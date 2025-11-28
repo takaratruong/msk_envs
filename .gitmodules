@@ -1,3 +1,0 @@
-[submodule "msk_envs/msk_warp"]
-	path = msk_envs/msk_warp
-	url = git@github.com:willwng/msk_warp.git

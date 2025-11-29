@@ -1,9 +1,7 @@
-import os
 import torch
 import msk_warp
 
 from .env_config import EnvConfig
-from .utils import parse_starting_pose
 
 
 class MSKEnv:
@@ -17,14 +15,34 @@ class MSKEnv:
     ):
         self.num_worlds = num_envs
         self.device = device
-        self.m, self.d = msk_warp.load_model(env_config.model_path, num_envs)
+        load_result = msk_warp.load_model(env_config.model_path, num_envs)
+        self.m, self.d = load_result.model, load_result.data
+        self.body_id_lookup = load_result.body_id_lookup
 
         self.num_qpos = msk_warp.get_num_qpos(self.m)
         self.num_dofs = msk_warp.get_num_dofs(self.m)
         self.num_muscles = msk_warp.get_num_muscles(self.m)
 
+        # [num_envs, num_muscles]
+        self.muscle_excitations = msk_warp.muscle_excitations(self.d)
+        self.muscle_activations = msk_warp.muscle_activations(self.d)
+        self.muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(self.d)
+        self.muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(self.d)
+
+        # [num_envs, num_bodies, 3]
+        self.body_positions = msk_warp.body_positions(self.d)
+        # [num_envs, num_bodies, 4] (w, x, y, z)
+        self.body_rotations = msk_warp.body_rotations(self.d)
+        # [num_envs, num_bodies, 6] (ang, lin)
+        self.body_velocities = msk_warp.body_velocities(self.d)
+        # [num_envs, num_dofs]
+        self.joint_positions = msk_warp.joint_positions(self.d)
+        # [num_envs, num_dofs]
+        self.joint_velocities = msk_warp.joint_velocities(self.d)
+
         self.action_range = (-1.0, 1.0)
         self.max_episode_duration = env_config.max_episode_duration
+        self.delta_t = env_config.delta_t
 
         self.reset_tensor = torch.zeros(
             (num_envs, 1), dtype=torch.float32, device=device)
@@ -34,6 +52,7 @@ class MSKEnv:
             (num_envs, self.num_dofs), dtype=torch.float32, device=device)
 
         self.reward_dict = {}
+        self.reward_lambdas = env_config.reward_lambdas
 
     def num_obs(self) -> int:
         return self._get_obs().shape[1]
@@ -46,6 +65,11 @@ class MSKEnv:
 
     def _upon_reset(self, reset_mask: torch.Tensor) -> None:
         """ Hook for additional reset behavior in subclasses """
+        return
+
+    def _handle_reset(self):
+        # TODO
+        self.reset_tensor.fill_(0.0)
         return
 
     # The following are environment-specific and need to be implemented
@@ -77,7 +101,7 @@ class MSKEnv:
         scaled_reward_dict = {}
         for key, raw_value in reward_dict.items():
             lambda_key = key.replace("rew_", "lambda_")
-            lambda_value = self.env_config.reward_lambdas[lambda_key]
+            lambda_value = self.reward_lambdas[lambda_key]
             scaled_reward_dict[key] = lambda_value * raw_value
         return scaled_reward_dict
 
@@ -103,7 +127,7 @@ class MSKEnv:
         # Clamp to [-1, 1], then map to [0, 1]
         clamped_action = torch.clamp(raw_action, -1.0, 1.0)
         excitations = (clamped_action + 1.0) / 2.0
-        self.actuator_excitations.copy_(excitations)
+        # self.actuator_excitations.copy_(excitations)
         return
 
     def _set_actions(self, raw_action) -> None:
@@ -114,7 +138,7 @@ class MSKEnv:
     def step(self, actions):
         # Sim step
         self._set_actions(actions)
-        self.sim.step()
+        msk_warp.step_to(self.m, self.d, self.delta_t)
 
         # Only compute reward dict once per step
         self._compute_raw_reward_dict()
@@ -124,14 +148,11 @@ class MSKEnv:
         terminated = self._get_terminated()
         truncated = self._get_truncated()
 
-        # Set the reset tensor for any envs that are done and run post-reset
-        done = torch.clamp(terminated + truncated, 0.0, 1.0)
-        # Reset env and starting pose
-        done = done.unsqueeze(-1)
-        self.reset_tensor.copy_(done)  # mark to reset
-        self.set_start_pose(done.squeeze(-1).bool())
+        # Reset any worlds that are done
+        done = torch.clamp(terminated + truncated, 0.0, 1.0).unsqueeze(-1)
+        self.reset_tensor.copy_(done)
         self._upon_reset(done.squeeze(-1).bool())
-        self.sim.post_reset()  # perform the reset in sim
+        self._handle_reset()
 
         # Gym api requires the observation after the reset
         obs = self._get_obs()
@@ -154,7 +175,9 @@ class MSKEnv:
 
     def reset(self):
         self.reset_tensor.fill_(1.0)
-        # TODO
-        self.reset_tensor.fill_(0.0)
+        self._handle_reset()
         obs = self._get_obs()
         return obs
+
+    def lookup_body_id(self, body_name: str) -> int:
+        return self.body_id_lookup[body_name]

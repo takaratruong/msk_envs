@@ -1,29 +1,18 @@
-import madrona_hopper as mdn
-from madrona_hopper import EnvType
-
 import torch
 
 from .env_base import MSKEnv
 from .env_config import EnvConfig
-from .utils import rotate_vec
-from ..util.reward_lib import velocity_reward, joint_limit_penalty, actuator_penalty
+from msk_envs.utils.quat import rotate_vec
+from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, \
+    actuator_penalty
 
 
 class SprintingEnv(MSKEnv):
     def __init__(self,
                  num_envs: int,
                  env_config: EnvConfig,
-                 enable_log: bool = False,
-                 launch_server: bool = True,
-                 use_cpu: bool = False):
-        env_type = EnvType.Empty  # don't need any assets
-        super().__init__(num_envs,
-                         env_config,
-                         env_type,
-                         enable_log,
-                         launch_server,
-                         use_cpu)
-
+                 device: torch.device):
+        super().__init__(num_envs, env_config, device)
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -41,7 +30,7 @@ class SprintingEnv(MSKEnv):
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.muscle_fiber_velocities,
-            self.actuator_activations,
+            # self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
             rel_body_positions.view(self.num_worlds, -1),
@@ -53,31 +42,32 @@ class SprintingEnv(MSKEnv):
     def _get_actions(self) -> torch.Tensor:
         actions = torch.cat([
             self.muscle_excitations,
-            self.actuator_excitations
+            # self.actuator_excitations
         ], dim=1)
         return actions.detach().clone()
 
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities)
-        rew_limit = joint_limit_penalty(self.limit_torques)
-        rew_actuator = actuator_penalty(self.actuator_activations, self.num_actuators)
+        # rew_limit = joint_limit_penalty(self.limit_torques)
+        # rew_actuator = actuator_penalty(self.actuator_activations,
+        #                                 self.num_actuators)
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
-            "rew_limit": rew_limit.detach(),
-            "rew_actuator": rew_actuator.detach(),
+            # "rew_limit": rew_limit.detach(),
+            # "rew_actuator": rew_actuator.detach(),
         }
 
     def _get_terminated(self):
         # Root falls below threshold
         min_root_height = 0.6
-        root_idx = self.bodies.index("pelvis")
+        root_idx = self.lookup_body_id("pelvis")
         root_height = self.body_positions[:, root_idx, 2]
         fallen = (root_height < min_root_height)
 
         # Head falls below threshold
         min_head_height = 1.0
-        torso_idx = self.bodies.index("torso")
+        torso_idx = self.lookup_body_id("torso")
         torso_pos = self.body_positions[:, torso_idx]
         torso_rot = self.body_rotations[:, torso_idx]
         head_offset = torch.tensor([0.0, 0.0, 0.215], device=torso_pos.device)
@@ -93,9 +83,12 @@ class SprintingEnv(MSKEnv):
 
         # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, root_idx]
-        pelvis_fwd = rotate_vec(pelvis_rot, torch.tensor([1.0, 0.0, 0.0], device=pelvis_rot.device).unsqueeze(0))
-        facing_forward = (pelvis_fwd[:, 0] > torch.cos(torch.deg2rad(torch.tensor(30.0))))
+        x_axis = torch.tensor([1.0, 0.0, 0.0], device=self.device)
+        pelvis_fwd = rotate_vec(pelvis_rot, x_axis.unsqueeze(0))
+        facing_forward = (pelvis_fwd[:, 0] > torch.cos(
+            torch.deg2rad(torch.tensor(30.0))))
         not_facing_forward = ~facing_forward
 
-        terminated = (fallen | head_fallen | body_out | not_facing_forward).float()
+        terminated = (
+                fallen | head_fallen | body_out | not_facing_forward).float()
         return terminated.detach()

@@ -1,5 +1,4 @@
 import torch
-import yaml
 
 
 def rotate_vec(rot: torch.Tensor, v: torch.Tensor):
@@ -57,9 +56,3 @@ def quat_diff_angle(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
     angle_axis = quat_to_angle_axis(qd)
     angle = torch.norm(angle_axis, dim=-1)
     return angle
-
-
-def parse_starting_pose(file_path):
-    with open(file_path, "r") as f:
-        data = yaml.safe_load(f)
-    return data["joint_positions"], data["joint_velocities"]

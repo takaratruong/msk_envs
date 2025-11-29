@@ -10,6 +10,8 @@ class EnvConfig:
 
     # Control frequency
     delta_t: float = 1.0 / 60.0
+    # Simulator frequency (only relevant for fixed-step integrators)
+    delta_t_sim: float = 1.0 / 600.0
 
     # Environment parameters
     max_episode_duration: float = 7.5  # seconds
@@ -17,7 +19,7 @@ class EnvConfig:
     muscle_multiplier: float = 2.0  # max isometric force scale
 
     # Starting state
-    starting_pose: str = "starting_pose.yaml"
+    starting_pose: str = "../models/starting_pose.yaml"
     noise_start: bool = True
     q_noise: float = 0.0
     qv_noise: float = 0.05

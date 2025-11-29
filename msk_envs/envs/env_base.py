@@ -1,7 +1,9 @@
 import torch
 import msk_warp
+import os
 
 from .env_config import EnvConfig
+from msk_envs.utils.pose import parse_starting_pose
 
 
 class MSKEnv:
@@ -11,48 +13,65 @@ class MSKEnv:
             self,
             num_envs: int,
             env_config: EnvConfig,
-            device: torch.device
+            device: torch.device,
+            render: bool
     ):
         self.num_worlds = num_envs
         self.device = device
-        load_result = msk_warp.load_model(env_config.model_path, num_envs)
+
+        # Load model
+        curr_path = os.path.abspath(os.path.dirname(__file__))
+        model_path = os.path.join(curr_path, env_config.model_path)
+        load_result = msk_warp.load_model(model_path, num_envs)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
 
+        # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)
         self.num_dofs = msk_warp.get_num_dofs(self.m)
         self.num_muscles = msk_warp.get_num_muscles(self.m)
 
+        # [num_envs]
+        self.time = msk_warp.time(self.d)
         # [num_envs, num_muscles]
         self.muscle_excitations = msk_warp.muscle_excitations(self.d)
         self.muscle_activations = msk_warp.muscle_activations(self.d)
         self.muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(self.d)
-
         # [num_envs, num_bodies, 3]
         self.body_positions = msk_warp.body_positions(self.d)
         # [num_envs, num_bodies, 4] (w, x, y, z)
         self.body_rotations = msk_warp.body_rotations(self.d)
         # [num_envs, num_bodies, 6] (ang, lin)
         self.body_velocities = msk_warp.body_velocities(self.d)
-        # [num_envs, num_dofs]
+        # [num_envs, num_qpos]
         self.joint_positions = msk_warp.joint_positions(self.d)
         # [num_envs, num_dofs]
         self.joint_velocities = msk_warp.joint_velocities(self.d)
 
+        # RL Environment
         self.action_range = (-1.0, 1.0)
         self.max_episode_duration = env_config.max_episode_duration
         self.delta_t = env_config.delta_t
-
+        self.delta_t_sim = env_config.delta_t_sim
         self.reset_tensor = torch.zeros(
             (num_envs, 1), dtype=torch.float32, device=device)
-        self.start_pose = torch.zeros(
-            (num_envs, self.num_qpos), dtype=torch.float32, device=device)
-        self.start_velocity = torch.zeros(
-            (num_envs, self.num_dofs), dtype=torch.float32, device=device)
+
+        # Starting position
+        start_pose_path = os.path.join(curr_path, env_config.starting_pose)
+        q, qv = parse_starting_pose(start_pose_path)
+        assert len(q) == self.num_qpos and len(qv) == self.num_dofs
+        q_torch = torch.tensor(q, dtype=torch.float32, device=device)
+        qv_torch = torch.tensor(qv, dtype=torch.float32, device=device)
+        self.start_pose = q_torch.unsqueeze(0).repeat(num_envs, 1)
+        self.start_velocity = qv_torch.unsqueeze(0).repeat(num_envs, 1)
 
         self.reward_dict = {}
         self.reward_lambdas = env_config.reward_lambdas
+
+        self.render = render
+        if render:
+            self.renderer = msk_warp.create_renderer()
 
     def num_obs(self) -> int:
         return self._get_obs().shape[1]
@@ -61,14 +80,20 @@ class MSKEnv:
         return self._get_actions().shape[1]
 
     def get_time(self) -> torch.Tensor:
-        return msk_warp.get_time(self.d)
+        return msk_warp.time(self.d)
 
     def _upon_reset(self, reset_mask: torch.Tensor) -> None:
         """ Hook for additional reset behavior in subclasses """
         return
 
     def _handle_reset(self):
-        # TODO
+        reset_mask = self.reset_tensor.squeeze(-1).bool()
+        if reset_mask.any():
+            self.time[reset_mask] = 0.0
+            self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
+            self.joint_velocities[reset_mask, :] = self.start_velocity[
+                                                   reset_mask, :]
+        msk_warp.fwd(self.m, self.d)
         self.reset_tensor.fill_(0.0)
         return
 
@@ -138,7 +163,7 @@ class MSKEnv:
     def step(self, actions):
         # Sim step
         self._set_actions(actions)
-        msk_warp.step_to(self.m, self.d, self.delta_t)
+        msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
 
         # Only compute reward dict once per step
         self._compute_raw_reward_dict()
@@ -170,6 +195,9 @@ class MSKEnv:
         # Assert actions aren't nan
         assert not torch.isnan(actions).any(), "Actions contain NaN!"
         assert not torch.isnan(obs).any(), "Observations contain NaN!"
+
+        if self.render:
+            self.renderer.render(self.m, self.d)
 
         return obs, rew, terminated, truncated, info
 

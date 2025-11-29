@@ -11,8 +11,9 @@ class SprintingEnv(MSKEnv):
     def __init__(self,
                  num_envs: int,
                  env_config: EnvConfig,
-                 device: torch.device):
-        super().__init__(num_envs, env_config, device)
+                 device: torch.device,
+                 render: bool):
+        super().__init__(num_envs, env_config, device, render)
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -62,7 +63,7 @@ class SprintingEnv(MSKEnv):
         # Root falls below threshold
         min_root_height = 0.6
         root_idx = self.lookup_body_id("pelvis")
-        root_height = self.body_positions[:, root_idx, 2]
+        root_height = self.body_positions[:, root_idx, 1]
         fallen = (root_height < min_root_height)
 
         # Head falls below threshold
@@ -70,16 +71,16 @@ class SprintingEnv(MSKEnv):
         torso_idx = self.lookup_body_id("torso")
         torso_pos = self.body_positions[:, torso_idx]
         torso_rot = self.body_rotations[:, torso_idx]
-        head_offset = torch.tensor([0.0, 0.0, 0.215], device=torso_pos.device)
+        head_offset = torch.tensor([0.0, 0.215, 0.0], device=torso_pos.device)
         head_offset = head_offset.unsqueeze(0).repeat(self.num_worlds, 1)
         head_pos = torso_pos + rotate_vec(torso_rot, head_offset)
-        head_fallen = (head_pos[:, 2] < min_head_height)
+        head_fallen = (head_pos[:, 1] < min_head_height)
 
         # Any of the bodies are out of the lanes
         body_out = torch.zeros_like(head_fallen)
         for body_idx in range(self.body_positions.shape[1]):
             body_pos = self.body_positions[:, body_idx]
-            body_out |= (torch.abs(body_pos[:, 1]) > 0.6)
+            body_out |= (torch.abs(body_pos[:, 2]) > 0.6)
 
         # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, root_idx]

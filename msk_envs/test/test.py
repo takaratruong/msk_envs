@@ -10,7 +10,8 @@ def main():
     env = EnvFactory.create_env(
         env_config=env_config,
         num_envs=num_envs,
-        device=device
+        device=device,
+        render=False
     )
 
     time = env.get_time()

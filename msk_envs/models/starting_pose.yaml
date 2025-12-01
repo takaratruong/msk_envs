@@ -1,8 +1,8 @@
 joint_positions:
   # Root position
   - 0.0
+  - 1.05
   - 0.0
-  - 1.0
   # Root orientation (w, x, y, z)
   - 1.0
   - 0

@@ -34,8 +34,8 @@ class MSKEnv:
         # [num_envs]
         self.time = msk_warp.time(self.d)
         # [num_envs, num_muscles]
-        self.muscle_excitations = msk_warp.muscle_excitations(self.d)
         self.muscle_activations = msk_warp.muscle_activations(self.d)
+        self.muscle_excitations = msk_warp.muscle_excitations(self.d)
         self.muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(self.d)
         # [num_envs, num_bodies, 3]

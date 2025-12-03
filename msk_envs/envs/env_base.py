@@ -2,6 +2,7 @@ import torch
 import msk_warp
 import os
 
+
 from .env_config import EnvConfig
 from msk_envs.utils.pose import parse_starting_pose
 
@@ -14,7 +15,7 @@ class MSKEnv:
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool
+            render: bool,
     ):
         self.num_worlds = num_envs
         self.device = device
@@ -196,7 +197,7 @@ class MSKEnv:
         assert not torch.isnan(actions).any(), "Actions contain NaN!"
         assert not torch.isnan(obs).any(), "Observations contain NaN!"
 
-        if self.render:
+        if self.render and hasattr(self.renderer, 'meshes') and len(self.renderer.meshes) > 0:
             self.renderer.render(self.m, self.d)
 
         return obs, rew, terminated, truncated, info

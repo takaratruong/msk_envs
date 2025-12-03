@@ -1,0 +1,145 @@
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Union
+
+import tyro
+from msk_envs.envs.env_variants import DerivedEnv
+
+
+@dataclass
+class BaseArgs:
+    """wandb configuration"""
+    disable_wandb: bool = False
+    env_name: str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    project: str = "madrona-hopper"
+    exp_prefix: str = ""
+
+    agent: str = "simbav2"  # fasttd3, simbav2
+
+    """ device/torch settings """
+    seed: int = 1
+    cuda: bool = True
+    gpu_id: int = 0
+    checkpoint_path: str = ""
+    amp: bool = True
+    amp_dtype: str = "bf16"
+
+    """ evaluation """
+    num_eval_envs: int = 1
+    eval_freq: int = 2000
+
+    """ learning rates """
+    critic_learning_rate: float = 3e-4
+    actor_learning_rate: float = 3e-4
+    critic_learning_rate_end: float = 3e-5
+    actor_learning_rate_end: float = 3e-5
+    weight_decay: float = 0.0
+
+    use_grad_norm_clipping: bool = False
+    max_grad_norm: float = 0.0
+
+    """ TD3 hyperparameters """
+    num_envs: int = 1024
+    total_timesteps: int = 150000
+    learning_starts: int = 0
+    num_updates: int = 4  # number of updates per step
+    policy_frequency: int = 2  # frequency of training policy (delayed)
+
+    buffer_size: int = 256 * 4  # (per env)
+    num_steps: int = 3  # n value of n-step returns
+    gamma: float = 0.97
+    tau: float = 0.1  # target smoothing coefficient
+    batch_size: int = 8192
+
+    """ Policy hyperparameters """
+    actor_hidden_dim: int = 256
+    init_scale: float = 0.01  # scale of initial weights
+    policy_noise: float = 0.001  # scale of target action noise
+    noise_clip: float = 0.5  # clip range for target action noise
+
+    """ Exploration hyperparameters """
+    std_min: float = 0.02  # minimum scale of exploration noise
+    std_max: float = 0.4  # maximum scale of exploration noise
+
+    """ Q/Value function hyperparameters
+    Distributional critic outputs logits over linspace(v_min, v_max, num_atoms)
+    """
+    critic_hidden_dim: int = 512
+    num_atoms: int = 101
+    v_min: float = -10.0
+    v_max: float = 10.0
+    use_cdq: bool = True  # whether to use Clipped Double Q-learning
+    disable_bootstrap: bool = False  # whether to disable bootstrap in the critic learning
+
+    """ Normalization """
+    obs_normalization: bool = True
+    reward_normalization: bool = True  # uses v_min, v_max
+
+    """ Miscellaneous """
+    save_interval: int = 1000
+
+    compile: bool = True
+    """whether to use torch.compile."""
+    # compile_mode: str = "reduce-overhead"
+    compile_mode: str = "max-autotune"
+
+    """ SimbaV2 """
+    critic_num_blocks: int = 2
+    actor_num_blocks: int = 1
+
+    """ Environment configuration """
+    env_variant: DerivedEnv = DerivedEnv.SPRINT
+
+    exp_name: str = ""
+    traj_out_folder: str = ""
+    analytics_out_folder: str = ""
+    
+    def __post_init__(self):
+        """Compute derived fields after exp_prefix is set from outside"""
+        self.exp_name = f"{self.exp_prefix}_{self.env_name}" if self.exp_prefix else self.env_name
+        self.traj_out_folder = f"scripts/dashboard/trajectories/{self.exp_name}"
+        self.analytics_out_folder = f"models/frame_data/{self.exp_name}"
+    
+    def get_reward_lambdas(self):
+        """Extract all lambda_* fields as a dictionary"""
+        return {k: v for k, v in self.__dict__.items() if k.startswith("lambda_")}
+
+
+@dataclass
+class SprintConfig(BaseArgs):
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 10.0
+    lambda_limit: float = -0.2
+    lambda_actuator: float = -5.0
+
+
+@dataclass
+class VerticalConfig(BaseArgs):
+    """Vertical jump environment specific reward scales"""
+    lambda_max_float: float = 10.0
+    lambda_max_hand: float = 10.0
+    lambda_limit: float = -0.2
+    lambda_actuator: float = -5.0
+
+
+def get_args():
+    """Get configuration arguments based on env_variant."""
+    import sys
+    
+    # Parse env_variant first to determine which config class to use
+    env_variant = DerivedEnv.SPRINT
+    for i, arg in enumerate(sys.argv):
+        if arg == "--env-variant" and i + 1 < len(sys.argv):
+            env_variant = DerivedEnv[sys.argv[i + 1]]
+            break
+    
+    # Select config class based on env_variant
+    config_class = {
+        DerivedEnv.SPRINT: SprintConfig,
+        DerivedEnv.VERTICAL: VerticalConfig,
+    }.get(env_variant, SprintConfig)
+    
+    args = tyro.cli(config_class)
+    args.env_variant = env_variant
+    args.use_wandb = not args.disable_wandb
+    return args

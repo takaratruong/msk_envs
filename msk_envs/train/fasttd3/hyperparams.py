@@ -89,6 +89,7 @@ class BaseArgs:
 
     """ Environment configuration """
     env_variant: DerivedEnv = DerivedEnv.SPRINT
+    render: bool = False  # Enable rendering (headless by default)
 
     exp_name: str = ""
     traj_out_folder: str = ""

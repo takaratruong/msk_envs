@@ -57,7 +57,7 @@ def main():
     
     envs = EnvFactory.create_env(num_envs=args.num_envs,
                                  env_config=env_config,
-                                 render=True,  # TODO: make this configurable
+                                 render=args.render,
                                  device=device,
                                  )
                                 #  enable_log=False,
@@ -65,7 +65,7 @@ def main():
                                 #  use_cpu=False)
     eval_envs = EnvFactory.create_env(num_envs=args.num_eval_envs,
                                       env_config=env_config,
-                                      render=True,  # TODO: make this configurable
+                                      render=args.render,
                                       device=device,
                                       )
                                     #   enable_log=True,

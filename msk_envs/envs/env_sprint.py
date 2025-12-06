@@ -12,8 +12,10 @@ class SprintingEnv(MSKEnv):
                  num_envs: int,
                  env_config: EnvConfig,
                  device: torch.device,
-                 render: bool):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render)
+                 render: bool,
+                 cuda_graph: bool):
+        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render,
+                         cuda_graph=cuda_graph)
         return
 
     def _get_obs(self) -> torch.Tensor:

@@ -9,7 +9,7 @@ class EnvConfig:
     env_variant: DerivedEnv = DerivedEnv.SPRINT
 
     # Control frequency
-    delta_t: float = 1.0 / 60.0
+    delta_t: float = 1.0 / 600.0
     # Simulator frequency (only relevant for fixed-step integrators)
     delta_t_sim: float = 1.0 / 600.0
 

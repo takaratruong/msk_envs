@@ -58,6 +58,7 @@ def main():
     envs = EnvFactory.create_env(num_envs=args.num_envs,
                                  env_config=env_config,
                                  render=args.render,
+                                 cuda_graph=args.cuda,
                                  device=device,
                                  )
                                 #  enable_log=False,
@@ -66,6 +67,7 @@ def main():
     eval_envs = EnvFactory.create_env(num_envs=args.num_eval_envs,
                                       env_config=env_config,
                                       render=args.render,
+                                      cuda_graph=args.cuda,
                                       device=device,
                                       )
                                     #   enable_log=True,

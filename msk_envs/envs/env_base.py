@@ -1,7 +1,7 @@
 import torch
 import msk_warp
+import warp as wp
 import os
-
 
 from .env_config import EnvConfig
 from msk_envs.utils.pose import parse_starting_pose
@@ -16,6 +16,7 @@ class MSKEnv:
             env_config: EnvConfig,
             device: torch.device,
             render: bool,
+            cuda_graph: bool
     ):
         self.num_worlds = num_envs
         self.device = device
@@ -74,6 +75,16 @@ class MSKEnv:
         if render:
             self.renderer = msk_warp.create_renderer()
 
+        self.cuda_graph = cuda_graph
+        if cuda_graph:
+            assert torch.cuda.is_available()
+            with wp.ScopedCapture() as capture:
+                msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
+            self.step_graph = capture.graph
+            with wp.ScopedCapture() as capture:
+                msk_warp.fwd(self.m, self.d)
+            self.fwd_graph = capture.graph
+
     def num_obs(self) -> int:
         return self._get_obs().shape[1]
 
@@ -93,8 +104,14 @@ class MSKEnv:
             self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
-                                                   reset_mask, :]
-        msk_warp.fwd(self.m, self.d)
+                reset_mask, :]
+
+        if self.cuda_graph:
+            wp.capture_launch(self.fwd_graph)
+            wp.synchronize()
+        else:
+            msk_warp.fwd(self.m, self.d)
+
         self.reset_tensor.fill_(0.0)
         return
 
@@ -164,7 +181,11 @@ class MSKEnv:
     def step(self, actions):
         # Sim step
         self._set_actions(actions)
-        msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
+        if self.cuda_graph:
+            wp.capture_launch(self.step_graph)
+            wp.synchronize()
+        else:
+            msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
 
         # Only compute reward dict once per step
         self._compute_raw_reward_dict()

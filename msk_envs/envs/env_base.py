@@ -10,6 +10,35 @@ from msk_envs.utils.pose import parse_starting_pose
 class MSKEnv:
     """ Superclass for MSK environments """
 
+    def setup_model(self, env_config: EnvConfig) -> None:
+        """ We're going to modify some model parameters here. """
+        # Joint damping
+        damping = msk_warp.damping(self.m)
+        damping[6:] = env_config.joint_damping
+
+        # Joint armature
+        armature = msk_warp.armature(self.m)
+        armature[6:] = env_config.joint_armature
+
+        # Foot stiffness
+        stiffness = msk_warp.stiffness(self.m)
+        stiffness[:] = 0.0
+        for toe in ["toes_l", "toes_r"]:
+            toe_id = self.lookup_body_id(toe)
+            dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
+            dof_num = msk_warp.get_dof_num(self.m, toe_id)
+            stiffness[dof_adr:dof_adr + dof_num] = env_config.toes_stiffness
+
+        # Muscles
+        for mm in msk_warp.muscle_metadata(self.m):
+            mm.max_isometric_force *= env_config.muscle_multiplier
+            mm.fiber_damping = env_config.muscle_fiber_damping
+            mm.min_activation = env_config.muscle_min_activation
+            mm.max_activation = env_config.muscle_max_activation
+            mm.v_max = env_config.muscle_v_max
+
+        msk_warp.reinitialize_model(self.m, self.d)
+
     def __init__(
             self,
             num_envs: int,
@@ -27,6 +56,7 @@ class MSKEnv:
         load_result = msk_warp.load_model(model_path, num_envs)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
+        self.setup_model(env_config)
 
         # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)
@@ -73,7 +103,13 @@ class MSKEnv:
 
         self.render = render
         if render:
-            self.renderer = msk_warp.create_renderer()
+            self.renderer = msk_warp.create_renderer(
+                load_result=load_result,
+                renderer_type=msk_warp.RendererType.OPENGL,
+                draw_visuals=True,
+                draw_colliders=False,
+                draw_muscles=True
+            )
 
         self.cuda_graph = cuda_graph
         if cuda_graph:
@@ -104,7 +140,7 @@ class MSKEnv:
             self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
-                reset_mask, :]
+                                                   reset_mask, :]
 
         if self.cuda_graph:
             wp.capture_launch(self.fwd_graph)
@@ -218,7 +254,8 @@ class MSKEnv:
         assert not torch.isnan(actions).any(), "Actions contain NaN!"
         assert not torch.isnan(obs).any(), "Observations contain NaN!"
 
-        if self.render and hasattr(self.renderer, 'meshes') and len(self.renderer.meshes) > 0:
+        if self.render and hasattr(self.renderer, 'meshes') and len(
+                self.renderer.meshes) > 0:
             self.renderer.render(self.m, self.d)
 
         return obs, rew, terminated, truncated, info

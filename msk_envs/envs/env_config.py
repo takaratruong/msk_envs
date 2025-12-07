@@ -16,7 +16,18 @@ class EnvConfig:
     # Environment parameters
     max_episode_duration: float = 7.5  # seconds
     model_path: str = "../models/model.osim"  # located at data/
+
+    # Model physics properties
+    joint_damping: float = 0.1
+    joint_armature: float = 0.01
+    toes_stiffness: float = 65.0
+
+    # Muscle properties
     muscle_multiplier: float = 2.0  # max isometric force scale
+    muscle_fiber_damping: float = 0.1
+    muscle_min_activation: float = 0.0
+    muscle_max_activation: float = 1.0
+    muscle_v_max: float = 12.0
 
     # Starting state
     starting_pose: str = "../models/starting_pose.yaml"

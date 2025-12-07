@@ -111,6 +111,7 @@ class MSKEnv:
                 draw_muscles=True
             )
 
+        # CUDA Graphs
         self.cuda_graph = cuda_graph
         if cuda_graph:
             assert torch.cuda.is_available()
@@ -120,6 +121,9 @@ class MSKEnv:
             with wp.ScopedCapture() as capture:
                 msk_warp.fwd(self.m, self.d)
             self.fwd_graph = capture.graph
+
+        self.reset()
+        return
 
     def num_obs(self) -> int:
         return self._get_obs().shape[1]

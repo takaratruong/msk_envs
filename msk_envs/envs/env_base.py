@@ -36,6 +36,14 @@ class MSKEnv:
             mm.min_activation = env_config.muscle_min_activation
             mm.max_activation = env_config.muscle_max_activation
             mm.v_max = env_config.muscle_v_max
+        msk_warp.set_muscle_dynamics_substeps(
+            self.m, env_config.muscle_dynamics_substeps)
+
+        # Use Newton solver for GPU
+        if self.device.type == "cuda":
+            msk_warp.use_newton_solver(self.m)
+        else:
+            msk_warp.use_cg_solver(self.m)
 
         msk_warp.reinitialize_model(self.m, self.d)
 

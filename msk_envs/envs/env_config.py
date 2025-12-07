@@ -28,6 +28,7 @@ class EnvConfig:
     muscle_min_activation: float = 0.0
     muscle_max_activation: float = 1.0
     muscle_v_max: float = 12.0
+    muscle_dynamics_substeps: int = 15
 
     # Starting state
     starting_pose: str = "../models/starting_pose.yaml"

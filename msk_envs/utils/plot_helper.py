@@ -1,0 +1,191 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from dataclasses import dataclass
+
+
+@dataclass
+class PlotConfig:
+    # Size/layout
+    num_vertical: int
+    num_horizontal: int
+    fig_size: tuple
+
+    # Labels
+    title: str
+    x_label: str
+    x_label_sub: str
+    y_label: str
+
+    # Ticks
+    x_fmt: str
+    x_sub_fmt: str
+    y_fmt: str
+
+    x_data: np.ndarray
+    x_data_sub: np.ndarray
+
+
+class SequencePlot:
+    """ Represents plots on one page, tracking values over time """
+
+    def __init__(self, cfg: PlotConfig):
+        fig, axs = plt.subplots(cfg.num_vertical, cfg.num_horizontal,
+                                figsize=cfg.fig_size)
+        if cfg.num_vertical == 1 and cfg.num_horizontal == 1:
+            axs = np.array([[axs]])
+
+        fig.suptitle(cfg.title, fontsize=24, fontweight="bold")
+        fig.supxlabel(cfg.x_label, fontsize=14, fontweight="bold")
+        fig.supylabel(cfg.y_label, fontsize=14, fontweight="bold")
+
+        self.fig = fig
+        self.axs = axs.flatten()
+        self.axs_per_height = cfg.num_vertical
+        self.axs_per_width = cfg.num_horizontal
+
+        self.x_data = cfg.x_data
+        self.x_data_sub = cfg.x_data_sub
+        self.x_label_sub = cfg.x_label_sub
+
+        self.x_fmt = cfg.x_fmt
+        self.x_sub_fmt = cfg.x_sub_fmt
+        self.y_fmt = cfg.y_fmt
+
+        self.plot_per_ax = np.zeros((cfg.num_horizontal, cfg.num_vertical))
+        self.labels_per_ax = np.zeros((cfg.num_horizontal, cfg.num_vertical))
+        self.y_ranges = np.zeros((cfg.num_horizontal, cfg.num_vertical, 2))
+        self.y_ranges[:, :, 0] = np.inf
+        self.y_ranges[:, :, 1] = -np.inf
+        return
+
+    def _get_idx(self, ax_idx_x: int, ax_idx_y: int):
+        return ax_idx_y * self.axs_per_width + ax_idx_x
+
+    def _get_x_y_idx(self, idx: int):
+        ax_idx_x = idx % self.axs_per_width
+        ax_idx_y = idx // self.axs_per_width
+        return ax_idx_x, ax_idx_y
+
+    def get_axes_at(self, ax_idx_x: int, ax_idx_y: int):
+        ax_idx = self._get_idx(ax_idx_x, ax_idx_y)
+        return self.axs[ax_idx]
+
+    def add(self, idx: int, y_data: np.ndarray, label: str, title: str = None):
+        ax = self.axs[idx]
+        ax.plot(self.x_data, y_data, label=label)
+
+        if title is not None:
+            ax.set_title(title, fontsize=14, fontweight="bold")
+
+        # Update y range
+        ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)
+        curr_min, curr_max = self.y_ranges[ax_idx_x, ax_idx_y, :]
+        new_min, new_max = np.min(y_data), np.max(y_data)
+        self.y_ranges[ax_idx_x, ax_idx_y, 0] = min(curr_min, new_min)
+        self.y_ranges[ax_idx_x, ax_idx_y, 1] = max(curr_max, new_max)
+
+        # Count plots per axis
+        if len(y_data.shape) == 1:
+            self.plot_per_ax[ax_idx_x, ax_idx_y] += 1
+            if label != "":
+                self.labels_per_ax[ax_idx_x, ax_idx_y] += 1
+        else:
+            self.plot_per_ax[ax_idx_x, ax_idx_y] += y_data.shape[1]
+            if label != "":
+                self.labels_per_ax[ax_idx_x, ax_idx_y] += y_data.shape[1]
+        return
+
+    def add_at(self, ax_idx_x: int, ax_idx_y: int, y_data: np.ndarray,
+               label: str, title: str = None):
+        self.add(self._get_idx(ax_idx_x, ax_idx_y), y_data, label, title)
+        return
+
+    def add_hline(self, idx: int, y_value: float, label: str = "", color: str = 'r'):
+        ax = self.axs[idx]
+        ax.axhline(y=y_value, color=color, linestyle='--', label=label)
+
+        # Update y range
+        ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)
+        curr_min, curr_max = self.y_ranges[ax_idx_x, ax_idx_y, :]
+        self.y_ranges[ax_idx_x, ax_idx_y, 0] = min(curr_min, y_value)
+        self.y_ranges[ax_idx_x, ax_idx_y, 1] = max(curr_max, y_value)
+        return
+
+    def add_hline_at(self, ax_idx_x: int, ax_idx_y: int, y_value: float,
+                     label: str = ""):
+        self.add_hline(self._get_idx(ax_idx_x, ax_idx_y), y_value, label)
+        return
+
+    def enforce_y_range(self, idx: int, y_min: float, y_max: float):
+        ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)
+        curr_min, curr_max = self.y_ranges[ax_idx_x, ax_idx_y, :]
+        self.y_ranges[ax_idx_x, ax_idx_y, 0] = min(curr_min, y_min)
+        self.y_ranges[ax_idx_x, ax_idx_y, 1] = max(curr_max, y_max)
+        return
+
+    def finish(self, pdf):
+        x_start, x_end = np.min(self.x_data), np.max(self.x_data)
+        x_start_s, x_end_s = np.min(self.x_data_sub), np.max(self.x_data_sub)
+
+        last_ax_row = self.axs[-self.axs_per_width:]
+        first_ax_col = self.axs[::self.axs_per_width]
+
+        # Iterate over all axes
+        for i in range(self.axs_per_width):
+            for j in range(self.axs_per_height):
+                ax = self.get_axes_at(i, j)
+
+                # Nothing was plotted here
+                if self.plot_per_ax[i, j] == 0:
+                    continue
+
+                # Limits
+                ax.set_xlim(x_start, x_end)
+                y_start, y_end = self.y_ranges[i, j, :]
+                y_range = y_end - y_start
+                delta = 0.1 * abs(y_range)
+                ax.set_ylim(y_start - delta, y_end + delta)
+
+                # Set ticks
+                x_ticks = np.linspace(x_start, x_end, num=5)
+                x_ticks_sub = np.linspace(x_start_s, x_end_s, num=5)
+                y_ticks = np.linspace(y_start, y_end, num=5)
+                ax.set_xticks(x_ticks)
+                ax.set_yticks(y_ticks)
+
+                # Set tick labels
+                x_tick_labels = [(f"{x:{self.x_fmt}}\n" +
+                                  f"({self.x_label_sub} {x_sub:{self.x_sub_fmt}})")
+                                 for x, x_sub in zip(x_ticks, x_ticks_sub)]
+                y_tick_labels = [f"{y:{self.y_fmt}}" for y in y_ticks]
+
+                # Only the last row gets x tick labels
+                if ax in last_ax_row:
+                    ax.set_xticklabels(x_tick_labels, fontsize=12,
+                                       fontweight="bold")
+                else:
+                    ax.set_xticklabels([""] * len(x_tick_labels))
+
+                if ax in first_ax_col:
+                    ax.set_yticklabels(y_tick_labels, fontsize=12,
+                                       fontweight="bold")
+                else:
+                    ax.set_yticklabels([""] * len(y_tick_labels))
+
+                # thicker lines
+                for axis in ["top", "bottom", "left", "right"]:
+                    ax.spines[axis].set_linewidth(1.5)
+
+                # Legend required
+                if self.labels_per_ax[i, j] >= 1:
+                    ax = self.get_axes_at(i, j)
+                    ax.legend(fontsize=12, loc="upper right",
+                              frameon=False, prop={'weight': 'bold'})
+
+
+                pass
+            pass
+
+        pdf.savefig(self.fig)
+        plt.close(self.fig)
+        return

@@ -1,10 +1,10 @@
 import torch
 
 
-def velocity_reward(body_velocities):
+def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool):
     """Forward velocity reward (x-velocity of root body)"""
-    root_velocity = body_velocities[:, 0, :]
-    return root_velocity[:, 0]
+    root_velocity = body_velocities[:, body_id, :]
+    return root_velocity[:, coordinate + 3] if linear else root_velocity[:, coordinate]
 
 
 def joint_limit_penalty(limit_torques):

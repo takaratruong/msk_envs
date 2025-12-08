@@ -1,5 +1,6 @@
 import torch
 import msk_warp
+import warp as wp
 import os
 
 from .env_config import EnvConfig
@@ -9,12 +10,50 @@ from msk_envs.utils.pose import parse_starting_pose
 class MSKEnv:
     """ Superclass for MSK environments """
 
+    def setup_model(self, env_config: EnvConfig) -> None:
+        """ We're going to modify some model parameters here. """
+        # Joint damping
+        damping = msk_warp.damping(self.m)
+        damping[6:] = env_config.joint_damping
+
+        # Joint armature
+        armature = msk_warp.armature(self.m)
+        armature[6:] = env_config.joint_armature
+
+        # Foot stiffness
+        stiffness = msk_warp.stiffness(self.m)
+        stiffness[:] = 0.0
+        for toe in ["toes_l", "toes_r"]:
+            toe_id = self.lookup_body_id(toe)
+            dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
+            dof_num = msk_warp.get_dof_num(self.m, toe_id)
+            stiffness[dof_adr:dof_adr + dof_num] = env_config.toes_stiffness
+
+        # Muscles
+        for mm in msk_warp.muscle_metadata(self.m):
+            mm.max_isometric_force *= env_config.muscle_multiplier
+            mm.fiber_damping = env_config.muscle_fiber_damping
+            mm.min_activation = env_config.muscle_min_activation
+            mm.max_activation = env_config.muscle_max_activation
+            mm.v_max = env_config.muscle_v_max
+        msk_warp.set_muscle_dynamics_substeps(
+            self.m, env_config.muscle_dynamics_substeps)
+
+        # Use Newton solver for GPU
+        if self.device.type == "cuda":
+            msk_warp.use_newton_solver(self.m)
+        else:
+            msk_warp.use_cg_solver(self.m)
+
+        msk_warp.reinitialize_model(self.m, self.d)
+
     def __init__(
             self,
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool
+            render: bool,
+            cuda_graph: bool
     ):
         self.num_worlds = num_envs
         self.device = device
@@ -25,6 +64,8 @@ class MSKEnv:
         load_result = msk_warp.load_model(model_path, num_envs)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
+        self.visuals = load_result.visuals
+        self.setup_model(env_config)
 
         # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)
@@ -43,7 +84,7 @@ class MSKEnv:
         # [num_envs, num_bodies, 4] (w, x, y, z)
         self.body_rotations = msk_warp.body_rotations(self.d)
         # [num_envs, num_bodies, 6] (ang, lin)
-        self.body_velocities = msk_warp.body_velocities(self.d)
+        self.body_velocities = msk_warp.body_com_velocities(self.d)
         # [num_envs, num_qpos]
         self.joint_positions = msk_warp.joint_positions(self.d)
         # [num_envs, num_dofs]
@@ -71,7 +112,29 @@ class MSKEnv:
 
         self.render = render
         if render:
-            self.renderer = msk_warp.create_renderer()
+            self.renderer = msk_warp.create_renderer(
+                load_result=load_result,
+                renderer_type=msk_warp.RendererType.TILED,
+                draw_visuals=True,
+                draw_colliders=False,
+                draw_muscles=True
+            )
+            if self.renderer.viewer_type == msk_warp.RendererType.TILED:
+                self.renderer.setup_tiled_renderer(list(range(min(num_envs, 4))))
+
+        # CUDA Graphs
+        self.cuda_graph = cuda_graph
+        if cuda_graph:
+            assert torch.cuda.is_available()
+            with wp.ScopedCapture() as capture:
+                msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
+            self.step_graph = capture.graph
+            with wp.ScopedCapture() as capture:
+                msk_warp.fwd(self.m, self.d)
+            self.fwd_graph = capture.graph
+
+        self.reset()
+        return
 
     def num_obs(self) -> int:
         return self._get_obs().shape[1]
@@ -93,7 +156,13 @@ class MSKEnv:
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
                                                    reset_mask, :]
-        msk_warp.fwd(self.m, self.d)
+
+        if self.cuda_graph:
+            wp.capture_launch(self.fwd_graph)
+            wp.synchronize()
+        else:
+            msk_warp.fwd(self.m, self.d)
+
         self.reset_tensor.fill_(0.0)
         return
 
@@ -163,7 +232,11 @@ class MSKEnv:
     def step(self, actions):
         # Sim step
         self._set_actions(actions)
-        msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
+        if self.cuda_graph:
+            wp.capture_launch(self.step_graph)
+            wp.synchronize()
+        else:
+            msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
 
         # Only compute reward dict once per step
         self._compute_raw_reward_dict()
@@ -196,7 +269,8 @@ class MSKEnv:
         assert not torch.isnan(actions).any(), "Actions contain NaN!"
         assert not torch.isnan(obs).any(), "Observations contain NaN!"
 
-        if self.render:
+        if self.render and hasattr(self.renderer, 'meshes') and len(
+                self.renderer.meshes) > 0:
             self.renderer.render(self.m, self.d)
 
         return obs, rew, terminated, truncated, info

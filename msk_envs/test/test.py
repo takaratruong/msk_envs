@@ -1,5 +1,6 @@
 import torch
 from msk_envs.envs import EnvFactory, EnvConfig
+from time import perf_counter
 
 
 def main():
@@ -11,13 +12,20 @@ def main():
         env_config=env_config,
         num_envs=num_envs,
         device=device,
-        render=False
+        render=True,
+        cuda_graph=torch.cuda.is_available(),
     )
+    env.reset()
 
-    time = env.get_time()
-    steps = 10
+    steps = 100
+    start = perf_counter()
     for _ in range(steps):
         env.step(torch.zeros(num_envs, env.num_actions(), device=device))
+    end = perf_counter()
+
+    steps_taken = steps * num_envs
+    elapsed = end - start
+    print(f"Steps/sec: {steps_taken / elapsed:.2f}")
     return
 
 

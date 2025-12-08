@@ -50,7 +50,8 @@ class SprintingEnv(MSKEnv):
         return actions.detach().clone()
 
     def _compute_raw_reward_dict(self):
-        rew_vel = velocity_reward(self.body_velocities)
+        pelvis_idx = self.lookup_body_id("pelvis")
+        rew_vel = velocity_reward(self.body_velocities, pelvis_idx, 0, linear=True)
         # rew_limit = joint_limit_penalty(self.limit_torques)
         # rew_actuator = actuator_penalty(self.actuator_activations,
         #                                 self.num_actuators)

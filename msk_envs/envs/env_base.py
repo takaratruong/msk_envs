@@ -83,7 +83,7 @@ class MSKEnv:
         # [num_envs, num_bodies, 4] (w, x, y, z)
         self.body_rotations = msk_warp.body_rotations(self.d)
         # [num_envs, num_bodies, 6] (ang, lin)
-        self.body_velocities = msk_warp.body_velocities(self.d)
+        self.body_velocities = msk_warp.body_com_velocities(self.d)
         # [num_envs, num_qpos]
         self.joint_positions = msk_warp.joint_positions(self.d)
         # [num_envs, num_dofs]
@@ -113,11 +113,13 @@ class MSKEnv:
         if render:
             self.renderer = msk_warp.create_renderer(
                 load_result=load_result,
-                renderer_type=msk_warp.RendererType.OPENGL,
+                renderer_type=msk_warp.RendererType.TILED,
                 draw_visuals=True,
                 draw_colliders=False,
                 draw_muscles=True
             )
+            if self.renderer.viewer_type == msk_warp.RendererType.TILED:
+                self.renderer.setup_tiled_renderer(list(range(min(num_envs, 4))))
 
         # CUDA Graphs
         self.cuda_graph = cuda_graph

@@ -1,6 +1,6 @@
 from msk_envs.envs.env_base import MSKEnv
 from msk_envs.utils.checkpoint_parser import parse_frame
-from msk_envs.utils.checkpoint_outputter import create_animation_json, create_pdf_output
+from msk_envs.utils.checkpoint_outputter import create_animation_json
 
 import os
 import json
@@ -36,23 +36,15 @@ class LoggedSim:
 
     def add_to_log(self):
         # Track rewards
-        rew = self.envs._get_rewards()
+        rew = self.envs.get_rewards()
         ind_not_finished = torch.where(self.finished == 0)[0]
         if len(ind_not_finished) == 0:
             return
         self.rewards[ind_not_finished, self.curr_step] = rew[ind_not_finished]
         self.episode_length[ind_not_finished] += 1
 
-        # Track all exported data
-        object_visuals = self.envs.get_visual_log()
-        object_colliders = self.envs.get_collider_log()
-        muscle_log = self.envs.get_muscle_log()
-        actuator_log = self.envs.get_actuator_log()
-        joint_angle_log = self.envs.get_joint_angle_log()
-        joint_velocities = self.envs.get_joint_velocities()
-        kinetic_log = self.envs.get_kinetic_log()
         times = self.envs.get_time()
-        reward_dict = self.envs._get_reward_dict()
+        reward_dict = self.envs.get_scaled_reward_dict()
 
         for i in range(len(self.worlds_to_save)):
             idx_world = self.worlds_to_save[i]
@@ -60,16 +52,12 @@ class LoggedSim:
                 continue
 
             reward_data = {k: v[idx_world].item() for k, v in reward_dict.items()}
-
             frame = parse_frame(
+                m=self.envs.m,
+                d=self.envs.d,
+                visual_load_results=self.envs.visuals,
+                world_id=idx_world,
                 frame_time=times[idx_world].item(),
-                visual_log=object_visuals[idx_world, :],
-                collider_log=object_colliders[idx_world, :],
-                muscle_log=muscle_log[idx_world, :, :],
-                actuator_log=actuator_log[idx_world, :, :],
-                joint_angle_log=joint_angle_log[idx_world, :, :],
-                joint_velocities=joint_velocities[idx_world, :],
-                kinetic_log=kinetic_log[idx_world, :],
                 reward_data=reward_data,
             )
             self.frame_data[i].append(frame)
@@ -104,15 +92,6 @@ class LoggedSim:
 
     def get_obs(self):
         return self.envs._get_obs()
-
-    def save_analytics(self, out_folder: str, base_filename: str):
-        # make a pdf with the plots
-        for i in range(self.n_worlds_to_save):
-            idx_world = self.worlds_to_save[i]
-            out_file = os.path.join(out_folder,
-                                    f"{base_filename}_{idx_world}.pdf")
-            create_pdf_output(self.frame_data[i], out_file)
-        return
 
     def save_frame_data(self, out_folder: str, base_filename: str):
         os.makedirs(out_folder, exist_ok=True)

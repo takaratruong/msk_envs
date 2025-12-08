@@ -26,7 +26,7 @@ class BaseArgs:
 
     """ evaluation """
     num_eval_envs: int = 1
-    eval_freq: int = 2000
+    eval_freq: int = 100
 
     """ learning rates """
     critic_learning_rate: float = 3e-4
@@ -76,7 +76,7 @@ class BaseArgs:
     reward_normalization: bool = True  # uses v_min, v_max
 
     """ Miscellaneous """
-    save_interval: int = 1000
+    save_interval: int = 50
 
     compile: bool = True
     """whether to use torch.compile."""

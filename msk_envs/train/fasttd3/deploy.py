@@ -2,6 +2,8 @@ from .hyperparams import get_args
 from msk_envs.envs.env_config import EnvConfig
 from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.utils.logged_sim import LoggedSim
+from msk_envs.train.dep.dep import DEP
+
 
 import torch
 from tqdm import tqdm
@@ -21,11 +23,24 @@ def main():
     device = torch.device("cuda" if args.cuda else f"cpu")
     envs = EnvFactory.create_env(num_envs=1,
                                  env_config=env_config,
-                                 render=False,
+                                 render=True,
                                  cuda_graph=args.cuda,
                                  device=device)
 
     actions = envs.get_blank_actions()
+
+    dep = DEP(n_motors=envs.num_muscles,
+              n_envs=envs.num_worlds,
+              buffer_size=200,
+              bias_rate=0.002,
+              kappa=1000,
+              tau=40,
+              s4avg=2,
+              regularization=32,
+              time_dist=5,
+              with_learning=True,
+              device=device)
+
 
     # Build a SimLogger to give us a whole pdf of stuff
     max_episode_length = int(env_config.max_episode_duration / env_config.delta_t)
@@ -33,6 +48,8 @@ def main():
     sim.reset()
 
     for _ in tqdm(range(max_episode_length)):
+        muscle_states = envs.muscle_fiber_lengths
+        actions = dep.step(muscle_states)
         finished, obs = sim.step(actions)
         if finished:
             break

@@ -75,4 +75,29 @@ function setupGround(scene) {
     scene.add(ground);
 }
 
-export { setupLightsSky, setupAxes, setupGround };
+function setupLanes(scene) {
+    // Lane 1
+    const laneWidth = 100;     // Length of the lane
+    const laneThickness = 0.05; // Thickness of the line (height of the plane)
+
+    const laneGeometry1 = new THREE.PlaneGeometry(laneWidth, laneThickness);
+    const laneMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+
+    const lane1 = new THREE.Mesh(laneGeometry1, laneMaterial1);
+    lane1.position.set(50, 0.01, -0.7);
+    lane1.rotation.x = -Math.PI / 2; // Rotate to lay flat on the XZ plane
+
+    scene.add(lane1);
+
+    // Lane 2
+    const laneGeometry2 = new THREE.PlaneGeometry(laneWidth, laneThickness);
+    const laneMaterial2 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+
+    const lane2 = new THREE.Mesh(laneGeometry2, laneMaterial2);
+    lane2.position.set(50, 0.01, 0.7);
+    lane2.rotation.x = -Math.PI / 2;
+
+    scene.add(lane2);
+}
+
+export { setupLightsSky, setupAxes, setupGround, setupLanes };

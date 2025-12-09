@@ -130,8 +130,8 @@ class MSKEnv:
                 msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
             self.step_graph = capture.graph
             with wp.ScopedCapture() as capture:
-                msk_warp.fwd(self.m, self.d)
-            self.fwd_graph = capture.graph
+                msk_warp.reset(self.m, self.d)
+            self.reset_graph = capture.graph
 
         self.reset()
         return
@@ -150,15 +150,19 @@ class MSKEnv:
         return
 
     def _handle_reset(self):
+        msk_warp.set_reset(self.d, self.reset_tensor)
         reset_mask = self.reset_tensor.squeeze(-1).bool()
+
+        # Reset time and starting pose
         if reset_mask.any():
             self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
                                                    reset_mask, :]
 
+        # Rerun forward
         if self.cuda_graph:
-            wp.capture_launch(self.fwd_graph)
+            wp.capture_launch(self.reset_graph)
             wp.synchronize()
         else:
             msk_warp.fwd(self.m, self.d)

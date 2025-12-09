@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { setupLightsSky, setupAxes } from "./scene.js";
-import { loadModel } from "./loader.js";
+import { setupLightsSky, setupAxes, setupGround, setupLanes } from "./scene.js";
+import { loadModel, loadCollider } from "./loader.js";
 import { drawMuscle, resetMuscles } from "./muscle.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -50,38 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Follow com
         updateCameras(frame.cam_pos)
 
-        function fixCapsule(obj, object) {
-            // Grab material from object
-            const capsuleMat = object.children[0].material;
-
-            const radius = obj.scale[0];
-            const height = obj.scale[2];
-            const sphereGeom = new THREE.SphereGeometry(radius, 48, 48);
-            const sphere1 = new THREE.Mesh(sphereGeom, capsuleMat);
-            const sphere2 = new THREE.Mesh(sphereGeom, capsuleMat);
-            sphere1.castShadow = true;
-            sphere2.castShadow = true;
-            sphere1.receiveShadow = true;
-            sphere2.receiveShadow = true;
-
-            // Take +z and rotate by object rotation
-            const sphere1Pos = new THREE.Vector3(obj.pos[0], obj.pos[1], obj.pos[2]);
-            const sphere2Pos = new THREE.Vector3(obj.pos[0], obj.pos[1], obj.pos[2]);
-            const zAxis = new THREE.Vector3(0, 0, 1);
-            zAxis.applyQuaternion(object.quaternion);
-            zAxis.normalize();
-            zAxis.multiplyScalar(height);
-            sphere1Pos.add(zAxis);
-            sphere2Pos.sub(zAxis);
-            sphere1.position.set(...sphere1Pos);
-            sphere2.position.set(...sphere2Pos);
-
-            scene.add(sphere1);
-            scene.add(sphere2);
-            currentObjects.push(sphere1);
-            currentObjects.push(sphere2);
-        }
-
         // Write time in text. Add directl to the scene
         const time = frame.time;
         timeElement.textContent = "(t = " + time.toFixed(3) + "s)";
@@ -99,28 +67,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     object.quaternion.set(obj.rot[1], obj.rot[2], obj.rot[3], obj.rot[0]);
                     scene.add(object);
                     currentObjects.push(object);
-                    // if (obj.obj_file.includes("capsule")) {
-                    //     fixCapsule(obj, object);
-                    // }
                 });
             }
         }
 
-        // if (drawColliders) {
-        //     for (const obj of frame.colliders) {
-        //         const color = 0x87CEEB;
-        //         loadModel(obj.obj_file, color, object => {
-        //             object.scale.set(...obj.scale);
-        //             object.position.set(...obj.pos);
-        //             object.quaternion.set(obj.rot[1], obj.rot[2], obj.rot[3], obj.rot[0]);
-        //             scene.add(object);
-        //             currentObjects.push(object);
-        //             if (obj.obj_file.includes("capsule")) {
-        //                 fixCapsule(obj, object);
-        //             }
-        //         });
-        //     }
-        // }
+        if (drawColliders) {
+            for (const obj of frame.colliders) {
+                const color = 0x87CEEB;
+                loadCollider(obj.geom_type, obj.scale, obj.rot, color, object => {
+                    object.position.set(...obj.pos);
+                    object.castShadow = true;
+                    object.receiveShadow = true;
+                    scene.add(object);
+                    currentObjects.push(object);
+                });
+            }
+        }
 
         // Draw muscles
         const drawMuscles = drawMusclesCheckbox.checked;
@@ -133,33 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         }
-
-// Lane 1
-//         const laneWidth = 100;     // Length of the lane
-//         const laneThickness = 0.05; // Thickness of the line (height of the plane)
-//
-//         const laneGeometry1 = new THREE.PlaneGeometry(laneWidth, laneThickness);
-//         const laneMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
-//
-//         const lane1 = new THREE.Mesh(laneGeometry1, laneMaterial1);
-//         lane1.position.set(50, -0.7, 0);
-//         lane1.rotation.x = -Math.PI / 2; // Rotate to lay flat on the XZ plane
-//         lane1.receiveShadow = true;
-//
-//         scene.add(lane1);
-//         currentObjects.push(lane1);
-//
-// // Lane 2
-//         const laneGeometry2 = new THREE.PlaneGeometry(laneWidth, laneThickness);
-//         const laneMaterial2 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
-//
-//         const lane2 = new THREE.Mesh(laneGeometry2, laneMaterial2);
-//         lane2.position.set(50, 0.7, 0);
-//         lane2.rotation.x = -Math.PI / 2;
-//         lane2.receiveShadow = true;
-//
-//         scene.add(lane2);
-//         currentObjects.push(lane2);
 
         currentFrame = frameIndex;
     }
@@ -334,7 +269,9 @@ document.addEventListener("DOMContentLoaded", () => {
         renderer.setScissorTest(false);
     }
 
+    setupGround(scene);
     setupLightsSky(scene);
+    setupLanes(scene);
     setupAxes(scene);
     renderer.setAnimationLoop(animate);
 });

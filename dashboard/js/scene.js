@@ -1,9 +1,12 @@
 import * as THREE from 'three';
+const textureLoader = new THREE.TextureLoader();
+const planeTexture = textureLoader.load('assets/textures/plane.png');
+
 function setupLightsSky(scene) {
     // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.);
     const dirLight = new THREE.DirectionalLight(0xffffff, 2);
-    dirLight.position.set(50, -50, 50);
+    dirLight.position.set(50, 50, 50); // Changed Y from -50 to 50
     dirLight.castShadow = true;
     dirLight.shadow.camera.left = -10;
     dirLight.shadow.camera.right = 100;
@@ -15,12 +18,9 @@ function setupLightsSky(scene) {
     dirLight.shadow.mapSize.width = 16384;
     dirLight.shadow.mapSize.height = 16384;
     dirLight.shadow.bias = -0.0001;
-    // const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    // fillLight.position.set(-5, -5, 5);
 
     scene.add(ambientLight);
     scene.add(dirLight);
-    // scene.add(fillLight);
 
     // Skybox (simple blue cube)
     const size = 500;
@@ -61,4 +61,43 @@ function setupAxes(scene) {
     scene.add(axesHelper);
 }
 
-export { setupLightsSky, setupAxes };
+function setupGround(scene) {
+    const groundGeometry = new THREE.PlaneGeometry(100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({
+        map: planeTexture,
+        metalness: 0.3,
+        roughness: 0.7,
+        side: THREE.DoubleSide
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+}
+
+function setupLanes(scene) {
+    // Lane 1
+    const laneWidth = 100;     // Length of the lane
+    const laneThickness = 0.05; // Thickness of the line (height of the plane)
+
+    const laneGeometry1 = new THREE.PlaneGeometry(laneWidth, laneThickness);
+    const laneMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+
+    const lane1 = new THREE.Mesh(laneGeometry1, laneMaterial1);
+    lane1.position.set(50, 0.01, -0.7);
+    lane1.rotation.x = -Math.PI / 2; // Rotate to lay flat on the XZ plane
+
+    scene.add(lane1);
+
+    // Lane 2
+    const laneGeometry2 = new THREE.PlaneGeometry(laneWidth, laneThickness);
+    const laneMaterial2 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+
+    const lane2 = new THREE.Mesh(laneGeometry2, laneMaterial2);
+    lane2.position.set(50, 0.01, 0.7);
+    lane2.rotation.x = -Math.PI / 2;
+
+    scene.add(lane2);
+}
+
+export { setupLightsSky, setupAxes, setupGround, setupLanes };

@@ -1,9 +1,12 @@
 import * as THREE from 'three';
+const textureLoader = new THREE.TextureLoader();
+const planeTexture = textureLoader.load('assets/textures/plane.png');
+
 function setupLightsSky(scene) {
     // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.);
     const dirLight = new THREE.DirectionalLight(0xffffff, 2);
-    dirLight.position.set(50, -50, 50);
+    dirLight.position.set(50, 50, 50); // Changed Y from -50 to 50
     dirLight.castShadow = true;
     dirLight.shadow.camera.left = -10;
     dirLight.shadow.camera.right = 100;
@@ -15,12 +18,9 @@ function setupLightsSky(scene) {
     dirLight.shadow.mapSize.width = 16384;
     dirLight.shadow.mapSize.height = 16384;
     dirLight.shadow.bias = -0.0001;
-    // const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    // fillLight.position.set(-5, -5, 5);
 
     scene.add(ambientLight);
     scene.add(dirLight);
-    // scene.add(fillLight);
 
     // Skybox (simple blue cube)
     const size = 500;
@@ -61,4 +61,18 @@ function setupAxes(scene) {
     scene.add(axesHelper);
 }
 
-export { setupLightsSky, setupAxes };
+function setupGround(scene) {
+    const groundGeometry = new THREE.PlaneGeometry(100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({
+        map: planeTexture,
+        metalness: 0.3,
+        roughness: 0.7,
+        side: THREE.DoubleSide
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+}
+
+export { setupLightsSky, setupAxes, setupGround };

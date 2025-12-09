@@ -98,14 +98,22 @@ class MSKEnv:
         self.reset_tensor = torch.zeros(
             (num_envs, 1), dtype=torch.float32, device=device)
 
-        # Starting position
+        # Starting position, load from file
         start_pose_path = os.path.join(curr_path, env_config.starting_pose)
         q, qv = parse_starting_pose(start_pose_path)
         assert len(q) == self.num_qpos and len(qv) == self.num_dofs
         q_torch = torch.tensor(q, dtype=torch.float32, device=device)
         qv_torch = torch.tensor(qv, dtype=torch.float32, device=device)
+        self.start_pose_base = q_torch.unsqueeze(0)
+        self.start_velocity_base = qv_torch.unsqueeze(0)
+        # Repeat for all envs
         self.start_pose = q_torch.unsqueeze(0).repeat(num_envs, 1)
         self.start_velocity = qv_torch.unsqueeze(0).repeat(num_envs, 1)
+        # Noise settings
+        self.noise_start = env_config.noise_start
+        self.q_noise = env_config.q_noise
+        self.qv_noise = env_config.qv_noise
+        self.swap_lr = env_config.swap_lr
 
         self.reward_dict = {}
         self.reward_lambdas = env_config.reward_lambdas
@@ -133,7 +141,39 @@ class MSKEnv:
                 msk_warp.reset(self.m, self.d)
             self.reset_graph = capture.graph
 
+        reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
+        self.set_start_pose(reset_ind.ravel())
         self.reset()
+        return
+
+    def set_start_pose(self, reset_mask: torch.Tensor) -> None:
+        """
+        Re-noise the starting pose and velocity for envs where reset_mask is 1
+        Note: takes effect on next reset or init
+        """
+        # Repeat for all envs
+        q = self.start_pose_base.repeat(self.num_worlds, 1)
+        qv = self.start_velocity_base.repeat(self.num_worlds, 1)
+
+        # Noise starting pose
+        if self.noise_start:
+            q += torch.randn_like(q) * self.q_noise
+            qv += torch.randn_like(qv) * self.qv_noise
+
+        # Randomly swap left/right
+        if self.swap_lr:
+            ind_swap = (torch.rand(self.num_worlds, device=q.device) > 0.5)
+            # Swap joint positions (excluding root + torso)
+            tmp = q[ind_swap, 10:24].clone()
+            q[ind_swap, 10:24] = q[ind_swap, 24:38]
+            q[ind_swap, 24:38] = tmp
+            # Swap joint velocities
+            tmp = qv[ind_swap, 9:23].clone()
+            qv[ind_swap, 9:23] = qv[ind_swap, 23:37]
+            qv[ind_swap, 23:37] = tmp
+
+        self.start_pose[reset_mask, :] = q[reset_mask, :]
+        self.start_velocity[reset_mask, :] = qv[reset_mask, :]
         return
 
     def num_obs(self) -> int:
@@ -158,7 +198,7 @@ class MSKEnv:
             self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
-                                                   reset_mask, :]
+                reset_mask, :]
 
         # Rerun forward
         if self.cuda_graph:
@@ -253,6 +293,7 @@ class MSKEnv:
         # Reset any worlds that are done
         done = torch.clamp(terminated + truncated, 0.0, 1.0).unsqueeze(-1)
         self.reset_tensor.copy_(done)
+        self.set_start_pose(done.squeeze(-1).bool())
         self._upon_reset(done.squeeze(-1).bool())
         self._handle_reset()
 

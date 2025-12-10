@@ -272,3 +272,4 @@ cython_debug/
 .vscode/
 models/
 wandb/
+scripts/dashboard/trajectories/**

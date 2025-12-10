@@ -162,7 +162,7 @@ class MSKEnv:
 
         # Noise starting pose
         if self.noise_start:
-            q += torch.randn_like(q) * self.q_noise
+            q[7:] += torch.randn_like(q[7:]) * self.q_noise
             qv += torch.randn_like(qv) * self.qv_noise
 
         # Randomly swap left/right

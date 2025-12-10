@@ -34,8 +34,8 @@ class EnvConfig:
     # Starting state
     starting_pose: str = "../models/starting_pose.yaml"
     noise_start: bool = True
-    q_noise: float = 0.0
-    qv_noise: float = 0.05
+    q_noise: float = 0.1
+    qv_noise: float = 0.1
     swap_lr: bool = True
 
     # Reward scales

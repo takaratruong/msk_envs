@@ -200,7 +200,7 @@ with ui.row().classes('w-full z-50 bg-white').style(
                 </div>
             </div>
         </div>
-    """).classes('w-full')
+    """, sanitize=False).classes('w-full')
 
     # Control panel
     with ui.column().classes("items-center w-full"):

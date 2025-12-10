@@ -18,3 +18,8 @@ pip install -e .
 ```
 python -m msk_envs.train.fasttd3.train
 ```
+
+Or with SLURM:
+```
+python slurm/deploy.py --input_yaml slurm/cfg/baselines.yaml --mode gen_run
+```

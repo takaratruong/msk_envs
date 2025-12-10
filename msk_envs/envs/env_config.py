@@ -20,6 +20,7 @@ class EnvConfig:
     # Model physics properties
     joint_damping: float = 0.1
     joint_armature: float = 0.01
+    torso_damping: float = 1.0
     toes_stiffness: float = 65.0
 
     # Muscle properties
@@ -28,7 +29,7 @@ class EnvConfig:
     muscle_min_activation: float = 0.0
     muscle_max_activation: float = 1.0
     muscle_v_max: float = 12.0
-    muscle_dynamics_substeps: int = 15
+    muscle_dynamics_substeps: int = 30
 
     # Starting state
     starting_pose: str = "../models/starting_pose.yaml"

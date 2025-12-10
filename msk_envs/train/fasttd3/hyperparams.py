@@ -39,7 +39,7 @@ class BaseArgs:
     max_grad_norm: float = 0.0
 
     """ TD3 hyperparameters """
-    num_envs: int = 1024
+    num_envs: int = 2048
     total_timesteps: int = 150000
     learning_starts: int = 0
     num_updates: int = 4  # number of updates per step
@@ -98,7 +98,7 @@ class BaseArgs:
     def __post_init__(self):
         """Compute derived fields after exp_prefix is set from outside"""
         self.exp_name = f"{self.exp_prefix}_{self.env_name}" if self.exp_prefix else self.env_name
-        self.traj_out_folder = f"scripts/dashboard/trajectories/{self.exp_name}"
+        self.traj_out_folder = f"dashboard/trajectories/{self.exp_name}"
         self.analytics_out_folder = f"models/frame_data/{self.exp_name}"
     
     def get_reward_lambdas(self):

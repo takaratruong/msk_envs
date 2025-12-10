@@ -16,6 +16,16 @@ class SprintingEnv(MSKEnv):
                  cuda_graph: bool):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render,
                          cuda_graph=cuda_graph)
+        self.root_id = self.lookup_body_id("pelvis")
+        self.torso_id = self.lookup_body_id("torso")
+
+        self.root_pos = self.body_positions[:, self.root_id]
+        self.torso_pos = self.body_positions[:, self.torso_id]
+        self.torso_rot = self.body_rotations[:, self.torso_id]
+
+        self.head_offset = torch.tensor(
+            [0.0, 0.215, 0.0], device=self.device
+        ).unsqueeze(0).repeat(num_envs, 1)
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -27,7 +37,7 @@ class SprintingEnv(MSKEnv):
          4. Joint velocities (qv)
          5. Body positions relative to root, rotations, velocities
         """
-        root_positions = self.body_positions[:, 0, :]
+        root_positions = self.body_positions[:, self.root_id, :]
         rel_body_positions = self.body_positions - root_positions.unsqueeze(1)
         obs = torch.cat([
             self.muscle_activations,
@@ -50,8 +60,7 @@ class SprintingEnv(MSKEnv):
         return actions.detach().clone()
 
     def _compute_raw_reward_dict(self):
-        pelvis_idx = self.lookup_body_id("pelvis")
-        rew_vel = velocity_reward(self.body_velocities, pelvis_idx, 0, linear=True)
+        rew_vel = velocity_reward(self.body_velocities, self.root_id, 0, linear=True)
         # rew_limit = joint_limit_penalty(self.limit_torques)
         # rew_actuator = actuator_penalty(self.actuator_activations,
         #                                 self.num_actuators)
@@ -65,18 +74,12 @@ class SprintingEnv(MSKEnv):
     def _get_terminated(self):
         # Root falls below threshold
         min_root_height = 0.6
-        root_idx = self.lookup_body_id("pelvis")
-        root_height = self.body_positions[:, root_idx, 1]
+        root_height = self.root_pos[:, 1]
         fallen = (root_height < min_root_height)
 
         # Head falls below threshold
         min_head_height = 1.0
-        torso_idx = self.lookup_body_id("torso")
-        torso_pos = self.body_positions[:, torso_idx]
-        torso_rot = self.body_rotations[:, torso_idx]
-        head_offset = torch.tensor([0.0, 0.215, 0.0], device=torso_pos.device)
-        head_offset = head_offset.unsqueeze(0).repeat(self.num_worlds, 1)
-        head_pos = torso_pos + rotate_vec(torso_rot, head_offset)
+        head_pos = self.torso_pos + rotate_vec(self.torso_rot, self.head_offset)
         head_fallen = (head_pos[:, 1] < min_head_height)
 
         # Any of the bodies are out of the lanes
@@ -86,13 +89,12 @@ class SprintingEnv(MSKEnv):
             body_out |= (torch.abs(body_pos[:, 2]) > 0.6)
 
         # Pelvis no longer facing forward (within N degrees)
-        pelvis_rot = self.body_rotations[:, root_idx]
+        pelvis_rot = self.body_rotations[:, self.root_id]
         x_axis = torch.tensor([1.0, 0.0, 0.0], device=self.device)
         pelvis_fwd = rotate_vec(pelvis_rot, x_axis.unsqueeze(0))
         facing_forward = (pelvis_fwd[:, 0] > torch.cos(
             torch.deg2rad(torch.tensor(30.0))))
         not_facing_forward = ~facing_forward
 
-        terminated = (
-                fallen | head_fallen | body_out | not_facing_forward).float()
+        terminated = (fallen | head_fallen | body_out | not_facing_forward).float()
         return terminated.detach()

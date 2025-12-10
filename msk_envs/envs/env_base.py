@@ -20,6 +20,12 @@ class MSKEnv:
         armature = msk_warp.armature(self.m)
         armature[6:] = env_config.joint_armature
 
+        # Torso damping
+        torso_id = self.lookup_body_id("torso")
+        dof_adr = msk_warp.get_dof_adr(self.m, torso_id)
+        dof_num = msk_warp.get_dof_num(self.m, torso_id)
+        damping[dof_adr:dof_adr + dof_num] = env_config.torso_damping
+
         # Foot stiffness
         stiffness = msk_warp.stiffness(self.m)
         stiffness[:] = 0.0
@@ -80,7 +86,7 @@ class MSKEnv:
         self.muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(self.d)
         # [num_envs, num_bodies, 3]
-        self.body_positions = msk_warp.body_positions(self.d)
+        self.body_positions = msk_warp.body_com_positions(self.d)
         # [num_envs, num_bodies, 4] (w, x, y, z)
         self.body_rotations = msk_warp.body_rotations(self.d)
         # [num_envs, num_bodies, 6] (ang, lin)
@@ -143,7 +149,6 @@ class MSKEnv:
 
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
         self.set_start_pose(reset_ind.ravel())
-        self.reset()
         return
 
     def set_start_pose(self, reset_mask: torch.Tensor) -> None:
@@ -190,22 +195,22 @@ class MSKEnv:
         return
 
     def _handle_reset(self):
-        msk_warp.set_reset(self.d, self.reset_tensor)
-        reset_mask = self.reset_tensor.squeeze(-1).bool()
+        msk_warp.set_reset(self.d, self.reset_tensor)  # Inform sim of resets
 
         # Reset time and starting pose
+        reset_mask = self.reset_tensor.squeeze(-1).bool()
         if reset_mask.any():
             self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
                 reset_mask, :]
 
-        # Rerun forward
+        # Reset sim
         if self.cuda_graph:
             wp.capture_launch(self.reset_graph)
             wp.synchronize()
         else:
-            msk_warp.fwd(self.m, self.d)
+            msk_warp.reset(self.m, self.d)
 
         self.reset_tensor.fill_(0.0)
         return

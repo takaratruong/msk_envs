@@ -57,6 +57,7 @@ def main():
 
     # write to torch
     sim.save_animation("dashboard/trajectories/test", "999")
+    sim.save_analytics(".", "deploy_analytics")
 
 
 if __name__ == "__main__":

@@ -45,6 +45,12 @@ class MSKEnv:
         msk_warp.set_muscle_dynamics_substeps(
             self.m, env_config.muscle_dynamics_substeps)
 
+        # Contact model
+        if env_config.use_hunt_crossley:
+            msk_warp.use_hunt_crossley_contact(self.m)
+        else:
+            msk_warp.use_mujoco_contact(self.m)
+
         # Use Newton solver for GPU
         if self.device.type == "cuda":
             msk_warp.use_newton_solver(self.m)
@@ -320,9 +326,8 @@ class MSKEnv:
             "scaled_rewards": scaled_rewards,
         }
 
-        # Assert actions aren't nan
-        assert not torch.isnan(actions).any(), "Actions contain NaN!"
         assert not torch.isnan(obs).any(), "Observations contain NaN!"
+        assert not torch.isnan(actions).any(), "Actions contain NaN!"
 
         if self.render and hasattr(self.renderer, 'meshes') and len(
                 self.renderer.meshes) > 0:

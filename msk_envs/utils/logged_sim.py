@@ -1,6 +1,6 @@
 from msk_envs.envs.env_base import MSKEnv
 from msk_envs.utils.checkpoint_parser import parse_frame
-from msk_envs.utils.checkpoint_outputter import create_animation_json
+from msk_envs.utils.checkpoint_outputter import create_animation_json, create_pdf_output
 
 import os
 import json
@@ -94,6 +94,7 @@ class LoggedSim:
         return self.envs._get_obs()
 
     def save_frame_data(self, out_folder: str, base_filename: str):
+        """ Save the raw frame data as json files """
         os.makedirs(out_folder, exist_ok=True)
         for idx_world in self.worlds_to_save:
             out_file = os.path.join(out_folder,
@@ -106,12 +107,23 @@ class LoggedSim:
         return
 
     def save_animation(self, out_folder: str, base_filename):
+        """ Create the animation-ready json files """
         for idx_world in self.worlds_to_save:
             out_file = os.path.join(out_folder,
                                     f"{base_filename}_{idx_world}.json")
             frame_data = self.frame_data[idx_world]
             create_animation_json(frame_data, out_file)
             print("Saved animation to", out_file)
+        return
+
+    def save_analytics(self, out_folder: str, base_filename: str):
+        # make a pdf with the plots
+        for i in range(self.n_worlds_to_save):
+            idx_world = self.worlds_to_save[i]
+            out_file = os.path.join(out_folder,
+                                    f"{base_filename}_{idx_world}.pdf")
+            create_pdf_output(self.frame_data[i], out_file)
+            print("Saved analytics to", out_file)
         return
 
 

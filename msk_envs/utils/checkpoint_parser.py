@@ -80,10 +80,16 @@ class MuscleData:
 @dataclass
 class KineticData:
     com: tuple
+    grf: tuple
+    total_mass: float
+    gravity: float
 
     def to_dict(self):
         return {
             "com": list(self.com),
+            "grf": list(self.grf),
+            "total_mass": self.total_mass,
+            "gravity": self.gravity,
         }
 
 
@@ -198,9 +204,15 @@ def parse_kinetic_data(
         d: msk_warp.types.Data,
         world_id: int
 ) -> KineticData:
-    com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()
+    com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
+    grf = msk_warp.grf(d)[world_id].tolist()
+    mass = msk_warp.subtree_mass(m)[1]
+    gravity = msk_warp.gravity(m)
     kinetic_data = KineticData(
-        com=tuple(com)
+        com=tuple(com),
+        grf=tuple(grf),
+        total_mass=mass,
+        gravity=gravity,
     )
     return kinetic_data
 

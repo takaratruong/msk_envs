@@ -224,7 +224,7 @@ def main():
         out_folder = args.analytics_out_folder
         os.makedirs(out_folder, exist_ok=True)
         # sim.save_frame_data(out_folder, f"frame_data_{global_step}")
-        # sim.save_analytics(out_folder, f"analytics_{global_step}")
+        sim.save_analytics(out_folder, f"analytics_{global_step}")
 
         # Restore back to training device
         actor.to(device=device)

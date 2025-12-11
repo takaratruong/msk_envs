@@ -12,6 +12,8 @@ def joint_limit_penalty(limit_torques):
     num_limits = limit_torques.shape[1]
     abs_limit_torque = torch.abs(limit_torques)
     abs_limit_torque_sum = torch.sum(abs_limit_torque, dim=1)
+    if num_limits == 0:
+        return torch.zeros_like(abs_limit_torque_sum)
     return abs_limit_torque_sum / num_limits
 
 
@@ -29,4 +31,3 @@ def max_vertical_reward(body_positions):
     """Maximum vertical height achieved (current max across all bodies)"""
     current_max_height = torch.max(body_positions[:, :, 2], dim=1)[0]
     return current_max_height
-

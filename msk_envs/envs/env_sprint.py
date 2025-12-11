@@ -61,13 +61,13 @@ class SprintingEnv(MSKEnv):
 
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, 0, linear=True)
-        # rew_limit = joint_limit_penalty(self.limit_torques)
+        rew_limit = joint_limit_penalty(self.limit_torques)
         # rew_actuator = actuator_penalty(self.actuator_activations,
         #                                 self.num_actuators)
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
-            # "rew_limit": rew_limit.detach(),
+            "rew_limit": rew_limit.detach(),
             # "rew_actuator": rew_actuator.detach(),
         }
 

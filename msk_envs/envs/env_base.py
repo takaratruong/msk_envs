@@ -96,6 +96,11 @@ class MSKEnv:
         # [num_envs, num_dofs]
         self.joint_velocities = msk_warp.joint_velocities(self.d)
 
+        # [num_envs, ]
+        self.grf = msk_warp.grf(self.d)
+        # [num_envs, num_joint_limits]
+        self.limit_torques = msk_warp.limit_torques(self.d)
+
         # RL Environment
         self.action_range = (-1.0, 1.0)
         self.max_episode_duration = env_config.max_episode_duration

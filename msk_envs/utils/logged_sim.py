@@ -8,18 +8,22 @@ import torch
 
 
 class LoggedSim:
-    def __init__(self, envs: MSKEnv, max_episode_length, device):
+    def __init__(
+            self,
+            envs: MSKEnv,
+            max_episode_length: int,
+            device: torch.device,
+    ):
         self.envs = envs
-        # self.worlds_to_save = [0]
         self.worlds_to_save = list(range(envs.num_worlds))
         n_worlds = envs.num_worlds
         n_worlds_to_save = len(self.worlds_to_save)
-        max_ep_len = max_episode_length
         assert n_worlds_to_save <= n_worlds
         assert min(self.worlds_to_save) >= 0
         assert max(self.worlds_to_save) < n_worlds
 
         # Build storage for things to track
+        max_ep_len = max_episode_length
         self.finished = torch.zeros((n_worlds,),
                                     dtype=torch.bool, device=device)
         self.rewards = torch.zeros((n_worlds_to_save, max_ep_len),

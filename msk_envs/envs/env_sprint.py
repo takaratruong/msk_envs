@@ -43,7 +43,7 @@ class SprintingEnv(MSKEnv):
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.muscle_fiber_velocities,
-            # self.actuator_activations,
+            self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
             rel_body_positions.view(self.num_worlds, -1),
@@ -55,20 +55,25 @@ class SprintingEnv(MSKEnv):
     def _get_actions(self) -> torch.Tensor:
         actions = torch.cat([
             self.muscle_excitations,
-            # self.actuator_excitations
+            self.actuator_excitations
         ], dim=1)
         return actions.detach().clone()
+
+    def _set_actions(self, raw_action) -> None:
+        self._set_muscle_excitations(raw_action[:, :self.num_muscles])
+        self._set_actuator_excitations(raw_action[:, self.num_muscles:])
+        return
 
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, 0, linear=True)
         rew_limit = joint_limit_penalty(self.limit_torques)
-        # rew_actuator = actuator_penalty(self.actuator_activations,
-        #                                 self.num_actuators)
+        rew_actuator = actuator_penalty(self.actuator_activations,
+                                        self.num_actuators)
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
             "rew_limit": rew_limit.detach(),
-            # "rew_actuator": rew_actuator.detach(),
+            "rew_actuator": rew_actuator.detach(),
         }
 
     def _get_terminated(self):

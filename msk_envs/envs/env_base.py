@@ -34,6 +34,7 @@ class MSKEnv:
             dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
             dof_num = msk_warp.get_dof_num(self.m, toe_id)
             stiffness[dof_adr:dof_adr + dof_num] = env_config.toes_stiffness
+            damping[dof_adr:dof_adr + dof_num] = env_config.toes_damping
 
         # Muscles
         for mm in msk_warp.muscle_metadata(self.m):
@@ -83,6 +84,7 @@ class MSKEnv:
         self.num_qpos = msk_warp.get_num_qpos(self.m)
         self.num_dofs = msk_warp.get_num_dofs(self.m)
         self.num_muscles = msk_warp.get_num_muscles(self.m)
+        self.num_actuators = msk_warp.get_num_actuators(self.m)
 
         # [num_envs]
         self.time = msk_warp.time(self.d)
@@ -91,6 +93,9 @@ class MSKEnv:
         self.muscle_excitations = msk_warp.muscle_excitations(self.d)
         self.muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(self.d)
+        # [num_envs, num_actuators]
+        self.actuator_activations = msk_warp.actuator_activations(self.d)
+        self.actuator_excitations = msk_warp.actuator_excitations(self.d)
         # [num_envs, num_bodies, 3]
         self.body_positions = msk_warp.body_com_positions(self.d)
         # [num_envs, num_bodies, 4] (w, x, y, z)
@@ -233,6 +238,9 @@ class MSKEnv:
     def _get_actions(self) -> torch.Tensor:
         raise NotImplementedError
 
+    def _set_actions(self, raw_action) -> None:
+        raise NotImplementedError
+
     def _compute_raw_reward_dict(self):
         """ Guarantee to only run once per step """
         raise NotImplementedError
@@ -281,12 +289,7 @@ class MSKEnv:
         # Clamp to [-1, 1], then map to [0, 1]
         clamped_action = torch.clamp(raw_action, -1.0, 1.0)
         excitations = (clamped_action + 1.0) / 2.0
-        # self.actuator_excitations.copy_(excitations)
-        return
-
-    def _set_actions(self, raw_action) -> None:
-        self._set_muscle_excitations(raw_action[:, :self.num_muscles])
-        self._set_actuator_excitations(raw_action[:, self.num_muscles:])
+        self.actuator_excitations.copy_(excitations)
         return
 
     def step(self, actions):

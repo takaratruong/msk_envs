@@ -23,7 +23,7 @@ def actuator_penalty(actuator_activations, num_actuators):
     squared_act = torch.pow(actuator_act, 2)
     mean_squared_act = torch.sum(squared_act, dim=1) / num_actuators
     if num_actuators == 0:
-        mean_squared_act = torch.zeros_like(mean_squared_act)
+        return torch.zeros_like(mean_squared_act)
     return mean_squared_act
 
 

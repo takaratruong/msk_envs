@@ -1,6 +1,3 @@
-# from scripts.mad_env.env_factory import EnvFactory
-# from scripts.mad_env.env_config import EnvConfig
-# from scripts.mad_env.logged_sim import LoggedSim
 from msk_envs.envs import EnvFactory, EnvConfig
 from msk_envs.utils.logged_sim import LoggedSim
 
@@ -17,6 +14,7 @@ import time
 import torch
 import tqdm
 import wandb
+import warp as wp
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -29,6 +27,8 @@ torch.set_float32_matmul_precision("high")
 
 
 def main():
+    wp.clear_kernel_cache()  # can't risk caching issues
+
     args = get_args()
     print(args)
 
@@ -54,25 +54,25 @@ def main():
         env_variant=args.env_variant,
         reward_lambdas=args.get_reward_lambdas(),
     )
-    
+
     envs = EnvFactory.create_env(num_envs=args.num_envs,
                                  env_config=env_config,
                                  render=args.render,
                                  cuda_graph=args.cuda,
                                  device=device,
                                  )
-                                #  enable_log=False,
-                                #  launch_server=True,
-                                #  use_cpu=False)
+    #  enable_log=False,
+    #  launch_server=True,
+    #  use_cpu=False)
     eval_envs = EnvFactory.create_env(num_envs=args.num_eval_envs,
                                       env_config=env_config,
                                       render=args.render,
                                       cuda_graph=args.cuda,
                                       device=device,
                                       )
-                                    #   enable_log=True,
-                                    #   launch_server=False,
-                                    #   use_cpu=True)
+    #   enable_log=True,
+    #   launch_server=False,
+    #   use_cpu=True)
 
     n_act = envs.num_actions()
     n_obs = envs.num_obs() if type(envs.num_obs()) == int else envs.num_obs()[0]
@@ -112,7 +112,6 @@ def main():
         "hidden_dim": args.critic_hidden_dim,
         "device": device,
     }
-
 
     if args.agent == "simbav2":
         actor_kwargs.pop("init_scale")
@@ -198,7 +197,6 @@ def main():
     def evaluate(model_path: str):
         policy_eval = load_policy(model_path).to(device=device)
 
-
         # Calculate max episode steps from duration and delta_t
         max_episode_steps = int(env_config.max_episode_duration / env_config.delta_t)
 
@@ -276,7 +274,7 @@ def main():
                         < qf2_next_target_value.unsqueeze(1),
                         qf1_next_target_projected,
                         qf2_next_target_projected,
-                        )
+                    )
                     qf1_next_target_dist = qf2_next_target_dist = qf_next_target_dist
                 else:
                     qf1_next_target_dist, qf2_next_target_dist = (
@@ -356,10 +354,12 @@ def main():
         update_main = torch.compile(update_main, mode=compile_mode)
         update_pol = torch.compile(update_pol, mode=compile_mode)
         policy = torch.compile(policy, mode=None)
+
         # Don't compile normalize_obs to avoid Triton compilation issues
         @torch._dynamo.disable
         def normalize_obs(x):
             return obs_normalizer.forward(x)
+
         if args.reward_normalization:
             update_stats = torch.compile(reward_normalizer.update_stats, mode=None)
         normalize_reward = torch.compile(reward_normalizer.forward, mode=None)
@@ -462,11 +462,11 @@ def main():
                         "critic_grad_norm": logs_dict["critic_grad_norm"].mean(),
                         "rewards/total": rewards.mean(),
                     }
-                    
+
                     # Log raw reward terms before lambda multiplication
                     for reward_name, reward_tensor in info["raw_rewards"].items():
                         logs[f"rewards/{reward_name}_raw"] = reward_tensor.mean()
-                    
+
                     if global_step % args.eval_freq == 0 and latest_model_path is not None:
                         print(f"Evaluating at global step {global_step}")
                         eval_avg_return, eval_avg_length = evaluate(latest_model_path)
@@ -501,7 +501,6 @@ def main():
         actor_scheduler.step()
         q_scheduler.step()
         pbar.update(1)
-
 
 
 if __name__ == "__main__":

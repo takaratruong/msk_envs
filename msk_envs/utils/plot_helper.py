@@ -22,7 +22,9 @@ class PlotConfig:
     y_fmt: str
 
     x_data: np.ndarray
+    """ data for x axis (e.g., time) """
     x_data_sub: np.ndarray
+    """ subscript for x axis (e.g., frame index) """
 
 
 class SequencePlot:
@@ -181,7 +183,6 @@ class SequencePlot:
                     ax = self.get_axes_at(i, j)
                     ax.legend(fontsize=12, loc="upper right",
                               frameon=False, prop={'weight': 'bold'})
-
 
                 pass
             pass

@@ -22,6 +22,7 @@ class EnvConfig:
     joint_armature: float = 0.01
     torso_damping: float = 1.0
     toes_stiffness: float = 65.0
+    toes_damping: float = 0.4
 
     use_hunt_crossley: bool = True
 

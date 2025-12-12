@@ -81,36 +81,55 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         rewards_plot.add_hline(0, 0.0)
         rewards_plot.finish(pdf)
 
-        # Ground reaction force
-        grf_plot = SequencePlot(
-            PlotConfig(
-                num_vertical=1,
-                num_horizontal=1,
-                fig_size=(8.5, 6),
-                title="Ground Reaction Forces",
-                x_label="Time (s)",
-                x_label_sub="Frame",
-                y_label="Force (N)",
-                x_data=times,
-                x_data_sub=frame_ind,
-                x_fmt=".1f",
-                x_sub_fmt=".0f",
-                y_fmt=".0f",
-            )
-        )
-
-        grf_plot.add_hline(0, 0.0)
+        # --- Ground reaction forces ---
         grf_data = np.array([frame.kinetic_data.grf for frame in frame_data])
-        grf_plot.add(0, grf_data[:, 0], label="X")
-        grf_plot.add(0, grf_data[:, 1], label="Y")
-        grf_plot.add(0, grf_data[:, 2], label="Z")
-        # grf_plot.add(0, np.linalg.norm(grf_data, axis=1), label="Norm")
-        # Line for body weight, 2x body weight, 6x body weight
-        kinetic_data = frame_data[0].kinetic_data
-        mass = kinetic_data.total_mass
-        weight = abs(float(mass * kinetic_data.gravity))
-        grf_plot.add_hline(0, weight, f"Weight\n({weight:.1f} N)")
-        grf_plot.add_hline(0, 2 * weight, f"2x Weight\n({2 * weight:.1f} N)")
-        grf_plot.add_hline(0, 6 * weight, f"6x Weight\n({6 * weight:.1f} N)")
-        grf_plot.finish(pdf)
+
+        def create_grf_plot(time_start: float = 0.0, time_end: float = None):
+            # Select time range
+            if time_end is None:
+                time_end = times[-1]
+            time_mask = (times >= time_start) & (times <= time_end)
+            time_selected = times[time_mask]
+            frame_ind_selected = frame_ind[time_mask]
+            grf_selected = grf_data[time_mask, :]
+
+            grf_plot = SequencePlot(
+                PlotConfig(
+                    num_vertical=1,
+                    num_horizontal=1,
+                    fig_size=(8.5, 6),
+                    title="Ground Reaction Forces",
+                    x_label="Time (s)",
+                    x_label_sub="Frame",
+                    y_label="Force (N)",
+                    x_data=time_selected,
+                    x_data_sub=frame_ind_selected,
+                    x_fmt=".1f",
+                    x_sub_fmt=".0f",
+                    y_fmt=".0f",
+                )
+            )
+
+            grf_plot.add_hline(0, 0.0)
+            grf_plot.add(0, grf_selected[:, 0], label="X")
+            grf_plot.add(0, grf_selected[:, 1], label="Y")
+            grf_plot.add(0, grf_selected[:, 2], label="Z")
+            # Line for body weight, 2x body weight, 6x body weight
+            kinetic_data = frame_data[0].kinetic_data
+            mass = kinetic_data.total_mass
+            weight = abs(float(mass * kinetic_data.gravity))
+            grf_plot.add_hline(0, weight, f"Weight\n({weight:.1f} N)")
+            grf_plot.add_hline(0, 2 * weight, f"2x Weight\n({2 * weight:.1f} N)")
+            grf_plot.add_hline(0, 6 * weight, f"6x Weight\n({6 * weight:.1f} N)")
+            grf_plot.finish(pdf)
+
+        # All data
+        create_grf_plot()
+        # Create plots for 1 second intervals
+        interval = 1.0
+        time_current = 0.0
+        final_time = times[-1]
+        while time_current < final_time:
+            create_grf_plot(time_current, min(time_current + interval, final_time))
+            time_current += interval
     return

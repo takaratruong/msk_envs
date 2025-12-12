@@ -1,6 +1,9 @@
 import * as THREE from 'three';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 const textureLoader = new THREE.TextureLoader();
 const planeTexture = textureLoader.load('assets/textures/plane.png');
+
 
 function setupLightsSky(scene) {
     // Lights
@@ -61,7 +64,7 @@ function setupAxes(scene) {
     scene.add(axesHelper);
 }
 
-function setupGround(scene) {
+function setupGround(scene, position) {
     const groundGeometry = new THREE.PlaneGeometry(100, 100);
     const groundMaterial = new THREE.MeshStandardMaterial({
         map: planeTexture,
@@ -70,6 +73,7 @@ function setupGround(scene) {
         side: THREE.DoubleSide
     });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.position.set(position.x, position.y, position.z);
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
@@ -100,4 +104,36 @@ function setupLanes(scene) {
     scene.add(lane2);
 }
 
-export { setupLightsSky, setupAxes, setupGround, setupLanes };
+function setupNumbers(scene) {
+    const loader = new FontLoader();
+    loader.load("assets/fonts/helvetiker.json", (font) => {
+
+        const step = 10;          // Distance between numbers
+        const max = 100;          // Numbers from 0 → 100
+        const size = 1;           // Character size
+
+        for (let x = 0; x <= max; x += step) {
+            const textGeo = new TextGeometry(String(x), {
+                font: font,
+                size: size,
+                depth: 0.02,      // Use 'depth' instead of 'height'
+                curveSegments: 4,
+            });
+
+            textGeo.computeBoundingBox();
+            const textMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const text = new THREE.Mesh(textGeo, textMat);
+
+            text.position.set(x, 0.05, -1.5);
+
+            text.castShadow = true;
+            text.receiveShadow = true;
+
+            scene.add(text);
+        }
+    })
+}
+
+
+
+export { setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers };

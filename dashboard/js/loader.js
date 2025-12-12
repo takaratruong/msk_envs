@@ -42,10 +42,10 @@ function loadModel(objFile, color, callback) {
     }
 }
 
-function loadCollider (geomType, scale, rot, color, callback) {
+function loadCollider (spheres, capsules, geomType, scale, rot, color, callback) {
     if (geomType === 0) {
         // Plane
-    } else if (geomType === 2) {
+    } else if (geomType === 2 && spheres) {
         // Create a sphere geometry
         const radius = scale[0];
         const sphere = new THREE.Mesh(
@@ -54,7 +54,7 @@ function loadCollider (geomType, scale, rot, color, callback) {
         );
         sphere.quaternion.set(rot[1], rot[2], rot[3], rot[0]);
         callback(sphere);
-    } else if (geomType === 3) {
+    } else if (geomType === 3 && capsules) {
         // Capsule
         const radius = scale[0];
         const half_height = scale[1];

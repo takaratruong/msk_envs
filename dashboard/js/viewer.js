@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { setupLightsSky, setupAxes, setupGround, setupLanes } from "./scene.js";
+import { setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers } from "./scene.js";
 import { loadModel, loadCollider } from "./loader.js";
 import { drawMuscle, resetMuscles } from "./muscle.js";
 
@@ -56,7 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Draw objects (visual/collider)
         const drawVisuals = drawVisualsCheckbox.checked;
-        const drawColliders = drawCollidersCheckbox.checked;
+        const drawSphereColliders = drawSphereCollidersCheckbox.checked;
+        const drawCapsuleColliders = drawCapsuleCollidersCheckbox.checked;
 
         if (drawVisuals) {
             for (const obj of frame.visuals) {
@@ -71,17 +72,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        if (drawColliders) {
-            for (const obj of frame.colliders) {
-                const color = 0x87CEEB;
-                loadCollider(obj.geom_type, obj.scale, obj.rot, color, object => {
-                    object.position.set(...obj.pos);
-                    object.castShadow = true;
-                    object.receiveShadow = true;
-                    scene.add(object);
-                    currentObjects.push(object);
-                });
-            }
+        for (const obj of frame.colliders) {
+            const color = 0x87CEEB;
+            loadCollider(drawSphereColliders, drawCapsuleColliders,
+                obj.geom_type, obj.scale, obj.rot, color, object => {
+                object.position.set(...obj.pos);
+                object.castShadow = true;
+                object.receiveShadow = true;
+                scene.add(object);
+                currentObjects.push(object);
+            });
         }
 
         // Draw muscles
@@ -117,7 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const controls3 = new OrbitControls(camera3, renderer.domElement);
 
     const drawVisualsCheckbox = document.getElementById("drawVisuals");
-    const drawCollidersCheckbox = document.getElementById("drawColliders");
+    const drawSphereCollidersCheckbox = document.getElementById("drawSphereColliders");
+    const drawCapsuleCollidersCheckbox = document.getElementById("drawCapsuleColliders");
     const drawMusclesCheckbox = document.getElementById("drawMuscles");
     const timeElement = document.getElementById("timeValue");
 
@@ -227,7 +228,10 @@ document.addEventListener("DOMContentLoaded", () => {
     drawVisualsCheckbox.addEventListener("change", () => {
         loadFrame(currentFrame);
     });
-    drawCollidersCheckbox.addEventListener("change", () => {
+    drawSphereCollidersCheckbox.addEventListener("change", () => {
+        loadFrame(currentFrame);
+    });
+    drawCapsuleCollidersCheckbox.addEventListener("change", () => {
         loadFrame(currentFrame);
     });
     drawMusclesCheckbox.addEventListener("change", () => {
@@ -269,7 +273,9 @@ document.addEventListener("DOMContentLoaded", () => {
         renderer.setScissorTest(false);
     }
 
-    setupGround(scene);
+    setupGround(scene, new THREE.Vector3(0, 0, 0));
+    setupGround(scene, new THREE.Vector3(50, 0, 0));
+    setupNumbers(scene);
     setupLightsSky(scene);
     setupLanes(scene);
     setupAxes(scene);

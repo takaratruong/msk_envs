@@ -77,6 +77,7 @@ class MSKEnv:
         load_result = msk_warp.load_model(model_path, num_envs)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
+        self.muscle_id_lookup = load_result.muscle_id_lookup
         self.visuals = load_result.visuals
         self.setup_model(env_config)
 

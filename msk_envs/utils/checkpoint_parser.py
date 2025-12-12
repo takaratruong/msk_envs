@@ -160,6 +160,7 @@ def parse_collider_data(
 def parse_muscle_data(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        muscle_id_lookup: dict[str, int],
         world_id: int
 ) -> list[MuscleData]:
     muscle_activations = msk_warp.muscle_activations(d)
@@ -178,11 +179,12 @@ def parse_muscle_data(
     muscle_site_num = msk_warp.muscle_site_num(m)
 
     muscles = []
+    id_to_muscle = {v: k for k, v in muscle_id_lookup.items()}
     for i in range(msk_warp.get_num_muscles(m)):
         pt_adr = muscle_site_adr[i]
         n_pts = muscle_site_num[i]
         muscle_data = MuscleData(
-            name=f"{i}",  # fixme
+            name=id_to_muscle[i],
             points=site_positions[world_id][pt_adr:pt_adr + n_pts].tolist(),
             max_isometric_force=float(muscle_metadata["max_isometric_force"][i]),
             activation=float(muscle_activations[world_id][i].item()),
@@ -220,6 +222,7 @@ def parse_kinetic_data(
 def parse_frame(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        muscle_id_lookup: dict[str, int],
         visual_load_results: list[msk_warp.types.MeshLoadResult],
         world_id: int,
         frame_time,
@@ -227,7 +230,7 @@ def parse_frame(
 ) -> FrameData:
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
     colliders = parse_collider_data(m, d, world_id)
-    muscles = parse_muscle_data(m, d, world_id)
+    muscles = parse_muscle_data(m, d, muscle_id_lookup, world_id)
     kinetic_data = parse_kinetic_data(m, d, world_id)
 
     frame_visuals = FrameData(

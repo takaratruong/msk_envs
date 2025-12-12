@@ -46,6 +46,92 @@ def create_animation_json(frame_data: list[FrameData], out_file: str):
     return
 
 
+def create_muscle_plot(
+        muscle_names: list[str],
+        times: np.ndarray,
+        frame_ind: np.ndarray,
+        plot_data: np.ndarray,
+        fig_title: str,
+        y_label: str,
+        y_fmt: str,
+        pdf: PdfPages,
+        enforced_range: tuple[float, float] = None,
+        sublabels: list[str] = None,
+        subset_ind: list[list[int]] = None,
+        add_zero_line: bool = True,
+):
+    num_muscles = plot_data.shape[1]
+    num_muscles_per_fig = 1
+    n_vertical, n_horizontal = 3, 1
+    figs_per_page = n_vertical * n_horizontal
+    n_figs = (num_muscles + num_muscles_per_fig - 1) // num_muscles_per_fig
+    num_pages = (n_figs + figs_per_page - 1) // figs_per_page
+
+    for p in range(num_pages):
+        muscles_plot = SequencePlot(
+            PlotConfig(
+                num_vertical=n_vertical,
+                num_horizontal=n_horizontal,
+                fig_size=(8.5, 11),
+                title=fig_title,
+                x_label="Time (s)",
+                x_label_sub="Frame",
+                y_label=y_label,
+                x_data=times,
+                x_data_sub=frame_ind,
+                x_fmt=".1f",
+                x_sub_fmt=".0f",
+                y_fmt=y_fmt
+            )
+        )
+
+        for f in range(figs_per_page):
+            start_muscle = (p * figs_per_page + f) * num_muscles_per_fig
+            end_muscle = min(start_muscle + num_muscles_per_fig,
+                             num_muscles)
+            if start_muscle >= num_muscles:
+                continue
+            muscle_subset = plot_data[:, start_muscle:end_muscle]
+            muscle_subset_names = muscle_names[start_muscle:end_muscle]
+            title = ", ".join(muscle_subset_names)
+            for m in range(muscle_subset.shape[1]):
+                muscle_name = muscle_subset_names[m]
+                muscle_sequence = muscle_subset[:, m]
+
+                # Add a zero line if needed
+                if add_zero_line:
+                    muscles_plot.add_hline(f, 0.0)
+
+                # simple 1d plot
+                if len(muscle_sequence.shape) == 1:
+                    muscles_plot.add(f, muscle_sequence, label=muscle_name,
+                                     title=title)
+
+                # multiple plots
+                else:
+                    assert sublabels is not None
+                    # Check if we want a subset of the plots for this muscle
+                    if subset_ind is not None:
+                        muscle_idx = start_muscle + m
+                        muscle_subset = muscle_subset[
+                            :, m, subset_ind[muscle_idx]]
+                        label = [sublabels[i] for i in subset_ind[muscle_idx]]
+                    else:
+                        label = sublabels
+
+                    for part in range(muscle_subset.shape[-1]):
+                        muscles_plot.add(f, muscle_subset[..., part],
+                                         label=label[part],
+                                         title=title)
+
+                if enforced_range is not None:
+                    muscles_plot.enforce_y_range(f,
+                                                 enforced_range[0],
+                                                 enforced_range[1])
+
+        muscles_plot.finish(pdf)
+
+
 def create_pdf_output(frame_data: list[FrameData], out_file: str):
     """ Create a pdf with all the relevant plots """
     n_frames = len(frame_data)
@@ -123,13 +209,33 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             grf_plot.add_hline(0, 6 * weight, f"6x Weight\n({6 * weight:.1f} N)")
             grf_plot.finish(pdf)
 
-        # All data
+        # GRF plot for entire duration
         create_grf_plot()
+
         # Create plots for 1 second intervals
         interval = 1.0
-        time_current = 0.0
-        final_time = times[-1]
+        time_current, final_time = 0.0, times[-1]
         while time_current < final_time:
             create_grf_plot(time_current, min(time_current + interval, final_time))
             time_current += interval
+
+        # --- Muscle plots ---
+        muscle_names = [m.name for m in frame_data[0].muscles]
+
+        # Muscle activations, fiber/tendon lengths
+        muscle_ae = []
+        muscle_ftl = []
+        for frame in frame_data:
+            muscle_ae.append([(m.activation, m.excitation) for m in frame.muscles])
+            muscle_ftl.append([(m.fiber_length, m.tendon_length) for m in frame.muscles])
+
+        muscle_ftl = np.array(muscle_ftl)
+        create_muscle_plot(muscle_names, times, frame_ind, np.array(muscle_ae),
+                           "Muscle Activations/Excitations", "Activation/Excitation", ".2f",
+                           pdf, enforced_range=(0.0, 1.0),
+                           sublabels=["Activation", "Excitation"])
+        create_muscle_plot(muscle_names, times, frame_ind, np.array(muscle_ftl),
+                           "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
+                           pdf, sublabels=["Fiber", "Tendon"])
+
     return

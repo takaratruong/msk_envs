@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import re
 from glob import glob
 from nicegui import ui, app, events
 from timeline_controller import TimelineController
@@ -70,11 +71,10 @@ def locate_trajectories():
         file_name = os.path.splitext(os.path.basename(file_path))[0]
 
         # Try to extract numeric part for natural sorting
-        import re
         numbers = re.findall(r'\d+', file_name)
         if numbers:
-            # Use the last number found (usually the iteration number)
-            numeric_part = int(numbers[-1])
+            # Use the first number found (usually the iteration number)
+            numeric_part = int(numbers[0])
         else:
             # If no numbers found, use 0
             numeric_part = 0

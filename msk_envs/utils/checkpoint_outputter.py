@@ -170,6 +170,12 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         # --- Ground reaction forces ---
         grf_data = np.array([frame.kinetic_data.grf for frame in frame_data])
 
+        # Express in terms of body weight
+        kinetic_data = frame_data[0].kinetic_data
+        mass = kinetic_data.total_mass
+        weight = abs(float(mass * kinetic_data.gravity))
+        grf_data /= weight
+
         def create_grf_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
             if time_end is None:
@@ -187,7 +193,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     title="Ground Reaction Forces",
                     x_label="Time (s)",
                     x_label_sub="Frame",
-                    y_label="Force (N)",
+                    y_label="GRF (BW)",
                     x_data=time_selected,
                     x_data_sub=frame_ind_selected,
                     x_fmt=".1f",
@@ -200,13 +206,10 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             grf_plot.add(0, grf_selected[:, 0], label="X")
             grf_plot.add(0, grf_selected[:, 1], label="Y")
             grf_plot.add(0, grf_selected[:, 2], label="Z")
-            # Line for body weight, 2x body weight, 6x body weight
-            kinetic_data = frame_data[0].kinetic_data
-            mass = kinetic_data.total_mass
-            weight = abs(float(mass * kinetic_data.gravity))
-            grf_plot.add_hline(0, weight, f"Weight\n({weight:.1f} N)")
-            grf_plot.add_hline(0, 2 * weight, f"2x Weight\n({2 * weight:.1f} N)")
-            grf_plot.add_hline(0, 6 * weight, f"6x Weight\n({6 * weight:.1f} N)")
+            # # Line for body weight, 2x body weight, 6x body weight
+            # grf_plot.add_hline(0, weight, f"Weight\n({weight:.1f} N)")
+            # grf_plot.add_hline(0, 2 * weight, f"2x Weight\n({2 * weight:.1f} N)")
+            # grf_plot.add_hline(0, 6 * weight, f"6x Weight\n({6 * weight:.1f} N)")
             grf_plot.finish(pdf)
 
         # GRF plot for entire duration

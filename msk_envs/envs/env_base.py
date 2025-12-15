@@ -10,7 +10,7 @@ from msk_envs.utils.pose import parse_starting_pose
 class MSKEnv:
     """ Superclass for MSK environments """
 
-    def setup_model(self, env_config: EnvConfig) -> None:
+    def _setup_model(self, env_config: EnvConfig) -> None:
         """ We're going to modify some model parameters here. """
         # Joint damping
         damping = msk_warp.damping(self.m)
@@ -60,6 +60,17 @@ class MSKEnv:
 
         msk_warp.reinitialize_model(self.m, self.d)
 
+    def _setup_cuda_graphs(self):
+        if self.cuda_graph:
+            assert torch.cuda.is_available()
+            with wp.ScopedCapture() as capture:
+                msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
+            self.step_graph = capture.graph
+            with wp.ScopedCapture() as capture:
+                msk_warp.reset(self.m, self.d)
+            self.reset_graph = capture.graph
+        return
+
     def __init__(
             self,
             num_envs: int,
@@ -68,6 +79,7 @@ class MSKEnv:
             render: bool,
             cuda_graph: bool
     ):
+        self.debug = True
         self.num_worlds = num_envs
         self.device = device
 
@@ -79,7 +91,7 @@ class MSKEnv:
         self.body_id_lookup = load_result.body_id_lookup
         self.muscle_id_lookup = load_result.muscle_id_lookup
         self.visuals = load_result.visuals
-        self.setup_model(env_config)
+        self._setup_model(env_config)
 
         # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)
@@ -155,14 +167,7 @@ class MSKEnv:
 
         # CUDA Graphs
         self.cuda_graph = cuda_graph
-        if cuda_graph:
-            assert torch.cuda.is_available()
-            with wp.ScopedCapture() as capture:
-                msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
-            self.step_graph = capture.graph
-            with wp.ScopedCapture() as capture:
-                msk_warp.reset(self.m, self.d)
-            self.reset_graph = capture.graph
+        self._setup_cuda_graphs()
 
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
         self.set_start_pose(reset_ind.ravel())
@@ -214,13 +219,15 @@ class MSKEnv:
     def _handle_reset(self):
         msk_warp.set_reset(self.d, self.reset_tensor)  # Inform sim of resets
 
-        # Reset time and starting pose
+        # Reset time, starting pose, muscle and actuator activations
         reset_mask = self.reset_tensor.squeeze(-1).bool()
         if reset_mask.any():
-            self.time[reset_mask] = 0.0
+            self.time[reset_mask] = 0.0  # should this be in env itself?
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
                 reset_mask, :]
+            self.muscle_activations[reset_mask, :].fill_(0.0)
+            self.actuator_activations[reset_mask, :].fill_(0.5)
 
         # Reset sim
         if self.cuda_graph:
@@ -317,17 +324,13 @@ class MSKEnv:
         self._upon_reset(done.squeeze(-1).bool())
         self._handle_reset()
 
-        # Gym api requires the observation after the reset
+        # Training requires the observation *after* the reset
         obs = self._get_obs()
-
         # Return raw reward terms for logging
-        raw_rewards = self.reward_dict
-        scaled_rewards = self.get_scaled_reward_dict()
-
         info = {
             "final_observation": final_obs,
-            "raw_rewards": raw_rewards,
-            "scaled_rewards": scaled_rewards,
+            "raw_rewards": self.reward_dict,
+            "scaled_rewards": self.get_scaled_reward_dict(),
         }
 
         assert not torch.isnan(obs).any(), "Observations contain NaN!"

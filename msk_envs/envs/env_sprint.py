@@ -40,11 +40,12 @@ class SprintingEnv(MSKEnv):
         root_positions = self.body_positions[:, self.root_id, :]
         rel_body_positions = self.body_positions - root_positions.unsqueeze(1)
         obs = torch.cat([
+            self.time.view(self.num_worlds, 1),
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.muscle_fiber_velocities,
             self.actuator_activations,
-            self.joint_positions,
+            self.joint_positions[:, 1:],  # exclude x position
             self.joint_velocities,
             rel_body_positions.view(self.num_worlds, -1),
             self.body_rotations.view(self.num_worlds, -1),
@@ -67,16 +68,23 @@ class SprintingEnv(MSKEnv):
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, 0, linear=True)
         rew_limit = joint_limit_penalty(self.limit_torques)
-        rew_actuator = actuator_penalty(self.actuator_activations,
-                                        self.num_actuators)
+        rew_actuator = actuator_penalty(self.actuator_activations, self.num_actuators)
+
+        reached_finish = (self.root_pos[:, 0] >= 100.0).float()
+        time_left = (self.max_episode_duration - self.time).clamp(min=0.0)
+        rew_finish = reached_finish * time_left
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
             "rew_limit": rew_limit.detach(),
             "rew_actuator": rew_actuator.detach(),
+            "rew_finish": rew_finish.detach(),
         }
 
     def _get_terminated(self):
+        # Reached finish line
+        reached_finish = (self.root_pos[:, 0] >= 100.0)
+
         # Root falls below threshold
         min_root_height = 0.6
         root_height = self.root_pos[:, 1]
@@ -101,5 +109,5 @@ class SprintingEnv(MSKEnv):
             torch.deg2rad(torch.tensor(30.0))))
         not_facing_forward = ~facing_forward
 
-        terminated = (fallen | head_fallen | body_out | not_facing_forward).float()
+        terminated = (reached_finish | fallen | head_fallen | body_out | not_facing_forward).float()
         return terminated.detach()

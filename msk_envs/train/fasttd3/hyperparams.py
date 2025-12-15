@@ -58,7 +58,7 @@ class BaseArgs:
     noise_clip: float = 0.5  # clip range for target action noise
 
     """ Exploration hyperparameters """
-    std_min: float = 0.02  # minimum scale of exploration noise
+    std_min: float = 0.001  # minimum scale of exploration noise
     std_max: float = 0.4  # maximum scale of exploration noise
 
     """ Q/Value function hyperparameters
@@ -109,9 +109,10 @@ class BaseArgs:
 @dataclass
 class SprintConfig(BaseArgs):
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 10.0
-    lambda_limit: float = -0.2
-    lambda_actuator: float = -5.0
+    lambda_vel: float = 1.0
+    lambda_limit: float = -0.05
+    lambda_actuator: float = -0.5
+    lambda_finish: float = 20.0
 
 
 @dataclass

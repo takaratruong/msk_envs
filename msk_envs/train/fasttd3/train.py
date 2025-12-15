@@ -55,24 +55,20 @@ def main():
         reward_lambdas=args.get_reward_lambdas(),
     )
 
-    envs = EnvFactory.create_env(num_envs=args.num_envs,
-                                 env_config=env_config,
-                                 render=args.render,
-                                 cuda_graph=args.cuda,
-                                 device=device,
-                                 )
-    #  enable_log=False,
-    #  launch_server=True,
-    #  use_cpu=False)
-    eval_envs = EnvFactory.create_env(num_envs=args.num_eval_envs,
-                                      env_config=env_config,
-                                      render=args.render,
-                                      cuda_graph=args.cuda,
-                                      device=device,
-                                      )
-    #   enable_log=True,
-    #   launch_server=False,
-    #   use_cpu=True)
+    envs = EnvFactory.create_env(
+        num_envs=args.num_envs,
+        env_config=env_config,
+        render=args.render,
+        cuda_graph=args.cuda,
+        device=device,
+    )
+    eval_envs = EnvFactory.create_env(
+        num_envs=args.num_eval_envs,
+        env_config=env_config,
+        render=args.render,
+        cuda_graph=args.cuda,
+        device=device,
+    )
 
     n_act = envs.num_actions()
     n_obs = envs.num_obs() if type(envs.num_obs()) == int else envs.num_obs()[0]

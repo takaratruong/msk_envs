@@ -167,7 +167,7 @@ with ui.row().classes('w-full z-50 bg-white').style(
         'border: 3px solid #ccc; border-radius: 8px; box-sizing: border-box;'):
     # Title, centered
     with ui.row().classes("w-full justify-center mt-4"):
-        ui.label("Madrona-Hopper Dashboard").classes("text-2xl font-bold")
+        ui.label("MSK Dashboard").classes("text-2xl font-bold")
         with ui.row().classes("items-center justify-center gap-4"):
             traj_dir_options = ui.dropdown_button("Traj Dir",
                                                   auto_close=True,
@@ -232,5 +232,5 @@ timeline_controller = TimelineController(tick_rate=tick_rate_input.value,
                                          timeline_slider=timeline_slider)
 
 if __name__ in {"__main__", "__mp_main__"}:
-    ui.run(show=False, title="Madrona Dashboard",
+    ui.run(show=False, title="MSK Dashboard",
            favicon="assets/textures/favicon.png")

@@ -34,7 +34,3 @@ the web-viewer.
 cd dashboard
 python3 dashboard.py
 ```
-These trajectories can also be loaded into Blender. Open Blender and in the 
-scripting tab open `scripts/madrona-env/blender.py`, edit the trajectory path,
-and run the script (it may take a minute or so). It should set up all the 
-animation frames.

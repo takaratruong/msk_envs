@@ -1,5 +1,4 @@
 import msk_warp
-import torch
 import os
 
 from dataclasses import dataclass
@@ -78,6 +77,23 @@ class MuscleData:
 
 
 @dataclass
+class ActuatorData:
+    name: str
+
+    optimal_force: float
+    activation: float
+    excitation: float
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "optimal_force": self.optimal_force,
+            "activation": self.activation,
+            "excitation": self.excitation,
+        }
+
+
+@dataclass
 class KineticData:
     com: tuple
     grf: tuple
@@ -99,6 +115,7 @@ class FrameData:
     visuals: list[VisualData]
     colliders: list[ColliderData]
     muscles: list[MuscleData]
+    actuators: list[ActuatorData]
     kinetic_data: KineticData
     reward_data: dict
 
@@ -108,6 +125,7 @@ class FrameData:
             "visuals": [obj.to_dict() for obj in self.visuals],
             "colliders": [obj.to_dict() for obj in self.colliders],
             "muscles": [muscle.to_dict() for muscle in self.muscles],
+            "actuators": [actuator.to_dict() for actuator in self.actuators],
             "kinetic_data": self.kinetic_data.to_dict(),
             "reward_data": self.reward_data,
         }
@@ -201,6 +219,29 @@ def parse_muscle_data(
     return muscles
 
 
+def parse_actuator_data(
+        m: msk_warp.types.Model,
+        d: msk_warp.types.Data,
+        actuator_id_lookup: dict[str, int],
+        world_id: int
+) -> list[ActuatorData]:
+    actuator_activations = msk_warp.actuator_activations(d)
+    actuator_excitations = msk_warp.actuator_excitations(d)
+    actuator_metadata = msk_warp.actuator_metadata_np(m)
+
+    actuators = []
+    id_to_actuator = {v: k for k, v in actuator_id_lookup.items()}
+    for i in range(msk_warp.get_num_actuators(m)):
+        actuator_data = ActuatorData(
+            name=id_to_actuator[i],
+            optimal_force=float(actuator_metadata["optimal_force"][i]),
+            activation=float(actuator_activations[world_id][i].item()),
+            excitation=float(actuator_excitations[world_id][i].item()),
+        )
+        actuators.append(actuator_data)
+    return actuators
+
+
 def parse_kinetic_data(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
@@ -223,6 +264,7 @@ def parse_frame(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
         muscle_id_lookup: dict[str, int],
+        actuator_id_lookup: dict[str, int],
         visual_load_results: list[msk_warp.types.MeshLoadResult],
         world_id: int,
         frame_time,
@@ -231,6 +273,7 @@ def parse_frame(
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
     colliders = parse_collider_data(m, d, world_id)
     muscles = parse_muscle_data(m, d, muscle_id_lookup, world_id)
+    actuators = parse_actuator_data(m, d, actuator_id_lookup, world_id)
     kinetic_data = parse_kinetic_data(m, d, world_id)
 
     frame_visuals = FrameData(
@@ -238,6 +281,7 @@ def parse_frame(
         visuals=visuals,
         colliders=colliders,
         muscles=muscles,
+        actuators=actuators,
         kinetic_data=kinetic_data,
         reward_data=reward_data
     )

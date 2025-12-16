@@ -1,5 +1,6 @@
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+
 from .env_variants import DerivedEnv
 
 
@@ -14,7 +15,7 @@ class EnvConfig:
     delta_t_sim: float = 1.0 / 1800.0
 
     # Environment parameters
-    max_episode_duration: float = 7.5  # seconds
+    max_episode_duration: float = 15.0  # seconds
     model_path: str = "../models/model.osim"  # located at data/
 
     # Model physics properties
@@ -28,7 +29,7 @@ class EnvConfig:
 
     # Muscle properties
     muscle_multiplier: float = 2.0  # max isometric force scale
-    muscle_fiber_damping: float = 0.1
+    muscle_fiber_damping: float = 0.01
     muscle_min_activation: float = 0.0
     muscle_max_activation: float = 1.0
     muscle_v_max: float = 12.0

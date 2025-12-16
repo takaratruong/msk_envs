@@ -72,9 +72,9 @@ class SequencePlot:
         ax_idx = self._get_idx(ax_idx_x, ax_idx_y)
         return self.axs[ax_idx]
 
-    def add(self, idx: int, y_data: np.ndarray, label: str, title: str = None):
+    def add(self, idx: int, y_data: np.ndarray, label: str, alpha: float = 1.0, title: str = None):
         ax = self.axs[idx]
-        ax.plot(self.x_data, y_data, label=label)
+        ax.plot(self.x_data, y_data, label=label, alpha=alpha)
 
         if title is not None:
             ax.set_title(title, fontsize=14, fontweight="bold")

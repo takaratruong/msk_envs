@@ -57,6 +57,7 @@ def create_muscle_plot(
         pdf: PdfPages,
         enforced_range: tuple[float, float] = None,
         sublabels: list[str] = None,
+        alphas: list[float] = None,
         subset_ind: list[list[int]] = None,
         add_zero_line: bool = True,
 ):
@@ -120,8 +121,10 @@ def create_muscle_plot(
                         label = sublabels
 
                     for part in range(muscle_subset.shape[-1]):
+                        alpha = 1.0 if alphas is None else alphas[part]
                         muscles_plot.add(f, muscle_subset[..., part],
                                          label=label[part],
+                                         alpha=alpha,
                                          title=title)
 
                 if enforced_range is not None:
@@ -236,7 +239,8 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         create_muscle_plot(muscle_names, times, frame_ind, np.array(muscle_ae),
                            "Muscle Activations/Excitations", "Activation/Excitation", ".2f",
                            pdf, enforced_range=(0.0, 1.0),
-                           sublabels=["Activation", "Excitation"])
+                           sublabels=["Activation", "Excitation"],
+                           alphas=[1.0, 0.5])
         create_muscle_plot(muscle_names, times, frame_ind, np.array(muscle_ftl),
                            "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
                            pdf, sublabels=["Fiber", "Tendon"])

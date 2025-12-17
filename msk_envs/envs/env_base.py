@@ -85,8 +85,8 @@ class MSKEnv:
 
         # Load model
         curr_path = os.path.abspath(os.path.dirname(__file__))
-        model_path = os.path.join(curr_path, env_config.model_path)
-        load_result = msk_warp.load_model(model_path, num_envs)
+        self.model_path = os.path.join(curr_path, env_config.model_path)
+        load_result = msk_warp.load_model(self.model_path, num_envs)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
         self.muscle_id_lookup = load_result.muscle_id_lookup
@@ -172,6 +172,18 @@ class MSKEnv:
 
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
         self.set_start_pose(reset_ind.ravel())
+        
+        self.root_id = self.lookup_body_id("pelvis")
+        self.torso_id = self.lookup_body_id("torso")
+
+        self.root_pos = self.body_positions[:, self.root_id]
+        self.torso_pos = self.body_positions[:, self.torso_id]
+        self.torso_rot = self.body_rotations[:, self.torso_id]
+
+        self.head_offset = torch.tensor(
+            [0.0, 0.215, 0.0], device=self.device
+        ).unsqueeze(0).repeat(num_envs, 1)
+        
         return
 
     def set_start_pose(self, reset_mask: torch.Tensor) -> None:
@@ -245,10 +257,16 @@ class MSKEnv:
         raise NotImplementedError
 
     def _get_actions(self) -> torch.Tensor:
-        raise NotImplementedError
+        actions = torch.cat([
+            self.muscle_excitations,
+            self.actuator_excitations
+        ], dim=1)
+        return actions.detach().clone()
 
     def _set_actions(self, raw_action) -> None:
-        raise NotImplementedError
+        self._set_muscle_excitations(raw_action[:, :self.num_muscles])
+        self._set_actuator_excitations(raw_action[:, self.num_muscles:])
+        return
 
     def _compute_raw_reward_dict(self):
         """ Guarantee to only run once per step """

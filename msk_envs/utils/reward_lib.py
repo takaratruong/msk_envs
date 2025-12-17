@@ -1,5 +1,5 @@
 import torch
-
+from msk_envs.utils.global_params import UP_IDX
 
 def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool):
     """Forward velocity reward (x-velocity of root body)"""
@@ -29,5 +29,5 @@ def actuator_penalty(actuator_activations, num_actuators):
 
 def max_vertical_reward(body_positions):
     """Maximum vertical height achieved (current max across all bodies)"""
-    current_max_height = torch.max(body_positions[:, :, 2], dim=1)[0]
+    current_max_height = torch.max(body_positions[:, :, UP_IDX], dim=1)[0]
     return current_max_height

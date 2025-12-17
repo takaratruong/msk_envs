@@ -17,6 +17,7 @@ class EnvConfig:
     # Environment parameters
     max_episode_duration: float = 15.0  # seconds
     model_path: str = "../models/model.osim"  # located at data/
+    motion_name: str = "reference_stride"  # motion file name (without .pt extension) for IMITATE variant
 
     # Model physics properties
     joint_damping: float = 0.1

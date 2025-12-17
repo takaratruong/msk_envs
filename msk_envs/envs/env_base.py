@@ -4,7 +4,6 @@ import warp as wp
 import os
 
 from .env_config import EnvConfig
-from msk_envs.utils.sim_objects import setup_sim_objects, sim_bodies_list
 from msk_envs.utils.pose import parse_starting_pose
 
 
@@ -93,8 +92,6 @@ class MSKEnv:
         self.muscle_id_lookup = load_result.muscle_id_lookup
         self.visuals = load_result.visuals
         self._setup_model(env_config)
-        setup_sim_objects(self.model_path)
-        self.bodies = sim_bodies_list
 
         # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)

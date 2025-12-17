@@ -25,7 +25,7 @@ class VerticalEnv(MSKEnv):
     def _upon_reset(self, reset_mask: torch.Tensor) -> None:
         # Reset max height tracking
         # self.max_height_achieved[reset_mask.bool().squeeze(-1)] = 0.0  
-        self.max_height_achieved[torch.ones_like(reset_mask).bool().squeeze(-1)] = 0.0  # This is to make the reward non-comulative
+        self.max_height_achieved[torch.ones_like(reset_mask).bool().squeeze(-1)] = 0.0  # This is to make the reward non-cumulative
         return
 
     def _compute_raw_reward_dict(self):
@@ -68,7 +68,6 @@ class VerticalEnv(MSKEnv):
         return obs.detach().clone()
     
     def _get_terminated(self):
-
         # Root falls below threshold
         min_root_height = 0.6
         root_height = self.root_pos[:, UP_IDX]

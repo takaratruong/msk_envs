@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 import re
 from scipy.spatial.transform import Rotation as R
@@ -58,9 +59,9 @@ def rot_to_quat(data, col_names):
     pelvis_quats = []
     for i in range(data.shape[1]):
         # in the motion, it is ZXY (but we swap from y-up to z-up)
-        r = R.from_euler("YXZ",
+        r = R.from_euler("ZXY",
                          [
-                             -data[pelvis_tilt_idx, i],
+                             data[pelvis_tilt_idx, i],
                              data[pelvis_list_idx, i],
                              data[pelvis_rotation_idx, i]
                          ],
@@ -140,8 +141,8 @@ def parse_mot(motion_file: str, model_file: str):
     data, col_names = reorder_translation(data, col_names)
     data, col_names = rot_to_quat(data, col_names)
 
-    # Y up to Z up
-    data = swap_yz(data)
+    # # Y up to Z up
+    # data = swap_yz(data)
 
     # Grab the joint columns that correspond to our model, reorder them
     load_osim(model_file)
@@ -153,14 +154,18 @@ def parse_mot(motion_file: str, model_file: str):
     return data, col_names
 
 
-def main():
-    data, col_names = parse_mot(
-        "../motions/reference_stride.mot",
-        "../../data/osim/model.osim"
-    )
+def main(motion_file: str = "msk_envs/motions/reference_stride.mot",
+         model_file: str = "msk_envs/models/model.osim"):
+    data, col_names = parse_mot(motion_file, model_file)
+    torch.save(torch.tensor(data), motion_file.replace(".mot", ".pt"))
     print(col_names)
     return
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--motion", default="msk_envs/motions/reference_stride.mot")
+    parser.add_argument("--model", default="msk_envs/models/model.osim")
+    args = parser.parse_args()
+    main(args.motion, args.model)

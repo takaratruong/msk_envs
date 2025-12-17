@@ -13,6 +13,7 @@ class BaseArgs:
     env_name: str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     project: str = "madrona-hopper"
     exp_prefix: str = ""
+    motion_name: str = "reference_stride"  # motion file name (without .pt extension) for IMITATE variant
 
     agent: str = "simbav2"  # fasttd3, simbav2
 
@@ -137,11 +138,11 @@ class VerticalConfig(BaseArgs):
 
 @dataclass
 class ImitateConfig(BaseArgs):
-    """Sprint environment specific reward scales"""
+    """Imitate environment specific reward scales"""
     lambda_track_joints: float = 1.0
     lambda_track_root_pos: float = 1.0
     lambda_track_root_rot: float = 1.0
-    lambda_track_body_pos: float = 1.0
+    # lambda_track_body_pos: float = 1.0
 
 
 def get_args():

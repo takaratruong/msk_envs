@@ -17,7 +17,7 @@ pip install -e .
 
 To start a training run,
 ```bash
-python -m msk_envs.train.fasttd3.train --env-variant [SPRINT|VERTICAL|IMITATE] --exp_prefix my_training
+python -m msk_envs.train.fasttd3.train --env-variant [SPRINT|VERTICAL] --exp_prefix my_training
 ```
 
 Or with SLURM:
@@ -25,11 +25,23 @@ Or with SLURM:
 python slurm/deploy.py --input_yaml slurm/cfg/baselines.yaml --mode gen_run
 ```
 
+# Motion imitation
+
+## Parse motion to be imitated
+```bash
+python -m msk_envs.utils.parse_mot --motion msk_envs/motions/reference_stride.mot
+```
+
+## Train
+```bash
+python -m msk_envs.train.fasttd3.train --env-variant IMITATE --exp_prefix my_imitation --motion_name reference_stride
+```
+
 # Visualization
 
 ### Dashboard
 During training, every `eval_freq` steps, the training script will save a 
-a checkpoint and a trajectory json. This trajectory can be visualized with 
+checkpoint and a trajectory JSON. This trajectory can be visualized with 
 the web-viewer.
 ```bash
 cd dashboard

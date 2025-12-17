@@ -60,6 +60,7 @@ class LoggedSim:
                 m=self.envs.m,
                 d=self.envs.d,
                 muscle_id_lookup=self.envs.muscle_id_lookup,
+                actuator_id_lookup=self.envs.actuator_id_lookup,
                 visual_load_results=self.envs.visuals,
                 world_id=idx_world,
                 frame_time=times[idx_world].item(),

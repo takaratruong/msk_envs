@@ -11,7 +11,7 @@ class BaseArgs:
     """wandb configuration"""
     disable_wandb: bool = False
     env_name: str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    project: str = "madrona-hopper"
+    project: str = "msk_sprinter"
     exp_prefix: str = ""
     motion_name: str = "reference_stride"  # motion file name (without .pt extension) for IMITATE variant
 
@@ -122,9 +122,10 @@ class WalkConfig(BaseArgs):
 @dataclass
 class SprintConfig(BaseArgs):
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 1.0
-    lambda_limit: float = -0.05
-    lambda_actuator: float = -0.5
+    lambda_speed: float = 10.0
+    lambda_mtu_activations: float = -0.1
+    lambda_d_mtu_activations: float = -0.01
+    lambda_accelerations: float = -0.05
     lambda_finish: float = 20.0
 
 

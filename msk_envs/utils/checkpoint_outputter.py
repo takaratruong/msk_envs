@@ -170,7 +170,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         rewards_plot.add_hline(0, 0.0)
         rewards_plot.finish(pdf)
 
-        # --- Ground reaction forces ---
+        # --- GROUND REACTION FORCE ---
         grf_data = np.array([frame.kinetic_data.grf for frame in frame_data])
 
         # Express in terms of body weight
@@ -217,7 +217,6 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
 
         # GRF plot for entire duration
         create_grf_plot()
-
         # Create plots for 1 second intervals
         interval = 1.0
         time_current, final_time = 0.0, times[-1]
@@ -225,9 +224,8 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             create_grf_plot(time_current, min(time_current + interval, final_time))
             time_current += interval
 
-        # --- Muscle plots ---
+        # --- MUSCLE PLOTS ---
         muscle_names = [m.name for m in frame_data[0].muscles]
-
         # Muscle activations, fiber/tendon lengths
         muscle_ae = []
         muscle_ftl = []
@@ -244,5 +242,17 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         create_muscle_plot(muscle_names, times, frame_ind, np.array(muscle_ftl),
                            "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
                            pdf, sublabels=["Fiber", "Tendon"])
+
+        # --- ACTUATOR PLOTS ---
+        actuator_names = [a.name for a in frame_data[0].actuators]
+        actuator_ae = []
+        for frame in frame_data:
+            actuator_ae.append([(a.activation, a.excitation) for a in frame.actuators])
+        actuator_ae = np.array(actuator_ae)
+        create_muscle_plot(actuator_names, times, frame_ind, np.array(actuator_ae),
+                           "Actuator Activations/Excitations", "Activation/Excitation", ".2f",
+                           pdf, enforced_range=(0.0, 1.0),
+                           sublabels=["Activation", "Excitation"],
+                           alphas=[1.0, 0.5], add_zero_line=False)
 
     return

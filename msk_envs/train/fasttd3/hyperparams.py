@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Union
 
 import tyro
 from msk_envs.envs.env_variants import DerivedEnv
@@ -122,10 +121,9 @@ class WalkConfig(BaseArgs):
 @dataclass
 class SprintConfig(BaseArgs):
     """Sprint environment specific reward scales"""
-    lambda_speed: float = 10.0
-    lambda_mtu_activations: float = -0.1
-    lambda_d_mtu_activations: float = -0.01
-    lambda_accelerations: float = -0.05
+    lambda_vel: float = 1.0
+    lambda_limit: float = -0.0
+    lambda_actuator: float = -0.0
     lambda_finish: float = 20.0
 
 

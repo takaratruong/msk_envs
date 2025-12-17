@@ -195,8 +195,7 @@ class ImitateEnv(MSKEnv):
 
         # Root falls below/above threshold
         min_root_height, max_root_height = 0.8, 1.2
-        root_idx = self.bodies.index("pelvis")
-        root_height = self.body_positions[:, root_idx, UP_IDX]
+        root_height = self.body_positions[:, self.root_id, UP_IDX]
         fallen = (root_height < min_root_height)
         fallen |= (root_height > max_root_height)
 

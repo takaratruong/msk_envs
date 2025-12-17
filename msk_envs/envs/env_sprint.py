@@ -1,6 +1,6 @@
 import torch
 
-from msk_envs.utils.global_params import UP_IDX, SIDE_IDX
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, LANE_IDX
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
@@ -45,7 +45,7 @@ class SprintingEnv(MSKEnv):
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
-        rew_vel = velocity_reward(self.body_velocities, self.root_id, 0, linear=True)
+        rew_vel = velocity_reward(self.body_velocities, self.root_id, LANE_IDX, linear=True)
         rew_limit = joint_limit_penalty(self.limit_torques)
         rew_actuator = actuator_penalty(self.actuator_activations, self.num_actuators)
 

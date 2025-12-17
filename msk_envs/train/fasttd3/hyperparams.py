@@ -109,7 +109,7 @@ class BaseArgs:
 
 @dataclass
 class WalkConfig(BaseArgs):
-    """Sprint environment specific reward scales"""
+    """Walk environment specific reward scales"""
     lambda_cot: float = 1.0
     lambda_head: float = 1.0
     lambda_limit: float = 0.2

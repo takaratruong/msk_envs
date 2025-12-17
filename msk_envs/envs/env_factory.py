@@ -1,7 +1,7 @@
 from .env_variants import DerivedEnv
 from .env_sprint import SprintingEnv
 from .env_vertical import VerticalEnv
-# from .env_walk import WalkEnv
+from .env_walk import WalkEnv
 from .env_imitate import ImitateEnv
 
 

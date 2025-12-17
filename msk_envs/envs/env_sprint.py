@@ -1,6 +1,6 @@
 import torch
 
-from msk_envs.utils.global_params import UP_IDX
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec

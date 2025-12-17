@@ -155,7 +155,7 @@ def parse_mot(motion_file: str, model_file: str):
 
 
 def main(motion_file: str = "msk_envs/motions/reference_stride.mot",
-         model_file: str = "msk_envs/models/model.osim"):
+         model_file: str = "msk_envs/msk_models/model.osim"):
     data, col_names = parse_mot(motion_file, model_file)
     torch.save(torch.tensor(data), motion_file.replace(".mot", ".pt"))
     print(col_names)
@@ -166,6 +166,6 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--motion", default="msk_envs/motions/reference_stride.mot")
-    parser.add_argument("--model", default="msk_envs/models/model.osim")
+    parser.add_argument("--model", default="msk_envs/msk_models/model.osim")
     args = parser.parse_args()
     main(args.motion, args.model)

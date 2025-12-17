@@ -16,7 +16,7 @@ class EnvConfig:
 
     # Environment parameters
     max_episode_duration: float = 15.0  # seconds
-    model_path: str = "../models/model.osim"  # located at data/
+    model_path: str = "../msk_models/model.osim"  # located at data/
     motion_name: str = "reference_stride"  # motion file name (without .pt extension) for IMITATE variant
 
     # Model physics properties
@@ -37,7 +37,7 @@ class EnvConfig:
     muscle_dynamics_substeps: int = 5
 
     # Starting state
-    starting_pose: str = "../models/starting_pose.yaml"
+    starting_pose: str = "../msk_models/starting_pose.yaml"
     noise_start: bool = True
     q_noise: float = 0.05
     qv_noise: float = 0.1

@@ -4,6 +4,7 @@ import warp as wp
 import os
 
 from .env_config import EnvConfig
+from msk_envs.utils.sim_objects import setup_sim_objects, sim_bodies_list
 from msk_envs.utils.pose import parse_starting_pose
 
 
@@ -85,13 +86,15 @@ class MSKEnv:
 
         # Load model
         curr_path = os.path.abspath(os.path.dirname(__file__))
-        model_path = os.path.join(curr_path, env_config.model_path)
-        load_result = msk_warp.load_model(model_path, num_envs)
+        self.model_path = os.path.join(curr_path, env_config.model_path)
+        load_result = msk_warp.load_model(self.model_path, num_envs)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
         self.muscle_id_lookup = load_result.muscle_id_lookup
         self.visuals = load_result.visuals
         self._setup_model(env_config)
+        setup_sim_objects(self.model_path)
+        self.bodies = sim_bodies_list
 
         # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)
@@ -171,6 +174,18 @@ class MSKEnv:
 
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
         self.set_start_pose(reset_ind.ravel())
+        
+        self.root_id = self.lookup_body_id("pelvis")
+        self.torso_id = self.lookup_body_id("torso")
+
+        self.root_pos = self.body_positions[:, self.root_id]
+        self.torso_pos = self.body_positions[:, self.torso_id]
+        self.torso_rot = self.body_rotations[:, self.torso_id]
+
+        self.head_offset = torch.tensor(
+            [0.0, 0.215, 0.0], device=self.device
+        ).unsqueeze(0).repeat(num_envs, 1)
+        
         return
 
     def set_start_pose(self, reset_mask: torch.Tensor) -> None:
@@ -244,10 +259,16 @@ class MSKEnv:
         raise NotImplementedError
 
     def _get_actions(self) -> torch.Tensor:
-        raise NotImplementedError
+        actions = torch.cat([
+            self.muscle_excitations,
+            self.actuator_excitations
+        ], dim=1)
+        return actions.detach().clone()
 
     def _set_actions(self, raw_action) -> None:
-        raise NotImplementedError
+        self._set_muscle_excitations(raw_action[:, :self.num_muscles])
+        self._set_actuator_excitations(raw_action[:, self.num_muscles:])
+        return
 
     def _compute_raw_reward_dict(self):
         """ Guarantee to only run once per step """

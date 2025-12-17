@@ -15,8 +15,9 @@ pip install -e .
 
 ## Sprint env
 
-```
-python -m msk_envs.train.fasttd3.train
+To start a training run,
+```bash
+python -m msk_envs.train.fasttd3.train --env-variant [SPRINT|VERTICAL|IMITATE] --exp_prefix my_training
 ```
 
 Or with SLURM:

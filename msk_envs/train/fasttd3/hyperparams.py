@@ -103,7 +103,19 @@ class BaseArgs:
     
     def get_reward_lambdas(self):
         """Extract all lambda_* fields as a dictionary"""
-        return {k: v for k, v in self.__dict__.items() if k.startswith("lambda_")}
+        return {k: v for k, v in self.__dict__.items() if
+                k.startswith("lambda_")}
+
+
+@dataclass
+class WalkConfig(BaseArgs):
+    """Sprint environment specific reward scales"""
+    lambda_cot: float = 1.0
+    lambda_head: float = 1.0
+    lambda_limit: float = 0.2
+    lambda_actuator: float = 1.0
+    lambda_activation: float = 1.0
+    lambda_alive: float = 1.0
 
 
 @dataclass
@@ -118,10 +130,18 @@ class SprintConfig(BaseArgs):
 @dataclass
 class VerticalConfig(BaseArgs):
     """Vertical jump environment specific reward scales"""
-    lambda_max_float: float = 10.0
-    lambda_max_hand: float = 10.0
+    lambda_max_vertical: float = 1.0
     lambda_limit: float = -0.2
     lambda_actuator: float = -5.0
+
+
+@dataclass
+class ImitateConfig(BaseArgs):
+    """Sprint environment specific reward scales"""
+    lambda_track_joints: float = 1.0
+    lambda_track_root_pos: float = 1.0
+    lambda_track_root_rot: float = 1.0
+    lambda_track_body_pos: float = 1.0
 
 
 def get_args():
@@ -137,8 +157,10 @@ def get_args():
     
     # Select config class based on env_variant
     config_class = {
+        DerivedEnv.WALK: WalkConfig,
         DerivedEnv.SPRINT: SprintConfig,
         DerivedEnv.VERTICAL: VerticalConfig,
+        DerivedEnv.IMITATE: ImitateConfig,
     }.get(env_variant, SprintConfig)
     
     args = tyro.cli(config_class)

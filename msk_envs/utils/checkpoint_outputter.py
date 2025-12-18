@@ -46,8 +46,8 @@ def create_animation_json(frame_data: list[FrameData], out_file: str):
     return
 
 
-def create_muscle_plot(
-        muscle_names: list[str],
+def create_generic_plot(
+        names: list[str],
         times: np.ndarray,
         frame_ind: np.ndarray,
         plot_data: np.ndarray,
@@ -93,7 +93,7 @@ def create_muscle_plot(
             if start_muscle >= num_muscles:
                 continue
             muscle_subset = plot_data[:, start_muscle:end_muscle]
-            muscle_subset_names = muscle_names[start_muscle:end_muscle]
+            muscle_subset_names = names[start_muscle:end_muscle]
             title = ", ".join(muscle_subset_names)
             for m in range(muscle_subset.shape[1]):
                 muscle_name = muscle_subset_names[m]
@@ -188,12 +188,13 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             frame_ind_selected = frame_ind[time_mask]
             grf_selected = grf_data[time_mask, :]
 
+            title = f"Ground Reaction Forces ({time_start:.1f}s to {time_end:.1f}s)"
             grf_plot = SequencePlot(
                 PlotConfig(
                     num_vertical=1,
                     num_horizontal=1,
                     fig_size=(8.5, 6),
-                    title="Ground Reaction Forces",
+                    title=title,
                     x_label="Time (s)",
                     x_label_sub="Frame",
                     y_label="GRF (BW)",
@@ -209,10 +210,6 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             grf_plot.add(0, grf_selected[:, 0], label="X")
             grf_plot.add(0, grf_selected[:, 1], label="Y")
             grf_plot.add(0, grf_selected[:, 2], label="Z")
-            # # Line for body weight, 2x body weight, 6x body weight
-            # grf_plot.add_hline(0, weight, f"Weight\n({weight:.1f} N)")
-            # grf_plot.add_hline(0, 2 * weight, f"2x Weight\n({2 * weight:.1f} N)")
-            # grf_plot.add_hline(0, 6 * weight, f"6x Weight\n({6 * weight:.1f} N)")
             grf_plot.finish(pdf)
 
         # GRF plot for entire duration
@@ -222,6 +219,70 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         time_current, final_time = 0.0, times[-1]
         while time_current < final_time:
             create_grf_plot(time_current, min(time_current + interval, final_time))
+            time_current += interval
+
+        # Find the intervals in which there is contact
+        contact_intervals = []
+        contact_threshold = 0.01  # 5% of body weight
+        in_contact = False
+        contact_start = 0.0
+        for i in range(n_frames):
+            grf_magnitude = np.linalg.norm(grf_data[i, :])
+            if not in_contact and grf_magnitude >= contact_threshold:
+                in_contact = True
+                contact_start = times[i]
+            elif in_contact and grf_magnitude < contact_threshold:
+                in_contact = False
+                contact_end = times[i]
+                contact_intervals.append((contact_start, contact_end))
+        contact_intervals = np.array(contact_intervals)
+        contact_durations = contact_intervals[:, 1] - contact_intervals[:, 0]
+        contact_mid_times = 0.5 * (contact_intervals[:, 0] + contact_intervals[:, 1])
+        contact_time_plot = SequencePlot(
+            PlotConfig(
+                num_vertical=1,
+                num_horizontal=1,
+                fig_size=(8.5, 6),
+                title="Contact Durations",
+                x_label="Time (s)",
+                x_label_sub="Frame",
+                y_label="Contact Duration",
+                x_data=times,
+                x_data_sub=frame_ind,
+                x_fmt=".1f",
+                x_sub_fmt=".0f",
+                y_fmt=".2f",
+            )
+        )
+        contact_time_plot.add_scatter(0, contact_mid_times, contact_durations, label="Contact Duration",
+                                      connect_line=True, labeled=True)
+        contact_time_plot.finish(pdf)
+
+        # --- JOINT ANGLES ---
+        joint_names = [j.name for j in frame_data[0].joint_angles]
+        joint_angles = []
+        for frame in frame_data:
+            joint_angles.append([j.value for j in frame.joint_angles])
+        joint_angles = np.array(joint_angles)
+
+        def create_joint_angles_plot(time_start: float = 0.0, time_end: float = None):
+            # Select time range
+            if time_end is None:
+                time_end = times[-1]
+            time_mask = (times >= time_start) & (times <= time_end)
+            time_selected = times[time_mask]
+            frame_ind_selected = frame_ind[time_mask]
+            title = f"Joint Angles ({time_start:.1f}s to {time_end:.1f}s)"
+            create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_angles[time_mask, :],
+                                title, "Value (rad)", ".3f", pdf, add_zero_line=False)
+
+        # Joint angles plot for entire duration
+        create_joint_angles_plot()
+        # Create plots for 1 second intervals
+        interval = 1.0
+        time_current = 0.0
+        while time_current < final_time:
+            create_joint_angles_plot(time_current, min(time_current + interval, final_time))
             time_current += interval
 
         # --- MUSCLE PLOTS ---
@@ -234,14 +295,14 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             muscle_ftl.append([(m.fiber_length, m.tendon_length) for m in frame.muscles])
 
         muscle_ftl = np.array(muscle_ftl)
-        create_muscle_plot(muscle_names, times, frame_ind, np.array(muscle_ae),
-                           "Muscle Activations/Excitations", "Activation/Excitation", ".2f",
-                           pdf, enforced_range=(0.0, 1.0),
-                           sublabels=["Activation", "Excitation"],
-                           alphas=[1.0, 0.5])
-        create_muscle_plot(muscle_names, times, frame_ind, np.array(muscle_ftl),
-                           "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
-                           pdf, sublabels=["Fiber", "Tendon"])
+        create_generic_plot(muscle_names, times, frame_ind, np.array(muscle_ae),
+                            "Muscle Activations/Excitations", "Activation/Excitation", ".2f",
+                            pdf, enforced_range=(0.0, 1.0),
+                            sublabels=["Activation", "Excitation"],
+                            alphas=[1.0, 0.5])
+        create_generic_plot(muscle_names, times, frame_ind, np.array(muscle_ftl),
+                            "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
+                            pdf, sublabels=["Fiber", "Tendon"])
 
         # --- ACTUATOR PLOTS ---
         actuator_names = [a.name for a in frame_data[0].actuators]
@@ -249,10 +310,10 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         for frame in frame_data:
             actuator_ae.append([(a.activation, a.excitation) for a in frame.actuators])
         actuator_ae = np.array(actuator_ae)
-        create_muscle_plot(actuator_names, times, frame_ind, np.array(actuator_ae),
-                           "Actuator Activations/Excitations", "Activation/Excitation", ".2f",
-                           pdf, enforced_range=(0.0, 1.0),
-                           sublabels=["Activation", "Excitation"],
-                           alphas=[1.0, 0.5], add_zero_line=False)
+        create_generic_plot(actuator_names, times, frame_ind, np.array(actuator_ae),
+                            "Actuator Activations/Excitations", "Activation/Excitation", ".2f",
+                            pdf, enforced_range=(0.0, 1.0),
+                            sublabels=["Activation", "Excitation"],
+                            alphas=[1.0, 0.5], add_zero_line=False)
 
     return

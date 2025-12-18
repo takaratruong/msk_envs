@@ -285,10 +285,10 @@ def parse_joint_angles(
     joint_angles = msk_warp.joint_positions(d)
     angles = []
     id_to_dof = {v[0]: k for k, v in dof_id_lookup.items()}
-    id_to_dof[0] = "root_rot_w"
-    id_to_dof[1] = "root_rot_x"
-    id_to_dof[2] = "root_rot_y"
-    id_to_dof[3] = "root_rot_z"
+    id_to_dof[3] = "root_rot_w"
+    id_to_dof[4] = "root_rot_x"
+    id_to_dof[5] = "root_rot_y"
+    id_to_dof[6] = "root_rot_z"
 
     for i in range(msk_warp.get_num_qpos(m)):
         angle = NamedValue(

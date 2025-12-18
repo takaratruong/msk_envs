@@ -4,7 +4,7 @@ import warp as wp
 import os
 
 from .env_config import EnvConfig
-from msk_envs.utils.pose import parse_starting_pose
+from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
 
 
 class MSKEnv:
@@ -146,11 +146,15 @@ class MSKEnv:
         # Repeat for all envs
         self.start_pose = q_torch.unsqueeze(0).repeat(num_envs, 1)
         self.start_velocity = qv_torch.unsqueeze(0).repeat(num_envs, 1)
-        # Noise settings
+        # Pose noise/reset settings
         self.noise_start = env_config.noise_start
         self.q_noise = env_config.q_noise
         self.qv_noise = env_config.qv_noise
         self.swap_lr = env_config.swap_lr
+        if self.swap_lr:
+            self.swap_lr_data = get_swap_left_right_data(self.m, self.body_id_lookup)
+        else:
+            self.swap_lr_data = []
 
         self.reward_dict = {}
         self.reward_lambdas = env_config.reward_lambdas
@@ -162,7 +166,7 @@ class MSKEnv:
                 renderer_type=msk_warp.RendererType.TILED,
                 draw_visuals=True,
                 draw_colliders=False,
-                draw_muscles=True
+                draw_muscles=False
             )
             if self.renderer.viewer_type == msk_warp.RendererType.TILED:
                 self.renderer.setup_tiled_renderer(list(range(min(num_envs, 4))))
@@ -201,17 +205,18 @@ class MSKEnv:
             q[7:] += torch.randn_like(q[7:]) * self.q_noise
             qv += torch.randn_like(qv) * self.qv_noise
 
-        # Randomly swap left/right
         if self.swap_lr:
-            ind_swap = (torch.rand(self.num_worlds, device=q.device) > 0.5)
-            # Swap joint positions (excluding root + torso)
-            tmp = q[ind_swap, 10:24].clone()
-            q[ind_swap, 10:24] = q[ind_swap, 24:38]
-            q[ind_swap, 24:38] = tmp
-            # Swap joint velocities
-            tmp = qv[ind_swap, 9:23].clone()
-            qv[ind_swap, 9:23] = qv[ind_swap, 23:37]
-            qv[ind_swap, 23:37] = tmp
+            # Determine which envs to swap the starting pose
+            swap_mask = (torch.rand(self.num_worlds, device=q.device) > 0.5)
+            q_old, qv_old = q.clone(), qv.clone()
+            for swap_pair in self.swap_lr_data:
+                rq, lq, nq = swap_pair.start_qpos_r, swap_pair.start_qpos_l, swap_pair.num_qpos
+                q[swap_mask, rq:rq + nq] = q_old[swap_mask, lq:lq + nq]
+                q[swap_mask, lq:lq + nq] = q_old[swap_mask, rq:rq + nq]
+
+                rv, lv, nv = swap_pair.start_dof_r, swap_pair.start_dof_l, swap_pair.num_dof
+                qv[swap_mask, rv:rv + nv] = qv_old[swap_mask, lv:lv + nv]
+                qv[swap_mask, lv:lv + nv] = qv_old[swap_mask, rv:rv + nv]
 
         self.start_pose[reset_mask, :] = q[reset_mask, :]
         self.start_velocity[reset_mask, :] = qv[reset_mask, :]
@@ -364,6 +369,7 @@ class MSKEnv:
 
     def reset(self):
         self.reset_tensor.fill_(1.0)
+        self._upon_reset(self.reset_tensor)
         self._handle_reset()
         obs = self._get_obs()
         return obs

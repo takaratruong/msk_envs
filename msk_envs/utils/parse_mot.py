@@ -2,8 +2,7 @@ import torch
 import numpy as np
 import re
 from scipy.spatial.transform import Rotation as R
-
-from msk_envs.utils.sim_objects import sim_joints_list, load_osim
+import msk_warp
 
 
 def swap_cols(data, i, j):
@@ -88,15 +87,16 @@ def rot_to_quat(data, col_names):
     return data, col_names
 
 
-def reorder_joint_values(data, col_names, sim_joints):
+def reorder_joint_values(data, col_names, dof_id_lookup):
     """ based on the model's joint order, reorder the motion joint values """
     new_data = np.zeros_like(data)
     new_col_names = []
 
     to_replace = {}
     for i, col in enumerate(col_names):
-        if col in sim_joints:
-            j = sim_joints.index(col) + 8  # (doesn't include pelvis or time)
+        if col in dof_id_lookup:
+            qpos_idx, dof_idx = dof_id_lookup[col]
+            j = qpos_idx + 1  # + 1 for time col
             to_replace[j] = i
 
     # copy in columns of data
@@ -145,8 +145,10 @@ def parse_mot(motion_file: str, model_file: str):
     # data = swap_yz(data)
 
     # Grab the joint columns that correspond to our model, reorder them
-    load_osim(model_file)
-    data, col_names = reorder_joint_values(data, col_names, sim_joints_list)
+    load_result = msk_warp.load_model(model_file, 1)
+    dof_id_lookup = load_result.dof_id_lookup
+
+    data, col_names = reorder_joint_values(data, col_names, dof_id_lookup)
 
     # Deg to rad
     data = joints_to_radians(data)
@@ -164,6 +166,7 @@ def main(motion_file: str = "msk_envs/motions/reference_stride.mot",
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--motion", default="msk_envs/motions/reference_stride.mot")
     parser.add_argument("--model", default="msk_envs/msk_models/model.osim")

@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (drawVisuals) {
             for (const obj of frame.visuals) {
                 const color = 0xF1ECE4;
-                loadModel(obj.mesh_file, color, object => {
+                loadModel(obj.mesh_file, obj.opacity, color, object => {
                     object.scale.set(...obj.scale);
                     object.position.set(...obj.pos);
                     object.quaternion.set(obj.rot[1], obj.rot[2], obj.rot[3], obj.rot[0]);

@@ -1,10 +1,12 @@
 import torch
 import os
+import msk_warp
 
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis
 from msk_envs.utils.global_params import UP_IDX
+from msk_envs.utils.parse_mot import parse_mot
 
 
 class ImitateEnv(MSKEnv):
@@ -16,27 +18,36 @@ class ImitateEnv(MSKEnv):
                  cuda_graph: bool):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render,
                          cuda_graph=cuda_graph)
-        device = self.joint_positions.device
+        device = self.device
 
         # Load reference motion
         curr_path = os.path.abspath(os.path.dirname(__file__))
-        motion_dir_path = os.path.join(curr_path, "..", "motions")
-        motion_file = f"{env_config.motion_name}.pt"
-        ref_motion = torch.load(
-            os.path.join(motion_dir_path, motion_file),
-            map_location=device,
-        )
+        motion_file = os.path.join(curr_path, f"{env_config.motion_name}.mot")
+        data, col_names = parse_mot(motion_file, self.model_path)
+        ref_motion = torch.tensor(data, device=device)
 
-        # # pre-computed body positions
-        # self.ref_body_positions = torch.load(
-        #     os.path.join(motion_dir_path, "reference_stride_bp.pt"),
-        #     map_location=device
-        # )
+        # Now we can compute the reference body positions
+        #  let's also process the visuals while we're at it
+        print("Processing reference motion")
+        ref_time, ref_frames = ref_motion[0, :], ref_motion[1:, :]
+        body_positions, body_rotations = [], []
+        vis_positions, vis_rotations = [], []
+        for i in range(data.shape[1]):
+            self.joint_positions[0, :] = ref_frames[:, i]
+            self.fk()
+
+            body_positions.append(self.body_positions[0, :, :].clone())
+            body_rotations.append(self.body_rotations[0, :, :].clone())
+            vis_positions.append(self.visual_positions[0, :, :].clone())
+            vis_rotations.append(self.visual_rotations[0, :, :].clone())
+        # [n_frames, n_bodies, 3 or 4]
+        self.ref_body_positions = torch.stack(body_positions, dim=0).to(device)
+        self.ref_body_rotations = torch.stack(body_rotations, dim=0).to(device)
+        # [n_frames, n_visuals, 3 or 4]
+        self.ref_vis_positions = torch.stack(vis_positions, dim=0).to(device)
+        self.ref_vis_rotations = torch.stack(vis_rotations, dim=0).to(device)
 
         # Extract time and frames, store
-        ref_time, ref_frames = ref_motion[0, :], ref_motion[1:, :]
-        # increase z values a bit
-        ref_frames[2, :] += 0.01
         n_joints, n_frames = ref_frames.shape
         self.ref_time = torch.tensor(ref_time, device=device)
         self.ref_frames = torch.tensor(ref_frames, device=device)
@@ -52,7 +63,7 @@ class ImitateEnv(MSKEnv):
         # Each world will have a random time offset into the motion
         self.time_offset = torch.rand(
             self.num_worlds, device=device) * self.max_time
-        self.time_offset[0] = 0.0   # for debugging, first env starts at beginning
+        self.time_offset[0] = 0.0  # for debugging, first env starts at beginning
 
         # Target frame (useful if we want to interpolate between frames)
         self.curr_target = torch.zeros(
@@ -71,8 +82,7 @@ class ImitateEnv(MSKEnv):
         # self.curr_bp_target[:] = self.ref_body_positions[frame_indices, :, :]
 
         # Finite diff with prev frame to get target velocities:
-        prev_frame_indices = torch.clamp(frame_indices - 1, 0,
-                                         len(self.ref_time) - 1)
+        prev_frame_indices = torch.clamp(frame_indices - 1, 0, len(self.ref_time) - 1)
         zero_vel_mask = (frame_indices == 0)  # for frame 0, use *next* frame
         prev_frame_indices[zero_vel_mask] = frame_indices[zero_vel_mask] + 1
         dx = self.ref_frames[:, frame_indices] - self.ref_frames[
@@ -90,8 +100,8 @@ class ImitateEnv(MSKEnv):
         # Update the starting position (in case we reset)
         self.start_pose[:] = self.curr_target.detach().clone()
         self.start_velocity[:, 0:3] = target_velocities[:, 0:3]  # root lin v
-        self.start_velocity[:, 3:6] = root_rot_vel               # root ang v
-        self.start_velocity[:, 6:] = target_velocities[:, 7:]    # joint qv
+        self.start_velocity[:, 3:6] = root_rot_vel  # root ang v
+        self.start_velocity[:, 6:] = target_velocities[:, 7:]  # joint qv
         return
 
     def _upon_reset(self, reset_mask: torch.Tensor):
@@ -107,7 +117,7 @@ class ImitateEnv(MSKEnv):
         self.world_times[reset_mask.bool()] = 0.0
         self.time_offset[reset_mask.bool()] = torch.rand(
             reset_mask.sum(), device=self.time_offset.device) * self.max_time
-        self.time_offset[0] = 0.0   # for debugging, first env starts at beginning
+        self.time_offset[0] = 0.0  # for debugging, first env starts at beginning
 
         self._set_curr_target_frame()
         return
@@ -217,3 +227,9 @@ class ImitateEnv(MSKEnv):
     def _get_truncated(self):
         # No truncation
         return torch.zeros(self.num_worlds, device=self.joint_positions.device)
+
+    def get_reference_visuals(self):
+        return self.ref_vis_positions, self.ref_vis_rotations
+
+    def get_reference_times(self):
+        return self.ref_time

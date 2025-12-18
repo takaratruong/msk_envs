@@ -1,6 +1,7 @@
 from msk_envs.envs.env_base import MSKEnv
-from msk_envs.utils.checkpoint_parser import parse_frame
-from msk_envs.utils.checkpoint_outputter import create_animation_json, create_pdf_output
+from msk_envs.utils.checkpoint_parser import parse_frame, add_reference_visuals
+from msk_envs.utils.animation_builder import create_animation_json
+from msk_envs.utils.pdf_log_builder import create_pdf_output
 
 import os
 import json
@@ -50,11 +51,18 @@ class LoggedSim:
         times = self.envs.get_time()
         reward_dict = self.envs.get_scaled_reward_dict()
 
+        # If we are using the ImitateEnv, add reference visuals
+        add_reference = False
+        if hasattr(self.envs, "get_reference_visuals") and hasattr(self.envs, "get_reference_times"):
+            ref_visuals_pos, ref_visuals_rot = self.envs.get_reference_visuals()
+            ref_times = self.envs.get_reference_times()
+            add_reference = True
+
         for i in range(len(self.worlds_to_save)):
             idx_world = self.worlds_to_save[i]
             if self.finished[idx_world]:
                 continue
-
+            frame_time = float(times[idx_world].item())
             reward_data = {k: v[idx_world].item() for k, v in reward_dict.items()}
             frame = parse_frame(
                 m=self.envs.m,
@@ -64,9 +72,20 @@ class LoggedSim:
                 actuator_id_lookup=self.envs.actuator_id_lookup,
                 visual_load_results=self.envs.visuals,
                 world_id=idx_world,
-                frame_time=times[idx_world].item(),
+                frame_time=frame_time,
                 reward_data=reward_data,
             )
+
+            if add_reference:
+                # find time in ref_times closest to frame_time
+                time_diffs = torch.abs(ref_times - frame_time)
+                closest_idx = torch.argmin(time_diffs).item()
+                add_reference_visuals(
+                    frame,
+                    ref_visuals_pos[closest_idx],
+                    ref_visuals_rot[closest_idx],
+                )
+
             self.frame_data[i].append(frame)
         self.curr_step += 1
         return

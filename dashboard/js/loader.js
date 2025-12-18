@@ -6,9 +6,11 @@ const objLoader = new OBJLoader();
 
 const modelCache = {};
 
-function loadModel(objFile, color, callback) {
-    if (modelCache[objFile + color]) {
-        callback(modelCache[objFile + color].clone());
+function loadModel(objFile, opacity, color, callback) {
+    opacity = opacity !== undefined ? opacity : 1.0;
+    const cache_key = objFile + color + opacity;
+    if (modelCache[cache_key]) {
+        callback(modelCache[cache_key].clone());
     } else {
         objLoader.load(objFile, obj => {
             obj.traverse(child => {
@@ -19,7 +21,9 @@ function loadModel(objFile, color, callback) {
                     metalness: 0.3,
                     roughness: 0.7,
                     flatShading: false,
-                    color: color
+                    color: color,
+                    transparent: opacity < 1.0,
+                    opacity: opacity,
                 });
 
                 // Smoothen
@@ -36,7 +40,7 @@ function loadModel(objFile, color, callback) {
                 child.geometry.dispose();
                 child.geometry = geometry;
             });
-            modelCache[objFile + color] = obj;
+            modelCache[cache_key] = obj;
             callback(obj.clone());
         });
     }

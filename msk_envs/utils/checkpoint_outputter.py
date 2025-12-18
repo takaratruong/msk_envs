@@ -235,28 +235,29 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 in_contact = False
                 contact_end = times[i]
                 contact_intervals.append((contact_start, contact_end))
-        contact_intervals = np.array(contact_intervals)
-        contact_durations = contact_intervals[:, 1] - contact_intervals[:, 0]
-        contact_mid_times = 0.5 * (contact_intervals[:, 0] + contact_intervals[:, 1])
-        contact_time_plot = SequencePlot(
-            PlotConfig(
-                num_vertical=1,
-                num_horizontal=1,
-                fig_size=(8.5, 6),
-                title="Contact Durations",
-                x_label="Time (s)",
-                x_label_sub="Frame",
-                y_label="Contact Duration",
-                x_data=times,
-                x_data_sub=frame_ind,
-                x_fmt=".1f",
-                x_sub_fmt=".0f",
-                y_fmt=".2f",
+        if contact_intervals:
+            contact_intervals = np.array(contact_intervals)
+            contact_durations = contact_intervals[:, 1] - contact_intervals[:, 0]
+            contact_mid_times = 0.5 * (contact_intervals[:, 0] + contact_intervals[:, 1])
+            contact_time_plot = SequencePlot(
+                PlotConfig(
+                    num_vertical=1,
+                    num_horizontal=1,
+                    fig_size=(8.5, 6),
+                    title="Contact Durations",
+                    x_label="Time (s)",
+                    x_label_sub="Frame",
+                    y_label="Contact Duration",
+                    x_data=times,
+                    x_data_sub=frame_ind,
+                    x_fmt=".1f",
+                    x_sub_fmt=".0f",
+                    y_fmt=".2f",
+                )
             )
-        )
-        contact_time_plot.add_scatter(0, contact_mid_times, contact_durations, label="Contact Duration",
-                                      connect_line=True, labeled=True)
-        contact_time_plot.finish(pdf)
+            contact_time_plot.add_scatter(0, contact_mid_times, contact_durations, label="Contact Duration",
+                                          connect_line=True, labeled=True)
+            contact_time_plot.finish(pdf)
 
         # --- JOINT ANGLES ---
         joint_names = [j.name for j in frame_data[0].joint_angles]

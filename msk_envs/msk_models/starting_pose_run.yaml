@@ -1,0 +1,158 @@
+joint_positions:
+# Root position
+- 1.03691628        # pelvis_tx
+- 0.95967798        # pelvis_ty
+- 0.30457117        # pelvis_tz
+
+# Root orientation (w, x, y, z)
+- 0.9812947982160072    # pelvis_rot_w
+- 0.04641758341276573  # pelvis_rot_x
+- -0.16481474617546224 # pelvis_rot_y
+- -0.0015356940131625823 # pelvis_rot_z
+
+# Torso: lumbar extension, bending, rotation
+- -0.16703639677011073  # lumbar_extension
+- -0.06427111457937638  # lumbar_bending
+- 0.18493987742291834   # lumbar_rotation
+
+# R Femur: Hip flexion, adduction, rotation
+- -0.02310611830837764  # hip_flexion_r
+- -0.2644256967747633  # hip_adduction_r
+- 0.1344013656056764   # hip_rotation_r
+
+# R Tibia: Knee angle
+- -0.7200927244663722  # knee_angle_r
+
+# R Talus: Ankle angle
+- -0.436062282288965   # ankle_angle_r
+
+# R Calcn: subtalar angle
+- -0.2330966056051398  # subtalar_angle_r
+
+# R toes: MTP angle
+- -0.1711383421838447  # mtp_angle_r
+
+# R humerus: arm flexion, adduction, rotation
+- 1.4834499691306762   # arm_flex_r
+- -0.04574050204520925 # arm_add_r
+- -0.0016177500469966742 # arm_rot_r
+
+# R ulna: elbow angle
+- 1.8666448984358428   # elbow_flex_r
+
+# R radius: pronation/supination
+- 1.4618513491185783   # pro_sup_r
+
+# R hand: wrist flexion, devation
+- -0.17536105111731434 # wrist_flex_r
+- 0.14802441073453754  # wrist_dev_r
+
+# L Femur: Hip flexion, adduction, rotation
+- 1.3969821672768101   # hip_flexion_l
+- -0.1810685189758384  # hip_adduction_l
+- -0.025191111496623265 # hip_rotation_l
+
+# L Tibia: Knee angle
+- -2.0992064257112952  # knee_angle_l
+
+# L Talus: Ankle angle
+- -0.03556059376999636 # ankle_angle_l
+
+# L Calcn: subtalar angle
+- -0.409585448691586   # subtalar_angle_l
+
+# L toes: MTP angle
+- 0.2731267833859712   # mtp_angle_l
+
+# L humerus: arm flexion, adduction, rotation
+- -1.2898917246273824  # arm_flex_l
+- -0.019814113179850976 # arm_add_l
+- -0.018367059649824925 # arm_rot_l
+
+# L ulna: elbow angle
+- 1.5567073949946812   # elbow_flex_l
+
+# L radius: pronation/supination
+- 0.9235276934825211   # pro_sup_l
+
+# L hand: wrist flexion, devation
+- -0.15856991539709372 # wrist_flex_l
+- 0.1416185921363946   # wrist_dev_l
+
+joint_velocities:
+  # Root linear velocity
+  - 11.5
+  - 0.169
+  - 0.173
+  # Root angular velocity
+  - 0.0
+  - 0.0
+  - 0.0
+  # Torso: lumbar extension, bending, rotation
+  - -0.4676179417539917    # lumbar_extension
+  - -0.6092349157203244    # lumbar_bending
+  - 0.992291459632552     # lumbar_rotation
+
+  # R Femur: Hip flexion, adduction, rotation
+  - -1.963557158220387    # hip_flexion_r
+  - -0.414735701668172    # hip_adduction_r
+  - 1.7761022450607948    # hip_rotation_r
+
+  # R Tibia: Knee angle
+  - -9.31962606215204     # knee_angle_r
+
+  # R Talus: Ankle angle
+  - -7.8817525276895      # ankle_angle_r
+
+  # R Calcn: subtalar angle
+  - -2.504261193833932    # subtalar_angle_r
+
+  # R toes: MTP angle
+  - -0.9144792525393224   # mtp_angle_r
+
+  # R humerus: arm flexion, adduction, rotation
+  - 5.561861166238879     # arm_flex_r
+  - 4.61870931081398      # arm_add_r
+  - 0.1697939892752023    # arm_rot_r
+
+  # R ulna: elbow angle
+  - -7.608960914563235    # elbow_flex_r
+
+  # R radius: pronation/supination
+  - -2.301955178536911    # pro_sup_r
+
+  # R hand: wrist flexion, devation
+  - 2.721672443189208     # wrist_flex_r
+  - -0.5141975052062719   # wrist_dev_r
+
+  # L Femur: Hip flexion, adduction, rotation
+  - 5.296242582940992     # hip_flexion_l
+  - -2.289474809896363    # hip_adduction_l
+  - 1.6868021413920222    # hip_rotation_l
+
+  # L Tibia: Knee angle
+  - 15.04378050847811     # knee_angle_l
+
+  # L Talus: Ankle angle
+  - -4.803672961369153    # ankle_angle_l
+
+  # L Calcn: subtalar angle
+  - 0.3023705480447659    # subtalar_angle_l
+
+  # L toes: MTP angle
+  - 0.035361633669965274  # mtp_angle_l
+
+  # L humerus: arm flexion, adduction, rotation
+  - -2.2417189266999817  # arm_flex_l
+  - 2.1002401993272315   # arm_add_l
+  - 2.0979154225206806   # arm_rot_l
+
+  # L ulna: elbow angle
+  - -15.086841341565531  # elbow_flex_l
+
+  # L radius: pronation/supination
+  - -1.9602143058035588  # pro_sup_l
+
+  # L hand: wrist flexion, devation
+  - -3.0650680914594166  # wrist_flex_l
+  - -0.23370307386082406 # wrist_dev_l

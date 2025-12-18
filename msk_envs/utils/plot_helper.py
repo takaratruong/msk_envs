@@ -72,20 +72,15 @@ class SequencePlot:
         ax_idx = self._get_idx(ax_idx_x, ax_idx_y)
         return self.axs[ax_idx]
 
-    def add(self, idx: int, y_data: np.ndarray, label: str, alpha: float = 1.0, title: str = None):
-        ax = self.axs[idx]
-        ax.plot(self.x_data, y_data, label=label, alpha=alpha)
-
-        if title is not None:
-            ax.set_title(title, fontsize=14, fontweight="bold")
-
-        # Update y range
+    def _update_y_range(self, idx: int, y_data: np.ndarray):
         ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)
         curr_min, curr_max = self.y_ranges[ax_idx_x, ax_idx_y, :]
         new_min, new_max = np.min(y_data), np.max(y_data)
         self.y_ranges[ax_idx_x, ax_idx_y, 0] = min(curr_min, new_min)
         self.y_ranges[ax_idx_x, ax_idx_y, 1] = max(curr_max, new_max)
 
+    def _update_plot_counts(self, idx: int, y_data: np.ndarray, label: str):
+        ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)
         # Count plots per axis
         if len(y_data.shape) == 1:
             self.plot_per_ax[ax_idx_x, ax_idx_y] += 1
@@ -95,6 +90,39 @@ class SequencePlot:
             self.plot_per_ax[ax_idx_x, ax_idx_y] += y_data.shape[1]
             if label != "":
                 self.labels_per_ax[ax_idx_x, ax_idx_y] += y_data.shape[1]
+
+    def add(self, idx: int, y_data: np.ndarray, label: str, alpha: float = 1.0, title: str = None):
+        ax = self.axs[idx]
+        ax.plot(self.x_data, y_data, label=label, alpha=alpha)
+
+        if title is not None:
+            ax.set_title(title, fontsize=14, fontweight="bold")
+
+        self._update_y_range(idx, y_data)
+        self._update_plot_counts(idx, y_data, label)
+        return
+
+    # scatter (x, y) data points
+    def add_scatter(self, idx: int, x_data: np.ndarray, y_data: np.ndarray,
+                    label: str, title: str = None, connect_line: bool = False,
+                    labeled: bool = False):
+        ax = self.axs[idx]
+
+        if connect_line:
+            ax.plot(x_data, y_data, label=label, marker="o", linestyle='-')
+        else:
+            ax.scatter(x_data, y_data, label=label)
+
+        # Text labels for each point
+        if labeled:
+            for (x, y) in zip(x_data, y_data):
+                ax.text(x, y, f"{y:.3f}", fontsize=3, va='bottom')
+
+        if title is not None:
+            ax.set_title(title, fontsize=14, fontweight="bold")
+
+        self._update_y_range(idx, y_data)
+        self._update_plot_counts(idx, y_data, label)
         return
 
     def add_at(self, ax_idx_x: int, ax_idx_y: int, y_data: np.ndarray,

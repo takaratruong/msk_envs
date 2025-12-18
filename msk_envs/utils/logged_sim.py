@@ -59,6 +59,7 @@ class LoggedSim:
             frame = parse_frame(
                 m=self.envs.m,
                 d=self.envs.d,
+                dof_id_lookup=self.envs.dof_id_lookup,
                 muscle_id_lookup=self.envs.muscle_id_lookup,
                 actuator_id_lookup=self.envs.actuator_id_lookup,
                 visual_load_results=self.envs.visuals,

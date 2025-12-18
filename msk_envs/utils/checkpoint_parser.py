@@ -110,10 +110,24 @@ class KineticData:
 
 
 @dataclass
+class NamedValue:
+    name: str
+    value: float
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "value": self.value,
+        }
+
+
+@dataclass
 class FrameData:
     time: float
     visuals: list[VisualData]
     colliders: list[ColliderData]
+    joint_angles: list[NamedValue]
+    joint_velocities: list[NamedValue]
     muscles: list[MuscleData]
     actuators: list[ActuatorData]
     kinetic_data: KineticData
@@ -124,6 +138,8 @@ class FrameData:
             "time": self.time,
             "visuals": [obj.to_dict() for obj in self.visuals],
             "colliders": [obj.to_dict() for obj in self.colliders],
+            "joint_angles": [angle.to_dict() for angle in self.joint_angles],
+            "joint_velocities": [vel.to_dict() for vel in self.joint_velocities],
             "muscles": [muscle.to_dict() for muscle in self.muscles],
             "actuators": [actuator.to_dict() for actuator in self.actuators],
             "kinetic_data": self.kinetic_data.to_dict(),
@@ -260,9 +276,43 @@ def parse_kinetic_data(
     return kinetic_data
 
 
+def parse_joint_angles(
+        m: msk_warp.types.Model,
+        d: msk_warp.types.Data,
+        dof_id_lookup: dict[str, tuple[int, int]],
+        world_id: int
+) -> list[NamedValue]:
+    joint_angles = msk_warp.joint_positions(d)
+    angles = []
+    id_to_dof = {v[0]: k for k, v in dof_id_lookup.items()}
+    id_to_dof[3] = "root_rot_w"
+    id_to_dof[4] = "root_rot_x"
+    id_to_dof[5] = "root_rot_y"
+    id_to_dof[6] = "root_rot_z"
+
+    for i in range(msk_warp.get_num_qpos(m)):
+        angle = NamedValue(
+            name=id_to_dof[i],
+            value=float(joint_angles[world_id][i].item()),
+        )
+        angles.append(angle)
+    return angles
+
+
+def parse_joint_velocities(
+        m: msk_warp.types.Model,
+        d: msk_warp.types.Data,
+        world_id: int
+) -> list[NamedValue]:
+    joint_velocities = msk_warp.joint_velocities(d)
+    velocities = []
+    return velocities
+
+
 def parse_frame(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        dof_id_lookup: dict[str, tuple[int, int]],
         muscle_id_lookup: dict[str, int],
         actuator_id_lookup: dict[str, int],
         visual_load_results: list[msk_warp.types.MeshLoadResult],
@@ -275,11 +325,15 @@ def parse_frame(
     muscles = parse_muscle_data(m, d, muscle_id_lookup, world_id)
     actuators = parse_actuator_data(m, d, actuator_id_lookup, world_id)
     kinetic_data = parse_kinetic_data(m, d, world_id)
+    joint_angles = parse_joint_angles(m, d, dof_id_lookup, world_id)
+    joint_velocities = parse_joint_velocities(m, d, world_id)
 
     frame_visuals = FrameData(
         time=frame_time,
         visuals=visuals,
         colliders=colliders,
+        joint_angles=joint_angles,
+        joint_velocities=joint_velocities,
         muscles=muscles,
         actuators=actuators,
         kinetic_data=kinetic_data,

@@ -21,7 +21,7 @@ function loadModel(objFile, opacity, color, callback) {
                     metalness: 0.3,
                     roughness: 0.7,
                     flatShading: false,
-                    color: color,
+                    color: opacity < 1.0 ? 0x00ffff : color,
                     transparent: opacity < 1.0,
                     opacity: opacity,
                 });

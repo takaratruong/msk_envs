@@ -54,7 +54,6 @@ def main():
     env_config = EnvConfig(
         env_variant=args.env_variant,
         reward_lambdas=args.get_reward_lambdas(),
-        motion_name=args.motion_name,
     )
 
     envs = EnvFactory.create_env(

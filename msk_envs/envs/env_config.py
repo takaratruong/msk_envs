@@ -21,10 +21,10 @@ class EnvConfig:
 
     # Model physics properties
     joint_damping: float = 0.1
-    joint_armature: float = 0.01
+    joint_armature: float = 0.002
     torso_damping: float = 1.0
     toes_stiffness: float = 65.0
-    toes_damping: float = 0.4
+    toes_damping: float = 0.1
 
     use_hunt_crossley: bool = True
 

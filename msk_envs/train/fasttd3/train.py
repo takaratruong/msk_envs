@@ -1,3 +1,10 @@
+import os
+# Set Warp cache directory before importing warp to ensure it uses the correct location
+if 'WARP_CACHE_DIR' not in os.environ:
+    import tempfile
+    os.environ['WARP_CACHE_DIR'] = os.path.join(tempfile.gettempdir(), f'warp_cache_{os.getuid()}')
+    os.makedirs(os.environ['WARP_CACHE_DIR'], exist_ok=True)
+
 from msk_envs.envs import EnvFactory, EnvConfig
 from msk_envs.utils.logged_sim import LoggedSim
 
@@ -5,11 +12,10 @@ from .buffer import SimpleReplayBuffer
 from msk_envs.nets.normalizers import EmpiricalNormalization, RewardNormalizer
 from msk_envs.nets.networks import Actor, Critic, load_policy
 from msk_envs.nets.simba import SimbaActor, SimbaCritic
-from msk_envs.train.fasttd3.hyperparams import get_args
+from msk_envs.train.fasttd3.hyperparams import get_args, pretty_print_base_args
 from msk_envs.utils.train_utils import mark_step, save_params, set_seed
 
 import math
-import os
 import time
 import torch
 import tqdm
@@ -28,9 +34,13 @@ torch.set_float32_matmul_precision("high")
 
 def main():
     wp.clear_kernel_cache()  # can't risk caching issues
+    
+    # Restore original HOME after Warp has initialized (for wandb and other tools)
+    if 'ORIG_HOME' in os.environ:
+        os.environ['HOME'] = os.environ['ORIG_HOME']
 
     args = get_args()
-    print(args)
+    pretty_print_base_args(args)
 
     amp_enabled = args.amp and args.cuda and torch.cuda.is_available()
     amp_device_type = (
@@ -348,10 +358,25 @@ def main():
         torch._foreach_add_(tgt_ps, src_ps, alpha=tau)
 
     if args.compile:
+        # Default settings are kept the same, but can now be overridden via args.
         compile_mode = args.compile_mode
-        update_main = torch.compile(update_main, mode=compile_mode)
-        update_pol = torch.compile(update_pol, mode=compile_mode)
-        policy = torch.compile(policy, mode=None)
+        compile_backend = args.compile_backend
+
+        update_main = torch.compile(
+            update_main,
+            mode=compile_mode,
+            backend=compile_backend,
+        )
+        update_pol = torch.compile(
+            update_pol,
+            mode=compile_mode,
+            backend=compile_backend,
+        )
+        policy = torch.compile(
+            policy,
+            mode=None,
+            backend=compile_backend,
+        )
 
         # Don't compile normalize_obs to avoid Triton compilation issues
         @torch._dynamo.disable
@@ -359,8 +384,16 @@ def main():
             return obs_normalizer.forward(x)
 
         if args.reward_normalization:
-            update_stats = torch.compile(reward_normalizer.update_stats, mode=None)
-        normalize_reward = torch.compile(reward_normalizer.forward, mode=None)
+            update_stats = torch.compile(
+                reward_normalizer.update_stats,
+                mode=None,
+                backend=compile_backend,
+            )
+        normalize_reward = torch.compile(
+            reward_normalizer.forward,
+            mode=None,
+            backend=compile_backend,
+        )
     else:
         normalize_obs = obs_normalizer.forward
         if args.reward_normalization:

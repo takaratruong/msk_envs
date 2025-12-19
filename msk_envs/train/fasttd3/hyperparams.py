@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict, fields
 from datetime import datetime
 
 import tyro
@@ -80,8 +80,9 @@ class BaseArgs:
 
     compile: bool = True
     """whether to use torch.compile."""
-    # compile_mode: str = "reduce-overhead"
-    compile_mode: str = "max-autotune"
+    compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
+    # compile_mode: str = "max-autotune"
+    compile_backend: str = "inductor" # "eager" is slower but safer
 
     """ SimbaV2 """
     critic_num_blocks: int = 2
@@ -105,6 +106,33 @@ class BaseArgs:
         """Extract all lambda_* fields as a dictionary"""
         return {k: v for k, v in self.__dict__.items() if
                 k.startswith("lambda_")}
+
+
+def pretty_print_base_args(args: BaseArgs):
+    """Nicely print BaseArgs (and env‑specific overrides) at experiment start."""
+    args_dict = asdict(args)
+
+    base_field_names = [f.name for f in fields(BaseArgs)]
+    base_items = {k: args_dict.get(k) for k in base_field_names}
+    extra_items = {k: v for k, v in args_dict.items() if k not in base_items}
+
+    line = "=" * 80
+    print(line)
+    print(f"Experiment config: {args_dict.get('exp_name', '')}  "
+          f"(env_variant={args_dict.get('env_variant')})")
+    print(line)
+
+    print("BaseArgs:")
+    for k in base_field_names:
+        print(f"  {k:24} = {base_items[k]}")
+
+    if extra_items:
+        print("-" * 80)
+        print(f"{type(args).__name__} extras:")
+        for k in sorted(extra_items.keys()):
+            print(f"  {k:24} = {extra_items[k]}")
+
+    print(line)
 
 
 @dataclass

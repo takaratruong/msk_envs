@@ -39,11 +39,25 @@ python -m msk_envs.train.fasttd3.train --env-variant IMITATE --exp_prefix my_imi
 
 # Visualization
 
-### Dashboard
+## Dashboard
 During training, every `eval_freq` steps, the training script will save a 
 checkpoint and a trajectory JSON. This trajectory can be visualized with 
 the web-viewer.
 ```bash
 cd dashboard
 python3 dashboard.py
+```
+
+## Viusalize from remote
+
+First, mount the remote traj dir to your local machine
+
+```
+sshfs sc.stanford.edu:/move/u/guytevet/msk_envs/dashboard/trajectories ./dashboard/remote_trajectories
+```
+
+Then run the dashboard pointing to it
+```
+cd dashboard
+python dashboard.py --traj-dir remote_trajectories
 ```

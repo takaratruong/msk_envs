@@ -1,3 +1,4 @@
+import argparse
 import csv
 import json
 import os
@@ -6,6 +7,15 @@ from glob import glob
 from nicegui import ui, app, events
 from timeline_controller import TimelineController
 
+# Parse command-line arguments (only when run directly)
+if __name__ in {"__main__", "__mp_main__"}:
+    parser = argparse.ArgumentParser(description='MSK Dashboard')
+    parser.add_argument('--traj-dir', type=str, default='trajectories',
+                        help='Trajectory directory (default: trajectories)')
+    args = parser.parse_args()
+    TRAJ_DIR = args.traj_dir
+else:
+    TRAJ_DIR = 'trajectories'
 
 
 def dispatch_custom_event(event_name: str, data: str):
@@ -41,7 +51,7 @@ def reset_dashboard():
 def locate_traj_dirs():
     traj_dir_options.clear()
     # Look for all subdirectories in trajectories/
-    dirs = [d for d in os.listdir("trajectories") if os.path.isdir(os.path.join("trajectories", d))]
+    dirs = [d for d in os.listdir(TRAJ_DIR) if os.path.isdir(os.path.join(TRAJ_DIR, d))]
     dirs = sorted(dirs)
 
     with traj_dir_options:
@@ -62,7 +72,7 @@ def select_traj_dir(dir_name: str):
 def locate_trajectories():
     trajectory_options.clear()
     # Look for json files in the selected directory
-    search_path = f"trajectories/{selected_traj_dir}/*.json" if selected_traj_dir else "trajectories/**/*.json"
+    search_path = f"{TRAJ_DIR}/{selected_traj_dir}/*.json" if selected_traj_dir else f"{TRAJ_DIR}/**/*.json"
     traj_files = glob(search_path, recursive=(not selected_traj_dir))
 
     def sort_key(file_path):
@@ -86,7 +96,7 @@ def locate_trajectories():
 
     with trajectory_options:
         for file in traj_files:
-            name = os.path.relpath(file, "trajectories")
+            name = os.path.relpath(file, TRAJ_DIR)
             ui.item(name, on_click=lambda f=file: send_viewer_trajectory(f))
     return
 
@@ -135,7 +145,7 @@ def set_tick_rate(value):
 
 app.add_static_files('/css', 'css')
 app.add_static_files('/js', 'js')
-app.add_static_files('/trajectories', 'trajectories')
+app.add_static_files('/trajectories', TRAJ_DIR)
 
 app.add_static_files('/assets', 'assets')
 app.add_static_files('/assets/geometry', 'assets/geometry')

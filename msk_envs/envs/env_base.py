@@ -252,8 +252,8 @@ class MSKEnv:
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
                 reset_mask, :]
-            self.muscle_activations[reset_mask, :].fill_(0.0)
-            self.actuator_activations[reset_mask, :].fill_(0.5)
+            self.muscle_activations[reset_mask, :] = 0.0
+            self.actuator_activations[reset_mask, :] = 0.5
 
         # Reset sim
         if self.cuda_graph:

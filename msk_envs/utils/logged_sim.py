@@ -39,6 +39,24 @@ class LoggedSim:
         self.curr_step = 0
         self.device = device
 
+        # Build lookups helpers: qpos idx to name
+        qpos_idx_to_name = {v[0]: k for k, v in self.envs.dof_id_lookup.items()}
+        qpos_idx_to_name[3] = "root_rot_w"
+        qpos_idx_to_name[4] = "root_rot_x"
+        qpos_idx_to_name[5] = "root_rot_y"
+        qpos_idx_to_name[6] = "root_rot_z"
+        self.qpos_idx_to_name = qpos_idx_to_name
+        # dof idx to name
+        dof_idx_to_name = {v[1]: k for k, v in self.envs.dof_id_lookup.items()}
+        dof_idx_to_name[3] = "root_rot_x"
+        dof_idx_to_name[4] = "root_rot_y"
+        dof_idx_to_name[5] = "root_rot_z"
+        self.dof_idx_to_name = dof_idx_to_name
+        # muscle idx to name
+        self.muscle_idx_to_name = {v: k for k, v in self.envs.muscle_id_lookup.items()}
+        # actuator idx to name
+        self.actuator_idx_to_name = {v: k for k, v in self.envs.actuator_id_lookup.items()}
+
     def add_to_log(self):
         # Track rewards
         rew = self.envs.get_rewards()
@@ -67,9 +85,10 @@ class LoggedSim:
             frame = parse_frame(
                 m=self.envs.m,
                 d=self.envs.d,
-                dof_id_lookup=self.envs.dof_id_lookup,
-                muscle_id_lookup=self.envs.muscle_id_lookup,
-                actuator_id_lookup=self.envs.actuator_id_lookup,
+                qpos_idx_to_name=self.qpos_idx_to_name,
+                dof_idx_to_name=self.dof_idx_to_name,
+                muscle_idx_to_name=self.muscle_idx_to_name,
+                actuation_idx_to_name=self.actuator_idx_to_name,
                 visual_load_results=self.envs.visuals,
                 world_id=idx_world,
                 frame_time=frame_time,

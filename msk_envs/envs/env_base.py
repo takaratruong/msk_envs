@@ -130,6 +130,8 @@ class MSKEnv:
         self.grf = msk_warp.grf(self.d)
         # [num_envs, num_joint_limits]
         self.limit_torques = msk_warp.limit_torques(self.d)
+        # [num_envs, num_dofs]
+        self.joint_moments = msk_warp.joint_moments(self.d)
 
         # [num_envs, num_visuals, 3]
         self.visual_positions = msk_warp.get_visual_positions(self.d)

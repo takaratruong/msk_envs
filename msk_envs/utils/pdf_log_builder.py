@@ -6,6 +6,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from msk_envs.utils.checkpoint_parser import FrameData
 from .plot_helper import SequencePlot, PlotConfig
 
+
 def create_generic_plot(
         names: list[str],
         times: np.ndarray,
@@ -245,6 +246,31 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         time_current = 0.0
         while time_current < final_time:
             create_joint_angles_plot(time_current, min(time_current + interval, final_time))
+            time_current += interval
+
+        # --- JOINT MOMENTS ---
+        joint_names = [j.name for j in frame_data[0].joint_moments]
+        joint_moments = []
+        for frame in frame_data:
+            joint_moments.append([j.value for j in frame.joint_moments])
+        joint_moments = np.array(joint_moments)
+
+        def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
+            # Select time range
+            if time_end is None:
+                time_end = times[-1]
+            time_mask = (times >= time_start) & (times <= time_end)
+            time_selected = times[time_mask]
+            frame_ind_selected = frame_ind[time_mask]
+            title = f"Joint Moments ({time_start:.1f}s to {time_end:.1f}s)"
+            create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_moments[time_mask, :],
+                                title, "Value (N m)", ".3f", pdf, add_zero_line=False)
+
+        create_joint_moments_plot()
+        interval = 1.0
+        time_current = 0.0
+        while time_current < final_time:
+            create_joint_moments_plot(time_current, min(time_current + interval, final_time))
             time_current += interval
 
         # --- MUSCLE PLOTS ---

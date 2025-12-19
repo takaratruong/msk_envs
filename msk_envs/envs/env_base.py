@@ -5,6 +5,7 @@ import os
 
 from .env_config import EnvConfig
 from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 
 
 class MSKEnv:
@@ -193,10 +194,8 @@ class MSKEnv:
         self.torso_pos = self.body_positions[:, self.torso_id]
         self.torso_rot = self.body_rotations[:, self.torso_id]
 
-        self.head_offset = torch.tensor(
-            [0.0, 0.215, 0.0], device=self.device
-        ).unsqueeze(0).repeat(num_envs, 1)
-
+        head_offset = build_axis(axis=UP_IDX, scale=0.215)
+        self.head_offset = torch.tensor(head_offset, device=self.device).unsqueeze(0).repeat(num_envs, 1)
         return
 
     def set_start_pose(self, reset_mask: torch.Tensor) -> None:

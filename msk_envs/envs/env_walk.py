@@ -5,7 +5,7 @@ from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import joint_limit_penalty, \
     actuator_penalty
-from msk_envs.utils.global_params import UP_IDX, LANE_IDX, SIDE_IDX
+from msk_envs.utils.global_params import UP_IDX, FWD_IDX, SIDE_IDX
 
 class WalkEnv(MSKEnv):
     def __init__(self,
@@ -58,7 +58,7 @@ class WalkEnv(MSKEnv):
     def _compute_raw_reward_dict(self):
         # TODO: Rewards should be implemented in the reward library
         # TODO: Add bindings to muscle_powers then bring back the commented out reward term
-        curr_lane_root_velocity = self.body_velocities[:, self.root_id, LANE_IDX+3]  # +3 because self.body_velocities is {ang_vel, lin_vel} (6 in total)
+        curr_lane_root_velocity = self.body_velocities[:, self.root_id, FWD_IDX + 3]  # +3 because self.body_velocities is {ang_vel, lin_vel} (6 in total)
         curr_lin_velocity = self.body_velocities[:, :, 3:]
         curr_ang_velocity = self.body_velocities[:, :, :3]
 
@@ -136,7 +136,7 @@ class WalkEnv(MSKEnv):
         # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, self.root_id]
         pelvis_fwd = rotate_vec(pelvis_rot, torch.tensor([1.0, 0.0, 0.0], device=pelvis_rot.device).unsqueeze(0))
-        facing_forward = (pelvis_fwd[:, LANE_IDX] > torch.cos(torch.deg2rad(torch.tensor(30.0))))
+        facing_forward = (pelvis_fwd[:, FWD_IDX] > torch.cos(torch.deg2rad(torch.tensor(30.0))))
         not_facing_forward = ~facing_forward
 
         terminated = (fallen | head_fallen | body_out | not_facing_forward).float()

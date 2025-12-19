@@ -10,23 +10,24 @@ class EnvConfig:
     env_variant: DerivedEnv = DerivedEnv.SPRINT
 
     # Control frequency
-    delta_t: float = 1.0 / 60.0
+    delta_t: float = 1.0 / 120.0
     # Simulator frequency (only relevant for fixed-step integrators)
-    delta_t_sim: float = 1.0 / 1800.0
+    delta_t_sim: float = 1.0 / 3600.0
 
     # Environment parameters
-    max_episode_duration: float = 15.0  # seconds
+    max_episode_duration: float = 2.0  # seconds
     model_path: str = "../msk_models/model.osim"  # located at data/
-    motion_name: str = "../motions/reference_stride"  # motion file name (without .mot extension) for IMITATE variant
+    motion_name: str = "../motions/pred_sprint"  # motion file name (without .mot extension) for IMITATE variant
 
     # Model physics properties
     joint_damping: float = 0.1
-    joint_armature: float = 0.002
+    joint_armature: float = 0.0
     torso_damping: float = 1.0
     toes_stiffness: float = 65.0
-    toes_damping: float = 0.1
+    toes_damping: float = 0.4
 
     use_hunt_crossley: bool = True
+    solref: tuple[float, float] = (0.005, 1.0)  # MuJoCo limit/contact parameters
 
     # Muscle properties
     muscle_multiplier: float = 2.0  # max isometric force scale

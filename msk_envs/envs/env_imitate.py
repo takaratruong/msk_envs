@@ -4,7 +4,7 @@ import msk_warp
 
 from .env_base import MSKEnv
 from .env_config import EnvConfig
-from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis
+from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis, quat_conjugate
 from msk_envs.utils.global_params import UP_IDX
 from msk_envs.utils.parse_mot import parse_mot
 
@@ -57,13 +57,8 @@ class ImitateEnv(MSKEnv):
         assert (n_joints == self.joint_positions.shape[1])
         print(f"Loaded {n_frames} frames, duration {self.max_time:.2f}s")
 
-        # Current time (we'll track this ourselves)
-        self.world_times = torch.zeros(self.num_worlds, device=device)
-
-        # Each world will have a random time offset into the motion
-        self.time_offset = torch.rand(
-            self.num_worlds, device=device) * self.max_time
-        self.time_offset[0] = 0.0  # for debugging, first env starts at beginning
+        # Update max episode duration
+        self.max_episode_duration = self.max_time
 
         # Target frame (useful if we want to interpolate between frames)
         self.curr_target = torch.zeros(
@@ -75,11 +70,11 @@ class ImitateEnv(MSKEnv):
 
     def _set_curr_target_frame(self):
         # Get the indices of the frames right after the current time
-        curr_time = (self.world_times + self.time_offset) % self.max_time
+        curr_time = self.time
         frame_indices = torch.searchsorted(self.ref_time, curr_time)
         frame_indices = torch.clamp(frame_indices, 0, len(self.ref_time) - 1)
         self.curr_target[:] = self.ref_frames[:, frame_indices].T
-        # self.curr_bp_target[:] = self.ref_body_positions[frame_indices, :, :]
+        self.curr_bp_target[:] = self.ref_body_positions[frame_indices, :, :]
 
         # Finite diff with prev frame to get target velocities:
         prev_frame_indices = torch.clamp(frame_indices - 1, 0, len(self.ref_time) - 1)
@@ -96,6 +91,9 @@ class ImitateEnv(MSKEnv):
         root_rot_diff_quat = quat_diff(root_rot_frame.T, root_rot_prev_frame.T)
         root_rot_diff_aa = quat_to_angle_axis(root_rot_diff_quat).T
         root_rot_vel = (root_rot_diff_aa / dt).T
+        # Rotate it by the root orientation inverse to get body-local angular velocity
+        root_rot_conj = quat_conjugate(root_rot_frame.T)
+        root_rot_vel = rotate_vec(root_rot_conj, root_rot_vel)
 
         # Update the starting position (in case we reset)
         self.start_pose[:] = self.curr_target.detach().clone()
@@ -105,20 +103,6 @@ class ImitateEnv(MSKEnv):
         return
 
     def _upon_reset(self, reset_mask: torch.Tensor):
-        # Note: reset_mask currently only includes envs that fell (terminated)
-        # A bit hacky, but mark queue sim reset for worlds past the max time
-        #  to reset the motion (we don't want RL to see these resets)
-        curr_time = self.world_times + self.time_offset
-        over_time_mask = (curr_time >= self.max_time)
-        self.reset_tensor[:] = (self.reset_tensor[:].bool() | over_time_mask.unsqueeze(1)).to(torch.float32)
-
-        # Now we can reset the world times and time offsets
-        reset_mask = reset_mask | over_time_mask
-        self.world_times[reset_mask.bool()] = 0.0
-        self.time_offset[reset_mask.bool()] = torch.rand(
-            reset_mask.sum(), device=self.time_offset.device) * self.max_time
-        self.time_offset[0] = 0.0  # for debugging, first env starts at beginning
-
         self._set_curr_target_frame()
         return
 
@@ -136,12 +120,12 @@ class ImitateEnv(MSKEnv):
         root_positions = self.body_positions[:, 0, :]
         rel_body_positions = self.body_positions - root_positions.unsqueeze(1)
 
-        curr_time = (self.world_times + self.time_offset) % self.max_time
+        curr_time = self.time
 
         obs = torch.cat([
             self.muscle_activations,
             self.muscle_fiber_lengths,
-            # self.muscle_fiber_velocities,
+            self.muscle_fiber_velocities,
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
@@ -155,8 +139,6 @@ class ImitateEnv(MSKEnv):
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
-        self.world_times += self.delta_t
-
         self._set_curr_target_frame()
 
         # TODO: Rewards should be implemented in the reward library
@@ -183,26 +165,23 @@ class ImitateEnv(MSKEnv):
         rew_track_root_rot = torch.exp(-10 * root_quat_diff_sq)
 
         # # Global body positions
-        # curr_body_pos = self.body_positions
-        # target_body_pos = self.curr_bp_target
-        # body_pos_diff = curr_body_pos - target_body_pos
-        # body_pos_diff_sq = body_pos_diff ** 2
+        curr_body_pos = self.body_positions
+        target_body_pos = self.curr_bp_target
+        body_pos_diff = curr_body_pos - target_body_pos
+        body_pos_diff_sq = body_pos_diff ** 2
         # # Sum across coordinates, then bodies
-        # body_pos_diff_sq_sum = body_pos_diff_sq.sum(dim=2)
-        # body_pos_diff_sq_sum = body_pos_diff_sq_sum.sum(dim=1)
-        # rew_track_body_pos = torch.exp(-0.1 * body_pos_diff_sq_sum)
+        body_pos_diff_sq_sum = body_pos_diff_sq.sum(dim=2)
+        body_pos_diff_sq_sum = body_pos_diff_sq_sum.sum(dim=1)
+        rew_track_body_pos = torch.exp(-0.1 * body_pos_diff_sq_sum)
 
         self.reward_dict = {
             "rew_track_joints": rew_track_joints.detach(),
             "rew_track_root_pos": rew_track_root_pos.detach(),
             "rew_track_root_rot": rew_track_root_rot.detach(),
-            # "rew_track_body_pos": rew_track_body_pos.detach(),
+            "rew_track_body_pos": rew_track_body_pos.detach(),
         }
 
     def _get_terminated(self):
-        # min_ref_root_height = torch.min(self.ref_frames[2, :]).item()
-        # max_ref_root_height = torch.max(self.ref_frames[2, :]).item()
-
         # Root falls below/above threshold
         min_root_height, max_root_height = 0.8, 1.2
         root_height = self.body_positions[:, self.root_id, UP_IDX]
@@ -214,19 +193,17 @@ class ImitateEnv(MSKEnv):
         head_pos = self.torso_pos + rotate_vec(self.torso_rot, self.head_offset)
         head_fallen = (head_pos[:, UP_IDX] < min_head_height)
 
-        # Root rot diff too large
-        curr_root_quat = self.joint_positions[:, 3:7]
-        target_root_quat = self.curr_target[:, 3:7]
-        root_quat_diff_angle = quat_diff_angle(curr_root_quat, target_root_quat)
-        angle_diff_high = (
-                root_quat_diff_angle > torch.deg2rad(torch.tensor(30.0)))
+        # Root position difference too high
+        curr_root_pos = self.joint_positions[:, 0:3]
+        target_root_pos = self.curr_target[:, 0:3]
+        root_diff_high = ((curr_root_pos - target_root_pos).norm(dim=1) > 1.0)
 
-        terminated = (fallen | head_fallen | angle_diff_high).float()
+        terminated = (fallen | head_fallen | root_diff_high).float()
         return terminated.detach()
 
     def _get_truncated(self):
         # No truncation
-        return torch.zeros(self.num_worlds, device=self.joint_positions.device)
+        return self.time >= self.max_episode_duration
 
     def get_reference_visuals(self):
         return self.ref_vis_positions, self.ref_vis_rotations

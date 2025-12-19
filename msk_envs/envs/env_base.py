@@ -52,6 +52,7 @@ class MSKEnv:
             msk_warp.use_hunt_crossley_contact(self.m)
         else:
             msk_warp.use_mujoco_contact(self.m)
+        msk_warp.set_solref(self.m, env_config.solref)
 
         # Use Newton solver for GPU
         if self.device.type == "cuda":
@@ -332,6 +333,7 @@ class MSKEnv:
         clamped_action = torch.clamp(raw_action, -1.0, 1.0)
         excitations = (clamped_action + 1.0) / 2.0
         self.actuator_excitations.copy_(excitations)
+        self.actuator_excitations[:] = -1.0
         return
 
     def step(self, actions):

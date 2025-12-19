@@ -12,7 +12,6 @@ class BaseArgs:
     env_name: str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     project: str = "msk_sprinter"
     exp_prefix: str = ""
-    motion_name: str = "reference_stride"  # motion file name (without .pt extension) for IMITATE variant
 
     agent: str = "simbav2"  # fasttd3, simbav2
 

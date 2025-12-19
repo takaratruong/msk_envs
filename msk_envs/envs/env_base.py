@@ -5,6 +5,7 @@ import os
 
 from .env_config import EnvConfig
 from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 
 
 class MSKEnv:
@@ -69,6 +70,9 @@ class MSKEnv:
             with wp.ScopedCapture() as capture:
                 msk_warp.reset(self.m, self.d)
             self.reset_graph = capture.graph
+            with wp.ScopedCapture() as capture:
+                msk_warp.fk(self.m, self.d)
+            self.fk_graph = capture.graph
         return
 
     def __init__(
@@ -127,6 +131,11 @@ class MSKEnv:
         # [num_envs, num_joint_limits]
         self.limit_torques = msk_warp.limit_torques(self.d)
 
+        # [num_envs, num_visuals, 3]
+        self.visual_positions = msk_warp.get_visual_positions(self.d)
+        # [num_envs, num_visuals, 4]
+        self.visual_rotations = msk_warp.get_visual_rotations(self.d)
+
         # RL Environment
         self.action_range = (-1.0, 1.0)
         self.max_episode_duration = env_config.max_episode_duration
@@ -166,7 +175,7 @@ class MSKEnv:
                 renderer_type=msk_warp.RendererType.TILED,
                 draw_visuals=True,
                 draw_colliders=False,
-                draw_muscles=False
+                draw_muscles=True
             )
             if self.renderer.viewer_type == msk_warp.RendererType.TILED:
                 self.renderer.setup_tiled_renderer(list(range(min(num_envs, 4))))
@@ -177,7 +186,7 @@ class MSKEnv:
 
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
         self.set_start_pose(reset_ind.ravel())
-        
+
         self.root_id = self.lookup_body_id("pelvis")
         self.torso_id = self.lookup_body_id("torso")
 
@@ -185,10 +194,8 @@ class MSKEnv:
         self.torso_pos = self.body_positions[:, self.torso_id]
         self.torso_rot = self.body_rotations[:, self.torso_id]
 
-        self.head_offset = torch.tensor(
-            [0.0, 0.215, 0.0], device=self.device
-        ).unsqueeze(0).repeat(num_envs, 1)
-        
+        head_offset = build_axis(axis=UP_IDX, scale=0.215)
+        self.head_offset = torch.tensor(head_offset, device=self.device).unsqueeze(0).repeat(num_envs, 1)
         return
 
     def set_start_pose(self, reset_mask: torch.Tensor) -> None:
@@ -369,10 +376,17 @@ class MSKEnv:
 
     def reset(self):
         self.reset_tensor.fill_(1.0)
-        self._upon_reset(self.reset_tensor)
+        self._upon_reset(self.reset_tensor.squeeze(-1).bool())
         self._handle_reset()
         obs = self._get_obs()
         return obs
+
+    def fk(self):
+        """ Forward kinematics only (only position dependent) """
+        if self.cuda_graph:
+            wp.capture_launch(self.fk_graph)
+        else:
+            msk_warp.fk(self.m, self.d)
 
     def lookup_body_id(self, body_name: str) -> int:
         return self.body_id_lookup[body_name]

@@ -1,6 +1,6 @@
 import torch
 
-from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, LANE_IDX
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
@@ -45,7 +45,7 @@ class SprintingEnv(MSKEnv):
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
-        rew_vel = velocity_reward(self.body_velocities, self.root_id, LANE_IDX, linear=True)
+        rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
         rew_limit = joint_limit_penalty(self.limit_torques)
         rew_actuator = actuator_penalty(self.actuator_activations, self.num_actuators)
 
@@ -62,7 +62,7 @@ class SprintingEnv(MSKEnv):
 
     def _get_terminated(self):
         # Reached finish line
-        reached_finish = (self.root_pos[:, 0] >= 100.0)
+        reached_finish = (self.root_pos[:, FWD_IDX] >= 100.0)
 
         # Root falls below threshold
         min_root_height = 0.6
@@ -82,9 +82,10 @@ class SprintingEnv(MSKEnv):
 
         # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, self.root_id]
-        x_axis = torch.tensor([1.0, 0.0, 0.0], device=self.device)
+        x_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device)
+
         pelvis_fwd = rotate_vec(pelvis_rot, x_axis.unsqueeze(0))
-        facing_forward = (pelvis_fwd[:, 0] > torch.cos(
+        facing_forward = (pelvis_fwd[:, FWD_IDX] >= torch.cos(
             torch.deg2rad(torch.tensor(30.0))))
         not_facing_forward = ~facing_forward
 

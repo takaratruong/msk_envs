@@ -17,14 +17,14 @@ class EnvConfig:
     # Environment parameters
     max_episode_duration: float = 15.0  # seconds
     model_path: str = "../msk_models/model.osim"  # located at data/
-    motion_name: str = "reference_stride"  # motion file name (without .pt extension) for IMITATE variant
+    motion_name: str = "../motions/reference_stride"  # motion file name (without .mot extension) for IMITATE variant
 
     # Model physics properties
     joint_damping: float = 0.1
-    joint_armature: float = 0.01
+    joint_armature: float = 0.002
     torso_damping: float = 1.0
     toes_stiffness: float = 65.0
-    toes_damping: float = 0.4
+    toes_damping: float = 0.1
 
     use_hunt_crossley: bool = True
 

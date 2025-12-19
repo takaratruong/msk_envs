@@ -153,6 +153,9 @@ def parse_mot(motion_file: str, model_file: str):
     # Deg to rad
     data = joints_to_radians(data)
 
+    # Make time start at 0
+    data[0, :] = data[0, :] - data[0, 0]
+
     return data, col_names
 
 

@@ -26,6 +26,7 @@ class VisualData:
     pos: list[float]
     rot: list[float]
     scale: list[float]
+    opacity: float = 1.0
 
     def to_dict(self):
         # Remove .vtp if it exists and replace with .obj
@@ -39,6 +40,7 @@ class VisualData:
             "pos": list(self.pos),
             "rot": list(self.rot),
             "scale": list(self.scale),
+            "opacity": self.opacity,
         }
 
 
@@ -341,3 +343,21 @@ def parse_frame(
     )
 
     return frame_visuals
+
+
+def add_reference_visuals(
+        frame: FrameData,
+        ref_visuals_pos: list,
+        ref_visuals_rot: list,
+):
+    for i in range(len(frame.visuals)):
+        ref_pos = ref_visuals_pos[i].tolist()
+        ref_rot = ref_visuals_rot[i].tolist()
+        ref_visual = VisualData(
+            mesh_file=frame.visuals[i].mesh_file,
+            pos=ref_pos,
+            rot=ref_rot,
+            scale=frame.visuals[i].scale,
+            opacity=0.3
+        )
+        frame.visuals.append(ref_visual)

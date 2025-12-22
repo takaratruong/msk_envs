@@ -18,7 +18,7 @@ class EnvConfig:
     """ Max episode duration in seconds """
 
     # Model properties
-    model_path: str = "../msk_models/test.osim"
+    model_path: str = "../msk_models/model_motor_arms_foot_contact.osim"
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """

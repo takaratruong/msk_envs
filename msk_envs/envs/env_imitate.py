@@ -50,7 +50,7 @@ class ImitateEnv(MSKEnv):
         # Extract time and frames, store
         n_joints, n_frames = ref_frames.shape
         self.ref_time = torch.tensor(ref_time, device=device)
-        self.ref_frames = torch.tensor(ref_frames, device=device)
+        self.ref_frame_angles = torch.tensor(ref_frames, device=device)
         self.max_time = self.ref_time[-1].item()
         self.n_frames = n_frames
 
@@ -61,9 +61,8 @@ class ImitateEnv(MSKEnv):
         self.max_episode_duration = self.max_time
 
         # Target frame (useful if we want to interpolate between frames)
-        self.curr_target = torch.zeros(
-            (self.num_worlds, n_joints), device=device)
-        self.curr_bp_target = torch.zeros_like(self.body_positions)
+        self.curr_target_angles = torch.zeros((self.num_worlds, n_joints), device=device)
+        self.curr_target_bp = torch.zeros_like(self.body_positions)
 
         self._set_curr_target_frame()
         return
@@ -73,21 +72,20 @@ class ImitateEnv(MSKEnv):
         curr_time = self.time
         frame_indices = torch.searchsorted(self.ref_time, curr_time)
         frame_indices = torch.clamp(frame_indices, 0, len(self.ref_time) - 1)
-        self.curr_target[:] = self.ref_frames[:, frame_indices].T
-        self.curr_bp_target[:] = self.ref_body_positions[frame_indices, :, :]
+        self.curr_target_angles[:] = self.ref_frame_angles[:, frame_indices].T
+        self.curr_target_bp[:] = self.ref_body_positions[frame_indices, :, :]
 
         # Finite diff with prev frame to get target velocities:
         prev_frame_indices = torch.clamp(frame_indices - 1, 0, len(self.ref_time) - 1)
         zero_vel_mask = (frame_indices == 0)  # for frame 0, use *next* frame
         prev_frame_indices[zero_vel_mask] = frame_indices[zero_vel_mask] + 1
-        dx = self.ref_frames[:, frame_indices] - self.ref_frames[
-            :, prev_frame_indices]
+        dx = self.ref_frame_angles[:, frame_indices] - self.ref_frame_angles[:, prev_frame_indices]
         dt = self.ref_time[frame_indices] - self.ref_time[prev_frame_indices]
         target_velocities = (dx / dt).T
 
         # Special handling for root quaternion velocity
-        root_rot_frame = self.ref_frames[3:7, frame_indices]
-        root_rot_prev_frame = self.ref_frames[3:7, prev_frame_indices]
+        root_rot_frame = self.ref_frame_angles[3:7, frame_indices]
+        root_rot_prev_frame = self.ref_frame_angles[3:7, prev_frame_indices]
         root_rot_diff_quat = quat_diff(root_rot_frame.T, root_rot_prev_frame.T)
         root_rot_diff_aa = quat_to_angle_axis(root_rot_diff_quat).T
         root_rot_vel = (root_rot_diff_aa / dt).T
@@ -96,7 +94,7 @@ class ImitateEnv(MSKEnv):
         root_rot_vel = rotate_vec(root_rot_conj, root_rot_vel)
 
         # Update the starting position (in case we reset)
-        self.start_pose[:] = self.curr_target.detach().clone()
+        self.start_pose[:] = self.curr_target_angles.detach().clone()
         self.start_velocity[:, 0:3] = target_velocities[:, 0:3]  # root lin v
         self.start_velocity[:, 3:6] = root_rot_vel  # root ang v
         self.start_velocity[:, 6:] = target_velocities[:, 7:]  # joint qv
@@ -133,8 +131,8 @@ class ImitateEnv(MSKEnv):
             self.body_rotations.view(self.num_worlds, -1),
             self.body_velocities.view(self.num_worlds, -1),
             curr_time.unsqueeze(1),
-            self.curr_target,
-            self.curr_bp_target.view(self.num_worlds, -1),
+            self.curr_target_angles,
+            self.curr_target_bp.view(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
@@ -145,28 +143,28 @@ class ImitateEnv(MSKEnv):
 
         # Tracking reward: joints (all except root)
         curr_joints = self.joint_positions[:, 7:]
-        target_joints = self.curr_target[:, 7:]
+        target_joints = self.curr_target_angles[:, 7:]
         joint_diff = curr_joints - target_joints
         joint_diff_sq = joint_diff ** 2
         rew_track_joints = torch.exp(-0.05 * joint_diff_sq.sum(dim=1))
 
         # Root position
         curr_root_pos = self.joint_positions[:, 0:3]
-        target_root_pos = self.curr_target[:, 0:3]
+        target_root_pos = self.curr_target_angles[:, 0:3]
         root_pos_diff = curr_root_pos - target_root_pos
         root_pos_diff_sq = root_pos_diff ** 2
         rew_track_root_pos = torch.exp(-10 * root_pos_diff_sq.sum(dim=1))
 
         # Root quaternion, use angle difference
         curr_root_quat = self.joint_positions[:, 3:7]
-        target_root_quat = self.curr_target[:, 3:7]
+        target_root_quat = self.curr_target_angles[:, 3:7]
         root_quat_diff_angle = quat_diff_angle(curr_root_quat, target_root_quat)
         root_quat_diff_sq = root_quat_diff_angle ** 2
         rew_track_root_rot = torch.exp(-10 * root_quat_diff_sq)
 
         # # Global body positions
         curr_body_pos = self.body_positions
-        target_body_pos = self.curr_bp_target
+        target_body_pos = self.curr_target_bp
         body_pos_diff = curr_body_pos - target_body_pos
         body_pos_diff_sq = body_pos_diff ** 2
         # # Sum across coordinates, then bodies
@@ -195,7 +193,7 @@ class ImitateEnv(MSKEnv):
 
         # Root position difference too high
         curr_root_pos = self.joint_positions[:, 0:3]
-        target_root_pos = self.curr_target[:, 0:3]
+        target_root_pos = self.curr_target_angles[:, 0:3]
         root_diff_high = ((curr_root_pos - target_root_pos).norm(dim=1) > 1.0)
 
         terminated = (fallen | head_fallen | root_diff_high).float()
@@ -212,4 +210,4 @@ class ImitateEnv(MSKEnv):
         return self.ref_time
 
     def get_reference_joint_angles(self):
-        return self.curr_target
+        return self.curr_target_angles

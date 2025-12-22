@@ -6,46 +6,79 @@ from .env_variants import DerivedEnv
 
 @dataclass
 class EnvConfig:
-    # Environment type
     env_variant: DerivedEnv = DerivedEnv.SPRINT
+    """ Environment type """
 
-    # Control frequency
-    delta_t: float = 1.0 / 120.0
-    # Simulator frequency (only relevant for fixed-step integrators)
-    delta_t_sim: float = 1.0 / 3600.0
+    delta_t: float = 1.0 / 360.0
+    """ Control/policy step size """
+    delta_t_sim: float = 1.0 / 7200.0
+    """ Simulator/physics step size """
 
-    # Environment parameters
-    max_episode_duration: float = 2.0  # seconds
-    model_path: str = "../msk_models/model.osim"  # located at data/
-    motion_name: str = "../motions/pred_sprint"  # motion file name (without .mot extension) for IMITATE variant
+    max_episode_duration: float = 12.0
+    """ Max episode duration in seconds """
 
-    # Model physics properties
+    # Model properties
+    model_path: str = "../msk_models/test.osim"
+    """ OpenSim model file path """
     joint_damping: float = 0.1
+    """ Joint damping applied to all joints """
     joint_armature: float = 0.0
+    """ Armature added to all joints (improves stability) """
     torso_damping: float = 1.0
+    """ Damping specifically for torso joint """
     toes_stiffness: float = 65.0
+    """ Toes joint stiffness """
     toes_damping: float = 0.4
+    """ Toes joint damping """
+    use_default_joint_limits: bool = False
+    """ Whether to use joint limits defined in the model file """
+    joint_limits_path: str = "../msk_models/joint_limits.yaml"
+    """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
 
+    # Constraint properties
     use_hunt_crossley: bool = True
-    solref: tuple[float, float] = (0.005, 1.0)  # MuJoCo limit/contact parameters
+    """ Whether to use Hunt-Crossley contact model (if not, then MuJoCo) """
+    use_exponential_limit: bool = True
+    """ Whether to use Exponential Spring limit model (if not, then MuJoCo) """
+    limit_force_curves_path: str = "../msk_models/limit_force_curves.yaml"
+    """ Exponential limit force curves file path (if using Exponential limits) """
+    solref: tuple[float, float] = (0.005, 1.0)
+    """ MuJoCo limit/contact parameters (if using MuJoCo limits/contacts) """
 
     # Muscle properties
-    muscle_multiplier: float = 2.0  # max isometric force scale
+    muscle_multiplier: float = 2.0
+    """ Multiplier to max isometric force """
     muscle_fiber_damping: float = 0.01
+    """ Fiber damping (0.0 = undamped) """
     muscle_min_activation: float = 0.0
+    """ Minimum muscle activation. Use non-zero for undamped muscle """
     muscle_max_activation: float = 1.0
+    """ Maximum muscle activation """
     muscle_v_max: float = 12.0
-    muscle_dynamics_substeps: int = 5
+    """ Maximum contraction velocity (in optimal fiber lengths per second) """
+    muscle_dynamics_substeps: int = 1
+    """ Number of substeps for muscle dynamics integration (can improve stability) """
 
-    # Starting state
+    # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose: str = "../msk_models/starting_pose.yaml"
+    """ Starting pose file path (YAML) """
     noise_start: bool = True
+    """ Whether to add noise to starting state """
     q_noise: float = 0.05
+    """ std of starting joint position noise"""
     qv_noise: float = 0.1
+    """ std of starting joint velocity noise"""
     swap_lr: bool = True
+    """ Whether to swap left/right sides when adding noise to starting state """
+    motion_name: str = "../motions/pred_sprint"
+    """ motion file name (without .mot extension) for IMITATE variant """
+    use_zero_starting_activations:  bool = False
+    """ Whether to use zero starting activations (overrides starting_activations) """
+    starting_activations: str = "../msk_models/starting_activations.yaml"
+    """ Starting activations file path (YAML) """
 
-    # Reward scales
     reward_lambdas: dict = None
+    """ Reward weights """
 
     def to_json(self):
         return json.dumps(self.__dict__, indent=4)

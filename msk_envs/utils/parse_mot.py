@@ -57,7 +57,6 @@ def rot_to_quat(data, col_names):
 
     pelvis_quats = []
     for i in range(data.shape[1]):
-        # in the motion, it is ZXY (but we swap from y-up to z-up)
         r = R.from_euler("ZXY",
                          [
                              data[pelvis_tilt_idx, i],
@@ -65,20 +64,20 @@ def rot_to_quat(data, col_names):
                              data[pelvis_rotation_idx, i]
                          ],
                          degrees=True)
-        q = r.as_quat()
+        q = r.as_quat(canonical=True)
+        q = q / np.linalg.norm(q)
         pelvis_quats.append(q)
+
     pelvis_quats = np.array(pelvis_quats)
     pelvis_quats = pelvis_quats[:, [3, 0, 1, 2]]  # xyzw to wxyz
 
     # Remove old columns
     data = np.delete(data, pelvis_rot_idxs, axis=0)
-    col_names = [col for j, col in enumerate(col_names)
-                 if j not in pelvis_rot_idxs]
+    col_names = [col for j, col in enumerate(col_names) if j not in pelvis_rot_idxs]
 
-    # Insert new columns
+    # Insert new columns for quaternion
     for i in range(4):
-        data = np.insert(data, pelvis_tilt_idx + i,
-                         pelvis_quats[:, i], axis=0)
+        data = np.insert(data, pelvis_tilt_idx + i, pelvis_quats[:, i], axis=0)
     # add new col names
     col_names.insert(pelvis_tilt_idx, "pelvis_rot_w")
     col_names.insert(pelvis_tilt_idx + 1, "pelvis_rot_x")
@@ -113,16 +112,7 @@ def reorder_joint_values(data, col_names, dof_id_lookup):
 
 
 def joints_to_radians(data):
-    data[7:] = np.deg2rad(data[7:])
-    return data
-
-
-def swap_yz(data):
-    """ Swap from right-handed y-up to right-handed z-up """
-    rot_convert = R.from_euler("X", 90, degrees=True)
-    for i in range(data.shape[1]):
-        # Pelvis position
-        data[1:4, i] = rot_convert.apply(data[1:4, i])
+    data[8:] = np.deg2rad(data[8:])
     return data
 
 
@@ -141,8 +131,6 @@ def parse_mot(motion_file: str, model_file: str):
     data, col_names = reorder_translation(data, col_names)
     data, col_names = rot_to_quat(data, col_names)
 
-    # # Y up to Z up
-    # data = swap_yz(data)
 
     # Grab the joint columns that correspond to our model, reorder them
     load_result = msk_warp.load_model(model_file, 1)

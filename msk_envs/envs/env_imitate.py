@@ -210,3 +210,6 @@ class ImitateEnv(MSKEnv):
 
     def get_reference_times(self):
         return self.ref_time
+
+    def get_reference_joint_angles(self):
+        return self.curr_target

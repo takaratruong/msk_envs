@@ -56,7 +56,7 @@ class EnvConfig:
     """ Maximum muscle activation """
     muscle_v_max: float = 12.0
     """ Maximum contraction velocity (in optimal fiber lengths per second) """
-    muscle_dynamics_substeps: int = 1
+    muscle_dynamics_substeps: int = 0
     """ Number of substeps for muscle dynamics integration (can improve stability) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
@@ -72,10 +72,12 @@ class EnvConfig:
     """ Whether to swap left/right sides when adding noise to starting state """
     motion_name: str = "../motions/pred_sprint"
     """ motion file name (without .mot extension) for IMITATE variant """
-    use_zero_starting_activations:  bool = False
-    """ Whether to use zero starting activations (overrides starting_activations) """
+    use_prescribed_starting_activations:  bool = False
+    """ Whether to use prescribed starting activations from file """
     starting_activations: str = "../msk_models/starting_activations.yaml"
     """ Starting activations file path (YAML) """
+    default_activation:  float = 0.05
+    """ Default activation value when prescribed activations are not used """
 
     reward_lambdas: dict = None
     """ Reward weights """

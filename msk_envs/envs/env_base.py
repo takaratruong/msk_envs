@@ -200,12 +200,14 @@ class MSKEnv:
             self.swap_lr_data = []
 
         # Starting muscle activations
-        if not env_config.use_zero_starting_activations:
+        if env_config.use_prescribed_starting_activations:
             start_activations_path = os.path.join(self.curr_path, env_config.starting_activations)
-            start_activations = parse_starting_activations(start_activations_path, self.muscle_id_lookup)
+            start_activations = parse_starting_activations(
+                start_activations_path, self.muscle_id_lookup, env_config.default_activation)
             self.start_activations = torch.tensor(start_activations, device=device).unsqueeze(0).repeat(num_envs, 1)
         else:
-            self.start_activations = torch.zeros((num_envs, self.num_muscles), device=device)
+            self.start_activations = torch.ones((num_envs, self.num_muscles),
+                                                device=device) * env_config.default_activation
 
         # Rewards storage
         self.reward_dict = {}

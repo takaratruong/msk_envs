@@ -70,8 +70,10 @@ class LoggedSim:
         reward_dict = self.envs.get_scaled_reward_dict()
 
         # If we are using the ImitateEnv, add reference visuals
-        add_reference = False
-        if hasattr(self.envs, "get_reference_visuals") and hasattr(self.envs, "get_reference_times"):
+        add_reference, ref_joint_angles = False, None
+        if hasattr(self.envs, "get_reference_visuals") and hasattr(self.envs, "get_reference_times") \
+            and hasattr(self.envs, "get_reference_joint_angles"):
+            ref_joint_angles = self.envs.get_reference_joint_angles()
             ref_visuals_pos, ref_visuals_rot = self.envs.get_reference_visuals()
             ref_times = self.envs.get_reference_times()
             add_reference = True
@@ -93,6 +95,7 @@ class LoggedSim:
                 world_id=idx_world,
                 frame_time=frame_time,
                 reward_data=reward_data,
+                ref_joint_angles=ref_joint_angles,
             )
 
             if add_reference:

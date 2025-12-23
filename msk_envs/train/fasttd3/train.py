@@ -109,6 +109,8 @@ def main():
         "hidden_dim": args.actor_hidden_dim,
         "std_min": args.std_min,
         "std_max": args.std_max,
+        "use_gsde": args.use_gsde,
+        "gsde_steps": args.gsde_steps,
     }
     critic_kwargs = {
         "n_obs": n_critic_obs,

@@ -170,7 +170,9 @@ class Actor(nn.Module):
             hidden_dim: int,
             std_min: float,
             std_max: float,
-            device: torch.device,
+            use_gsde: bool = False,
+            gsde_steps: int = 10,
+            device: torch.device = None,
     ):
         super().__init__()
         # obs -> action mean
@@ -196,7 +198,11 @@ class Actor(nn.Module):
         self.register_buffer("noise_scales", noise_scales)
         self.register_buffer("std_min", torch.as_tensor(std_min, device=device))
         self.register_buffer("std_max", torch.as_tensor(std_max, device=device))
+        self.register_buffer("noise", torch.zeros(num_envs, n_act, device=device))
+        self.register_buffer("gsde_step_count", torch.zeros(1, device=device, dtype=torch.int32))
         self.n_envs = num_envs
+        self.use_gsde = use_gsde
+        self.gsde_steps = gsde_steps
         self.device = device
 
     def forward(self, obs: torch.Tensor) -> torch.Tensor:
@@ -219,9 +225,14 @@ class Actor(nn.Module):
 
         # add noise to mean
         act = self(obs)
-        noise = torch.randn_like(act) * self.noise_scales
-        noise[0] = 0.0  # no noise for world 0
-        return act + noise
+
+        if self.use_gsde:
+            self.gsde_step_count += 1
+            if self.gsde_step_count.item() % self.gsde_steps == 0:
+                self.noise.copy_(torch.randn_like(act) * self.noise_scales)
+        else:
+            self.noise.copy_(torch.randn_like(act) * self.noise_scales)
+        return act + self.noise
 
 
 # The following are used for inference

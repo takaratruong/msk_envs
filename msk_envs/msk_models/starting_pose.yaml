@@ -1,120 +1,120 @@
-joint_positions:
-  # Root position
-  - 0.0
-  - 1.05
-  - 0.0
-  # Root orientation (w, x, y, z)
-  - 1.0
-  - 0
-  - 0
-  - 0
-  # Torso: lumbar extension, bending, rotation
-  - 0.0
-  - 0.0
-  - 0.0
-  # R Femur: Hip flexion, adduction, rotation
-  - 0.232604
-  - 0.0
-  - 0.0
-  # R Tibia: Knee angle
-  - -1.22703
-  # R Talus: Ankle angle
-  - 0.367279
-  # R Calcn: subtalar angle
-  - 0.0
-  # R toes: MTP angle
-  - 0.0
-  # R humerus: arm flexion, adduction, rotation
-  - -0.2
-  - 0.0
-  - 0.0
-  # R ulna: elbow angle
-  - 0.5
-  # R radius: pronation/supination
-  - 1.5
-  # R hand: wrist flexion, devation
-  - 0.0
-  - 0.0
-  # L Femur: Hip flexion, adduction, rotation
-  - 0.165239
-  - 0.0
-  - 0.0
-  # L Tibia: Knee angle
-  - -0.288801
-  # L Talus: Ankle angle
-  - 0.01971
-  # L Calcn: subtalar angle
-  - 0.0
-  # L toes: MTP angle
-  - 0.0
-  # L humerus: arm flexion, adduction, rotation
-  - 0.2
-  - 0.0
-  - 0.0
-  # L ulna: elbow angle
-  - 0.5
-  # L radius: pronation/supination
-  - 1.5
-  # L hand: wrist flexion, devation
-  - 0.0
-  - 0.0
+pelvis_tx:
+  q: 0.0
+  v: 0.0
+pelvis_ty:
+  q: 1.05
+  v: 0.0
+pelvis_tz:
+  q: 0.0
+  v: 0.0
 
-joint_velocities:
-  # Root linear velocity
-  - 1.0
-  - 0.0
-  - 0.0
-  # Root angular velocity
-  - 0.0
-  - 0.0
-  - 0.0
-  # Torso: lumbar extension, bending, rotation
-  - 0.0
-  - 0.0
-  - 0.0
-  # R Femur: Hip flexion, adduction, rotation
-  - 0.0
-  - 0.0
-  - 0.0
-  # R Tibia: Knee angle
-  - 0.0
-  # R Talus: Ankle angle
-  - 0.0
-  # R Calcn: subtalar angle
-  - 0.0
-  # R toes: MTP angle
-  - 0.0
-  # R humerus: arm flexion, adduction, rotation
-  - 0.0
-  - 0.0
-  - 0.0
-  # R ulna: elbow angle
-  - 0.0
-  # R radius: pronation/supination
-  - 0.0
-  # R hand: wrist flexion, devation
-  - 0.0
-  - 0.0
-  # L Femur: Hip flexion, adduction, rotation
-  - 0.0
-  - 0.0
-  - 0.0
-  # L Tibia: Knee angle
-  - 0.0
-  # L Talus: Ankle angle
-  - 0.0
-  # L Calcn: subtalar angle
-  - 0.0
-  # L toes: MTP angle
-  - 0.0
-  # L humerus: arm flexion, adduction, rotation
-  - 0.0
-  - 0.0
-  - 0.0
-  # L ulna: elbow angle
-  - 0.0
-  # L radius: pronation/supination
-  - 0.0
-  # L hand: wrist flexion, devation
-  - 0.0
-  - 0.0
+pelvis_rot_w:
+  q: 1.0
+  v: 0.0 # ignored (omega is defined by rot_x, rot_y, rot_z)
+pelvis_rot_x:
+  q: 0.0
+  v: 0.0
+pelvis_rot_y:
+  q: 0.0
+  v: 0.0
+pelvis_rot_z:
+  q: 0.0
+  v: 0.0
+
+lumbar_extension:
+  q: 0.0
+  v: 0.0
+lumbar_bending:
+  q: 0.0
+  v: 0.0
+lumbar_rotation:
+  q: 0.0
+  v: 0.0
+
+hip_flexion_r:
+  q: 0.232604
+  v: 0.0
+hip_adduction_r:
+  q: 0.0
+  v: 0.0
+hip_rotation_r:
+  q: 0.0
+  v: 0.0
+knee_angle_r:
+  q: -1.22703
+  v: 0.0
+ankle_angle_r:
+  q: 0.367279
+  v: 0.0
+subtalar_angle_r:
+  q: 0.0
+  v: 0.0
+mtp_angle_r:
+  q: 0.0
+  v: 0.0
+
+arm_flex_r:
+  q: -0.2
+  v: 0.0
+arm_add_r:
+  q: 0.0
+  v: 0.0
+arm_rot_r:
+  q: 0.0
+  v: 0.0
+elbow_flex_r:
+  q: 0.5
+  v: 0.0
+pro_sup_r:
+  q: 1.5
+  v: 0.0
+wrist_flex_r:
+  q: 0.0
+  v: 0.0
+wrist_dev_r:
+  q: 0.0
+  v: 0.0
+
+hip_flexion_l:
+  q: 0.165239
+  v: 0.0
+hip_adduction_l:
+  q: 0.0
+  v: 0.0
+hip_rotation_l:
+  q: 0.0
+  v: 0.0
+knee_angle_l:
+  q: -0.288801
+  v: 0.0
+ankle_angle_l:
+  q: 0.01971
+  v: 0.0
+subtalar_angle_l:
+  q: 0.0
+  v: 0.0
+mtp_angle_l:
+  q: 0.0
+  v: 0.0
+arm_flex_l:
+  q: 0.2
+  v: 0.0
+arm_add_l:
+  q: 0.0
+  v: 0.0
+arm_rot_l:
+  q: 0.0
+  v: 0.0
+elbow_flex_l:
+  q: 0.5
+  v: 0.0
+pro_sup_l:
+  q: 1.5
+  v: 0.0
+wrist_flex_l:
+  q: 0.0
+  v: 0.0
+wrist_dev_l:
+  q: 0.0
+  v: 0.0
+

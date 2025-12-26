@@ -183,7 +183,7 @@ class MSKEnv:
 
         # Starting position, load from file
         start_pose_path = os.path.join(self.curr_path, env_config.starting_pose)
-        q, qv = parse_starting_pose(start_pose_path)
+        q, qv = parse_starting_pose(start_pose_path, self.dof_id_lookup, self.num_qpos, self.num_dofs)
         assert len(q) == self.num_qpos and len(qv) == self.num_dofs
         q_torch = torch.tensor(q, dtype=torch.float32, device=device)
         qv_torch = torch.tensor(qv, dtype=torch.float32, device=device)

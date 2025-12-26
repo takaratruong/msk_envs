@@ -25,17 +25,17 @@ class ImitateEnv(MSKEnv):
         motion_file = os.path.join(curr_path, f"{env_config.motion_name}.mot")
         data, col_names = parse_mot(motion_file, self.model_path)
         ref_motion = torch.tensor(data, device=device)
+        ref_time, ref_frames = ref_motion[0, :], ref_motion[1:, :]
 
         # Now we can compute the reference body positions
         #  let's also process the visuals while we're at it
         print("Processing reference motion")
-        ref_time, ref_frames = ref_motion[0, :], ref_motion[1:, :]
         body_positions, body_rotations = [], []
         vis_positions, vis_rotations = [], []
         for i in range(data.shape[1]):
+            # Modify world 0, run FK
             self.joint_positions[0, :] = ref_frames[:, i]
             self.fk()
-
             body_positions.append(self.body_positions[0, :, :].clone())
             body_rotations.append(self.body_rotations[0, :, :].clone())
             vis_positions.append(self.visual_positions[0, :, :].clone())
@@ -63,6 +63,7 @@ class ImitateEnv(MSKEnv):
         # Target frame (useful if we want to interpolate between frames)
         self.curr_target_angles = torch.zeros((self.num_worlds, n_joints), device=device)
         self.curr_target_bp = torch.zeros_like(self.body_positions)
+        self.curr_target_br = torch.zeros_like(self.body_rotations)
 
         self._set_curr_target_frame()
         return
@@ -74,6 +75,7 @@ class ImitateEnv(MSKEnv):
         frame_indices = torch.clamp(frame_indices, 0, len(self.ref_time) - 1)
         self.curr_target_angles[:] = self.ref_frame_angles[:, frame_indices].T
         self.curr_target_bp[:] = self.ref_body_positions[frame_indices, :, :]
+        self.curr_target_br[:] = self.ref_body_rotations[frame_indices, :, :]
 
         # Finite diff with prev frame to get target velocities:
         prev_frame_indices = torch.clamp(frame_indices - 1, 0, len(self.ref_time) - 1)
@@ -133,6 +135,7 @@ class ImitateEnv(MSKEnv):
             curr_time.unsqueeze(1),
             self.curr_target_angles,
             self.curr_target_bp.view(self.num_worlds, -1),
+            # self.curr_target_br.view(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
@@ -146,7 +149,7 @@ class ImitateEnv(MSKEnv):
         target_joints = self.curr_target_angles[:, 7:]
         joint_diff = curr_joints - target_joints
         joint_diff_sq = joint_diff ** 2
-        rew_track_joints = torch.exp(-0.05 * joint_diff_sq.sum(dim=1))
+        rew_track_joints = torch.exp(-0.15 * joint_diff_sq.sum(dim=1))
 
         # Root position
         curr_root_pos = self.joint_positions[:, 0:3]
@@ -167,16 +170,29 @@ class ImitateEnv(MSKEnv):
         target_body_pos = self.curr_target_bp
         body_pos_diff = curr_body_pos - target_body_pos
         body_pos_diff_sq = body_pos_diff ** 2
-        # # Sum across coordinates, then bodies
+        # Sum across coordinates
         body_pos_diff_sq_sum = body_pos_diff_sq.sum(dim=2)
+        # Scale by body weights, then sum across bodies
+        body_pos_diff_sq_sum = (self.body_mass / self.total_mass) * body_pos_diff_sq_sum
         body_pos_diff_sq_sum = body_pos_diff_sq_sum.sum(dim=1)
-        rew_track_body_pos = torch.exp(-0.1 * body_pos_diff_sq_sum)
+        rew_track_body_pos = torch.exp(-30.0 * body_pos_diff_sq_sum)
+
+        # Global body rotations
+        curr_body_rot = self.body_rotations  # [num_worlds, n_bodies, 4]
+        target_body_rot = self.curr_target_br  # [num_worlds, n_bodies, 4]
+        body_rot_diff_angle = quat_diff_angle(curr_body_rot, target_body_rot)  # [num_worlds, n_bodies]
+        body_rot_diff_sq = body_rot_diff_angle ** 2  # [num_worlds, n_bodies]
+        # Scale by body weights, then sum across bodies
+        body_rot_diff_sq = (self.body_mass / self.total_mass) * body_rot_diff_sq  # [num_worlds, n_bodies]
+        body_rot_diff_sq = body_rot_diff_sq.sum(dim=1)
+        rew_track_body_rot = torch.exp(-10.0 * body_rot_diff_sq)
 
         self.reward_dict = {
             "rew_track_joints": rew_track_joints.detach(),
             "rew_track_root_pos": rew_track_root_pos.detach(),
             "rew_track_root_rot": rew_track_root_rot.detach(),
             "rew_track_body_pos": rew_track_body_pos.detach(),
+            "rew_track_body_rot": rew_track_body_rot.detach(),
         }
 
     def _get_terminated(self):

@@ -136,6 +136,9 @@ class MSKEnv:
         self.num_dofs = msk_warp.get_num_dofs(self.m)
         self.num_muscles = msk_warp.get_num_muscles(self.m)
         self.num_actuators = msk_warp.get_num_actuators(self.m)
+        # [num_envs, num_bodies]
+        self.body_mass = msk_warp.body_mass(self.m)
+        self.total_mass = self.body_mass.sum()
 
         # [num_envs]
         self.time = msk_warp.time(self.d)

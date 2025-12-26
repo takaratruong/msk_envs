@@ -39,7 +39,7 @@ def create_generic_plot(
                 y_label=y_label,
                 x_data=times,
                 x_data_sub=frame_ind,
-                x_fmt=".1f",
+                x_fmt=".2f",
                 x_sub_fmt=".0f",
                 y_fmt=y_fmt
             )
@@ -127,7 +127,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 y_label="Reward",
                 x_data=times,
                 x_data_sub=frame_ind,
-                x_fmt=".1f",
+                x_fmt=".2f",
                 x_sub_fmt=".0f",
                 y_fmt=".1f",
             )
@@ -169,7 +169,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     y_label="GRF (BW)",
                     x_data=time_selected,
                     x_data_sub=frame_ind_selected,
-                    x_fmt=".1f",
+                    x_fmt=".2f",
                     x_sub_fmt=".0f",
                     y_fmt=".0f",
                 )
@@ -214,7 +214,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     y_label="Contact Duration",
                     x_data=times,
                     x_data_sub=frame_ind,
-                    x_fmt=".1f",
+                    x_fmt=".2f",
                     x_sub_fmt=".0f",
                     y_fmt=".2f",
                 )

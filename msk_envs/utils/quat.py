@@ -46,7 +46,11 @@ def quat_to_angle_axis(q: torch.Tensor) -> torch.Tensor:
     axis[..., 2] = 1.0  # default z-axis
 
     mask = s > 1e-6
-    axis[mask] = q[mask, 1:] / s[mask].unsqueeze(-1)
+    axis = torch.where(
+        mask.unsqueeze(-1),
+        q[..., 1:] / s.unsqueeze(-1),
+        axis,
+    )
 
     return axis * angle.unsqueeze(-1)
 

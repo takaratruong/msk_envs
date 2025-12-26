@@ -227,11 +227,13 @@ class Actor(nn.Module):
         act = self(obs)
 
         if self.use_gsde:
+            resample_noise = (self.gsde_step_count % self.gsde_steps) == 0
             self.gsde_step_count += 1
-            if self.gsde_step_count.item() % self.gsde_steps == 0:
-                self.noise.copy_(torch.randn_like(act) * self.noise_scales)
+            new_noise = torch.randn_like(act) * self.noise_scales
+            self.noise.copy_(torch.where(resample_noise, new_noise, self.noise))
         else:
             self.noise.copy_(torch.randn_like(act) * self.noise_scales)
+
         return act + self.noise
 
 

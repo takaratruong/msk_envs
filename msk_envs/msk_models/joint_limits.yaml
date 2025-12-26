@@ -36,7 +36,7 @@ subtalar_angle_r:
   upper: 0.65
 
 mtp_angle_r:
-  lower: 0.0
+  lower: -0.2
   upper: 1.134464013796314
 
 arm_flex_r:
@@ -48,7 +48,7 @@ arm_add_r:
   upper: 0.15
 
 arm_rot_r:
-  lower: -0.261
+  lower: -0.3
   upper: 0.0
 
 elbow_flex_r:
@@ -92,7 +92,7 @@ subtalar_angle_l:
   upper: 0.65
 
 mtp_angle_l:
-  lower: 0.0
+  lower: -0.2
   upper: 1.134464013796314
 
 arm_flex_l:
@@ -104,7 +104,7 @@ arm_add_l:
   upper: 0.15
 
 arm_rot_l:
-  lower: -0.261
+  lower: -0.3
   upper: 0.0
 
 elbow_flex_l:

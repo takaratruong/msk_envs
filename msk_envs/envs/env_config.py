@@ -28,7 +28,7 @@ class EnvConfig:
     """ Damping specifically for torso joint """
     toes_stiffness: float = 65.0
     """ Toes joint stiffness """
-    toes_damping: float = 0.4
+    toes_damping: float = 0.1
     """ Toes joint damping """
     use_default_joint_limits: bool = False
     """ Whether to use joint limits defined in the model file """
@@ -72,11 +72,11 @@ class EnvConfig:
     """ Whether to swap left/right sides when adding noise to starting state """
     motion_name: str = "../motions/pred_sprint"
     """ motion file name (without .mot extension) for IMITATE variant """
-    use_prescribed_starting_activations:  bool = False
+    use_prescribed_starting_activations: bool = True
     """ Whether to use prescribed starting activations from file """
     starting_activations: str = "../msk_models/starting_activations.yaml"
     """ Starting activations file path (YAML) """
-    default_activation:  float = 0.05
+    default_activation: float = 0.05
     """ Default activation value when prescribed activations are not used """
 
     reward_lambdas: dict = None

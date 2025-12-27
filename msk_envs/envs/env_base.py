@@ -34,10 +34,13 @@ class MSKEnv:
         dof_num = msk_warp.get_dof_num(self.m, torso_id)
         damping[dof_adr:dof_adr + dof_num] = env_config.torso_damping
 
-        # Foot stiffness
+        # Foot stiffness and damping
         for toe in ["toes_l", "toes_r"]:
             toe_id = self.lookup_body_id(toe)
             stiffness[toe_id] = env_config.toes_stiffness
+
+            dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
+            dof_num = msk_warp.get_dof_num(self.m, toe_id)
             damping[dof_adr:dof_adr + dof_num] = env_config.toes_damping
 
         # Muscles

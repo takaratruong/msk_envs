@@ -14,12 +14,18 @@ class MSKEnv:
 
     def _setup_model(self, env_config: EnvConfig) -> None:
         """ We're going to modify some model parameters here. """
+        # Reset stiffness, damping, armature to zero
+        stiffness = msk_warp.stiffness(self.m)  # [num_bodies]
+        damping = msk_warp.damping(self.m)  # [num_dofs]
+        armature = msk_warp.armature(self.m)  # [num_dofs]
+        damping[:] = 0.0
+        stiffness[:] = 0.0
+        armature[:] = 0.0
+
         # Joint damping
-        damping = msk_warp.damping(self.m)
         damping[6:] = env_config.joint_damping
 
         # Joint armature
-        armature = msk_warp.armature(self.m)
         armature[6:] = env_config.joint_armature
 
         # Torso damping
@@ -29,13 +35,9 @@ class MSKEnv:
         damping[dof_adr:dof_adr + dof_num] = env_config.torso_damping
 
         # Foot stiffness
-        stiffness = msk_warp.stiffness(self.m)
-        stiffness[:] = 0.0
         for toe in ["toes_l", "toes_r"]:
             toe_id = self.lookup_body_id(toe)
-            dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
-            dof_num = msk_warp.get_dof_num(self.m, toe_id)
-            stiffness[dof_adr:dof_adr + dof_num] = env_config.toes_stiffness
+            stiffness[toe_id] = env_config.toes_stiffness
             damping[dof_adr:dof_adr + dof_num] = env_config.toes_damping
 
         # Muscles

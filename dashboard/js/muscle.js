@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+
 const muscleCache = {};
 
 function activationToColor(activation) {
@@ -11,15 +12,23 @@ function activationToColor(activation) {
 
 function resetMuscles() {
     for (const key in muscleCache) {
-        const [tendons, muscles] = muscleCache[key];
-        tendons.forEach(tendon => {
-            tendon.geometry.dispose();
-            tendon.material.dispose();
-        });
-        muscles.forEach(muscle => {
-            muscle.geometry.dispose();
-            muscle.material.dispose();
-        });
+        const cached = muscleCache[key];
+        if (Array.isArray(cached)) {
+            // Capsule cache
+            const [tendons, muscles] = cached;
+            tendons.forEach(tendon => {
+                tendon.geometry.dispose();
+                tendon.material.dispose();
+            });
+            muscles.forEach(muscle => {
+                muscle.geometry.dispose();
+                muscle.material.dispose();
+            });
+        } else {
+            // Line2 cache
+            cached.geometry.dispose();
+            cached.material.dispose();
+        }
     }
 }
 
@@ -41,7 +50,7 @@ function updateCapsule(capsule, p1, p2, radius, color) {
     capsule.material.needsUpdate = true;
 }
 
-function drawMuscle(muscle, addObjectCallback) {
+function drawMuscleCapsule(muscle, addObjectCallback) {
     const tendonRadius = Math.sqrt(muscle.max_isometric_force) / 8000;
     const muscleRadius = Math.sqrt(muscle.max_isometric_force) / 4000;
     const color = activationToColor(muscle.activation);
@@ -159,4 +168,43 @@ function drawMuscle(muscle, addObjectCallback) {
     }
 }
 
-export { drawMuscle, resetMuscles };
+function drawMuscleLine(muscle, addObjectCallback) {
+    const color = activationToColor(muscle.activation);
+    const muscleRadius = 0.005;
+
+    let capsules = [];
+    if (muscleCache[muscle.name]) {
+        capsules = muscleCache[muscle.name];
+    } else {
+        // Create capsules for each segment
+        for (let i = 0; i < muscle.points.length - 1; i++) {
+            const muscleMaterial = new THREE.MeshStandardMaterial({
+                color: 0xFF8888,
+                side: THREE.DoubleSide,
+                flatShading: false,
+                metalness: 0.0,
+                roughness: 1.0
+            });
+
+            const muscleGeometry = new THREE.CapsuleGeometry(muscleRadius, 0, 8, 16);
+            const capsule = new THREE.Mesh(muscleGeometry, muscleMaterial);
+
+            capsule.castShadow = true;
+            capsule.receiveShadow = true;
+
+            capsules.push(capsule);
+        }
+        muscleCache[muscle.name] = capsules;
+    }
+
+    // Update all capsules
+    for (let i = 0; i < muscle.points.length - 1; i++) {
+        const p1 = new THREE.Vector3(...muscle.points[i]);
+        const p2 = new THREE.Vector3(...muscle.points[i + 1]);
+        const capsule = capsules[i];
+        updateCapsule(capsule, p1, p2, muscleRadius, color);
+        addObjectCallback(capsule);
+    }
+}
+
+export {drawMuscleCapsule, drawMuscleLine, resetMuscles};

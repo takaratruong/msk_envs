@@ -196,23 +196,12 @@ class ImitateEnv(MSKEnv):
         }
 
     def _get_terminated(self):
-        # Root falls below/above threshold
-        min_root_height, max_root_height = 0.8, 1.2
-        root_height = self.body_positions[:, self.root_id, UP_IDX]
-        fallen = (root_height < min_root_height)
-        fallen |= (root_height > max_root_height)
-
-        # Head falls below threshold
-        min_head_height = 1.4
-        head_pos = self.torso_pos + rotate_vec(self.torso_rot, self.head_offset)
-        head_fallen = (head_pos[:, UP_IDX] < min_head_height)
-
         # Root position difference too high
         curr_root_pos = self.joint_positions[:, 0:3]
         target_root_pos = self.curr_target_angles[:, 0:3]
         root_diff_high = ((curr_root_pos - target_root_pos).norm(dim=1) > 1.0)
 
-        terminated = (fallen | head_fallen | root_diff_high).float()
+        terminated = root_diff_high.float()
         return terminated.detach()
 
     def _get_truncated(self):

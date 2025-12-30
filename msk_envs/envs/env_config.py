@@ -9,7 +9,7 @@ class EnvConfig:
     env_variant: DerivedEnv = DerivedEnv.SPRINT
     """ Environment type """
 
-    delta_t: float = 1.0 / 360.0
+    delta_t: float = 1.0 / 720.0
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 7200.0
     """ Simulator/physics step size """

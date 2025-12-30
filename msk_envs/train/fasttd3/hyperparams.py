@@ -46,7 +46,7 @@ class BaseArgs:
 
     buffer_size: int = 256 * 4  # (per env)
     num_steps: int = 3  # n value of n-step returns
-    gamma: float = 0.99
+    gamma: float = 0.997
     tau: float = 0.1  # target smoothing coefficient
     batch_size: int = 8192
 

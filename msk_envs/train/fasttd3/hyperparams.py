@@ -46,7 +46,7 @@ class BaseArgs:
 
     buffer_size: int = 256 * 4  # (per env)
     num_steps: int = 3  # n value of n-step returns
-    gamma: float = 0.97
+    gamma: float = 0.99
     tau: float = 0.1  # target smoothing coefficient
     batch_size: int = 8192
 
@@ -58,9 +58,9 @@ class BaseArgs:
 
     """ Exploration hyperparameters """
     std_min: float = 0.001  # minimum scale of exploration noise
-    std_max: float = 0.4  # maximum scale of exploration noise
-    use_gsde: bool = True  # whether to use generalized state-dependent exploration (gSDE)
-    gsde_steps: int = 10 # number of steps to sample new noise for gSDE
+    std_max: float = 0.4    # maximum scale of exploration noise
+    use_gsde: bool = True   # whether to use generalized state-dependent exploration (gSDE)
+    gsde_steps: int = 10    # number of steps to sample new noise for gSDE
 
     """ Q/Value function hyperparameters
     Distributional critic outputs logits over linspace(v_min, v_max, num_atoms)
@@ -151,8 +151,8 @@ class WalkConfig(BaseArgs):
 class SprintConfig(BaseArgs):
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
-    lambda_limit: float = -0.2
-    lambda_actuator: float = -0.0
+    lambda_limit: float = -1.0
+    lambda_actuator: float = -1.0
     lambda_finish: float = 20.0
 
 
@@ -168,9 +168,10 @@ class VerticalConfig(BaseArgs):
 class ImitateConfig(BaseArgs):
     """Imitate environment specific reward scales"""
     lambda_track_joints: float = 1.0
-    lambda_track_root_pos: float = 1.0
-    lambda_track_root_rot: float = 1.0
-    # lambda_track_body_pos: float = 1.0
+    lambda_track_root_pos: float = 0.0
+    lambda_track_root_rot: float = 0.0
+    lambda_track_body_pos: float = 1.0
+    lambda_track_body_rot: float = 1.0
 
 
 def get_args():
@@ -178,7 +179,7 @@ def get_args():
     import sys
     
     # Parse env_variant first to determine which config class to use
-    env_variant = DerivedEnv.SPRINT
+    env_variant = DerivedEnv.IMITATE
     for i, arg in enumerate(sys.argv):
         if arg == "--env-variant" and i + 1 < len(sys.argv):
             env_variant = DerivedEnv[sys.argv[i + 1]]

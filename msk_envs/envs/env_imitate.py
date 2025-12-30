@@ -173,7 +173,7 @@ class ImitateEnv(MSKEnv):
         # Sum across coordinates
         body_pos_diff_sq_sum = body_pos_diff_sq.sum(dim=2)
         # Scale by body weights, then sum across bodies
-        body_pos_diff_sq_sum = (self.body_mass / self.total_mass) * body_pos_diff_sq_sum
+        # body_pos_diff_sq_sum = (self.body_mass / self.total_mass) * body_pos_diff_sq_sum
         body_pos_diff_sq_sum = body_pos_diff_sq_sum.sum(dim=1)
         rew_track_body_pos = torch.exp(-30.0 * body_pos_diff_sq_sum)
 
@@ -183,7 +183,7 @@ class ImitateEnv(MSKEnv):
         body_rot_diff_angle = quat_diff_angle(curr_body_rot, target_body_rot)  # [num_worlds, n_bodies]
         body_rot_diff_sq = body_rot_diff_angle ** 2  # [num_worlds, n_bodies]
         # Scale by body weights, then sum across bodies
-        body_rot_diff_sq = (self.body_mass / self.total_mass) * body_rot_diff_sq  # [num_worlds, n_bodies]
+        # body_rot_diff_sq = (self.body_mass / self.total_mass) * body_rot_diff_sq  # [num_worlds, n_bodies]
         body_rot_diff_sq = body_rot_diff_sq.sum(dim=1)
         rew_track_body_rot = torch.exp(-10.0 * body_rot_diff_sq)
 

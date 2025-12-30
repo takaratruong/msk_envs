@@ -130,6 +130,12 @@ class SequencePlot:
         self.add(self._get_idx(ax_idx_x, ax_idx_y), y_data, label, title)
         return
 
+    def add_text(self, idx: int, x_pos: float, y_pos: float, text: str,
+                 fontsize: int = 12):
+        ax = self.axs[idx]
+        ax.text(x_pos, y_pos, text, fontsize=fontsize)
+        return
+
     def add_hline(self, idx: int, y_value: float, label: str = "", color: str = 'r'):
         ax = self.axs[idx]
         ax.axhline(y=y_value, color=color, linestyle='--', label=label)

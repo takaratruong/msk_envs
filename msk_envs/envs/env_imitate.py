@@ -197,11 +197,17 @@ class ImitateEnv(MSKEnv):
 
     def _get_terminated(self):
         # Root position difference too high
-        curr_root_pos = self.joint_positions[:, 0:3]
-        target_root_pos = self.curr_target_angles[:, 0:3]
-        root_diff_high = ((curr_root_pos - target_root_pos).norm(dim=1) > 1.0)
+        curr_root_pos = self.body_positions[:, self.root_id]
+        target_root_pos = self.curr_target_bp[:, self.root_id]
+        root_diff_high = ((curr_root_pos - target_root_pos).norm(dim=1) > 0.15)
 
-        terminated = root_diff_high.float()
+        # Root rotation difference too high
+        curr_root_rot = self.body_rotations[:, self.root_id]
+        target_root_rot = self.curr_target_br[:, self.root_id]
+        root_rot_diff_angle = quat_diff_angle(curr_root_rot, target_root_rot)
+        root_rot_diff_high = (root_rot_diff_angle > 0.5)
+
+        terminated = (root_diff_high | root_rot_diff_high).float()
         return terminated.detach()
 
     def _get_truncated(self):

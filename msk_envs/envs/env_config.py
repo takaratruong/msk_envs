@@ -22,7 +22,7 @@ class EnvConfig:
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
-    joint_armature: float = 0.0
+    joint_armature: float = 0.0001
     """ Armature added to all joints (improves stability) """
     torso_damping: float = 1.0
     """ Damping specifically for torso joint """
@@ -37,9 +37,9 @@ class EnvConfig:
 
     # Constraint properties
     use_hunt_crossley: bool = True
-    """ Whether to use Hunt-Crossley contact model (if not, then MuJoCo) """
-    use_exponential_limit: bool = True
-    """ Whether to use Exponential Spring limit model (if not, then MuJoCo) """
+    """ Whether to use Hunt-Crossley contact model (if not, then MuJoCo contact) """
+    use_exponential_limit: bool = False
+    """ Whether to use Exponential Spring limit model (if not, then MuJoCo joint limit) """
     limit_force_curves_path: str = "../msk_models/limit_force_curves.yaml"
     """ Exponential limit force curves file path (if using Exponential limits) """
     solref: tuple[float, float] = (0.005, 1.0)
@@ -56,11 +56,11 @@ class EnvConfig:
     """ Maximum muscle activation """
     muscle_v_max: float = 12.0
     """ Maximum contraction velocity (in optimal fiber lengths per second) """
-    muscle_dynamics_substeps: int = 0
+    muscle_dynamics_substeps: int = 10
     """ Number of substeps for muscle dynamics integration (can improve stability) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
-    starting_pose: str = "../msk_models/starting_pose.yaml"
+    starting_pose: str = "../msk_models/starting_pose_run.yaml"
     """ Starting pose file path (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
@@ -70,7 +70,7 @@ class EnvConfig:
     """ std of starting joint velocity noise"""
     swap_lr: bool = True
     """ Whether to swap left/right sides when adding noise to starting state """
-    motion_name: str = "../motions/pred_sprint"
+    motion_name: str = "../motions/pred_sprint_two_step"
     """ motion file name (without .mot extension) for IMITATE variant """
     use_prescribed_starting_activations: bool = True
     """ Whether to use prescribed starting activations from file """

@@ -64,6 +64,7 @@ def main():
     env_config = EnvConfig(
         env_variant=args.env_variant,
         reward_lambdas=args.get_reward_lambdas(),
+        imitation_weights=args.get_imitation_weights(),
     )
 
     envs = EnvFactory.create_env(

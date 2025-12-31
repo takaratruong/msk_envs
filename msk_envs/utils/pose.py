@@ -95,3 +95,10 @@ def parse_starting_activations(
         muscle_id = muscle_id_lookup[muscle_name]
         activations[muscle_id] = activation
     return activations
+
+
+def get_base_name(name: str) -> str:
+    """ Get base name by removing _r/_l suffix """
+    if name.endswith("_r") or name.endswith("_l"):
+        return name[:-2]
+    return name

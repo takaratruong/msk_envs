@@ -5,8 +5,9 @@ import msk_warp
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis, quat_conjugate
-from msk_envs.utils.global_params import UP_IDX
 from msk_envs.utils.parse_mot import parse_mot
+from msk_envs.utils.pose import get_base_name
+from ..utils.reward_lib import joint_angle_track_reward, body_pos_track_reward, body_rot_track_reward
 
 
 class ImitateEnv(MSKEnv):
@@ -66,6 +67,9 @@ class ImitateEnv(MSKEnv):
         self.curr_target_br = torch.zeros_like(self.body_rotations)
 
         self._set_curr_target_frame()
+
+        # Imitation weights
+        self.imitation_weights = env_config.imitation_weights
         return
 
     def _set_curr_target_frame(self):
@@ -141,59 +145,42 @@ class ImitateEnv(MSKEnv):
 
     def _compute_raw_reward_dict(self):
         self._set_curr_target_frame()
+        self.reward_dict = {}
 
-        # TODO: Rewards should be implemented in the reward library
+        # Joint angle errors
+        for joint, (qpos_adr, dof_adr) in self.dof_id_lookup.items():
+            # First 7 are root, skip (handled in body reward)
+            if qpos_adr < 7:
+                continue
 
-        # Tracking reward: joints (all except root)
-        curr_joints = self.joint_positions[:, 7:]
-        target_joints = self.curr_target_angles[:, 7:]
-        joint_diff = curr_joints - target_joints
-        joint_diff_sq = joint_diff ** 2
-        rew_track_joints = torch.exp(-0.15 * joint_diff_sq.sum(dim=1))
+            weight_key = f"imitation_weight_{get_base_name(joint)}"
+            rew_key = f"rew_track_{get_base_name(joint)}"
 
-        # Root position
-        curr_root_pos = self.joint_positions[:, 0:3]
-        target_root_pos = self.curr_target_angles[:, 0:3]
-        root_pos_diff = curr_root_pos - target_root_pos
-        root_pos_diff_sq = root_pos_diff ** 2
-        rew_track_root_pos = torch.exp(-10 * root_pos_diff_sq.sum(dim=1))
+            track_angle_reward = joint_angle_track_reward(
+                self.joint_positions, self.curr_target_angles, qpos_adr,
+                weight=self.imitation_weights[weight_key])
+            if rew_key in self.reward_dict:
+                self.reward_dict[rew_key] += track_angle_reward.detach()
+            else:
+                self.reward_dict[rew_key] = track_angle_reward.detach()
 
-        # Root quaternion, use angle difference
-        curr_root_quat = self.joint_positions[:, 3:7]
-        target_root_quat = self.curr_target_angles[:, 3:7]
-        root_quat_diff_angle = quat_diff_angle(curr_root_quat, target_root_quat)
-        root_quat_diff_sq = root_quat_diff_angle ** 2
-        rew_track_root_rot = torch.exp(-10 * root_quat_diff_sq)
+        # Global body position and rotation errors
+        for body, body_id in self.body_id_lookup.items():
+            if body == "ground":
+                continue
+            weight_pos_key = f"imitation_weight_{get_base_name(body)}_pos"
+            weight_rot_key = f"imitation_weight_{get_base_name(body)}_rot"
+            rew_pos_key = f"rew_track_{get_base_name(body)}_pos"
+            rew_rot_key = f"rew_track_{get_base_name(body)}_rot"
 
-        # # Global body positions
-        curr_body_pos = self.body_positions
-        target_body_pos = self.curr_target_bp
-        body_pos_diff = curr_body_pos - target_body_pos
-        body_pos_diff_sq = body_pos_diff ** 2
-        # Sum across coordinates
-        body_pos_diff_sq_sum = body_pos_diff_sq.sum(dim=2)
-        # Scale by body weights, then sum across bodies
-        # body_pos_diff_sq_sum = (self.body_mass / self.total_mass) * body_pos_diff_sq_sum
-        body_pos_diff_sq_sum = body_pos_diff_sq_sum.sum(dim=1)
-        rew_track_body_pos = torch.exp(-30.0 * body_pos_diff_sq_sum)
-
-        # Global body rotations
-        curr_body_rot = self.body_rotations  # [num_worlds, n_bodies, 4]
-        target_body_rot = self.curr_target_br  # [num_worlds, n_bodies, 4]
-        body_rot_diff_angle = quat_diff_angle(curr_body_rot, target_body_rot)  # [num_worlds, n_bodies]
-        body_rot_diff_sq = body_rot_diff_angle ** 2  # [num_worlds, n_bodies]
-        # Scale by body weights, then sum across bodies
-        # body_rot_diff_sq = (self.body_mass / self.total_mass) * body_rot_diff_sq  # [num_worlds, n_bodies]
-        body_rot_diff_sq = body_rot_diff_sq.sum(dim=1)
-        rew_track_body_rot = torch.exp(-10.0 * body_rot_diff_sq)
-
-        self.reward_dict = {
-            "rew_track_joints": rew_track_joints.detach(),
-            "rew_track_root_pos": rew_track_root_pos.detach(),
-            "rew_track_root_rot": rew_track_root_rot.detach(),
-            "rew_track_body_pos": rew_track_body_pos.detach(),
-            "rew_track_body_rot": rew_track_body_rot.detach(),
-        }
+            track_pos_reward = body_pos_track_reward(
+                self.body_positions, self.curr_target_bp, body_id,
+                weight=self.imitation_weights[weight_pos_key])
+            track_rot_reward = body_rot_track_reward(
+                self.body_rotations, self.curr_target_br, body_id,
+                weight=self.imitation_weights[weight_rot_key])
+            self.reward_dict[rew_pos_key] = track_pos_reward.detach()
+            self.reward_dict[rew_rot_key] = track_rot_reward.detach()
 
     def _get_terminated(self):
         # Root position difference too high

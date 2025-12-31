@@ -1,5 +1,7 @@
 import torch
 from msk_envs.utils.global_params import UP_IDX
+from msk_envs.utils.quat import quat_diff_angle
+
 
 def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool):
     """Forward velocity reward (x-velocity of root body)"""
@@ -31,3 +33,30 @@ def max_vertical_reward(body_positions):
     """Maximum vertical height achieved (current max across all bodies)"""
     current_max_height = torch.max(body_positions[:, :, UP_IDX], dim=1)[0]
     return current_max_height
+
+
+def joint_angle_track_reward(joint_positions, target_joint_positions, qpos_adr, weight):
+    """Imitation reward for joint tracking"""
+    joint_values = joint_positions[:, qpos_adr: qpos_adr + 1]
+    target_values = target_joint_positions[:, qpos_adr: qpos_adr + 1]
+
+    mse = (joint_values - target_values).pow(2).mean(dim=1)
+    reward = torch.exp(-weight * mse)
+    return reward
+
+
+def body_pos_track_reward(body_positions, target_body_positions, body_id, weight):
+    """Imitation reward for body position tracking"""
+    body_pos_values = body_positions[:, body_id: body_id + 1, :]
+    target_pos_values = target_body_positions[:, body_id: body_id + 1, :]
+    mse = (body_pos_values - target_pos_values).pow(2).mean(dim=(1, 2))
+    reward = torch.exp(-weight * mse)
+    return reward
+
+def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight):
+    body_rot_values = body_rotations[:, body_id: body_id + 1, :]
+    target_rot_values = target_body_rotations[:, body_id: body_id + 1, :]
+    rot_diff_angle = quat_diff_angle(body_rot_values, target_rot_values)
+    mse = rot_diff_angle.pow(2).mean(dim=1)
+    reward = torch.exp(-weight * mse)
+    return reward

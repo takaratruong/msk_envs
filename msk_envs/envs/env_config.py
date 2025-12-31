@@ -81,6 +81,8 @@ class EnvConfig:
 
     reward_lambdas: dict = None
     """ Reward weights """
+    imitation_weights: dict = None
+    """ Imitation reward weights """
 
     def to_json(self):
         return json.dumps(self.__dict__, indent=4)

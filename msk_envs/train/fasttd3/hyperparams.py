@@ -172,92 +172,11 @@ class VerticalConfig(BaseArgs):
 @dataclass
 class ImitateConfig(BaseArgs):
     """Imitate environment specific reward scales"""
-    # Weights are used for exp(-weight * error)
-    # Lambdas are used to scale the reward terms
-
-    # Joint angle weights
-    imitation_weight_hip_flexion: float = 1.0
-    imitation_weight_hip_adduction: float = 1.0
-    imitation_weight_hip_rotation: float = 1.0
-    imitation_weight_knee_angle: float = 1.0
-    imitation_weight_ankle_angle: float = 1.0
-    imitation_weight_subtalar_angle: float = 1.0
-    imitation_weight_mtp_angle: float = 1.0
-    imitation_weight_lumbar_extension: float = 1.0
-    imitation_weight_lumbar_bending: float = 1.0
-    imitation_weight_lumbar_rotation: float = 1.0
-    imitation_weight_arm_flex: float = 1.0
-    imitation_weight_arm_add: float = 1.0
-    imitation_weight_arm_rot: float = 1.0
-    imitation_weight_elbow_flex: float = 1.0
-    imitation_weight_pro_sup: float = 1.0
-    imitation_weight_wrist_flex: float = 1.0
-    imitation_weight_wrist_dev: float = 1.0
-    # Body position and rotation weights
-    imitation_weight_pelvis_pos: float = 1.0
-    imitation_weight_pelvis_rot: float = 1.0
-    imitation_weight_femur_pos: float = 1.0
-    imitation_weight_femur_rot: float = 1.0
-    imitation_weight_tibia_pos: float = 1.0
-    imitation_weight_tibia_rot: float = 1.0
-    imitation_weight_talus_pos: float = 1.0
-    imitation_weight_talus_rot: float = 1.0
-    imitation_weight_calcn_pos: float = 1.0
-    imitation_weight_calcn_rot: float = 1.0
-    imitation_weight_toes_pos: float = 1.0
-    imitation_weight_toes_rot: float = 1.0
-    imitation_weight_torso_pos: float = 1.0
-    imitation_weight_torso_rot: float = 1.0
-    imitation_weight_humerus_pos: float = 1.0
-    imitation_weight_humerus_rot: float = 1.0
-    imitation_weight_ulna_pos: float = 1.0
-    imitation_weight_ulna_rot: float = 1.0
-    imitation_weight_radius_pos: float = 1.0
-    imitation_weight_radius_rot: float = 1.0
-    imitation_weight_hand_pos: float = 1.0
-    imitation_weight_hand_rot: float = 1.0
-
-    # Joint angle lambdas
-    lambda_track_hip_flexion: float = 1.0
-    lambda_track_hip_adduction: float = 1.0
-    lambda_track_hip_rotation: float = 1.0
-    lambda_track_knee_angle: float = 1.0
-    lambda_track_ankle_angle: float = 1.0
-    lambda_track_subtalar_angle: float = 1.0
-    lambda_track_mtp_angle: float = 1.0
-    lambda_track_lumbar_extension: float = 1.0
-    lambda_track_lumbar_bending: float = 1.0
-    lambda_track_lumbar_rotation: float = 1.0
-    lambda_track_arm_flex: float = 1.0
-    lambda_track_arm_add: float = 1.0
-    lambda_track_arm_rot: float = 1.0
-    lambda_track_elbow_flex: float = 1.0
-    lambda_track_pro_sup: float = 1.0
-    lambda_track_wrist_flex: float = 1.0
-    lambda_track_wrist_dev: float = 1.0
-    # Body position and rotation lambdas
-    lambda_track_pelvis_pos: float = 1.0
-    lambda_track_pelvis_rot: float = 1.0
-    lambda_track_femur_pos: float = 1.0
-    lambda_track_femur_rot: float = 1.0
-    lambda_track_tibia_pos: float = 1.0
-    lambda_track_tibia_rot: float = 1.0
-    lambda_track_talus_pos: float = 1.0
-    lambda_track_talus_rot: float = 1.0
-    lambda_track_calcn_pos: float = 1.0
-    lambda_track_calcn_rot: float = 1.0
-    lambda_track_toes_pos: float = 1.0
-    lambda_track_toes_rot: float = 1.0
-    lambda_track_torso_pos: float = 1.0
-    lambda_track_torso_rot: float = 1.0
-    lambda_track_humerus_pos: float = 1.0
-    lambda_track_humerus_rot: float = 1.0
-    lambda_track_ulna_pos: float = 1.0
-    lambda_track_ulna_rot: float = 1.0
-    lambda_track_radius_pos: float = 1.0
-    lambda_track_radius_rot: float = 1.0
-    lambda_track_hand_pos: float = 1.0
-    lambda_track_hand_rot: float = 1.0
+    lambda_track_joints: float = 1.0
+    lambda_track_root_pos: float = 0.0
+    lambda_track_root_rot: float = 0.0
+    lambda_track_body_pos: float = 1.0
+    lambda_track_body_rot: float = 1.0
 
 
 def get_args():

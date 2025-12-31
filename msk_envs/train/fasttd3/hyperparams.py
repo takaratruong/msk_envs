@@ -109,7 +109,7 @@ class BaseArgs:
                 k.startswith("lambda_")}
 
     def get_imitation_weights(self):
-        """Extract all lambda_track_* fields as a dictionary"""
+        """Extract all imitation_weight_* fields as a dictionary"""
         return {k: v for k, v in self.__dict__.items() if
                 k.startswith("imitation_weight_")}
 
@@ -177,6 +177,13 @@ class ImitateConfig(BaseArgs):
     lambda_track_root_rot: float = 0.0
     lambda_track_body_pos: float = 1.0
     lambda_track_body_rot: float = 1.0
+    
+    """Imitation reward weights"""
+    imitation_weight_track_joints: float = 0.15
+    imitation_weight_track_root_pos: float = 10.0
+    imitation_weight_track_root_rot: float = 10.0
+    imitation_weight_track_body_pos: float = 30.0
+    imitation_weight_track_body_rot: float = 10.0
 
 
 def get_args():

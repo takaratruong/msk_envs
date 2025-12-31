@@ -60,3 +60,9 @@ def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight
     mse = rot_diff_angle.pow(2).mean(dim=1)
     reward = torch.exp(-weight * mse)
     return reward
+
+def update_dict(reward_dict, key, value):
+    if key in reward_dict:
+        reward_dict[key] += value.detach()
+    else:
+        reward_dict[key] = value.detach()

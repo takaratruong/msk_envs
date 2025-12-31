@@ -7,7 +7,7 @@ from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis, quat_conjugate
 from msk_envs.utils.parse_mot import parse_mot
 from msk_envs.utils.pose import get_base_name
-from ..utils.reward_lib import joint_angle_track_reward, body_pos_track_reward, body_rot_track_reward
+from msk_envs.utils.reward_lib import joint_angle_track_reward, body_pos_track_reward, body_rot_track_reward, update_dict
 
 
 class ImitateEnv(MSKEnv):
@@ -152,17 +152,12 @@ class ImitateEnv(MSKEnv):
             # First 7 are root, skip (handled in body reward)
             if qpos_adr < 7:
                 continue
-
             weight_key = f"imitation_weight_{get_base_name(joint)}"
             rew_key = f"rew_track_{get_base_name(joint)}"
-
             track_angle_reward = joint_angle_track_reward(
                 self.joint_positions, self.curr_target_angles, qpos_adr,
                 weight=self.imitation_weights[weight_key])
-            if rew_key in self.reward_dict:
-                self.reward_dict[rew_key] += track_angle_reward.detach()
-            else:
-                self.reward_dict[rew_key] = track_angle_reward.detach()
+            update_dict(self.reward_dict, rew_key, track_angle_reward)
 
         # Global body position and rotation errors
         for body, body_id in self.body_id_lookup.items():
@@ -179,8 +174,8 @@ class ImitateEnv(MSKEnv):
             track_rot_reward = body_rot_track_reward(
                 self.body_rotations, self.curr_target_br, body_id,
                 weight=self.imitation_weights[weight_rot_key])
-            self.reward_dict[rew_pos_key] = track_pos_reward.detach()
-            self.reward_dict[rew_rot_key] = track_rot_reward.detach()
+            update_dict(self.reward_dict, rew_pos_key, track_pos_reward)
+            update_dict(self.reward_dict, rew_rot_key, track_rot_reward)
 
     def _get_terminated(self):
         # Root position difference too high

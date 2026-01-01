@@ -32,7 +32,7 @@ class EnvConfig:
     """ Toes joint damping """
     use_default_joint_limits: bool = False
     """ Whether to use joint limits defined in the model file """
-    joint_limits_path: str = "../msk_models/joint_limits.yaml"
+    joint_limits_path: str = "../msk_models/joint_limits_sprinting.yaml"
     """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
 
     # Constraint properties

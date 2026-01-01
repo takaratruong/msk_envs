@@ -1,0 +1,5 @@
+base_cmd: python -m msk_envs.train.fasttd3.train --no-amp --exp-prefix 
+args:
+  env-variant: IMITATE
+  extra_rewarded_joints: ['pelvis', 'toes_l,toes_r', 'hand_l,hand_r']
+  lambda_extra_rewarded_joints: [1., 5., 10.]

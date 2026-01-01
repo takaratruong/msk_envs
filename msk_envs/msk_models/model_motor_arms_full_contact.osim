@@ -6269,7 +6269,7 @@
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.046078839531912198</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.020479484236405401</tendon_slack_length>
+					<tendon_slack_length>0.022527432660045945</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--tendon strain at maximum isometric muscle force-->
@@ -9350,7 +9350,7 @@
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.046078839531912198</optimal_fiber_length>
 					<!--Resting length of the tendon-->
-					<tendon_slack_length>0.020479484236405401</tendon_slack_length>
+					<tendon_slack_length>0.022527432660045945</tendon_slack_length>
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--tendon strain at maximum isometric muscle force-->
@@ -11198,6 +11198,25 @@
 					<!--Deactivation time constant, in seconds-->
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
+                <ActivationCoordinateActuator name="lumbar_ext_motor">
+                    <optimal_force>100.0</optimal_force>
+                    <coordinate>lumbar_extension</coordinate>
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <default_activation>0.5</default_activation>
+                </ActivationCoordinateActuator>
+                <ActivationCoordinateActuator name="lumbar_bend_motor">
+                    <optimal_force>100.0</optimal_force>
+                    <coordinate>lumbar_bending</coordinate>
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <default_activation>0.5</default_activation>
+                </ActivationCoordinateActuator>
+                <ActivationCoordinateActuator name="lumbar_rot_motor">
+                    <optimal_force>100.0</optimal_force>
+                    <coordinate>lumbar_rotation</coordinate>
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <default_activation>0.5</default_activation>
+                </ActivationCoordinateActuator>
+
                 <ActivationCoordinateActuator name="arm_flex_r_motor">
                     <optimal_force>100.0</optimal_force>
                     <coordinate>arm_flex_r</coordinate>
@@ -11287,9 +11306,9 @@
                     <!--Name of the generalized coordinate to which the actuator applies.-->
                     <coordinate>mtp_angle_r</coordinate>
                     <!--The maximum generalized force produced by this actuator.-->
-                    <optimal_force>50</optimal_force>
+                    <optimal_force>40</optimal_force>
                     <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
+                    <activation_time_constant>0.0</activation_time_constant>
                     <!--Value of activation in the default state (default: 0.5).-->
                     <default_activation>0.5</default_activation>
                 </ActivationCoordinateActuator>
@@ -11297,9 +11316,9 @@
                     <!--Name of the generalized coordinate to which the actuator applies.-->
                     <coordinate>mtp_angle_l</coordinate>
                     <!--The maximum generalized force produced by this actuator.-->
-                    <optimal_force>50</optimal_force>
+                    <optimal_force>40</optimal_force>
                     <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
+                    <activation_time_constant>0.0</activation_time_constant>
                     <!--Value of activation in the default state (default: 0.5).-->
                     <default_activation>0.5</default_activation>
                 </ActivationCoordinateActuator>

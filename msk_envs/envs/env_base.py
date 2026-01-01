@@ -126,7 +126,9 @@ class MSKEnv:
         # Load model
         self.curr_path = os.path.abspath(os.path.dirname(__file__))
         self.model_path = os.path.join(self.curr_path, env_config.model_path)
-        load_result = msk_warp.load_model(self.model_path, num_envs)
+        function_path = os.path.join(
+            self.curr_path, env_config.muscle_function_path) if env_config.use_function_based_path else None
+        load_result = msk_warp.load_model(self.model_path, num_envs, function_path)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
         self.dof_id_lookup = load_result.dof_id_lookup
@@ -304,7 +306,7 @@ class MSKEnv:
             self.time[reset_mask] = 0.0  # should this be in env itself?
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
-                reset_mask, :]
+                                                   reset_mask, :]
             self.muscle_activations[reset_mask, :] = self.start_activations[reset_mask, :]
             self.actuator_activations[reset_mask, :] = 0.5
 

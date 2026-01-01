@@ -58,6 +58,9 @@ class EnvConfig:
     """ Maximum contraction velocity (in optimal fiber lengths per second) """
     muscle_dynamics_substeps: int = 10
     """ Number of substeps for muscle dynamics integration (can improve stability) """
+    use_function_based_path: bool = True
+    """ Whether to use function-based path (or geometry path)"""
+    muscle_function_path: str = "../msk_models/muscle_fn_path_info.json"
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose: str = "../msk_models/starting_pose_run.yaml"

@@ -69,6 +69,8 @@ class ImitateEnv(MSKEnv):
         self._set_curr_target_frame()
 
         self.imitation_weights = env_config.imitation_weights
+        self.extra_rewarded_joints = env_config.extra_rewarded_joints
+        self.extra_rewarded_dofs = env_config.extra_rewarded_dofs
         return
 
     def _set_curr_target_frame(self):
@@ -167,16 +169,43 @@ class ImitateEnv(MSKEnv):
 
         # # Global body positions
         rew_track_body_pos = body_pos_track_reward(
-            self.body_positions, self.curr_target_bp, range(self.body_positions.shape[1]),
+            self.body_positions, self.curr_target_bp, range(1, self.body_positions.shape[1]),
             weight=self.imitation_weights["imitation_weight_track_body_pos"])
         update_dict(self.reward_dict, "rew_track_body_pos", rew_track_body_pos)
 
 
         # Global body rotations
         rew_track_body_rot = body_rot_track_reward(
-            self.body_rotations, self.curr_target_br, range(self.body_rotations.shape[1]),
+            self.body_rotations, self.curr_target_br, range(1, self.body_rotations.shape[1]),
             weight=self.imitation_weights["imitation_weight_track_body_rot"])
         update_dict(self.reward_dict, "rew_track_body_rot", rew_track_body_rot)
+
+        # Extra rewarded DOFs - for debug!
+        if len(self.extra_rewarded_dofs) > 0:
+            assert self.reward_lambdas["lambda_extra_rewarded_dofs"] > 0.0, "lambda_extra_rewarded_dofs must be set when extra_rewarded_dofs are set"
+            extra_rewarded_dofs_reward = 0.0
+            for dof in self.extra_rewarded_dofs:
+                dof_adr = self.dof_id_lookup[dof][0]  # qpos_adr
+                track_angle_reward = joint_angle_track_reward(
+                    self.joint_positions, self.curr_target_angles, dof_adr,
+                    weight=self.imitation_weights["imitation_weight_track_joints"])
+                extra_rewarded_dofs_reward += track_angle_reward
+            update_dict(self.reward_dict, "rew_extra_rewarded_dofs", extra_rewarded_dofs_reward)
+        
+        # Extra rewarded joints - for debug!
+        if len(self.extra_rewarded_joints) > 0:
+            assert self.reward_lambdas["lambda_extra_rewarded_joints"] > 0.0, "lambda_extra_rewarded_joints must be set when extra_rewarded_joints are set"
+            extra_rewarded_joints_reward = 0.0
+            for body in self.extra_rewarded_joints:
+                body_id = self.body_id_lookup[body]
+                track_pos_reward = body_pos_track_reward(
+                    self.body_positions, self.curr_target_bp, body_id,
+                    weight=self.imitation_weights["imitation_weight_track_body_pos"])
+                track_rot_reward = body_rot_track_reward(
+                    self.body_rotations, self.curr_target_br, body_id,
+                    weight=self.imitation_weights["imitation_weight_track_body_rot"])
+                extra_rewarded_joints_reward += track_pos_reward + track_rot_reward
+            update_dict(self.reward_dict, "rew_extra_rewarded_joints", extra_rewarded_joints_reward)
 
 
 

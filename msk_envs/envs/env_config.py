@@ -84,6 +84,15 @@ class EnvConfig:
     imitation_weights: dict = None
     """ Imitation reward weights """
 
+    extra_rewarded_joints: list = None
+    """ List of body names to give extra reward for tracking (for debug) """
+    lambda_extra_rewarded_joints: float = 0.0
+    """ Lambda for extra rewarded joints """
+    extra_rewarded_dofs: list = None
+    """ List of DOFs to give extra reward for tracking (for debug) """
+    lambda_extra_rewarded_dofs: float = 0.0
+    """ Lambda for extra rewarded DOFs """
+
     def to_json(self):
         return json.dumps(self.__dict__, indent=4)
 

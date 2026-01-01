@@ -179,11 +179,26 @@ class ImitateConfig(BaseArgs):
     lambda_track_body_rot: float = 1.0
     
     """Imitation reward weights"""
-    imitation_weight_track_joints: float = 0.15
+    imitation_weight_track_joints: float = 3.
     imitation_weight_track_root_pos: float = 10.0
     imitation_weight_track_root_rot: float = 10.0
     imitation_weight_track_body_pos: float = 30.0
-    imitation_weight_track_body_rot: float = 10.0
+    imitation_weight_track_body_rot: float = 3.0
+
+    extra_rewarded_joints: str = ""  # comma-separated list of joints to reward, default is empty
+    lambda_extra_rewarded_joints: float = 0.  # This feature is disabled by default
+
+    extra_rewarded_dofs: str = ""  # comma-separated list of DOFs to reward, default is empty
+    lambda_extra_rewarded_dofs: float = 0.0  # This feature is disabled by default
+
+    def __post_init__(self):
+        super().__post_init__()
+        # Convert comma-separated string to list
+        if isinstance(self.extra_rewarded_joints, str):
+            self.extra_rewarded_joints = [s.strip() for s in self.extra_rewarded_joints.split(",") if s.strip()]
+        if isinstance(self.extra_rewarded_dofs, str):
+            self.extra_rewarded_dofs = [s.strip() for s in self.extra_rewarded_dofs.split(",") if s.strip()]
+
 
 
 def get_args():

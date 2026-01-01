@@ -65,6 +65,10 @@ def main():
         env_variant=args.env_variant,
         reward_lambdas=args.get_reward_lambdas(),
         imitation_weights=args.get_imitation_weights(),
+        extra_rewarded_joints=args.extra_rewarded_joints,
+        lambda_extra_rewarded_joints=args.lambda_extra_rewarded_joints,
+        extra_rewarded_dofs=args.extra_rewarded_dofs,
+        lambda_extra_rewarded_dofs=args.lambda_extra_rewarded_dofs,
     )
 
     envs = EnvFactory.create_env(

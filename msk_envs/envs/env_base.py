@@ -4,7 +4,8 @@ import warp as wp
 import os
 
 from .env_config import EnvConfig
-from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
+from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data, parse_starting_activations
+from msk_envs.utils.joint_limits import get_exp_limit_curves, get_joint_limits
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 
 
@@ -13,12 +14,18 @@ class MSKEnv:
 
     def _setup_model(self, env_config: EnvConfig) -> None:
         """ We're going to modify some model parameters here. """
+        # Reset stiffness, damping, armature to zero
+        stiffness = msk_warp.stiffness(self.m)  # [num_bodies]
+        damping = msk_warp.damping(self.m)  # [num_dofs]
+        armature = msk_warp.armature(self.m)  # [num_dofs]
+        damping[:] = 0.0
+        stiffness[:] = 0.0
+        armature[:] = 0.0
+
         # Joint damping
-        damping = msk_warp.damping(self.m)
         damping[6:] = env_config.joint_damping
 
         # Joint armature
-        armature = msk_warp.armature(self.m)
         armature[6:] = env_config.joint_armature
 
         # Torso damping
@@ -27,14 +34,13 @@ class MSKEnv:
         dof_num = msk_warp.get_dof_num(self.m, torso_id)
         damping[dof_adr:dof_adr + dof_num] = env_config.torso_damping
 
-        # Foot stiffness
-        stiffness = msk_warp.stiffness(self.m)
-        stiffness[:] = 0.0
+        # Foot stiffness and damping
         for toe in ["toes_l", "toes_r"]:
             toe_id = self.lookup_body_id(toe)
+            stiffness[toe_id] = env_config.toes_stiffness
+
             dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
             dof_num = msk_warp.get_dof_num(self.m, toe_id)
-            stiffness[dof_adr:dof_adr + dof_num] = env_config.toes_stiffness
             damping[dof_adr:dof_adr + dof_num] = env_config.toes_damping
 
         # Muscles
@@ -47,11 +53,41 @@ class MSKEnv:
         msk_warp.set_muscle_dynamics_substeps(
             self.m, env_config.muscle_dynamics_substeps)
 
-        # Contact model
+        # Joint limits: override if specified
+        if not env_config.use_default_joint_limits:
+            joint_limit_ranges = msk_warp.joint_limit_ranges(self.m)
+            joint_limits_path = os.path.join(self.curr_path, env_config.joint_limits_path)
+            joint_limits = get_joint_limits(joint_limits_path, self.limit_id_lookup)
+            for joint_limit in joint_limits:
+                limit_id = joint_limit.limit_id
+                joint_limit_ranges[limit_id][0] = joint_limit.lower
+                joint_limit_ranges[limit_id][1] = joint_limit.upper
+
+        # Contact model (Hunt-Crossley or MuJoCo)
         if env_config.use_hunt_crossley:
             msk_warp.use_hunt_crossley_contact(self.m)
         else:
             msk_warp.use_mujoco_contact(self.m)
+
+        # Joint limit model (Exponential or MuJoCo)
+        if env_config.use_exponential_limit:
+            msk_warp.use_exponential_limit(self.m)
+            # Load exponential-spring force curve parameters
+            exp_limit_forces = msk_warp.exp_limit_forces(self.m)
+            exp_limit_shapes = msk_warp.exp_limit_shapes(self.m)
+            limit_curves_path = os.path.join(self.curr_path, env_config.limit_force_curves_path)
+            limit_curves = get_exp_limit_curves(limit_curves_path, self.limit_id_lookup)
+            for limit_curve in limit_curves:
+                limit_id = limit_curve.limit_id
+                exp_limit_forces[limit_id][0] = limit_curve.limit_force[0]
+                exp_limit_forces[limit_id][1] = limit_curve.limit_force[1]
+                exp_limit_shapes[limit_id][0] = limit_curve.shape_param[0]
+                exp_limit_shapes[limit_id][1] = limit_curve.shape_param[1]
+        else:
+            msk_warp.use_mujoco_limit(self.m)
+
+        # MuJoCo-parameters
+        msk_warp.set_solref(self.m, env_config.solref)
 
         # Use Newton solver for GPU
         if self.device.type == "cuda":
@@ -88,12 +124,15 @@ class MSKEnv:
         self.device = device
 
         # Load model
-        curr_path = os.path.abspath(os.path.dirname(__file__))
-        self.model_path = os.path.join(curr_path, env_config.model_path)
-        load_result = msk_warp.load_model(self.model_path, num_envs)
+        self.curr_path = os.path.abspath(os.path.dirname(__file__))
+        self.model_path = os.path.join(self.curr_path, env_config.model_path)
+        function_path = os.path.join(
+            self.curr_path, env_config.muscle_function_path) if env_config.use_function_based_path else None
+        load_result = msk_warp.load_model(self.model_path, num_envs, function_path)
         self.m, self.d = load_result.model, load_result.data
         self.body_id_lookup = load_result.body_id_lookup
         self.dof_id_lookup = load_result.dof_id_lookup
+        self.limit_id_lookup = load_result.limit_id_lookup
         self.muscle_id_lookup = load_result.muscle_id_lookup
         self.actuator_id_lookup = load_result.actuator_id_lookup
         self.visuals = load_result.visuals
@@ -104,6 +143,9 @@ class MSKEnv:
         self.num_dofs = msk_warp.get_num_dofs(self.m)
         self.num_muscles = msk_warp.get_num_muscles(self.m)
         self.num_actuators = msk_warp.get_num_actuators(self.m)
+        # [num_envs, num_bodies]
+        self.body_mass = msk_warp.body_mass(self.m)
+        self.total_mass = self.body_mass.sum()
 
         # [num_envs]
         self.time = msk_warp.time(self.d)
@@ -138,7 +180,7 @@ class MSKEnv:
         # [num_envs, num_visuals, 4]
         self.visual_rotations = msk_warp.get_visual_rotations(self.d)
 
-        # RL Environment
+        # RL Environment metadata
         self.action_range = (-1.0, 1.0)
         self.max_episode_duration = env_config.max_episode_duration
         self.delta_t = env_config.delta_t
@@ -147,8 +189,8 @@ class MSKEnv:
             (num_envs, 1), dtype=torch.float32, device=device)
 
         # Starting position, load from file
-        start_pose_path = os.path.join(curr_path, env_config.starting_pose)
-        q, qv = parse_starting_pose(start_pose_path)
+        start_pose_path = os.path.join(self.curr_path, env_config.starting_pose)
+        q, qv = parse_starting_pose(start_pose_path, self.dof_id_lookup, self.num_qpos, self.num_dofs)
         assert len(q) == self.num_qpos and len(qv) == self.num_dofs
         q_torch = torch.tensor(q, dtype=torch.float32, device=device)
         qv_torch = torch.tensor(qv, dtype=torch.float32, device=device)
@@ -167,6 +209,17 @@ class MSKEnv:
         else:
             self.swap_lr_data = []
 
+        # Starting muscle activations
+        if env_config.use_prescribed_starting_activations:
+            start_activations_path = os.path.join(self.curr_path, env_config.starting_activations)
+            start_activations = parse_starting_activations(
+                start_activations_path, self.muscle_id_lookup, env_config.default_activation)
+            self.start_activations = torch.tensor(start_activations, device=device).unsqueeze(0).repeat(num_envs, 1)
+        else:
+            self.start_activations = torch.ones((num_envs, self.num_muscles),
+                                                device=device) * env_config.default_activation
+
+        # Rewards storage
         self.reward_dict = {}
         self.reward_lambdas = env_config.reward_lambdas
 
@@ -186,18 +239,18 @@ class MSKEnv:
         self.cuda_graph = cuda_graph
         self._setup_cuda_graphs()
 
-        reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
-        self.set_start_pose(reset_ind.ravel())
-
+        # Pre-compute useful body IDs and offsets
         self.root_id = self.lookup_body_id("pelvis")
         self.torso_id = self.lookup_body_id("torso")
-
         self.root_pos = self.body_positions[:, self.root_id]
         self.torso_pos = self.body_positions[:, self.torso_id]
         self.torso_rot = self.body_rotations[:, self.torso_id]
-
         head_offset = build_axis(axis=UP_IDX, scale=0.215)
         self.head_offset = torch.tensor(head_offset, device=self.device).unsqueeze(0).repeat(num_envs, 1)
+
+        # Finally, set initial pose
+        reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
+        self.set_start_pose(reset_ind.ravel())
         return
 
     def set_start_pose(self, reset_mask: torch.Tensor) -> None:
@@ -253,8 +306,8 @@ class MSKEnv:
             self.time[reset_mask] = 0.0  # should this be in env itself?
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[
-                reset_mask, :]
-            self.muscle_activations[reset_mask, :] = 0.0
+                                                   reset_mask, :]
+            self.muscle_activations[reset_mask, :] = self.start_activations[reset_mask, :]
             self.actuator_activations[reset_mask, :] = 0.5
 
         # Reset sim

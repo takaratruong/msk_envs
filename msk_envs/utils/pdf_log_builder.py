@@ -1,5 +1,3 @@
-import json
-
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -41,7 +39,7 @@ def create_generic_plot(
                 y_label=y_label,
                 x_data=times,
                 x_data_sub=frame_ind,
-                x_fmt=".1f",
+                x_fmt=".2f",
                 x_sub_fmt=".0f",
                 y_fmt=y_fmt
             )
@@ -96,6 +94,15 @@ def create_generic_plot(
         muscles_plot.finish(pdf)
 
 
+def create_interval_plots(interval_duration: float, times: np.ndarray, fn):
+    time_current, final_time = 0.0, times[-1]
+    if final_time - time_current > interval_duration:  # only if longer than interval
+        while time_current < final_time:
+            fn(time_current, min(time_current + interval_duration, final_time))
+            time_current += interval_duration
+    return
+
+
 def create_pdf_output(frame_data: list[FrameData], out_file: str):
     """ Create a pdf with all the relevant plots """
     n_frames = len(frame_data)
@@ -120,7 +127,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 y_label="Reward",
                 x_data=times,
                 x_data_sub=frame_ind,
-                x_fmt=".1f",
+                x_fmt=".2f",
                 x_sub_fmt=".0f",
                 y_fmt=".1f",
             )
@@ -162,26 +169,42 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     y_label="GRF (BW)",
                     x_data=time_selected,
                     x_data_sub=frame_ind_selected,
-                    x_fmt=".1f",
+                    x_fmt=".2f",
                     x_sub_fmt=".0f",
-                    y_fmt=".0f",
+                    y_fmt=".1f",
                 )
             )
+
+            # put grf_selected through a low pass filter to reduce noise
+            # from scipy.signal import butter, filtfilt
+            # def lowpass(data, times, order=4):
+            #     fs = 1.0 / np.mean(np.diff(times))  # sampling frequency (Hz)
+            #     cutoff = 60.0  # Hz
+            #
+            #     nyq = 0.5 * fs
+            #     normal_cutoff = cutoff / nyq
+            #
+            #     b, a = butter(order, normal_cutoff, btype='low')
+            #     return filtfilt(b, a, data, axis=0)
+            # grf_selected = lowpass(grf_selected, time_selected)
 
             grf_plot.add_hline(0, 0.0)
             grf_plot.add(0, grf_selected[:, 0], label="X")
             grf_plot.add(0, grf_selected[:, 1], label="Y")
             grf_plot.add(0, grf_selected[:, 2], label="Z")
+
+            # Compute the impulse over the selected time range
+            impulse = np.trapz(grf_selected, time_selected, axis=0)
+            # grf_plot.add_text(0, x_pos=0.25, y_pos=3.15,
+            #                   text=f"Impulse (BW s): ({impulse[0]:.2f}, {impulse[1]:.2f}, {impulse[2]:.2f})",
+            #                   fontsize=6)
+            # print(f"GRF Impulse (BW s) from {time_start:.4f}s to {time_end:.4f}s: "
+            #       f"({impulse[0]:.4f}, {impulse[1]:.4f}, {impulse[2]:.4f})")
+
             grf_plot.finish(pdf)
 
         # GRF plot for entire duration
         create_grf_plot()
-        # Create plots for 1 second intervals
-        interval = 1.0
-        time_current, final_time = 0.0, times[-1]
-        while time_current < final_time:
-            create_grf_plot(time_current, min(time_current + interval, final_time))
-            time_current += interval
 
         # Find the intervals in which there is contact
         contact_intervals = []
@@ -212,7 +235,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     y_label="Contact Duration",
                     x_data=times,
                     x_data_sub=frame_ind,
-                    x_fmt=".1f",
+                    x_fmt=".2f",
                     x_sub_fmt=".0f",
                     y_fmt=".2f",
                 )
@@ -221,11 +244,19 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                                           connect_line=True, labeled=True)
             contact_time_plot.finish(pdf)
 
+        # Create interval plots for each contact interval
+        for (start_time, end_time) in contact_intervals:
+            create_grf_plot(start_time, end_time)
+
         # --- JOINT ANGLES ---
+        has_reference = frame_data[0].joint_angles[0].has_reference()
         joint_names = [j.name for j in frame_data[0].joint_angles]
         joint_angles = []
         for frame in frame_data:
-            joint_angles.append([j.value for j in frame.joint_angles])
+            if has_reference:
+                joint_angles.append([(j.value, j.reference) for j in frame.joint_angles])
+            else:
+                joint_angles.append([j.value for j in frame.joint_angles])
         joint_angles = np.array(joint_angles)
 
         def create_joint_angles_plot(time_start: float = 0.0, time_end: float = None):
@@ -236,17 +267,15 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             time_selected = times[time_mask]
             frame_ind_selected = frame_ind[time_mask]
             title = f"Joint Angles ({time_start:.1f}s to {time_end:.1f}s)"
+            sublabels = ["Value", "Reference"] if has_reference else None
+            alpha = [1.0, 0.5] if has_reference else None
             create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_angles[time_mask, :],
-                                title, "Value (rad)", ".3f", pdf, add_zero_line=False)
+                                title, "Value (rad)", ".3f", pdf, add_zero_line=False,
+                                sublabels=sublabels, alphas=alpha)
 
-        # Joint angles plot for entire duration
+        # Joint angles plot for entire duration, and 1 second intervals
         create_joint_angles_plot()
-        # Create plots for 1 second intervals
-        interval = 1.0
-        time_current = 0.0
-        while time_current < final_time:
-            create_joint_angles_plot(time_current, min(time_current + interval, final_time))
-            time_current += interval
+        create_interval_plots(1.0, times, create_joint_angles_plot)
 
         # --- JOINT MOMENTS ---
         joint_names = [j.name for j in frame_data[0].joint_moments]
@@ -266,12 +295,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_moments[time_mask, :],
                                 title, "Value (N m)", ".3f", pdf, add_zero_line=False)
 
+        # Joint moments plot for entire duration, and 1 second intervals
         create_joint_moments_plot()
-        interval = 1.0
-        time_current = 0.0
-        while time_current < final_time:
-            create_joint_moments_plot(time_current, min(time_current + interval, final_time))
-            time_current += interval
+        create_interval_plots(1.0, times, create_joint_moments_plot)
 
         # --- MUSCLE PLOTS ---
         muscle_names = [m.name for m in frame_data[0].muscles]

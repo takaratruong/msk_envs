@@ -13,17 +13,19 @@ def main():
     env_config = EnvConfig(
         env_variant=args.env_variant,
         reward_lambdas=args.get_reward_lambdas(),
+        imitation_weights=args.get_imitation_weights()
     )
 
     env_config.q_noise = 0.0
     env_config.qv_noise = 0.0
     env_config.swap_lr = False
 
-    device = torch.device("cuda" if args.cuda else f"cpu")
+    has_cuda_support = torch.cuda.is_available()
+    device = torch.device("cuda" if args.cuda and has_cuda_support else f"cpu")
     envs = EnvFactory.create_env(num_envs=1,
                                  env_config=env_config,
                                  render=True,
-                                 cuda_graph=args.cuda,
+                                 cuda_graph=has_cuda_support,
                                  device=device)
 
     actions = envs.get_blank_actions()
@@ -34,7 +36,8 @@ def main():
     sim.reset()
 
     for _ in tqdm(range(max_episode_length)):
-        actions = torch.randn_like(actions)
+        # actions = torch.randn_like(actions)
+        actions = envs.get_blank_actions()
         finished, obs = sim.step(actions)
         if finished:
             break

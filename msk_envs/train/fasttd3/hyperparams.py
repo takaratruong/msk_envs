@@ -46,7 +46,7 @@ class BaseArgs:
 
     buffer_size: int = 256 * 4  # (per env)
     num_steps: int = 3  # n value of n-step returns
-    gamma: float = 0.97
+    gamma: float = 0.997
     tau: float = 0.1  # target smoothing coefficient
     batch_size: int = 8192
 
@@ -59,6 +59,8 @@ class BaseArgs:
     """ Exploration hyperparameters """
     std_min: float = 0.001  # minimum scale of exploration noise
     std_max: float = 0.4  # maximum scale of exploration noise
+    use_gsde: bool = True  # whether to use generalized state-dependent exploration (gSDE)
+    gsde_steps: int = 10  # number of steps to sample new noise for gSDE
 
     """ Q/Value function hyperparameters
     Distributional critic outputs logits over linspace(v_min, v_max, num_atoms)
@@ -81,7 +83,7 @@ class BaseArgs:
     """whether to use torch.compile."""
     compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
     # compile_mode: str = "max-autotune"
-    compile_backend: str = "inductor" # "eager" is slower but safer
+    compile_backend: str = "inductor"  # "eager" is slower but safer
 
     """ SimbaV2 """
     critic_num_blocks: int = 2
@@ -94,17 +96,22 @@ class BaseArgs:
     exp_name: str = ""
     traj_out_folder: str = ""
     analytics_out_folder: str = ""
-    
+
     def __post_init__(self):
         """Compute derived fields after exp_prefix is set from outside"""
         self.exp_name = f"{self.exp_prefix}_{self.env_name}" if self.exp_prefix else self.env_name
         self.traj_out_folder = f"dashboard/trajectories/{self.exp_name}"
         self.analytics_out_folder = f"models/frame_data/{self.exp_name}"
-    
+
     def get_reward_lambdas(self):
         """Extract all lambda_* fields as a dictionary"""
         return {k: v for k, v in self.__dict__.items() if
                 k.startswith("lambda_")}
+
+    def get_imitation_weights(self):
+        """Extract all imitation_weight_* fields as a dictionary"""
+        return {k: v for k, v in self.__dict__.items() if
+                k.startswith("imitation_weight_")}
 
 
 def pretty_print_base_args(args: BaseArgs):
@@ -149,8 +156,8 @@ class WalkConfig(BaseArgs):
 class SprintConfig(BaseArgs):
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
-    lambda_limit: float = -0.0
-    lambda_actuator: float = -0.0
+    lambda_limit: float = -1.0
+    lambda_actuator: float = -1.0
     lambda_finish: float = 20.0
 
 
@@ -166,22 +173,45 @@ class VerticalConfig(BaseArgs):
 class ImitateConfig(BaseArgs):
     """Imitate environment specific reward scales"""
     lambda_track_joints: float = 1.0
-    lambda_track_root_pos: float = 1.0
-    lambda_track_root_rot: float = 1.0
-    # lambda_track_body_pos: float = 1.0
+    lambda_track_root_pos: float = 0.0
+    lambda_track_root_rot: float = 0.0
+    lambda_track_body_pos: float = 1.0
+    lambda_track_body_rot: float = 1.0
+    
+    """Imitation reward weights"""
+    imitation_weight_track_joints: float = 3.
+    imitation_weight_track_root_pos: float = 10.0
+    imitation_weight_track_root_rot: float = 10.0
+    imitation_weight_track_body_pos: float = 30.0
+    imitation_weight_track_body_rot: float = 3.0
+
+    extra_rewarded_joints: str = ""  # comma-separated list of joints to reward, default is empty
+    lambda_extra_rewarded_joints: float = 0.  # This feature is disabled by default
+
+    extra_rewarded_dofs: str = ""  # comma-separated list of DOFs to reward, default is empty
+    lambda_extra_rewarded_dofs: float = 0.0  # This feature is disabled by default
+
+    def __post_init__(self):
+        super().__post_init__()
+        # Convert comma-separated string to list
+        if isinstance(self.extra_rewarded_joints, str):
+            self.extra_rewarded_joints = [s.strip() for s in self.extra_rewarded_joints.split(",") if s.strip()]
+        if isinstance(self.extra_rewarded_dofs, str):
+            self.extra_rewarded_dofs = [s.strip() for s in self.extra_rewarded_dofs.split(",") if s.strip()]
+
 
 
 def get_args():
     """Get configuration arguments based on env_variant."""
     import sys
-    
+
     # Parse env_variant first to determine which config class to use
-    env_variant = DerivedEnv.SPRINT
+    env_variant = DerivedEnv.IMITATE
     for i, arg in enumerate(sys.argv):
         if arg == "--env-variant" and i + 1 < len(sys.argv):
             env_variant = DerivedEnv[sys.argv[i + 1]]
             break
-    
+
     # Select config class based on env_variant
     config_class = {
         DerivedEnv.WALK: WalkConfig,
@@ -189,7 +219,7 @@ def get_args():
         DerivedEnv.VERTICAL: VerticalConfig,
         DerivedEnv.IMITATE: ImitateConfig,
     }.get(env_variant, SprintConfig)
-    
+
     args = tyro.cli(config_class)
     args.env_variant = env_variant
     args.use_wandb = not args.disable_wandb

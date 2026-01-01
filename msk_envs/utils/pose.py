@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class SwapPair:
+    """ Represents a pair of left/right body parts to swap """
     start_qpos_r: int
     start_qpos_l: int
     num_qpos: int
@@ -14,10 +15,29 @@ class SwapPair:
     num_dof: int
 
 
-def parse_starting_pose(file_path):
+def parse_starting_pose(
+        file_path,
+        dof_id_lookup: dict[str, tuple[int, int]],
+        num_qpos: int,
+        num_dofs: int,
+):
+    """ Parse starting pose from YAML file"""
+    start_q, start_qv = [0.0] * num_qpos, [0.0] * num_dofs
+
     with open(file_path, "r") as f:
         data = yaml.safe_load(f)
-    return data["joint_positions"], data["joint_velocities"]
+
+    for coord_name, values in data.items():
+        if coord_name not in dof_id_lookup:
+            raise ValueError(f"Coordinate '{coord_name}' not found")
+        qpos_id, qvel_id = dof_id_lookup[coord_name]
+        qpos, qvel = values["q"], values["v"]
+        if qpos_id != -1:
+            start_q[qpos_id] = qpos
+        if qvel_id != -1:
+            start_qv[qvel_id] = qvel
+
+    return start_q, start_qv
 
 
 def get_swap_left_right_data(
@@ -58,3 +78,27 @@ def get_swap_left_right_data(
             )
         )
     return swap_data
+
+
+def parse_starting_activations(
+        file_path: str,
+        muscle_id_lookup: dict[str, int],
+        default_activation: float = 0.0,
+) -> list[float]:
+    num_muscles = len(muscle_id_lookup)
+
+    with open(file_path, "r") as f:
+        data = yaml.safe_load(f)
+
+    activations = [default_activation] * num_muscles
+    for muscle_name, activation in data.items():
+        muscle_id = muscle_id_lookup[muscle_name]
+        activations[muscle_id] = activation
+    return activations
+
+
+def get_base_name(name: str) -> str:
+    """ Get base name by removing _r/_l suffix """
+    if name.endswith("_r") or name.endswith("_l"):
+        return name[:-2]
+    return name

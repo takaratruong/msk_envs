@@ -1,0 +1,98 @@
+# Joint angle limits (radians)
+lumbar_extension:
+  lower: -0.6382683019723987
+  upper: 0.029566666199439692
+lumbar_bending:
+  lower: -0.3462544893113844
+  upper: 0.3462544893113844
+lumbar_rotation:
+  lower: -0.20787608465612198
+  upper: 0.20787608465612198
+
+hip_flexion_r:
+  lower: -0.48672976023709463
+  upper: 1.8872046548439223
+hip_adduction_r:
+  lower: -0.30793872428197694
+  upper: 0.22448010934318957
+hip_rotation_r:
+  lower: -0.487598817267528
+  upper: 0.2037655473791795
+knee_angle_r:
+  lower: -3.1076227876321165
+  upper: -0.27823332849254734
+ankle_angle_r:
+  lower: -0.9106588549089635
+  upper: 0.4940999324572593
+subtalar_angle_r:
+  lower: -0.5842658424754732
+  upper: -0.024134571110674283
+mtp_angle_r:
+  lower: -0.201518321866337
+  upper: 0.32217938466628504
+
+arm_flex_r:
+  lower: -1.3089969389957472
+  upper: 1.5707963267948966
+arm_add_r:
+  lower: -0.46633961505662375
+  upper: 0.018194510291320385
+arm_rot_r:
+  lower: -0.2617993877991494
+  upper: 0.0
+elbow_flex_r:
+  lower: 0.5673752990842443
+  upper: 3.2725000001036397
+pro_sup_r:
+  lower: 0.6906831166502283
+  upper: 1.5707963267948966
+wrist_flex_r:
+  lower: -0.5432859019379003
+  upper: 0.23526645770518176
+wrist_dev_r:
+  lower: 0.08799561399367667
+  upper: 0.6087404937834253
+
+hip_flexion_l:
+  lower: -0.48672976023709463
+  upper: 1.8872046548439223
+hip_adduction_l:
+  lower: -0.30793872428197694
+  upper: 0.22448010934318957
+hip_rotation_l:
+  lower: -0.487598817267528
+  upper: 0.2037655473791795
+knee_angle_l:
+  lower: -3.1076227876321165
+  upper: -0.27823332849254734
+ankle_angle_l:
+  lower: -0.9106588549089635
+  upper: 0.4940999324572593
+subtalar_angle_l:
+  lower: -0.5842658424754732
+  upper: -0.024134571110674283
+mtp_angle_l:
+  lower: -0.201518321866337
+  upper: 0.32217938466628504
+
+arm_flex_l:
+  lower: -1.3089969389957472
+  upper: 1.5707963267948966
+arm_add_l:
+  lower: -0.46633961505662375
+  upper: 0.018194510291320385
+arm_rot_l:
+  lower: -0.2617993877991494
+  upper: 0.0
+elbow_flex_l:
+  lower: 0.5673752990842443
+  upper: 3.2725000001036397
+pro_sup_l:
+  lower: 0.6906831166502283
+  upper: 1.5707963267948966
+wrist_flex_l:
+  lower: -0.5432859019379003
+  upper: 0.23526645770518176
+wrist_dev_l:
+  lower: 0.08799561399367667
+  upper: 0.6087404937834253

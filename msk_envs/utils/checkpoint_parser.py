@@ -1,5 +1,6 @@
 import msk_warp
 import os
+import torch
 
 from dataclasses import dataclass
 
@@ -122,13 +123,31 @@ class NamedValue:
             "value": self.value,
         }
 
+    def has_reference(self) -> bool:
+        return False
+
+
+@dataclass
+class NamedValueWithReference(NamedValue):
+    reference: float
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "value": self.value,
+            "reference": self.reference,
+        }
+
+    def has_reference(self) -> bool:
+        return True
+
 
 @dataclass
 class FrameData:
     time: float
     visuals: list[VisualData]
     colliders: list[ColliderData]
-    joint_angles: list[NamedValue]
+    joint_angles: list[NamedValue | NamedValueWithReference]
     joint_velocities: list[NamedValue]
     joint_moments: list[NamedValue]
     muscles: list[MuscleData]
@@ -282,16 +301,24 @@ def parse_joint_angles(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
         qpos_idx_to_name: dict[int, str],
-        world_id: int
+        world_id: int,
+        ref_joint_angles: torch.Tensor | None
 ) -> list[NamedValue]:
     joint_angles = msk_warp.joint_positions(d)
     angles = []
 
     for i in range(msk_warp.get_num_qpos(m)):
-        angle = NamedValue(
-            name=qpos_idx_to_name[i],
-            value=float(joint_angles[world_id][i].item()),
-        )
+        if ref_joint_angles is None:
+            angle = NamedValue(
+                name=qpos_idx_to_name[i],
+                value=float(joint_angles[world_id][i].item()),
+            )
+        else:
+            angle = NamedValueWithReference(
+                name=qpos_idx_to_name[i],
+                value=float(joint_angles[world_id][i].item()),
+                reference=float(ref_joint_angles[world_id][i].item()),
+            )
         angles.append(angle)
     return angles
 
@@ -333,15 +360,16 @@ def parse_frame(
         actuation_idx_to_name: dict[int, str],
         visual_load_results: list[msk_warp.types.MeshLoadResult],
         world_id: int,
-        frame_time,
-        reward_data
+        frame_time: float,
+        reward_data: dict,
+        ref_joint_angles=None,
 ) -> FrameData:
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
     colliders = parse_collider_data(m, d, world_id)
     muscles = parse_muscle_data(m, d, muscle_idx_to_name, world_id)
     actuators = parse_actuator_data(m, d, actuation_idx_to_name, world_id)
     kinetic_data = parse_kinetic_data(m, d, world_id)
-    joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, world_id)
+    joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, world_id, ref_joint_angles)
     joint_velocities = parse_joint_velocities(m, d, world_id)
     joint_moments = parse_joint_moments(m, d, dof_idx_to_name, world_id)
 

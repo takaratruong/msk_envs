@@ -4,9 +4,10 @@ import msk_warp
 
 from .env_base import MSKEnv
 from .env_config import EnvConfig
-from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis
-from msk_envs.utils.global_params import UP_IDX
+from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis, quat_conjugate
 from msk_envs.utils.parse_mot import parse_mot
+from msk_envs.utils.pose import get_base_name
+from msk_envs.utils.reward_lib import joint_angle_track_reward, body_pos_track_reward, body_rot_track_reward, update_dict
 
 
 class ImitateEnv(MSKEnv):
@@ -25,17 +26,17 @@ class ImitateEnv(MSKEnv):
         motion_file = os.path.join(curr_path, f"{env_config.motion_name}.mot")
         data, col_names = parse_mot(motion_file, self.model_path)
         ref_motion = torch.tensor(data, device=device)
+        ref_time, ref_frames = ref_motion[0, :], ref_motion[1:, :]
 
         # Now we can compute the reference body positions
         #  let's also process the visuals while we're at it
         print("Processing reference motion")
-        ref_time, ref_frames = ref_motion[0, :], ref_motion[1:, :]
         body_positions, body_rotations = [], []
         vis_positions, vis_rotations = [], []
         for i in range(data.shape[1]):
+            # Modify world 0, run FK
             self.joint_positions[0, :] = ref_frames[:, i]
             self.fk()
-
             body_positions.append(self.body_positions[0, :, :].clone())
             body_rotations.append(self.body_rotations[0, :, :].clone())
             vis_positions.append(self.visual_positions[0, :, :].clone())
@@ -50,75 +51,63 @@ class ImitateEnv(MSKEnv):
         # Extract time and frames, store
         n_joints, n_frames = ref_frames.shape
         self.ref_time = torch.tensor(ref_time, device=device)
-        self.ref_frames = torch.tensor(ref_frames, device=device)
+        self.ref_frame_angles = torch.tensor(ref_frames, device=device)
         self.max_time = self.ref_time[-1].item()
         self.n_frames = n_frames
 
         assert (n_joints == self.joint_positions.shape[1])
         print(f"Loaded {n_frames} frames, duration {self.max_time:.2f}s")
 
-        # Current time (we'll track this ourselves)
-        self.world_times = torch.zeros(self.num_worlds, device=device)
-
-        # Each world will have a random time offset into the motion
-        self.time_offset = torch.rand(
-            self.num_worlds, device=device) * self.max_time
-        self.time_offset[0] = 0.0  # for debugging, first env starts at beginning
+        # Update max episode duration
+        self.max_episode_duration = self.max_time
 
         # Target frame (useful if we want to interpolate between frames)
-        self.curr_target = torch.zeros(
-            (self.num_worlds, n_joints), device=device)
-        self.curr_bp_target = torch.zeros_like(self.body_positions)
+        self.curr_target_angles = torch.zeros((self.num_worlds, n_joints), device=device)
+        self.curr_target_bp = torch.zeros_like(self.body_positions)
+        self.curr_target_br = torch.zeros_like(self.body_rotations)
 
         self._set_curr_target_frame()
+
+        self.imitation_weights = env_config.imitation_weights
+        self.extra_rewarded_joints = env_config.extra_rewarded_joints
+        self.extra_rewarded_dofs = env_config.extra_rewarded_dofs
         return
 
     def _set_curr_target_frame(self):
         # Get the indices of the frames right after the current time
-        curr_time = (self.world_times + self.time_offset) % self.max_time
+        curr_time = self.time
         frame_indices = torch.searchsorted(self.ref_time, curr_time)
         frame_indices = torch.clamp(frame_indices, 0, len(self.ref_time) - 1)
-        self.curr_target[:] = self.ref_frames[:, frame_indices].T
-        # self.curr_bp_target[:] = self.ref_body_positions[frame_indices, :, :]
+        self.curr_target_angles[:] = self.ref_frame_angles[:, frame_indices].T
+        self.curr_target_bp[:] = self.ref_body_positions[frame_indices, :, :]
+        self.curr_target_br[:] = self.ref_body_rotations[frame_indices, :, :]
 
         # Finite diff with prev frame to get target velocities:
         prev_frame_indices = torch.clamp(frame_indices - 1, 0, len(self.ref_time) - 1)
         zero_vel_mask = (frame_indices == 0)  # for frame 0, use *next* frame
         prev_frame_indices[zero_vel_mask] = frame_indices[zero_vel_mask] + 1
-        dx = self.ref_frames[:, frame_indices] - self.ref_frames[
-            :, prev_frame_indices]
+        dx = self.ref_frame_angles[:, frame_indices] - self.ref_frame_angles[:, prev_frame_indices]
         dt = self.ref_time[frame_indices] - self.ref_time[prev_frame_indices]
         target_velocities = (dx / dt).T
 
         # Special handling for root quaternion velocity
-        root_rot_frame = self.ref_frames[3:7, frame_indices]
-        root_rot_prev_frame = self.ref_frames[3:7, prev_frame_indices]
+        root_rot_frame = self.ref_frame_angles[3:7, frame_indices]
+        root_rot_prev_frame = self.ref_frame_angles[3:7, prev_frame_indices]
         root_rot_diff_quat = quat_diff(root_rot_frame.T, root_rot_prev_frame.T)
         root_rot_diff_aa = quat_to_angle_axis(root_rot_diff_quat).T
         root_rot_vel = (root_rot_diff_aa / dt).T
+        # Rotate it by the root orientation inverse to get body-local angular velocity
+        root_rot_conj = quat_conjugate(root_rot_frame.T)
+        root_rot_vel = rotate_vec(root_rot_conj, root_rot_vel)
 
         # Update the starting position (in case we reset)
-        self.start_pose[:] = self.curr_target.detach().clone()
+        self.start_pose[:] = self.curr_target_angles.detach().clone()
         self.start_velocity[:, 0:3] = target_velocities[:, 0:3]  # root lin v
         self.start_velocity[:, 3:6] = root_rot_vel  # root ang v
         self.start_velocity[:, 6:] = target_velocities[:, 7:]  # joint qv
         return
 
     def _upon_reset(self, reset_mask: torch.Tensor):
-        # Note: reset_mask currently only includes envs that fell (terminated)
-        # A bit hacky, but mark queue sim reset for worlds past the max time
-        #  to reset the motion (we don't want RL to see these resets)
-        curr_time = self.world_times + self.time_offset
-        over_time_mask = (curr_time >= self.max_time)
-        self.reset_tensor[:] = (self.reset_tensor[:].bool() | over_time_mask.unsqueeze(1)).to(torch.float32)
-
-        # Now we can reset the world times and time offsets
-        reset_mask = reset_mask | over_time_mask
-        self.world_times[reset_mask.bool()] = 0.0
-        self.time_offset[reset_mask.bool()] = torch.rand(
-            reset_mask.sum(), device=self.time_offset.device) * self.max_time
-        self.time_offset[0] = 0.0  # for debugging, first env starts at beginning
-
         self._set_curr_target_frame()
         return
 
@@ -136,12 +125,12 @@ class ImitateEnv(MSKEnv):
         root_positions = self.body_positions[:, 0, :]
         rel_body_positions = self.body_positions - root_positions.unsqueeze(1)
 
-        curr_time = (self.world_times + self.time_offset) % self.max_time
+        curr_time = self.time
 
         obs = torch.cat([
             self.muscle_activations,
             self.muscle_fiber_lengths,
-            # self.muscle_fiber_velocities,
+            self.muscle_fiber_velocities,
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
@@ -149,87 +138,101 @@ class ImitateEnv(MSKEnv):
             self.body_rotations.view(self.num_worlds, -1),
             self.body_velocities.view(self.num_worlds, -1),
             curr_time.unsqueeze(1),
-            self.curr_target,
-            self.curr_bp_target.view(self.num_worlds, -1),
+            self.curr_target_angles,
+            self.curr_target_bp.view(self.num_worlds, -1),
+            # self.curr_target_br.view(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
-        self.world_times += self.delta_t
-
         self._set_curr_target_frame()
-
-        # TODO: Rewards should be implemented in the reward library
+        self.reward_dict = {}
 
         # Tracking reward: joints (all except root)
-        curr_joints = self.joint_positions[:, 7:]
-        target_joints = self.curr_target[:, 7:]
-        joint_diff = curr_joints - target_joints
-        joint_diff_sq = joint_diff ** 2
-        rew_track_joints = torch.exp(-0.05 * joint_diff_sq.sum(dim=1))
+        track_angle_reward = joint_angle_track_reward(
+            self.joint_positions, self.curr_target_angles, qpos_adr=range(7, self.joint_positions.shape[1]),
+            weight=self.imitation_weights["imitation_weight_track_joints"])
+        update_dict(self.reward_dict, "rew_track_joints", track_angle_reward)
 
         # Root position
-        curr_root_pos = self.joint_positions[:, 0:3]
-        target_root_pos = self.curr_target[:, 0:3]
-        root_pos_diff = curr_root_pos - target_root_pos
-        root_pos_diff_sq = root_pos_diff ** 2
-        rew_track_root_pos = torch.exp(-10 * root_pos_diff_sq.sum(dim=1))
+        rew_track_root_pos = joint_angle_track_reward(
+            self.joint_positions, self.curr_target_angles, qpos_adr=range(3),
+            weight=self.imitation_weights["imitation_weight_track_root_pos"])
+        update_dict(self.reward_dict, "rew_track_root_pos", rew_track_root_pos)
 
         # Root quaternion, use angle difference
-        curr_root_quat = self.joint_positions[:, 3:7]
-        target_root_quat = self.curr_target[:, 3:7]
-        root_quat_diff_angle = quat_diff_angle(curr_root_quat, target_root_quat)
-        root_quat_diff_sq = root_quat_diff_angle ** 2
-        rew_track_root_rot = torch.exp(-10 * root_quat_diff_sq)
+        rew_track_root_rot = joint_angle_track_reward(
+            self.joint_positions, self.curr_target_angles, qpos_adr=range(3,7),
+            weight=self.imitation_weights["imitation_weight_track_root_rot"])
+        update_dict(self.reward_dict, "rew_track_root_rot", rew_track_root_rot)
+
 
         # # Global body positions
-        # curr_body_pos = self.body_positions
-        # target_body_pos = self.curr_bp_target
-        # body_pos_diff = curr_body_pos - target_body_pos
-        # body_pos_diff_sq = body_pos_diff ** 2
-        # # Sum across coordinates, then bodies
-        # body_pos_diff_sq_sum = body_pos_diff_sq.sum(dim=2)
-        # body_pos_diff_sq_sum = body_pos_diff_sq_sum.sum(dim=1)
-        # rew_track_body_pos = torch.exp(-0.1 * body_pos_diff_sq_sum)
+        rew_track_body_pos = body_pos_track_reward(
+            self.body_positions, self.curr_target_bp, range(1, self.body_positions.shape[1]),
+            weight=self.imitation_weights["imitation_weight_track_body_pos"])
+        update_dict(self.reward_dict, "rew_track_body_pos", rew_track_body_pos)
 
-        self.reward_dict = {
-            "rew_track_joints": rew_track_joints.detach(),
-            "rew_track_root_pos": rew_track_root_pos.detach(),
-            "rew_track_root_rot": rew_track_root_rot.detach(),
-            # "rew_track_body_pos": rew_track_body_pos.detach(),
-        }
+
+        # Global body rotations
+        rew_track_body_rot = body_rot_track_reward(
+            self.body_rotations, self.curr_target_br, range(1, self.body_rotations.shape[1]),
+            weight=self.imitation_weights["imitation_weight_track_body_rot"])
+        update_dict(self.reward_dict, "rew_track_body_rot", rew_track_body_rot)
+
+        # Extra rewarded DOFs - for debug!
+        if len(self.extra_rewarded_dofs) > 0:
+            assert self.reward_lambdas["lambda_extra_rewarded_dofs"] > 0.0, "lambda_extra_rewarded_dofs must be set when extra_rewarded_dofs are set"
+            extra_rewarded_dofs_reward = 0.0
+            for dof in self.extra_rewarded_dofs:
+                dof_adr = self.dof_id_lookup[dof][0]  # qpos_adr
+                track_angle_reward = joint_angle_track_reward(
+                    self.joint_positions, self.curr_target_angles, dof_adr,
+                    weight=self.imitation_weights["imitation_weight_track_joints"])
+                extra_rewarded_dofs_reward += track_angle_reward
+            update_dict(self.reward_dict, "rew_extra_rewarded_dofs", extra_rewarded_dofs_reward)
+        
+        # Extra rewarded joints - for debug!
+        if len(self.extra_rewarded_joints) > 0:
+            assert self.reward_lambdas["lambda_extra_rewarded_joints"] > 0.0, "lambda_extra_rewarded_joints must be set when extra_rewarded_joints are set"
+            extra_rewarded_joints_reward = 0.0
+            for body in self.extra_rewarded_joints:
+                body_id = self.body_id_lookup[body]
+                track_pos_reward = body_pos_track_reward(
+                    self.body_positions, self.curr_target_bp, body_id,
+                    weight=self.imitation_weights["imitation_weight_track_body_pos"])
+                track_rot_reward = body_rot_track_reward(
+                    self.body_rotations, self.curr_target_br, body_id,
+                    weight=self.imitation_weights["imitation_weight_track_body_rot"])
+                extra_rewarded_joints_reward += track_pos_reward + track_rot_reward
+            update_dict(self.reward_dict, "rew_extra_rewarded_joints", extra_rewarded_joints_reward)
+
+
 
     def _get_terminated(self):
-        # min_ref_root_height = torch.min(self.ref_frames[2, :]).item()
-        # max_ref_root_height = torch.max(self.ref_frames[2, :]).item()
+        # Root position difference too high
+        curr_root_pos = self.body_positions[:, self.root_id]
+        target_root_pos = self.curr_target_bp[:, self.root_id]
+        root_diff_high = ((curr_root_pos - target_root_pos).norm(dim=1) > 0.15)
 
-        # Root falls below/above threshold
-        min_root_height, max_root_height = 0.8, 1.2
-        root_height = self.body_positions[:, self.root_id, UP_IDX]
-        fallen = (root_height < min_root_height)
-        fallen |= (root_height > max_root_height)
+        # Root rotation difference too high
+        curr_root_rot = self.body_rotations[:, self.root_id]
+        target_root_rot = self.curr_target_br[:, self.root_id]
+        root_rot_diff_angle = quat_diff_angle(curr_root_rot, target_root_rot)
+        root_rot_diff_high = (root_rot_diff_angle > 0.5)
 
-        # Head falls below threshold
-        min_head_height = 1.4
-        head_pos = self.torso_pos + rotate_vec(self.torso_rot, self.head_offset)
-        head_fallen = (head_pos[:, UP_IDX] < min_head_height)
-
-        # Root rot diff too large
-        curr_root_quat = self.joint_positions[:, 3:7]
-        target_root_quat = self.curr_target[:, 3:7]
-        root_quat_diff_angle = quat_diff_angle(curr_root_quat, target_root_quat)
-        angle_diff_high = (
-                root_quat_diff_angle > torch.deg2rad(torch.tensor(30.0)))
-
-        terminated = (fallen | head_fallen | angle_diff_high).float()
+        terminated = (root_diff_high | root_rot_diff_high).float()
         return terminated.detach()
 
     def _get_truncated(self):
         # No truncation
-        return torch.zeros(self.num_worlds, device=self.joint_positions.device)
+        return self.time >= self.max_episode_duration
 
     def get_reference_visuals(self):
         return self.ref_vis_positions, self.ref_vis_rotations
 
     def get_reference_times(self):
         return self.ref_time
+
+    def get_reference_joint_angles(self):
+        return self.curr_target_angles

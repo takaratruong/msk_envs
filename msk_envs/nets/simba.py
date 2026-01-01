@@ -417,8 +417,10 @@ class SimbaActor(nn.Module):
             expansion: int,
             c_shift: float,
             num_blocks: int,
-            std_min: float = 0.05,
-            std_max: float = 0.8,
+            std_min: float,
+            std_max: float,
+            use_gsde: bool = False,
+            gsde_steps: int = 10,
             device: torch.device = None,
     ):
         super().__init__()
@@ -454,14 +456,16 @@ class SimbaActor(nn.Module):
             device=device,
         )
 
-        noise_scales = (
-                torch.rand(num_envs, 1, device=device) * (std_max - std_min) + std_min
-        )
+        noise_scales = (torch.rand(num_envs, 1, device=device) * (std_max - std_min) + std_min)
         self.register_buffer("noise_scales", noise_scales)
 
         self.register_buffer("std_min", torch.as_tensor(std_min, device=device))
         self.register_buffer("std_max", torch.as_tensor(std_max, device=device))
+        self.register_buffer("noise", torch.zeros(num_envs, n_act, device=device))
+        self.register_buffer("gsde_step_count", torch.zeros(1, device=device, dtype=torch.int32))
         self.n_envs = num_envs
+        self.use_gsde = use_gsde
+        self.gsde_steps = gsde_steps
         self.device = device
 
     def forward(self, obs: torch.Tensor) -> torch.Tensor:
@@ -489,6 +493,12 @@ class SimbaActor(nn.Module):
 
         act = self(obs)
 
-        noise = torch.randn_like(act) * self.noise_scales
-        return act + noise
+        if self.use_gsde:
+            resample_noise = (self.gsde_step_count % self.gsde_steps) == 0
+            self.gsde_step_count += 1
+            new_noise = torch.randn_like(act) * self.noise_scales
+            self.noise.copy_(torch.where(resample_noise, new_noise, self.noise))
+        else:
+            self.noise.copy_(torch.randn_like(act) * self.noise_scales)
+        return act + self.noise
 

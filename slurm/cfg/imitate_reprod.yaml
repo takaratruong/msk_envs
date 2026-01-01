@@ -1,0 +1,3 @@
+base_cmd: python -m msk_envs.train.fasttd3.train --exp-prefix 
+args:
+  env-variant: IMITATE

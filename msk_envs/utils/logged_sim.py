@@ -41,16 +41,9 @@ class LoggedSim:
 
         # Build lookups helpers: qpos idx to name
         qpos_idx_to_name = {v[0]: k for k, v in self.envs.dof_id_lookup.items()}
-        qpos_idx_to_name[3] = "root_rot_w"
-        qpos_idx_to_name[4] = "root_rot_x"
-        qpos_idx_to_name[5] = "root_rot_y"
-        qpos_idx_to_name[6] = "root_rot_z"
         self.qpos_idx_to_name = qpos_idx_to_name
         # dof idx to name
         dof_idx_to_name = {v[1]: k for k, v in self.envs.dof_id_lookup.items()}
-        dof_idx_to_name[3] = "root_rot_x"
-        dof_idx_to_name[4] = "root_rot_y"
-        dof_idx_to_name[5] = "root_rot_z"
         self.dof_idx_to_name = dof_idx_to_name
         # muscle idx to name
         self.muscle_idx_to_name = {v: k for k, v in self.envs.muscle_id_lookup.items()}
@@ -70,8 +63,10 @@ class LoggedSim:
         reward_dict = self.envs.get_scaled_reward_dict()
 
         # If we are using the ImitateEnv, add reference visuals
-        add_reference = False
-        if hasattr(self.envs, "get_reference_visuals") and hasattr(self.envs, "get_reference_times"):
+        add_reference, ref_joint_angles = False, None
+        if hasattr(self.envs, "get_reference_visuals") and hasattr(self.envs, "get_reference_times") \
+            and hasattr(self.envs, "get_reference_joint_angles"):
+            ref_joint_angles = self.envs.get_reference_joint_angles()
             ref_visuals_pos, ref_visuals_rot = self.envs.get_reference_visuals()
             ref_times = self.envs.get_reference_times()
             add_reference = True
@@ -93,6 +88,7 @@ class LoggedSim:
                 world_id=idx_world,
                 frame_time=frame_time,
                 reward_data=reward_data,
+                ref_joint_angles=ref_joint_angles,
             )
 
             if add_reference:

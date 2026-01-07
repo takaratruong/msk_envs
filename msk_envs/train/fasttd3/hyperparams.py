@@ -103,6 +103,10 @@ class BaseArgs:
         self.traj_out_folder = f"dashboard/trajectories/{self.exp_name}"
         self.analytics_out_folder = f"models/frame_data/{self.exp_name}"
 
+        self.extra_rewarded_joints, self.extra_rewarded_dofs = [], []
+        self.lambda_extra_rewarded_joints = 0.0
+        self.lambda_extra_rewarded_dofs = 0.0
+
     def get_reward_lambdas(self):
         """Extract all lambda_* fields as a dictionary"""
         return {k: v for k, v in self.__dict__.items() if

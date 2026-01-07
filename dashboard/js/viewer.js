@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers } from "./scene.js";
 import { loadModel, loadCollider } from "./loader.js";
-import { drawMuscleCapsule, drawMuscleLine, resetMuscles } from "./muscle.js";
+import { drawMuscleLine, resetMuscles } from "./muscle.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     THREE.Object3D.DefaultUp = new THREE.Vector3(0, 1, 0);
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // add a point for
             for (const muscle of frame.muscles) {
                 // drawMuscleCapsule(muscle, object => {
-                drawMuscleLine(muscle, object => {
+                drawMuscleLine(muscle.name, muscle, object => {
                     scene.add(object);
                     currentObjects.push(object);
                 });

@@ -1,9 +1,10 @@
 import argparse
 import csv
+import gzip
 import json
 import os
 import re
-from glob import glob
+from pathlib import Path
 from nicegui import ui, app, events
 from timeline_controller import TimelineController
 
@@ -71,23 +72,29 @@ def select_traj_dir(dir_name: str):
 
 def locate_trajectories():
     trajectory_options.clear()
-    # Look for json files in the selected directory
-    search_path = f"{TRAJ_DIR}/{selected_traj_dir}/*.json" if selected_traj_dir else f"{TRAJ_DIR}/**/*.json"
-    traj_files = glob(search_path, recursive=(not selected_traj_dir))
 
-    def sort_key(file_path):
+    base_path = (
+        Path(TRAJ_DIR) / selected_traj_dir
+        if selected_traj_dir
+        else Path(TRAJ_DIR)
+    )
+
+    # Find .json and .json.gz files
+    traj_files = list(base_path.rglob("*.json")) + list(base_path.rglob("*.json.gz"))
+
+    def sort_key(path: Path):
         """Sort by directory, then by filename (natural sorting)"""
-        dir_name = os.path.dirname(file_path)
-        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        dir_name = str(path.parent)
 
-        # Try to extract numeric part for natural sorting
-        numbers = re.findall(r'\d+', file_name)
-        if numbers:
-            # Use the first number found (usually the iteration number)
-            numeric_part = int(numbers[0])
+        name = path.name
+        if name.endswith(".json.gz"):
+            file_name = name[:-8]  # strip ".json.gz"
         else:
-            # If no numbers found, use 0
-            numeric_part = 0
+            file_name = path.stem  # strips ".json"
+
+        # Extract numeric part for natural sorting
+        numbers = re.findall(r'\d+', file_name)
+        numeric_part = int(numbers[0]) if numbers else 0
 
         return (dir_name, numeric_part, file_name)
 
@@ -95,19 +102,26 @@ def locate_trajectories():
     traj_files = sorted(traj_files, key=sort_key)
 
     with trajectory_options:
-        for file in traj_files:
-            name = os.path.relpath(file, TRAJ_DIR)
-            ui.item(name, on_click=lambda f=file: send_viewer_trajectory(f))
+        for path in traj_files:
+            name = str(path.relative_to(TRAJ_DIR))
+            ui.item(name, on_click=lambda p=path: send_viewer_trajectory(str(p)))
     return
 
 
 def send_viewer_trajectory(file: str):
     reset_dashboard()
-    traj = json.loads(open(file).read())
+
+    if file.endswith(".gz"):
+        with gzip.open(file, 'rt') as f:
+            traj = json.load(f)
+    else:
+        traj = json.loads(open(file).read())
+
     # update slider
+    n_frames = len(traj)
     current_traj_label.set_text(file)
-    timeline_controller.max_ticks = len(traj) - 1
-    timeline_slider.props['max'] = len(traj) - 1
+    timeline_controller.max_ticks = n_frames - 1
+    timeline_slider.props['max'] = n_frames - 1
     timeline_slider.update()
     format_timeline_label()
     # send to viewer
@@ -217,8 +231,7 @@ with ui.row().classes('w-full z-50 bg-white').style(
 
     # Control panel
     with ui.column().classes("items-center w-full"):
-        timeline_slider = ui.slider(min=0, max=0, value=0,
-                                    on_change=slider_change)
+        timeline_slider = ui.slider(min=0, max=0, value=0, on_change=slider_change)
         timeline_slider.props('id="timeline"')
         with ui.row().classes("items-center"):
             current_traj_label = ui.label("")

@@ -56,9 +56,9 @@ def main():
     print("Mean rewards: ", sim.get_rewards_mean())
 
     # write to torch
-    sim.save_animation("dashboard/trajectories/test", "999")
+    sim.save_animation("dashboard/trajectories/test", "999", use_gzip=True)
     sim.save_analytics(".", "deploy_analytics")
-    sim.save_frame_data(".", "deploy_frame_data")
+    sim.save_frame_data(".", "deploy_frame_data", use_gzip=True)
 
 
 if __name__ == "__main__":

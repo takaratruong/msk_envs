@@ -5,6 +5,7 @@ from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
 
 import os
+import gzip
 import json
 import torch
 
@@ -132,24 +133,38 @@ class LoggedSim:
     def get_episode_length_mean(self):
         return self.episode_length.float().mean()
 
-    def save_frame_data(self, out_folder: str, base_filename: str):
-        """ Save the raw frame data as json files """
+    def save_frame_data(self, out_folder: str, base_filename: str, use_gzip: bool = False):
+        """ Save the raw frame data into a JSON file for each world """
         os.makedirs(out_folder, exist_ok=True)
         for idx_world in self.worlds_to_save:
-            out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.json")
             frame_data = self.frame_data[idx_world]
             frame_data = [frame.to_dict() for frame in frame_data]
-            with open(out_file, 'w') as f:
-                json.dump(frame_data, f)
+            # Output file path
+            if use_gzip:
+                out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.json.gz")
+            else:
+                out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.json")
+
+            if use_gzip:
+                with gzip.open(out_file, "wt") as f:
+                    json.dump(frame_data, f, indent=4)
+            else:
+                with open(out_file, "w") as f:
+                    json.dump(frame_data, f, indent=4)
             print("Saved frame data to", out_file)
         return
 
-    def save_animation(self, out_folder: str, base_filename):
-        """ Create the animation-ready json files """
+    def save_animation(self, out_folder: str, base_filename: str, use_gzip: bool = False):
+        """ Create the animation-ready JSON file for each world """
         for idx_world in self.worlds_to_save:
-            out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.json")
             frame_data = self.frame_data[idx_world]
-            create_animation_json(frame_data, out_file)
+
+            if use_gzip:
+                out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.json.gz")
+            else:
+                out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.json")
+
+            create_animation_json(frame_data, out_file, use_gzip)
             print("Saved animation to", out_file)
         return
 

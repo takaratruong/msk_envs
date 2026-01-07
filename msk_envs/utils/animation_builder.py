@@ -1,3 +1,4 @@
+import gzip
 import json
 
 from msk_envs.utils.checkpoint_parser import FrameData
@@ -14,7 +15,7 @@ def track_com(frame_data: list[FrameData]):
     return com_positions
 
 
-def create_animation_json(frame_data: list[FrameData], out_file: str):
+def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: bool):
     """ Dump all relevant animation data to json """
     n_frames = len(frame_data)
 
@@ -37,8 +38,12 @@ def create_animation_json(frame_data: list[FrameData], out_file: str):
         }
         stacked_frames.append(frame)
 
-    with open(out_file, 'w') as f:
-        json.dump(stacked_frames, f, indent=2)
+    if use_gzip:
+        with gzip.open(out_file, 'wt') as f:
+            json.dump(stacked_frames, f, indent=2)
+    else:
+        with open(out_file, 'w') as f:
+            json.dump(stacked_frames, f, indent=2)
     return
 
 

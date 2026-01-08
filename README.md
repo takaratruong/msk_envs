@@ -1,5 +1,5 @@
 # MSK Envs - RL Environments for Musculoskeletal Simulations
-MSK Envs are environments designed for training RL policies. Environments run entirely on a GPU and interoperate with the simulator built on top of the hardware-accelerated musculoskeletal simulator [MSK Warp](https://github.com/willwng/msk_warp). 
+RL environments built on top of the [MSK Warp](https://github.com/willwng/msk_warp) simulator that run entirely on the GPU.
 
 ## Preqrequisites/Setup
 Installation requires installation of [MSK Warp](https://github.com/willwng/msk_warp), of which the only dependency is [warp-lang](https://github.com/NVIDIA/warp). Use of the environments requires PyTorch. 

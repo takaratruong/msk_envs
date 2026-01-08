@@ -60,17 +60,7 @@ def main():
     set_seed(args.seed)
     device = torch.device("cuda:0" if args.cuda else "cpu")
 
-    # TODO: Everything should be configurable from args! Make it more general!
-    env_config = EnvConfig(
-        env_variant=args.env_variant,
-        reward_lambdas=args.get_reward_lambdas(),
-        imitation_weights=args.get_imitation_weights(),
-        extra_rewarded_joints=args.extra_rewarded_joints,
-        lambda_extra_rewarded_joints=args.lambda_extra_rewarded_joints,
-        extra_rewarded_dofs=args.extra_rewarded_dofs,
-        lambda_extra_rewarded_dofs=args.lambda_extra_rewarded_dofs,
-    )
-
+    env_config = EnvConfig.env_config_from_args(args=args)
     envs = EnvFactory.create_env(
         num_envs=args.num_envs,
         env_config=env_config,

@@ -8,6 +8,7 @@ from msk_envs.envs.env_variants import DerivedEnv
 @dataclass
 class BaseArgs:
     """wandb configuration"""
+    exp_name: str = ""
     disable_wandb: bool = False
     env_name: str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     project: str = "msk_sprinter"
@@ -39,7 +40,7 @@ class BaseArgs:
 
     """ TD3 hyperparameters """
     num_envs: int = 2048
-    total_timesteps: int = 150000
+    total_timesteps: int = 250000
     learning_starts: int = 0
     num_updates: int = 4  # number of updates per step
     policy_frequency: int = 2  # frequency of training policy (delayed)
@@ -59,7 +60,7 @@ class BaseArgs:
     """ Exploration hyperparameters """
     std_min: float = 0.001  # minimum scale of exploration noise
     std_max: float = 0.4  # maximum scale of exploration noise
-    use_gsde: bool = False  # whether to use generalized state-dependent exploration (gSDE)
+    use_gsde: bool = True  # whether to use generalized state-dependent exploration (gSDE)
     gsde_steps: int = 10  # number of steps to sample new noise for gSDE
 
     """ Q/Value function hyperparameters
@@ -81,21 +82,18 @@ class BaseArgs:
 
     compile: bool = True
     """whether to use torch.compile."""
-    compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
-    # compile_mode: str = "max-autotune"
+    # compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
+    compile_mode: str = "max-autotune"
     compile_backend: str = "inductor"  # "eager" is slower but safer
 
     """ SimbaV2 """
     critic_num_blocks: int = 2
     actor_num_blocks: int = 1
 
-    """ Environment configuration """
-    env_variant: DerivedEnv = DerivedEnv.SPRINT
-    render: bool = False  # Enable rendering (headless by default)
-
-    exp_name: str = ""
+    """ Output trajectories and analytics """
     traj_out_folder: str = ""
     analytics_out_folder: str = ""
+    render: bool = False  # Enable live rendering (headless by default)
 
     def __post_init__(self):
         """Compute derived fields after exp_prefix is set from outside"""
@@ -103,19 +101,12 @@ class BaseArgs:
         self.traj_out_folder = f"dashboard/trajectories/{self.exp_name}"
         self.analytics_out_folder = f"models/frame_data/{self.exp_name}"
 
+        self.reward_lambdas = {k: v for k, v in self.__dict__.items() if k.startswith("lambda_")}
+        self.imitation_weights = {k: v for k, v in self.__dict__.items() if k.startswith("imitation_weight_")}
+
         self.extra_rewarded_joints, self.extra_rewarded_dofs = [], []
         self.lambda_extra_rewarded_joints = 0.0
         self.lambda_extra_rewarded_dofs = 0.0
-
-    def get_reward_lambdas(self):
-        """Extract all lambda_* fields as a dictionary"""
-        return {k: v for k, v in self.__dict__.items() if
-                k.startswith("lambda_")}
-
-    def get_imitation_weights(self):
-        """Extract all imitation_weight_* fields as a dictionary"""
-        return {k: v for k, v in self.__dict__.items() if
-                k.startswith("imitation_weight_")}
 
 
 def pretty_print_base_args(args: BaseArgs):
@@ -147,6 +138,10 @@ def pretty_print_base_args(args: BaseArgs):
 
 @dataclass
 class WalkConfig(BaseArgs):
+    # Modifications to environment
+    delta_t = 1.0 / 100.0
+    max_episode_duration: float = 5.0
+
     """Walk environment specific reward scales"""
     lambda_cot: float = 1.0
     lambda_head: float = 1.0
@@ -158,15 +153,23 @@ class WalkConfig(BaseArgs):
 
 @dataclass
 class SprintConfig(BaseArgs):
+    # Modifications to environment
+    delta_t = 1.0 / 100.0
+    max_episode_duration: float = 12.0
+
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
-    lambda_limit: float = -1.0
+    lambda_limit: float = -2.0
     lambda_actuator: float = -1.0
     lambda_finish: float = 20.0
 
 
 @dataclass
 class VerticalConfig(BaseArgs):
+    # Modifications to environment
+    delta_t = 1.0 / 100.0
+    max_episode_duration: float = 2.0
+
     """Vertical jump environment specific reward scales"""
     lambda_max_vertical: float = 1.0
     lambda_limit: float = -0.2
@@ -175,13 +178,18 @@ class VerticalConfig(BaseArgs):
 
 @dataclass
 class ImitateConfig(BaseArgs):
+    # Modifications to environment
+    delta_t: float = 1.0 / 500.0
+    use_prescribed_starting_activations: bool = True
+    joint_limits_path: str = "../msk_models/joint_limits_sprinting.yaml"
+
     """Imitate environment specific reward scales"""
     lambda_track_joints: float = 1.0
     lambda_track_root_pos: float = 1.0
     lambda_track_root_rot: float = 1.0
     lambda_track_body_pos: float = 1.0
     lambda_track_body_rot: float = 1.0
-    
+
     """Imitation reward weights"""
     imitation_weight_track_joints: float = 10.0
     imitation_weight_track_root_pos: float = 100.0
@@ -204,13 +212,12 @@ class ImitateConfig(BaseArgs):
             self.extra_rewarded_dofs = [s.strip() for s in self.extra_rewarded_dofs.split(",") if s.strip()]
 
 
-
 def get_args():
     """Get configuration arguments based on env_variant."""
     import sys
 
     # Parse env_variant first to determine which config class to use
-    env_variant = DerivedEnv.IMITATE
+    env_variant = DerivedEnv.SPRINT
     for i, arg in enumerate(sys.argv):
         if arg == "--env-variant" and i + 1 < len(sys.argv):
             env_variant = DerivedEnv[sys.argv[i + 1]]

@@ -10,7 +10,7 @@ class EnvConfig:
     env_variant: DerivedEnv = DerivedEnv.SPRINT
     """ Environment type """
 
-    delta_t: float = 1.0 / 500.0
+    delta_t: float = 1.0 / 100.0
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 10000.0
     """ Simulator/physics step size """
@@ -33,7 +33,7 @@ class EnvConfig:
     """ Toes joint damping """
     use_default_joint_limits: bool = False
     """ Whether to use joint limits defined in the model file """
-    joint_limits_path: str = "../msk_models/joint_limits_sprinting.yaml"
+    joint_limits_path: str = "../msk_models/joint_limits.yaml"
     """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
     enable_drag: bool = True
     """ Whether to enable drag forces """
@@ -49,7 +49,7 @@ class EnvConfig:
     """ MuJoCo limit/contact parameters (if using MuJoCo limits/contacts) """
 
     # Integrator properties
-    integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.RK4_FIXED
+    integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_FIXED
     """ Integrator type (EULER_FIXED, RK4_FIXED) """
 
     # Muscle properties
@@ -82,7 +82,7 @@ class EnvConfig:
     """ Whether to swap left/right sides when adding noise to starting state """
     motion_name: str = "../motions/pred_sprint_two_step"
     """ motion file name (without .mot extension) for IMITATE variant """
-    use_prescribed_starting_activations: bool = True
+    use_prescribed_starting_activations: bool = False
     """ Whether to use prescribed starting activations from file """
     starting_activations: str = "../msk_models/starting_activations.yaml"
     """ Starting activations file path (YAML) """
@@ -119,3 +119,14 @@ class EnvConfig:
 
     def to_dict(self):
         return self.__dict__
+
+    @staticmethod
+    def env_config_from_args(args) -> 'EnvConfig':
+        """Build EnvConfig from args, starting with default and replacing fields present in args."""
+        env_config = EnvConfig()
+
+        for key, value in vars(args).items():
+            if hasattr(env_config, key):
+                setattr(env_config, key, value)
+
+        return env_config

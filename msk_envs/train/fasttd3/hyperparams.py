@@ -90,6 +90,8 @@ class BaseArgs:
     critic_num_blocks: int = 2
     actor_num_blocks: int = 1
 
+    env_variant: DerivedEnv = DerivedEnv.SPRINT
+
     """ Output trajectories and analytics """
     traj_out_folder: str = ""
     analytics_out_folder: str = ""

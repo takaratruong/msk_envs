@@ -34,6 +34,23 @@ def actuator_penalty(actuator_activations, num_actuators):
     return mean_squared_act
 
 
+def metabolic_penalty(muscle_powers, num_muscles):
+    """Metabolic penalty based on total muscle power"""
+    total_power = torch.sum(muscle_powers, dim=1)
+    if num_muscles == 0:
+        return torch.zeros_like(total_power)
+    return total_power / num_muscles
+
+
+def fatigue_penalty(muscle_activations, num_muscles):
+    """Fatigue penalty based on squared muscle activations"""
+    squared_activations = torch.pow(muscle_activations, 2)
+    total_fatigue = torch.sum(squared_activations, dim=1)
+    if num_muscles == 0:
+        return torch.zeros_like(total_fatigue)
+    return total_fatigue / num_muscles
+
+
 def max_vertical_reward(body_positions):
     """Maximum vertical height achieved (current max across all bodies)"""
     current_max_height = torch.max(body_positions[:, :, UP_IDX], dim=1)[0]

@@ -98,6 +98,8 @@ class SprintConfig(BaseArgs):
     lambda_vel: float = 1.0
     lambda_limit: float = -2.0
     lambda_actuator: float = -0.5
+    lambda_fatigue: float = -1.0
+    lambda_metabolic: float = 0.0
     lambda_finish: float = 20.0
 
 
@@ -159,7 +161,7 @@ def get_args():
     import sys
 
     # Parse env_variant first to determine which config class to use
-    env_variant = DerivedEnv.WALK
+    env_variant = DerivedEnv.SPRINT
     for i, arg in enumerate(sys.argv):
         if arg == "--env-variant" and i + 1 < len(sys.argv):
             env_variant = DerivedEnv[sys.argv[i + 1]]

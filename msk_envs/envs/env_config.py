@@ -19,7 +19,7 @@ class EnvConfig:
     """ Max episode duration in seconds """
 
     # Model properties
-    model_path: str = "../msk_models/model_motor_arms_foot_contact.osim"
+    model_path: str = "../msk_models/model_motor_arms_full_contact.osim"
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
@@ -31,8 +31,8 @@ class EnvConfig:
     """ Toes joint stiffness """
     toes_damping: float = 0.1
     """ Toes joint damping """
-    use_default_joint_limits: bool = False
-    """ Whether to use joint limits defined in the model file """
+    use_specified_joint_limits: bool = True
+    """ Whether to use joint limits defined in joint_limits_path, otherwise use limits defined in model file """
     joint_limits_path: str = "../msk_models/joint_limits.yaml"
     """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
     enable_drag: bool = True
@@ -68,6 +68,11 @@ class EnvConfig:
     use_function_based_path: bool = True
     """ Whether to use function-based path (or geometry path)"""
     muscle_function_path: str = "../msk_models/muscle_fn_path_info.json"
+    """ Function-based path data file (JSON) """
+    use_specified_metabolic_params: bool = True
+    """ Whether to use metabolic parameters defined in metabolic_params_path """
+    metabolic_params_path: str = "../msk_models/muscle_metabolic_params.yaml"
+    """ Muscle metabolic parameters file path (YAML) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose: str = "../msk_models/starting_pose_run.yaml"

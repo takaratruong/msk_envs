@@ -80,23 +80,6 @@ def get_swap_left_right_data(
     return swap_data
 
 
-def parse_starting_activations(
-        file_path: str,
-        muscle_id_lookup: dict[str, int],
-        default_activation: float = 0.0,
-) -> list[float]:
-    num_muscles = len(muscle_id_lookup)
-
-    with open(file_path, "r") as f:
-        data = yaml.safe_load(f)
-
-    activations = [default_activation] * num_muscles
-    for muscle_name, activation in data.items():
-        muscle_id = muscle_id_lookup[muscle_name]
-        activations[muscle_id] = activation
-    return activations
-
-
 def get_base_name(name: str) -> str:
     """ Get base name by removing _r/_l suffix """
     if name.endswith("_r") or name.endswith("_l"):

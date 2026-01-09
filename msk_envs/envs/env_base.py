@@ -4,7 +4,8 @@ import warp as wp
 import os
 
 from .env_config import EnvConfig
-from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data, parse_starting_activations
+from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
+from msk_envs.utils.muscle_props import parse_starting_activations, parse_muscle_metabolic_params
 from msk_envs.utils.joint_limits import get_exp_limit_curves, get_joint_limits
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 
@@ -21,40 +22,23 @@ class MSKEnv:
         damping[:] = 0.0
         stiffness[:] = 0.0
         armature[:] = 0.0
-
-        # Joint damping
+        # Joint damping, armature
         damping[6:] = env_config.joint_damping
-
-        # Joint armature
         armature[6:] = env_config.joint_armature
-
         # Torso damping
         torso_id = self.lookup_body_id("torso")
         dof_adr = msk_warp.get_dof_adr(self.m, torso_id)
         dof_num = msk_warp.get_dof_num(self.m, torso_id)
         damping[dof_adr:dof_adr + dof_num] = env_config.torso_damping
-
         # Foot stiffness and damping
         for toe in ["toes_l", "toes_r"]:
             toe_id = self.lookup_body_id(toe)
             stiffness[toe_id] = env_config.toes_stiffness
-
             dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
             dof_num = msk_warp.get_dof_num(self.m, toe_id)
             damping[dof_adr:dof_adr + dof_num] = env_config.toes_damping
-
-        # Muscles
-        for mm in msk_warp.muscle_metadata(self.m):
-            mm.max_isometric_force *= env_config.muscle_multiplier
-            mm.fiber_damping = env_config.muscle_fiber_damping
-            mm.min_activation = env_config.muscle_min_activation
-            mm.max_activation = env_config.muscle_max_activation
-            mm.v_max = env_config.muscle_v_max
-        msk_warp.set_muscle_dynamics_substeps(
-            self.m, env_config.muscle_dynamics_substeps)
-
         # Joint limits: override if specified
-        if not env_config.use_default_joint_limits:
+        if env_config.use_specified_joint_limits:
             joint_limit_ranges = msk_warp.joint_limit_ranges(self.m)
             joint_limits_path = os.path.join(self.curr_path, env_config.joint_limits_path)
             joint_limits = get_joint_limits(joint_limits_path, self.limit_id_lookup)
@@ -62,13 +46,6 @@ class MSKEnv:
                 limit_id = joint_limit.limit_id
                 joint_limit_ranges[limit_id][0] = joint_limit.lower
                 joint_limit_ranges[limit_id][1] = joint_limit.upper
-
-        # Contact model (Hunt-Crossley or MuJoCo)
-        msk_warp.set_contact_type(self.m, env_config.contact_type)
-
-        # Joint limit model (Exponential or MuJoCo)
-        msk_warp.set_limit_type(self.m, env_config.limit_type)
-
         # Load exponential-spring force curve parameters
         if env_config.limit_type == msk_warp.LimitType.EXPONENTIAL:
             msk_warp.use_exponential_limit(self.m)
@@ -83,6 +60,30 @@ class MSKEnv:
                 exp_limit_shapes[limit_id][0] = limit_curve.shape_param[0]
                 exp_limit_shapes[limit_id][1] = limit_curve.shape_param[1]
 
+        # Muscles fiber dynamics
+        msk_warp.set_muscle_dynamics_substeps(self.m, env_config.muscle_dynamics_substeps)
+        muscle_metadata = msk_warp.muscle_metadata(self.m)
+        for mm in muscle_metadata:
+            mm.max_isometric_force *= env_config.muscle_multiplier
+            mm.fiber_damping = env_config.muscle_fiber_damping
+            mm.min_activation = env_config.muscle_min_activation
+            mm.max_activation = env_config.muscle_max_activation
+            mm.v_max = env_config.muscle_v_max
+        # Muscle metabolic properties
+        if env_config.use_specified_metabolic_params:
+            metabolic_params_path = os.path.join(self.curr_path, env_config.metabolic_params_path)
+            metabolic_params = parse_muscle_metabolic_params(metabolic_params_path, self.muscle_id_lookup)
+            for params in metabolic_params:
+                muscle_id = params.muscle_id
+                mm = muscle_metadata[muscle_id]
+                mm.specific_tension = params.specific_tension
+                mm.slow_twitch_ratio = params.slow_twitch_ratio
+                mm.density = params.density
+
+        # Contact model (Hunt-Crossley or MuJoCo)
+        msk_warp.set_contact_type(self.m, env_config.contact_type)
+        # Joint limit model (Exponential or MuJoCo)
+        msk_warp.set_limit_type(self.m, env_config.limit_type)
         # MuJoCo-parameters
         msk_warp.set_solref(self.m, env_config.solref)
 
@@ -94,7 +95,6 @@ class MSKEnv:
 
         # Integrator type
         msk_warp.set_integrator_type(self.m, env_config.integrator)
-
         # Toggle drag forces
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
 
@@ -157,6 +157,7 @@ class MSKEnv:
         self.muscle_excitations = msk_warp.muscle_excitations(self.d)
         self.muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(self.d)
+        self.muscle_powers = msk_warp.muscle_powers(self.d)
         # [num_envs, num_actuators]
         self.actuator_activations = msk_warp.actuator_activations(self.d)
         self.actuator_excitations = msk_warp.actuator_excitations(self.d)

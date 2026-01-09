@@ -5,7 +5,7 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, \
-    actuator_penalty
+    actuator_penalty, metabolic_penalty, fatigue_penalty
 
 
 class SprintingEnv(MSKEnv):
@@ -48,6 +48,8 @@ class SprintingEnv(MSKEnv):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
         rew_limit = joint_limit_penalty(self.limit_torques, squared=False)
         rew_actuator = actuator_penalty(self.actuator_activations, self.num_actuators)
+        rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
+        rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
 
         reached_finish = (self.root_pos[:, 0] >= 100.0).float()
         time_left = (self.max_episode_duration - self.time).clamp(min=0.0)
@@ -57,6 +59,8 @@ class SprintingEnv(MSKEnv):
             "rew_vel": rew_vel.detach(),
             "rew_limit": rew_limit.detach(),
             "rew_actuator": rew_actuator.detach(),
+            "rew_fatigue": rew_fatigue.detach(),
+            "rew_metabolic": rew_metabolic.detach(),
             "rew_finish": rew_finish.detach(),
         }
 

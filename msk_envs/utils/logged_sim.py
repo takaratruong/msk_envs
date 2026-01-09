@@ -14,7 +14,6 @@ class LoggedSim:
     def __init__(
             self,
             envs: MSKEnv,
-            max_episode_length: int,
             device: torch.device,
     ):
         self.envs = envs
@@ -26,7 +25,7 @@ class LoggedSim:
         assert max(self.worlds_to_save) < n_worlds
 
         # Build storage for things to track
-        max_ep_len = max_episode_length
+        max_ep_len = int(envs.max_episode_duration / envs.delta_t)
         self.finished = torch.zeros((n_worlds,),
                                     dtype=torch.bool, device=device)
         self.rewards = torch.zeros((n_worlds_to_save, max_ep_len),

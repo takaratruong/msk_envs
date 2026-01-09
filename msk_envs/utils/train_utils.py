@@ -51,6 +51,7 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
 
+
 @torch.no_grad()
 def mark_step():
     # call this once per iteration *before* any compiled function

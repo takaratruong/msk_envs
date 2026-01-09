@@ -1,28 +1,23 @@
-import msk_warp
-from .hyperparams import get_args
-from msk_envs.envs.env_config import EnvConfig
-from msk_envs.envs.env_factory import EnvFactory
-from msk_envs.utils.logged_sim import LoggedSim
-from msk_envs.nets.networks import load_policy
-
-
 import torch
 from tqdm import tqdm
+
+from msk_envs.envs.env_factory import EnvFactory
+from msk_envs.nets.networks import load_policy
+from msk_envs.train.hyperparams import get_args, pretty_print_base_args
+from msk_envs.utils.logged_sim import LoggedSim
 
 
 def main():
     args = get_args()
-    env_config = EnvConfig.env_config_from_args(args)
-    print(env_config)
-    quit()
 
     # no noise
+    env_config = args.env_config
     env_config.q_noise = 0.0
     env_config.qv_noise = 0.0
     env_config.swap_lr = False
 
     has_cuda_support = torch.cuda.is_available()
-    device = torch.device("cuda" if args.cuda and has_cuda_support else f"cpu")
+    device = torch.device("cuda" if has_cuda_support else f"cpu")
     envs = EnvFactory.create_env(num_envs=1,
                                  env_config=env_config,
                                  render=False,
@@ -31,20 +26,20 @@ def main():
 
     actions = envs.get_blank_actions()
 
-    policy = load_policy("/home/marth/Documents/msk_envs/models/sprint_gsde_lims_2026-01-07_17-10-24/sprint_gsde_lims_2026-01-07_17-10-24_10000.pt")
-    policy.to(device)
+    # policy = load_policy("/home/marth/Documents/msk_envs/models/sprint_gsde_lims_2026-01-07_17-10-24/sprint_gsde_lims_2026-01-07_17-10-24_10000.pt")
+    # policy.to(device)
 
 
     # Build a SimLogger to give us a whole pdf of stuff
     max_episode_length = int(env_config.max_episode_duration / env_config.delta_t)
-    sim = LoggedSim(envs, max_episode_length, device)
+    sim = LoggedSim(envs, device)
     obs = sim.reset()
 
     for _ in tqdm(range(max_episode_length)):
         # actions = torch.randn_like(actions)
         # actions = envs.get_blank_actions()
-        with torch.no_grad():
-            actions = policy(obs)
+        # with torch.no_grad():
+        #     actions = policy(obs)
         finished, obs = sim.step(actions)
         if finished:
             break

@@ -1,4 +1,4 @@
-base_cmd: python -m msk_envs.train.fasttd3.train --no-amp --exp-prefix 
+base_cmd: python -m msk_envs.train.train --exp-prefix
 args:
   env-variant: SPRINT
   seed: [1,2,3,4,5]

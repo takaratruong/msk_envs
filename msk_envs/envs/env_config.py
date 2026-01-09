@@ -1,6 +1,6 @@
 import json
 import msk_warp
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .env_variants import DerivedEnv
 
@@ -89,16 +89,16 @@ class EnvConfig:
     default_activation: float = 0.05
     """ Default activation value when prescribed activations are not used """
 
-    reward_lambdas: dict = None
+    # The following need to be set
+    reward_lambdas: dict = field(default_factory=dict)
     """ Reward weights """
-    imitation_weights: dict = None
+    imitation_weights: dict = field(default_factory=dict)
     """ Imitation reward weights """
-
-    extra_rewarded_joints: list = None
+    extra_rewarded_joints: list = field(default_factory=list)
     """ List of body names to give extra reward for tracking (for debug) """
     lambda_extra_rewarded_joints: float = 0.0
     """ Lambda for extra rewarded joints """
-    extra_rewarded_dofs: list = None
+    extra_rewarded_dofs: list = field(default_factory=list)
     """ List of DOFs to give extra reward for tracking (for debug) """
     lambda_extra_rewarded_dofs: float = 0.0
     """ Lambda for extra rewarded DOFs """
@@ -121,12 +121,7 @@ class EnvConfig:
         return self.__dict__
 
     @staticmethod
-    def env_config_from_args(args) -> 'EnvConfig':
-        """Build EnvConfig from args, starting with default and replacing fields present in args."""
-        env_config = EnvConfig()
-
-        for key, value in vars(args).items():
-            if hasattr(env_config, key):
-                setattr(env_config, key, value)
-
-        return env_config
+    def pretty_print(env_config):
+        print("Environment Configuration:")
+        for key, value in env_config.to_dict().items():
+            print(f"  {key}: {value}")

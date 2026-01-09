@@ -38,7 +38,7 @@ python -m msk_envs.utils.parse_mot --motion msk_envs/motions/reference_stride.mo
 
 #### Train
 ```bash
-python -m msk_envs.train.fasttd3.train --env-variant IMITATE --exp_prefix my_imitation --motion_name reference_stride
+python -m msk_envs.train.train --env-variant IMITATE --exp_prefix my_imitation --motion_name reference_stride
 ```
 
 

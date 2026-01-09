@@ -9,14 +9,19 @@ def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool
     return root_velocity[:, coordinate + 3] if linear else root_velocity[:, coordinate]
 
 
-def joint_limit_penalty(limit_torques):
+def joint_limit_penalty(limit_torques: torch.Tensor, squared: bool = False):
     """Joint limit penalty based on sum of absolute limit torques"""
     num_limits = limit_torques.shape[1]
-    abs_limit_torque = torch.abs(limit_torques)
-    abs_limit_torque_sum = torch.sum(abs_limit_torque, dim=1)
+    if squared:
+        sq_limit_torque = torch.pow(limit_torques, 2)
+        limit_torque_sum = torch.sum(sq_limit_torque, dim=1)
+    else:
+        abs_limit_torque = torch.abs(limit_torques)
+        limit_torque_sum = torch.sum(abs_limit_torque, dim=1)
+
     if num_limits == 0:
-        return torch.zeros_like(abs_limit_torque_sum)
-    return abs_limit_torque_sum / num_limits
+        return torch.zeros_like(limit_torque_sum)
+    return limit_torque_sum / num_limits
 
 
 def actuator_penalty(actuator_activations, num_actuators):
@@ -58,12 +63,13 @@ def body_pos_track_reward(body_positions, target_body_positions, body_id, weight
         _range = body_id
     else:
         _range = range(body_id, body_id + 1)
-    
+
     body_pos_values = body_positions[:, _range, :]
     target_pos_values = target_body_positions[:, _range, :]
     mse = (body_pos_values - target_pos_values).pow(2).mean(dim=(1, 2))
     reward = torch.exp(-weight * mse)
     return reward
+
 
 def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight):
     # If body_id can be either a range or an integer
@@ -71,13 +77,14 @@ def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight
         _range = body_id
     else:
         _range = range(body_id, body_id + 1)
-    
+
     body_rot_values = body_rotations[:, _range, :]
     target_rot_values = target_body_rotations[:, _range, :]
     rot_diff_angle = quat_diff_angle(body_rot_values, target_rot_values)
     mse = rot_diff_angle.pow(2).mean(dim=1)
     reward = torch.exp(-weight * mse)
     return reward
+
 
 def update_dict(reward_dict, key, value):
     if key in reward_dict:

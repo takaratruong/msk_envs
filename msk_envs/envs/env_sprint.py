@@ -46,7 +46,7 @@ class SprintingEnv(MSKEnv):
 
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
-        rew_limit = joint_limit_penalty(self.limit_torques)
+        rew_limit = joint_limit_penalty(self.limit_torques, squared=False)
         rew_actuator = actuator_penalty(self.actuator_activations, self.num_actuators)
 
         reached_finish = (self.root_pos[:, 0] >= 100.0).float()

@@ -35,7 +35,6 @@ class BaseArgs:
 
         self.env_config.reward_lambdas = reward_lambdas
         self.env_config.imitation_weights = imitation_weights
-        self.env_config.env_variant = self.env_variant
 
 
 def pretty_print_base_args(args: BaseArgs):
@@ -73,6 +72,7 @@ def pretty_print_base_args(args: BaseArgs):
 @dataclass
 class WalkConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.WALK,
         delta_t=1.0 / 100.0,
         max_episode_duration=5.0,
     ))
@@ -89,6 +89,7 @@ class WalkConfig(BaseArgs):
 @dataclass
 class SprintConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
     ))
@@ -96,13 +97,14 @@ class SprintConfig(BaseArgs):
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
     lambda_limit: float = -2.0
-    lambda_actuator: float = -1.0
+    lambda_actuator: float = -0.5
     lambda_finish: float = 20.0
 
 
 @dataclass
 class VerticalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 100.0,
         max_episode_duration=2.0,
     ))
@@ -116,6 +118,7 @@ class VerticalConfig(BaseArgs):
 @dataclass
 class ImitateConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.IMITATE,
         delta_t=1.0 / 500.0,
         use_prescribed_starting_activations=True,
         joint_limits_path="../msk_models/joint_limits_sprinting.yaml"
@@ -156,7 +159,7 @@ def get_args():
     import sys
 
     # Parse env_variant first to determine which config class to use
-    env_variant = DerivedEnv.SPRINT
+    env_variant = DerivedEnv.WALK
     for i, arg in enumerate(sys.argv):
         if arg == "--env-variant" and i + 1 < len(sys.argv):
             env_variant = DerivedEnv[sys.argv[i + 1]]

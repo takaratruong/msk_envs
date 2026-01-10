@@ -22,7 +22,7 @@ class ImitateEnv(MSKEnv):
 
         # Load reference motion
         curr_path = os.path.abspath(os.path.dirname(__file__))
-        motion_file = os.path.join(curr_path, f"{env_config.motion_name}.mot")
+        motion_file = os.path.join(curr_path, env_config.motion_name)
         data, col_names = parse_mot(motion_file, self.model_path)
         ref_motion = torch.tensor(data, device=device)
         ref_time, ref_frames = ref_motion[0, :], ref_motion[1:, :]

@@ -1,3 +1,1 @@
-base_cmd: python -m msk_envs.train.train --exp-prefix
-args:
-  env-variant: IMITATE
+base_cmd: python -m msk_envs.train.train imitate --exp-prefix

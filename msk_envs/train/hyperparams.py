@@ -1,5 +1,7 @@
 from dataclasses import dataclass, asdict, fields, field
 from datetime import datetime
+from typing import Union
+from typing_extensions import Annotated
 
 import tyro
 
@@ -119,11 +121,13 @@ class VerticalConfig(BaseArgs):
 
 @dataclass
 class ImitateConfig(BaseArgs):
+    """ Default Imitate environment configuration. Tracks a two-step sprinting motion. """
     env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
         env_variant=DerivedEnv.IMITATE,
         delta_t=1.0 / 500.0,
         use_prescribed_starting_activations=True,
-        joint_limits_path="../msk_models/joint_limits_sprinting.yaml"
+        joint_limits_path="../msk_models/joint_limits_sprinting.yaml",
+        motion_name="../motions/pred_sprint_two_step.mot"
     ))
 
     """Imitate environment specific reward scales"""
@@ -156,26 +160,17 @@ class ImitateConfig(BaseArgs):
             self.env_config.extra_rewarded_dofs = [s.strip() for s in self.extra_rewarded_dofs.split(",") if s.strip()]
 
 
+# Register configs here
+Config = Union[
+    Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
+    Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
+    Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
+    Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
+]
+
+
 def get_args():
-    """Get configuration arguments based on env_variant."""
-    import sys
-
-    # Parse env_variant first to determine which config class to use
-    env_variant = DerivedEnv.SPRINT
-    for i, arg in enumerate(sys.argv):
-        if arg == "--env-variant" and i + 1 < len(sys.argv):
-            env_variant = DerivedEnv[sys.argv[i + 1]]
-            break
-
-    # Select config class based on env_variant
-    config_class = {
-        DerivedEnv.WALK: WalkConfig,
-        DerivedEnv.SPRINT: SprintConfig,
-        DerivedEnv.VERTICAL: VerticalConfig,
-        DerivedEnv.IMITATE: ImitateConfig,
-    }.get(env_variant, SprintConfig)
-
-    # Parse full args
-    args = tyro.cli(config_class)
+    """Parse command-line arguments into Config dataclass."""
+    args = tyro.cli(Config)
     args.use_wandb = not args.disable_wandb
     return args

@@ -9,6 +9,7 @@ from msk_envs.utils.logged_sim import LoggedSim
 
 def main():
     args = get_args()
+    pretty_print_base_args(args)
 
     # no noise
     env_config = args.env_config

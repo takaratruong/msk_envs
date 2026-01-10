@@ -19,26 +19,20 @@ We provide example training code based on [FastTD3](https://github.com/younggyos
 
 ### Sprinting (maximum forward velocity) environment
     
-To start a training run,
+To start a training run, use the corresponding config (found in [hyperparams](msk_envs/train/hyperparams.py)):
 ```bash
-python -m msk_envs.train.train --env-variant [SPRINT|VERTICAL|WALK] --exp_prefix my_training
+python -m msk_envs.train.train [sprint|vertical|walk] --exp_prefix my_training_run
 ```
 
-Or with SLURM:
+Or to launch several runs on a SLURM cluster:
 ```
 python slurm/deploy.py --input_yaml slurm/cfg/baselines.yaml --mode gen_run
 ```
 
 ### Motion imitation environment
-    
-#### Parse motion to be imitated
+To track a motion file (in this example, the starting-phase of a sprint):
 ```bash
-python -m msk_envs.utils.parse_mot --motion msk_envs/motions/reference_stride.mot
-```
-
-#### Train
-```bash
-python -m msk_envs.train.train --env-variant IMITATE --exp_prefix my_imitation --motion_name reference_stride
+python -m msk_envs.train.train imitate --exp_prefix my_imitation --motion_name "../motions/study2_p02_s_01_lowIK.mot"
 ```
 
 

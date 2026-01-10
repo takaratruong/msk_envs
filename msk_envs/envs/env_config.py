@@ -75,7 +75,7 @@ class EnvConfig:
     """ Muscle metabolic parameters file path (YAML) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
-    starting_pose: str = "../msk_models/starting_pose_run.yaml"
+    starting_pose: str = "../msk_models/starting_pose_stand.yaml"
     """ Starting pose file path (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
@@ -85,8 +85,8 @@ class EnvConfig:
     """ std of starting joint velocity noise"""
     swap_lr: bool = True
     """ Whether to swap left/right sides when adding noise to starting state """
-    motion_name: str = "../motions/pred_sprint_two_step"
-    """ motion file name (without .mot extension) for IMITATE variant """
+    motion_name: str = "../motions/pred_sprint_two_step.mot"
+    """ motion file name for IMITATE environments (or variants) """
     use_prescribed_starting_activations: bool = False
     """ Whether to use prescribed starting activations from file """
     starting_activations: str = "../msk_models/starting_activations.yaml"

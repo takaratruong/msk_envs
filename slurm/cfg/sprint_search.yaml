@@ -1,6 +1,5 @@
-base_cmd: python -m msk_envs.train.train --exp-prefix
+base_cmd: python -m msk_envs.train.train sprint --exp-prefix
 args:
-  env-variant: SPRINT
   td3-config.num_steps: [1,2,3,4,5]
   td3-config.gamma: [0.95, 0.97, 0.99]
   td3-config.num_updates: [1,2,3,4,5]

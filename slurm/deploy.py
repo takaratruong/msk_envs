@@ -4,7 +4,7 @@ import os
 from copy import deepcopy
 
 
-def underscore2camelCase(word):
+def underscore_to_camel_case(word):
     return ''.join(x.capitalize() or '_' for x in word.split('_'))
 
 
@@ -26,7 +26,7 @@ def split_exp(exp_name, exp_d):
                 model_no_suffix = os.path.splitext(file)[0].replace('model', '')
                 exp = os.path.split(path)[1]
                 item_str = exp + '_' + model_no_suffix
-            ret_dict.update({f'{exp_name}_{underscore2camelCase(k[-1])}_{item_str}': _added_dict})
+            ret_dict.update({f'{exp_name}_{underscore_to_camel_case(k[-1])}_{item_str}': _added_dict})
 
     return had_split, ret_dict
 
@@ -70,9 +70,10 @@ def unflatten(dictionary):
 
 def build_experiments(yaml_dict, exp_name):
     yaml_flat = flatten(yaml_dict)
-    exps = {underscore2camelCase(exp_name): yaml_flat}
+    exps = {underscore_to_camel_case(exp_name): yaml_flat}
     split_experiments(exps)
     return {k.replace(' ', '_'): unflatten(v) for k, v in exps.items()}
+
 
 def yaml2cmd(exp_name, exp_dict):
     cmd = exp_dict['base_cmd']
@@ -91,10 +92,12 @@ def yaml2cmd(exp_name, exp_dict):
 
     return cmd
 
+
 def build_cmds(yaml_dict, exp_name):
     yamls = build_experiments(yaml_dict, exp_name)
     cmds = [yaml2cmd(name, params) for name, params in yamls.items()]
     return cmds, yamls
+
 
 def generate_experiments(opt):
     assert opt.input_yaml.endswith('.yaml')

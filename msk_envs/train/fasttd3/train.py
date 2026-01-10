@@ -179,9 +179,11 @@ def train(
         # Build logged sim wrapper
         sim = LoggedSim(eval_envs, device=device)
         eval_obs = sim.reset()
-        for i in range(sim.max_episode_length):
-            eval_actions = policy_eval(eval_obs)
-            finished, eval_obs = sim.step(eval_actions)
+        for _ in range(sim.max_episode_length):
+            with torch.no_grad():
+                eval_actions = policy_eval(eval_obs)
+                finished, eval_obs = sim.step(eval_actions)
+
             if finished:
                 break
 
@@ -463,12 +465,6 @@ def train(
                     for reward_name, reward_tensor in info["raw_rewards"].items():
                         logs[f"rewards/{reward_name}_raw"] = reward_tensor.mean()
 
-                    if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
-                        print(f"Evaluating at global step {global_step}")
-                        eval_avg_return, eval_avg_length = evaluate(latest_model_path)
-                        logs["eval_avg_return"] = eval_avg_return
-                        logs["eval_avg_length"] = eval_avg_length
-
                 if use_wandb:
                     wandb.log(
                         {
@@ -492,6 +488,12 @@ def train(
                     f"models/{exp_name}/{exp_name}_{global_step}.pt",
                 )
                 latest_model_path = f"models/{exp_name}/{exp_name}_{global_step}.pt"
+
+            if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
+                print(f"Evaluating at global step {global_step}")
+                eval_avg_return, eval_avg_length = evaluate(latest_model_path)
+                logs["eval_avg_return"] = eval_avg_return
+                logs["eval_avg_length"] = eval_avg_length
 
         global_step += 1
         actor_scheduler.step()

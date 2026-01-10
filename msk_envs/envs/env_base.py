@@ -189,8 +189,7 @@ class MSKEnv:
         self.max_episode_duration = env_config.max_episode_duration
         self.delta_t = env_config.delta_t
         self.delta_t_sim = env_config.delta_t_sim
-        self.reset_tensor = torch.zeros(
-            (num_envs, 1), dtype=torch.float32, device=device)
+        self.reset_tensor = torch.zeros((num_envs, 1), dtype=torch.float32, device=device)
 
         # Starting position, load from file
         start_pose_path = os.path.join(self.curr_path, env_config.starting_pose)
@@ -301,27 +300,22 @@ class MSKEnv:
         """ Hook for additional reset behavior in subclasses """
         return
 
-    def _handle_reset(self):
+    def _reset_sim(self):
         msk_warp.set_reset(self.d, self.reset_tensor)  # Inform sim of resets
-
         # Reset time, starting pose, muscle and actuator activations
         reset_mask = self.reset_tensor.squeeze(-1).bool()
         if reset_mask.any():
-            self.time[reset_mask] = 0.0  # should this be in env itself?
+            self.time[reset_mask] = 0.0  # imitate envs may want to reset this ahead of time
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
-            self.joint_velocities[reset_mask, :] = self.start_velocity[
-                                                   reset_mask, :]
+            self.joint_velocities[reset_mask, :] = self.start_velocity[reset_mask, :]
             self.muscle_activations[reset_mask, :] = self.start_activations[reset_mask, :]
             self.actuator_activations[reset_mask, :] = 0.5
-
         # Reset sim
         if self.cuda_graph:
             wp.capture_launch(self.reset_graph)
             wp.synchronize()
         else:
             msk_warp.reset(self.m, self.d)
-
-        self.reset_tensor.fill_(0.0)
         return
 
     # The following are environment-specific and need to be implemented
@@ -391,6 +385,14 @@ class MSKEnv:
         self.actuator_excitations.copy_(excitations)
         return
 
+    def _perform_reset(self, reset_mask: torch.Tensor):
+        """ Internal reset call, resets only envs where reset_mask is 1 """
+        self.reset_tensor.copy_(reset_mask)
+        self.set_start_pose(reset_mask.squeeze(-1).bool())
+        self._upon_reset(reset_mask.squeeze(-1).bool())
+        self._reset_sim()
+        self.reset_tensor.fill_(0.0)
+
     def step(self, actions):
         # Sim step
         self._set_actions(actions)
@@ -402,20 +404,17 @@ class MSKEnv:
 
         # Only compute reward dict once per step
         self._compute_raw_reward_dict()
-
+        # RL step outputs
         final_obs = self._get_obs()
         rew = self.get_rewards()
         terminated = self._get_terminated()
         truncated = self._get_truncated()
-
         # Reset any worlds that are done
         done = torch.clamp(terminated + truncated, 0.0, 1.0).unsqueeze(-1)
-        self.reset_tensor.copy_(done)
-        self.set_start_pose(done.squeeze(-1).bool())
-        self._upon_reset(done.squeeze(-1).bool())
-        self._handle_reset()
+        if done.any():
+            self._perform_reset(done)
 
-        # Training requires the observation *after* the reset
+        # Training requires the observation *after* the reset (for next action)
         obs = self._get_obs()
         # Return raw reward terms for logging
         info = {
@@ -434,9 +433,8 @@ class MSKEnv:
         return obs, rew, terminated, truncated, info
 
     def reset(self):
-        self.reset_tensor.fill_(1.0)
-        self._upon_reset(self.reset_tensor.squeeze(-1).bool())
-        self._handle_reset()
+        """ External reset call, resets all envs """
+        self._perform_reset(reset_mask=torch.ones_like(self.reset_tensor))
         obs = self._get_obs()
         return obs
 

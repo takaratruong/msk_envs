@@ -111,6 +111,8 @@ class ImitateEnv(MSKEnv):
         return
 
     def _upon_reset(self, reset_mask: torch.Tensor):
+        # Requires time to be reset now
+        self.time[reset_mask] = 0.0
         self._set_curr_target_frame()
         return
 

@@ -198,15 +198,15 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
 
         # Find the intervals in which there is contact
         contact_intervals = []
-        contact_threshold = 0.01  # 5% of body weight
+        contact_threshold = 0.01 * weight  # 1% of body weight
         in_contact = False
         contact_start = 0.0
         for i in range(n_frames):
             grf_magnitude = np.linalg.norm(grf_data[i, :])
-            if not in_contact and grf_magnitude >= contact_threshold:
+            if not in_contact and grf_magnitude >= contact_threshold:  # start of contact
                 in_contact = True
                 contact_start = times[i]
-            elif in_contact and grf_magnitude < contact_threshold:
+            elif in_contact and grf_magnitude < contact_threshold:  # end of contact
                 in_contact = False
                 contact_end = times[i]
                 contact_intervals.append((contact_start, contact_end))

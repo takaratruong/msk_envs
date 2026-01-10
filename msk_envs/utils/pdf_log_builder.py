@@ -184,7 +184,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             grf_plot.add(0, grf_selected[:, 2], label="Z")
 
             # Compute the impulse over the selected time range
-            impulse = np.trapz(grf_selected, time_selected, axis=0)
+            # impulse = np.trapz(grf_selected, time_selected, axis=0)
             # grf_plot.add_text(0, x_pos=0.25, y_pos=3.15,
             #                   text=f"Impulse (BW s): ({impulse[0]:.2f}, {impulse[1]:.2f}, {impulse[2]:.2f})",
             #                   fontsize=6)

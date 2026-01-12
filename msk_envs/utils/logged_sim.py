@@ -109,9 +109,9 @@ class LoggedSim:
 
         obs, rew, terminated, truncated, info = self.envs.step(actions)
         done = (terminated + truncated).bool()
-        self.add_to_log()
 
         self.finished = self.finished | done
+        self.add_to_log()
         return self.finished, obs
 
     def reset(self):

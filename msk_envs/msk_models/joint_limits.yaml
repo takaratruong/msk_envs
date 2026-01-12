@@ -49,7 +49,7 @@ wrist_flex_r:
   lower: -0.6
   upper: 0.2500901843342273
 wrist_dev_r:
-  lower: 0.0355379872619602
+  lower: -0.43633231
   upper: 0.5604107508506543
 
 hip_flexion_l:
@@ -92,5 +92,5 @@ wrist_flex_l:
   lower: -0.6
   upper: 0.2500901843342273
 wrist_dev_l:
-  lower: 0.0355379872619602
+  lower: -0.43633231
   upper: 0.5604107508506543

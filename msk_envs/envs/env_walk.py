@@ -4,7 +4,7 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import joint_limit_penalty, \
-    actuator_penalty
+    actuator_sq_penalty
 from msk_envs.utils.global_params import UP_IDX, FWD_IDX, SIDE_IDX
 
 class WalkEnv(MSKEnv):
@@ -23,7 +23,7 @@ class WalkEnv(MSKEnv):
             self.num_worlds, 3, device=self.reset_tensor.device)
         return
 
-    def _upon_reset(self, reset_mask: torch.Tensor):
+    def _upon_reset_pre_sim(self, reset_mask: torch.Tensor):
         # Reset previous velocities
         self.prev_head_v[reset_mask.bool()] = (
             self.body_velocities)[reset_mask.bool(), self.torso_id, 3:]
@@ -96,7 +96,7 @@ class WalkEnv(MSKEnv):
         rew_limit = torch.exp(-limit_arg)
 
         # Actuator costs
-        actuator_arg = torch.abs(actuator_penalty(self.actuator_activations, self.num_actuators) / curr_lane_root_velocity)
+        actuator_arg = torch.abs(actuator_sq_penalty(self.actuator_activations, self.num_actuators) / curr_lane_root_velocity)
         rew_actuator = torch.exp(-actuator_arg)
 
         # Alive bonus

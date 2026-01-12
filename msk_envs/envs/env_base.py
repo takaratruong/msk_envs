@@ -253,10 +253,10 @@ class MSKEnv:
 
         # Finally, set initial pose
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
-        self.set_start_pose(reset_ind.ravel())
+        self.noise_start_pose(reset_ind.ravel())
         return
 
-    def set_start_pose(self, reset_mask: torch.Tensor) -> None:
+    def noise_start_pose(self, reset_mask: torch.Tensor) -> None:
         """
         Re-noise the starting pose and velocity for envs where reset_mask is 1
         Note: takes effect on next reset or init
@@ -296,8 +296,12 @@ class MSKEnv:
     def get_time(self) -> torch.Tensor:
         return msk_warp.time(self.d)
 
-    def _upon_reset(self, reset_mask: torch.Tensor) -> None:
-        """ Hook for additional reset behavior in subclasses """
+    def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
+        """ Hook for additional reset behavior in subclasses. Occurs before sim reset """
+        return
+
+    def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
+        """ Hook for additional reset behavior in subclasses. Occurs after sim reset """
         return
 
     def _reset_sim(self):
@@ -388,9 +392,10 @@ class MSKEnv:
     def _perform_reset(self, reset_mask: torch.Tensor):
         """ Internal reset call, resets only envs where reset_mask is 1 """
         self.reset_tensor.copy_(reset_mask)
-        self.set_start_pose(reset_mask.squeeze(-1).bool())
-        self._upon_reset(reset_mask.squeeze(-1).bool())
+        self.noise_start_pose(reset_mask.squeeze(-1).bool())
+        self._upon_reset_pre_sim(reset_mask.squeeze(-1).bool())
         self._reset_sim()
+        self._upon_reset_post_sim(reset_mask.squeeze(-1).bool())
         self.reset_tensor.fill_(0.0)
 
     def step(self, actions):

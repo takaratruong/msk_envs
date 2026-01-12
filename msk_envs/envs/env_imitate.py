@@ -6,7 +6,8 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec, quat_diff_angle, quat_diff, quat_to_angle_axis, quat_conjugate, quat_mul
 from msk_envs.utils.parse_mot import parse_mot
-from msk_envs.utils.reward_lib import joint_angle_track_reward, body_pos_track_reward, body_rot_track_reward, update_dict
+from msk_envs.utils.reward_lib import joint_angle_track_reward, body_pos_track_reward, body_rot_track_reward, \
+    update_dict
 
 
 class ImitateEnv(MSKEnv):
@@ -110,9 +111,9 @@ class ImitateEnv(MSKEnv):
         self.start_velocity[:, 6:] = target_velocities[:, 7:]  # joint qv
         return
 
-    def _upon_reset(self, reset_mask: torch.Tensor):
-        # Requires time to be reset now
-        self.time[reset_mask] = 0.0
+    def _upon_reset_pre_sim(self, reset_mask: torch.Tensor):
+        # We use the reset-hook before sim reset since we need to modify start pose/vel
+        self.time[reset_mask] = 0.0  # Requires time to be reset now
         self._set_curr_target_frame()
         return
 
@@ -205,7 +206,8 @@ class ImitateEnv(MSKEnv):
 
         # Extra rewarded DOFs - for debug!
         if len(self.extra_rewarded_dofs) > 0:
-            assert self.reward_lambdas["lambda_extra_rewarded_dofs"] > 0.0, "lambda_extra_rewarded_dofs must be set when extra_rewarded_dofs are set"
+            assert self.reward_lambdas[
+                       "lambda_extra_rewarded_dofs"] > 0.0, "lambda_extra_rewarded_dofs must be set when extra_rewarded_dofs are set"
             extra_rewarded_dofs_reward = 0.0
             for dof in self.extra_rewarded_dofs:
                 dof_adr = self.dof_id_lookup[dof][0]  # qpos_adr
@@ -214,10 +216,11 @@ class ImitateEnv(MSKEnv):
                     weight=self.imitation_weights["imitation_weight_track_joints"])
                 extra_rewarded_dofs_reward += track_angle_reward
             update_dict(self.reward_dict, "rew_extra_rewarded_dofs", extra_rewarded_dofs_reward)
-        
+
         # Extra rewarded joints - for debug!
         if len(self.extra_rewarded_joints) > 0:
-            assert self.reward_lambdas["lambda_extra_rewarded_joints"] > 0.0, "lambda_extra_rewarded_joints must be set when extra_rewarded_joints are set"
+            assert self.reward_lambdas[
+                       "lambda_extra_rewarded_joints"] > 0.0, "lambda_extra_rewarded_joints must be set when extra_rewarded_joints are set"
             extra_rewarded_joints_reward = 0.0
             for body in self.extra_rewarded_joints:
                 body_id = self.body_id_lookup[body]
@@ -229,8 +232,6 @@ class ImitateEnv(MSKEnv):
                     weight=self.imitation_weights["imitation_weight_track_body_rot"])
                 extra_rewarded_joints_reward += track_pos_reward + track_rot_reward
             update_dict(self.reward_dict, "rew_extra_rewarded_joints", extra_rewarded_joints_reward)
-
-
 
     def _get_terminated(self):
         # Root position difference too high

@@ -5,7 +5,7 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import max_vertical_reward, joint_limit_penalty, \
-    actuator_penalty
+    actuator_sq_penalty
 
 
 class VerticalEnv(MSKEnv):
@@ -22,7 +22,7 @@ class VerticalEnv(MSKEnv):
         self.max_height_achieved = torch.zeros(num_envs, device=self.body_positions.device)
         return
 
-    def _upon_reset(self, reset_mask: torch.Tensor) -> None:
+    def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         # Reset max height tracking
         # self.max_height_achieved[reset_mask.bool().squeeze(-1)] = 0.0  
         self.max_height_achieved[torch.ones_like(reset_mask).bool().squeeze(-1)] = 0.0  # This is to make the reward non-cumulative
@@ -34,7 +34,7 @@ class VerticalEnv(MSKEnv):
         rew_max_vertical = self.max_height_achieved.clone()  # Cloned to avoid early reset issues
 
         rew_limit = joint_limit_penalty(self.limit_torques)
-        rew_actuator = actuator_penalty(self.actuator_activations, self.num_actuators)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
 
         self.reward_dict = {
             "rew_max_vertical": rew_max_vertical.detach(),

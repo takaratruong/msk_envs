@@ -24,8 +24,10 @@ def joint_limit_penalty(limit_torques: torch.Tensor, squared: bool = False):
     return limit_torque_sum / num_limits
 
 
-def actuator_penalty(actuator_activations, num_actuators):
-    """Actuator penalty based on squared activation deviation from 0.5"""
+def actuator_sq_penalty(actuator_activations, num_actuators):
+    """
+    Actuator penalty based on squared activation. Note that 0.5 = no activation, so we shift and scale to [-1, 1] first.
+    """
     actuator_act = (actuator_activations - 0.5) * 2.0
     squared_act = torch.pow(actuator_act, 2)
     mean_squared_act = torch.sum(squared_act, dim=1) / num_actuators
@@ -34,9 +36,14 @@ def actuator_penalty(actuator_activations, num_actuators):
     return mean_squared_act
 
 
-def metabolic_penalty(muscle_powers, num_muscles):
+def metabolic_penalty(muscle_powers, num_muscles, squared: bool = False):
     """Metabolic penalty based on total muscle power"""
-    total_power = torch.sum(muscle_powers, dim=1)
+    if squared:
+        muscle_powers_sq = torch.pow(muscle_powers, 2)
+        total_power = torch.sum(muscle_powers_sq, dim=1)
+    else:
+        total_power = torch.sum(muscle_powers, dim=1)
+
     if num_muscles == 0:
         return torch.zeros_like(total_power)
     return total_power / num_muscles
@@ -44,11 +51,17 @@ def metabolic_penalty(muscle_powers, num_muscles):
 
 def fatigue_penalty(muscle_activations, num_muscles):
     """Fatigue penalty based on squared muscle activations"""
-    squared_activations = torch.pow(muscle_activations, 2)
-    total_fatigue = torch.sum(squared_activations, dim=1)
+    activations_sq = torch.pow(muscle_activations, 2)
+    total_fatigue = torch.sum(activations_sq, dim=1)
     if num_muscles == 0:
         return torch.zeros_like(total_fatigue)
     return total_fatigue / num_muscles
+
+
+def acceleration_sq_penalty(joint_accelerations):
+    """Penalty based on squared joint accelerations"""
+    acc_sq = torch.pow(joint_accelerations, 2)
+    return torch.mean(acc_sq, dim=1)
 
 
 def max_vertical_reward(body_positions):

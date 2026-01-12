@@ -21,7 +21,6 @@ class BaseArgs:
     cuda: bool = True
     gpu_id: int = 0
 
-    env_variant: DerivedEnv = DerivedEnv.SPRINT
     td3_config: TD3Config = field(default_factory=TD3Config)
     env_config: EnvConfig = field(default_factory=EnvConfig)
 
@@ -86,6 +85,23 @@ class WalkConfig(BaseArgs):
     lambda_actuator: float = 1.0
     lambda_activation: float = 1.0
     lambda_alive: float = 1.0
+
+
+@dataclass
+class JogConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.JOG,
+        delta_t=1.0 / 100.0,
+        max_episode_duration=10.0,
+    ))
+
+    """Walk environment specific reward scales"""
+    lambda_vel: float = 1.0
+    lambda_metabolic: float = -0.01
+    lambda_fatigue: float = -0.05
+    lambda_acc: float = -0.001
+    lambda_limit: float = -0.1
+    lambda_actuator: float = -1.0
 
 
 @dataclass
@@ -163,6 +179,7 @@ class ImitateConfig(BaseArgs):
 # Register configs here
 Config = Union[
     Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
+    Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
     Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],

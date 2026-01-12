@@ -449,12 +449,6 @@ def train(
 
                 soft_update(qnet, qnet_target, td3_config.tau)
 
-            if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
-                print(f"Evaluating at global step {global_step}")
-                eval_avg_return, eval_avg_length = evaluate(latest_model_path)
-                logs["eval_avg_return"] = eval_avg_return
-                logs["eval_avg_length"] = eval_avg_length
-
             if global_step % 100 == 0 and start_time is not None:
                 with torch.no_grad():
                     logs = {
@@ -470,6 +464,12 @@ def train(
                     # Log raw reward terms before lambda multiplication
                     for reward_name, reward_tensor in info["raw_rewards"].items():
                         logs[f"rewards/{reward_name}_raw"] = reward_tensor.mean()
+
+                if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
+                    print(f"Evaluating at global step {global_step}")
+                    eval_avg_return, eval_avg_length = evaluate(latest_model_path)
+                    logs["eval_avg_return"] = eval_avg_return
+                    logs["eval_avg_length"] = eval_avg_length
 
                 if use_wandb:
                     wandb.log(

@@ -37,6 +37,10 @@ class EnvConfig:
     """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
     enable_drag: bool = True
     """ Whether to enable drag forces """
+    use_specified_contact_params: bool = True
+    """ Whether to use contact parameters defined in contact_params_path """
+    contact_params_path: str = "../msk_models/contact_params.yaml"
+    """ Contact parameters file path (YAML). NOTE: this overrides contact parameters defined in the model file """
 
     # Constraint properties
     contact_type: msk_warp.ContactType = msk_warp.ContactType.HUNT_CROSSLEY

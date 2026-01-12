@@ -7,6 +7,7 @@ from .env_config import EnvConfig
 from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
 from msk_envs.utils.muscle_props import parse_starting_activations, parse_muscle_metabolic_params
 from msk_envs.utils.joint_limits import get_exp_limit_curves, get_joint_limits
+from msk_envs.utils.contact_params import parse_contact_params
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 
 
@@ -80,6 +81,20 @@ class MSKEnv:
                 mm.slow_twitch_ratio = params.slow_twitch_ratio
                 mm.density = params.density
 
+        # Collider properties
+        if env_config.use_specified_contact_params:
+            geom_stiffness = msk_warp.collider_stiffness(self.m)
+            geom_dissipation = msk_warp.collider_dissipation(self.m)
+            geom_priority = msk_warp.collider_priority(self.m)
+
+            contact_params_path = os.path.join(self.curr_path, env_config.contact_params_path)
+            contact_params = parse_contact_params(contact_params_path, self.collider_id_lookup)
+            for params in contact_params:
+                geom_id = params.geom_id
+                geom_stiffness[geom_id] = params.stiffness
+                geom_dissipation[geom_id] = params.dissipation
+                geom_priority[geom_id] = params.priority
+
         # Contact model (Hunt-Crossley or MuJoCo)
         msk_warp.set_contact_type(self.m, env_config.contact_type)
         # Joint limit model (Exponential or MuJoCo)
@@ -99,6 +114,7 @@ class MSKEnv:
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
 
         msk_warp.reinitialize_model(self.m, self.d)
+        return
 
     def _setup_cuda_graphs(self):
         if self.cuda_graph:
@@ -138,6 +154,7 @@ class MSKEnv:
         self.limit_id_lookup = load_result.limit_id_lookup
         self.muscle_id_lookup = load_result.muscle_id_lookup
         self.actuator_id_lookup = load_result.actuator_id_lookup
+        self.collider_id_lookup = load_result.collider_id_lookup
         self.visuals = load_result.visuals
         self._setup_model(env_config)
 

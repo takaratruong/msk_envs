@@ -449,6 +449,12 @@ def train(
 
                 soft_update(qnet, qnet_target, td3_config.tau)
 
+            if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
+                print(f"Evaluating at global step {global_step}")
+                eval_avg_return, eval_avg_length = evaluate(latest_model_path)
+                logs["eval_avg_return"] = eval_avg_return
+                logs["eval_avg_length"] = eval_avg_length
+
             if global_step % 100 == 0 and start_time is not None:
                 with torch.no_grad():
                     logs = {
@@ -488,12 +494,6 @@ def train(
                     f"models/{exp_name}/{exp_name}_{global_step}.pt",
                 )
                 latest_model_path = f"models/{exp_name}/{exp_name}_{global_step}.pt"
-
-            if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
-                print(f"Evaluating at global step {global_step}")
-                eval_avg_return, eval_avg_length = evaluate(latest_model_path)
-                logs["eval_avg_return"] = eval_avg_return
-                logs["eval_avg_length"] = eval_avg_length
 
         global_step += 1
         actor_scheduler.step()

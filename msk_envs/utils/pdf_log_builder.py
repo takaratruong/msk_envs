@@ -227,7 +227,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     x_data_sub=frame_ind,
                     x_fmt=".2f",
                     x_sub_fmt=".0f",
-                    y_fmt=".2f",
+                    y_fmt=".3f",
                 )
             )
             contact_time_plot.add_scatter(0, contact_mid_times, contact_durations, label="Contact Duration",

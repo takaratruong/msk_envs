@@ -103,7 +103,12 @@ head_col:
   dissipation: 1.0
   priority: 1
 
-torso_col_1:
+torso_col_1_1:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+
+torso_col_1_2:
   stiffness: 5e6
   dissipation: 1.0
   priority: 1

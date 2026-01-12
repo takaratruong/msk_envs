@@ -12176,41 +12176,61 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>pelvis</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>-0.06 0.0 0.0</location>
+					<location>-0.06 -0.02 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>0 0 0</orientation>
-					<radius>0.05</radius>
-					<length>0.075</length>
+					<radius>0.065</radius>
+					<length>0.06</length>
 				</ContactCapsule>
-				<ContactCapsule name="torso_col_1">
+				<ContactCapsule name="torso_col_1_1">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.0 0.05 0.0</location>
+					<location>0.025 0.06 -0.075</location>
 					<!--Orientation of geometry in the body frame-->
-					<orientation>0 0 0</orientation>
-					<radius>0.06</radius>
+					<orientation>1.4707 0 0</orientation>
+					<radius>0.05</radius>
+					<length>0.075</length>
+				</ContactCapsule>
+				<ContactCapsule name="torso_col_1_2">
+					<!--Body name to connect the contact geometry to-->
+					<socket_frame>torso</socket_frame>
+					<!--Location of geometry center in the body frame-->
+					<location>0.025 0.06 0.075</location>
+					<!--Orientation of geometry in the body frame-->
+					<orientation>1.6707 0 0</orientation>
+					<radius>0.05</radius>
+					<length>0.075</length>
+				</ContactCapsule>
+				<ContactCapsule name="torso_col_1_3">
+					<!--Body name to connect the contact geometry to-->
+					<socket_frame>torso</socket_frame>
+					<!--Location of geometry center in the body frame-->
+					<location>0.025 0.06 0.0</location>
+					<!--Orientation of geometry in the body frame-->
+					<orientation>1.5707 0 0</orientation>
+					<radius>0.05</radius>
 					<length>0.075</length>
 				</ContactCapsule>
 				<ContactCapsule name="torso_col_2_1">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.025 0.2 0.0</location>
+					<location>0.0 0.275 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>0 0 0</orientation>
-					<radius>0.075</radius>
-					<length>0.06</length>
+					<radius>0.07</radius>
+					<length>0.065</length>
 				</ContactCapsule>
 				<ContactCapsule name="torso_col_2_2">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>-0.025 0.2 0.0</location>
+					<location>0.025 0.2 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>0 0 0</orientation>
-					<radius>0.075</radius>
-					<length>0.075</length>
+					<radius>0.07</radius>
+					<length>0.065</length>
 				</ContactCapsule>
 				<ContactCapsule name="torso_col_3">
 					<!--Body name to connect the contact geometry to-->
@@ -12238,7 +12258,7 @@
 					<location>0.0 -0.15 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
-					<radius>0.02</radius>
+					<radius>0.03</radius>
 					<length>0.15</length>
 				</ContactCapsule>
 				<ContactCapsule name="right_forearm_col">
@@ -12268,7 +12288,7 @@
 					<location>0.0 -0.15 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
-					<radius>0.02</radius>
+					<radius>0.03</radius>
 					<length>0.15</length>
 				</ContactCapsule>
 				<ContactCapsule name="left_forearm_col">

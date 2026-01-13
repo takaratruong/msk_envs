@@ -1,6 +1,6 @@
 import torch
-from msk_envs.utils.global_params import UP_IDX, SIDE_IDX
-from msk_envs.utils.quat import quat_diff_angle
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
+from msk_envs.utils.quat import quat_diff_angle, rotate_vec
 
 
 def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool):
@@ -120,6 +120,19 @@ def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight
     mse = rot_diff_angle.pow(2).mean(dim=1)
     reward = torch.exp(-weight * mse)
     return reward
+
+
+def has_fallen(root_pos, torso_pos, torso_rot, head_offset):
+    # Root falls below threshold
+    root_height = root_pos[:, UP_IDX]
+    pelvis_fallen = (root_height < MIN_ROOT_HEIGHT)
+
+    # Head falls below threshold
+    head_pos = torso_pos + rotate_vec(torso_rot, head_offset)
+    head_fallen = (head_pos[:, UP_IDX] < MIN_HEAD_HEIGHT)
+
+    fallen = pelvis_fallen | head_fallen
+    return fallen.detach()
 
 
 def update_dict(reward_dict, key, value):

@@ -6,6 +6,7 @@ from .env_side_shuffle import SideShuffleEnv
 from .env_hop import HopEnv
 from .env_vertical import VerticalEnv
 from .env_walk import WalkEnv
+from .env_perturb import PerturbEnv
 from .env_imitate import ImitateEnv
 
 
@@ -29,6 +30,8 @@ class EnvFactory:
             return HopEnv(**kwargs)
         elif env_variant == DerivedEnv.VERTICAL:
             return VerticalEnv(**kwargs)
+        elif env_variant == DerivedEnv.PERTURB:
+            return PerturbEnv(**kwargs)
         elif env_variant == DerivedEnv.IMITATE:
             return ImitateEnv(**kwargs)
         else:

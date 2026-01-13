@@ -195,6 +195,16 @@ class VerticalConfig(BaseArgs):
 
 
 @dataclass
+class PerturbConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.PERTURB,
+        delta_t=1.0 / 100.0,
+        max_episode_duration=10.0,
+    ))
+    lambda_alive: float = 1.0
+
+
+@dataclass
 class ImitateConfig(BaseArgs):
     """ Default Imitate environment configuration. Tracks a two-step sprinting motion. """
     env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
@@ -244,6 +254,7 @@ Config = Union[
     Annotated[SideShuffleConfig, tyro.conf.subcommand(name="sideshuffle")],
     Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
+    Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
 ]
 

@@ -7,5 +7,6 @@ class DerivedEnv(Enum):
     BACKPEDAL = 3
     SIDE_SHUFFLE = 4
     HOP = 5
-    VERTICAL = 6
-    IMITATE = 7
+    PERTURB = 6
+    VERTICAL = 7
+    IMITATE = 8

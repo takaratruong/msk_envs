@@ -27,12 +27,12 @@ class HopEnv(MaxEffortLanesEnv):
 
     def _get_terminated(self):
         # Get normal termination conditions
-        terminated_sprint = super()._get_terminated()
+        terminated_lanes = super()._get_terminated()
 
         # Check if left toe is on the ground
         left_toe_pos = self.body_positions[:, self.toes_ids[0], :]
         left_toe_height = left_toe_pos[:, UP_IDX]
         left_toe_on_ground = (left_toe_height < 0.05).float()
 
-        terminated = torch.max(terminated_sprint, left_toe_on_ground)
+        terminated = torch.max(terminated_lanes, left_toe_on_ground)
         return terminated.detach()

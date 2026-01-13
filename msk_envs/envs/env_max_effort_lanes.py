@@ -1,11 +1,11 @@
 import torch
 
-from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX
+from msk_envs.utils.global_params import SIDE_IDX, FWD_IDX
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, mid_lane_reward
+    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, mid_lane_reward, has_fallen
 
 
 class MaxEffortLanesEnv(MSKEnv):
@@ -76,21 +76,14 @@ class MaxEffortLanesEnv(MSKEnv):
         # Reached finish line
         reached_finish = (self.root_pos[:, FWD_IDX] >= 100.0)
 
-        # Root falls below threshold
-        min_root_height = 0.6
-        root_height = self.root_pos[:, UP_IDX]
-        fallen = (root_height < min_root_height)
-
-        # Head falls below threshold
-        min_head_height = 1.0
-        head_pos = self.torso_pos + rotate_vec(self.torso_rot, self.head_offset)
-        head_fallen = (head_pos[:, UP_IDX] < min_head_height)
+        # Has fallen
+        fallen = has_fallen(self.root_pos, self.torso_pos, self.torso_rot, self.head_offset)
 
         # Any of the *toes* are out of the lanes
-        body_out = torch.zeros_like(head_fallen)
+        toes_out = torch.zeros_like(reached_finish, dtype=torch.bool)
         for body_idx in self.toes_ids:
             body_pos = self.body_positions[:, body_idx]
-            body_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
+            toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
 
         # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, self.root_id]
@@ -98,5 +91,5 @@ class MaxEffortLanesEnv(MSKEnv):
         facing_direction = (pelvis_fwd[:, FWD_IDX] >= torch.cos(torch.deg2rad(torch.tensor(30.0))))
         not_facing_direction = ~facing_direction
 
-        terminated = (reached_finish | fallen | head_fallen | body_out | not_facing_direction).float()
+        terminated = (reached_finish | fallen | toes_out | not_facing_direction).float()
         return terminated.detach()

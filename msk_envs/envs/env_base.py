@@ -161,6 +161,7 @@ class MSKEnv:
         # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)
         self.num_dofs = msk_warp.get_num_dofs(self.m)
+        self.num_bodies = msk_warp.get_num_bodies(self.m)
         self.num_muscles = msk_warp.get_num_muscles(self.m)
         self.num_actuators = msk_warp.get_num_actuators(self.m)
         # [num_envs, num_bodies]
@@ -184,6 +185,8 @@ class MSKEnv:
         self.body_rotations = msk_warp.body_rotations(self.d)
         # [num_envs, num_bodies, 6] (ang, lin)
         self.body_velocities = msk_warp.body_com_velocities(self.d)
+        # [num_envs, num_bodies, 6] (frc, trq)
+        self.body_user_forces = msk_warp.body_user_forces(self.d)
         # [num_envs, num_qpos]
         self.joint_positions = msk_warp.joint_positions(self.d)
         # [num_envs, num_dofs]
@@ -355,6 +358,10 @@ class MSKEnv:
         self._set_actuator_excitations(raw_action[:, self.num_muscles:])
         return
 
+    def _pre_step(self) -> None:
+        """ Hook for any pre-step computations """
+        return
+
     def _compute_raw_reward_dict(self):
         """ Guarantee to only run once per step """
         raise NotImplementedError
@@ -416,6 +423,9 @@ class MSKEnv:
         self.reset_tensor.fill_(0.0)
 
     def step(self, actions):
+        """ External step call """
+        self._pre_step()
+
         # Sim step
         self._set_actions(actions)
         if self.cuda_graph:
@@ -426,7 +436,8 @@ class MSKEnv:
 
         # Only compute reward dict once per step
         self._compute_raw_reward_dict()
-        # RL step outputs
+
+        # RL outputs
         final_obs = self._get_obs()
         rew = self.get_rewards()
         terminated = self._get_terminated()

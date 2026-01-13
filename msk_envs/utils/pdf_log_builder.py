@@ -141,6 +141,8 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             # Select time range
             if time_end is None:
                 time_end = times[-1]
+            time_start = max(time_start, times[0])
+            time_end = min(time_end, times[-1])
             time_mask = (times >= time_start) & (times <= time_end)
             time_mask = time_mask.flatten()
             time_selected = times[time_mask]
@@ -164,33 +166,10 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     y_fmt=".1f",
                 )
             )
-
-            # put grf_selected through a low pass filter to reduce noise
-            # from scipy.signal import butter, filtfilt
-            # def lowpass(data, times, order=4):
-            #     fs = 1.0 / np.mean(np.diff(times))  # sampling frequency (Hz)
-            #     cutoff = 60.0  # Hz
-            #
-            #     nyq = 0.5 * fs
-            #     normal_cutoff = cutoff / nyq
-            #
-            #     b, a = butter(order, normal_cutoff, btype='low')
-            #     return filtfilt(b, a, data, axis=0)
-            # grf_selected = lowpass(grf_selected, time_selected)
-
             grf_plot.add_hline(0, 0.0)
             grf_plot.add(0, grf_selected[:, 0], label="X")
             grf_plot.add(0, grf_selected[:, 1], label="Y")
             grf_plot.add(0, grf_selected[:, 2], label="Z")
-
-            # Compute the impulse over the selected time range
-            # impulse = np.trapz(grf_selected, time_selected, axis=0)
-            # grf_plot.add_text(0, x_pos=0.25, y_pos=3.15,
-            #                   text=f"Impulse (BW s): ({impulse[0]:.2f}, {impulse[1]:.2f}, {impulse[2]:.2f})",
-            #                   fontsize=6)
-            # print(f"GRF Impulse (BW s) from {time_start:.4f}s to {time_end:.4f}s: "
-            #       f"({impulse[0]:.4f}, {impulse[1]:.4f}, {impulse[2]:.4f})")
-
             grf_plot.finish(pdf)
 
         # GRF plot for entire duration
@@ -198,7 +177,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
 
         # Find the intervals in which there is contact
         contact_intervals = []
-        contact_threshold = 0.01 * weight  # 1% of body weight
+        contact_threshold = 1e-3
         in_contact = False
         contact_start = 0.0
         for i in range(n_frames):
@@ -235,8 +214,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             contact_time_plot.finish(pdf)
 
         # Create interval plots for each contact interval
+        dt = times[1] - times[0]
         for (start_time, end_time) in contact_intervals:
-            create_grf_plot(start_time, end_time)
+            create_grf_plot(start_time - dt, end_time + dt)
 
         # --- JOINT ANGLES ---
         has_reference = frame_data[0].joint_angles[0].has_reference()

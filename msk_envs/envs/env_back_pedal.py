@@ -5,7 +5,7 @@ from .env_config import EnvConfig
 from .env_max_effort_lanes import MaxEffortLanesEnv
 
 
-class SprintingEnv(MaxEffortLanesEnv):
+class BackPedalEnv(MaxEffortLanesEnv):
     def __init__(
             self,
             num_envs: int,
@@ -20,6 +20,6 @@ class SprintingEnv(MaxEffortLanesEnv):
             device=device,
             render=render,
             cuda_graph=cuda_graph,
-            target_dir=build_axis(FWD_IDX, 1.0),
+            target_dir=build_axis(FWD_IDX, -1.0)
         )
         return

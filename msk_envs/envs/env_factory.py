@@ -1,6 +1,9 @@
 from .env_variants import DerivedEnv
 from .env_sprint import SprintingEnv
 from .env_jog import JoggingEnv
+from .env_back_pedal import BackPedalEnv
+from .env_side_shuffle import SideShuffleEnv
+from .env_hop import HopEnv
 from .env_vertical import VerticalEnv
 from .env_walk import WalkEnv
 from .env_imitate import ImitateEnv
@@ -18,6 +21,12 @@ class EnvFactory:
             return JoggingEnv(**kwargs)
         elif env_variant == DerivedEnv.SPRINT:
             return SprintingEnv(**kwargs)
+        elif env_variant == DerivedEnv.BACKPEDAL:
+            return BackPedalEnv(**kwargs)
+        elif env_variant == DerivedEnv.SIDE_SHUFFLE:
+            return SideShuffleEnv(**kwargs)
+        elif env_variant == DerivedEnv.HOP:
+            return HopEnv(**kwargs)
         elif env_variant == DerivedEnv.VERTICAL:
             return VerticalEnv(**kwargs)
         elif env_variant == DerivedEnv.IMITATE:

@@ -110,13 +110,68 @@ class SprintConfig(BaseArgs):
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
+        starting_pose="../msk_models/starting_pose_run.yaml",
     ))
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
     lambda_limit: float = -2.0
-    lambda_actuator: float = -0.5
-    lambda_fatigue: float = -1.0
+    lambda_actuator: float = -1.0
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+    lambda_finish: float = 20.0
+
+
+@dataclass
+class BackPedalConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.BACKPEDAL,
+        delta_t=1.0 / 100.0,
+        max_episode_duration=12.0,
+        starting_pose="../msk_models/starting_pose_stand_backward.yaml",
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 1.0
+    lambda_limit: float = -2.0
+    lambda_actuator: float = -1.0
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+    lambda_finish: float = 20.0
+
+
+@dataclass
+class SideShuffleConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.SIDE_SHUFFLE,
+        delta_t=1.0 / 100.0,
+        max_episode_duration=12.0,
+        starting_pose="../msk_models/starting_pose_stand_side.yaml",
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 1.0
+    lambda_limit: float = -2.0
+    lambda_actuator: float = -1.0
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+    lambda_finish: float = 20.0
+
+
+@dataclass
+class HopConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.HOP,
+        delta_t=1.0 / 100.0,
+        max_episode_duration=12.0,
+        starting_pose="../msk_models/starting_pose_left_leg_up.yaml",
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 1.0
+    lambda_limit: float = -2.0
+    lambda_actuator: float = -1.0
+    lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
     lambda_finish: float = 20.0
 
@@ -181,6 +236,9 @@ Config = Union[
     Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
     Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
+    Annotated[BackPedalConfig, tyro.conf.subcommand(name="backpedal")],
+    Annotated[SideShuffleConfig, tyro.conf.subcommand(name="sideshuffle")],
+    Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
 ]

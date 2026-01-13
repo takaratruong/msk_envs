@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderer.setScissorTest(false);
     }
 
-    setupGround(scene, new THREE.Vector3(0, 0, 0));
+    setupGround(scene, new THREE.Vector3(-50, 0, 0));
     setupGround(scene, new THREE.Vector3(50, 0, 0));
     setupNumbers(scene);
     setupLightsSky(scene);

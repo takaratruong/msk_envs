@@ -98,6 +98,11 @@ left_tibia_col:
   dissipation: 1.0
   priority: 1
 
+neck_col:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+
 head_col:
   stiffness: 5e6
   dissipation: 1.0

@@ -12140,7 +12140,7 @@
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.65 0.1 0</orientation>
 					<radius>0.05</radius>
-					<length>0.155</length>
+					<length>0.16</length>
 				</ContactCapsule>
 				<ContactCapsule name="right_tibia_col">
 					<!--Body name to connect the contact geometry to-->
@@ -12160,7 +12160,7 @@
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.4914 0.1 0</orientation>
 					<radius>0.05</radius>
-					<length>0.155</length>
+					<length>0.16</length>
 				</ContactCapsule>
 				<ContactCapsule name="left_tibia_col">
 					<!--Body name to connect the contact geometry to-->
@@ -12242,6 +12242,16 @@
 					<radius>0.05</radius>
 					<length>0.1</length>
 				</ContactCapsule>
+				<ContactCapsule name="neck_col">
+					<!--Body name to connect the contact geometry to-->
+					<socket_frame>torso</socket_frame>
+					<!--Location of geometry center in the body frame-->
+					<location>-0.01 0.45 0.0</location>
+					<!--Orientation of geometry in the body frame-->
+					<orientation>1.5707 -0.2 0</orientation>
+					<radius>0.05</radius>
+					<length>0.05</length>
+				</ContactCapsule>
 				<ContactSphere name="head_col">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
@@ -12265,11 +12275,11 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>ulna_r</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>-0.01 -0.135 0.015</location>
+					<location>-0.01 -0.145 0.015</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
 					<radius>0.02</radius>
-					<length>0.1</length>
+					<length>0.135</length>
 				</ContactCapsule>
 				<ContactSphere name="right_palm_col">
 					<!--Body name to connect the contact geometry to-->
@@ -12295,11 +12305,11 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>ulna_l</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>-0.01 -0.135 -0.015</location>
+					<location>-0.01 -0.145 -0.015</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
 					<radius>0.02</radius>
-					<length>0.1</length>
+					<length>0.135</length>
 				</ContactCapsule>
 				<ContactSphere name="left_palm_col">
 					<!--Body name to connect the contact geometry to-->

@@ -115,6 +115,7 @@ class SprintConfig(BaseArgs):
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
+    lambda_mid_lane: float = 1.0
     lambda_limit: float = -2.0
     lambda_actuator: float = -1.0
     lambda_fatigue: float = 0.0
@@ -133,6 +134,7 @@ class BackPedalConfig(BaseArgs):
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
+    lambda_mid_lane: float = 1.0
     lambda_limit: float = -2.0
     lambda_actuator: float = -1.0
     lambda_fatigue: float = 0.0
@@ -151,6 +153,7 @@ class SideShuffleConfig(BaseArgs):
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
+    lambda_mid_lane: float = 1.0
     lambda_limit: float = -2.0
     lambda_actuator: float = -1.0
     lambda_fatigue: float = 0.0
@@ -169,6 +172,7 @@ class HopConfig(BaseArgs):
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
+    lambda_mid_lane: float = 1.0
     lambda_limit: float = -2.0
     lambda_actuator: float = -1.0
     lambda_fatigue: float = 0.0

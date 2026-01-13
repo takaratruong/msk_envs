@@ -5,7 +5,7 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty
+    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, mid_lane_reward
 
 
 class MaxEffortLanesEnv(MSKEnv):
@@ -52,6 +52,7 @@ class MaxEffortLanesEnv(MSKEnv):
 
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
+        rew_mid_lane = mid_lane_reward(self.root_pos)
         rew_limit = joint_limit_penalty(self.limit_torques, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
@@ -63,6 +64,7 @@ class MaxEffortLanesEnv(MSKEnv):
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
+            "rew_mid_lane": rew_mid_lane.detach(),
             "rew_limit": rew_limit.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_fatigue": rew_fatigue.detach(),

@@ -1,5 +1,5 @@
 import torch
-from msk_envs.utils.global_params import UP_IDX
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX
 from msk_envs.utils.quat import quat_diff_angle
 
 
@@ -7,6 +7,12 @@ def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool
     """Forward velocity reward (x-velocity of root body)"""
     root_velocity = body_velocities[:, body_id, :]
     return root_velocity[:, coordinate + 3] if linear else root_velocity[:, coordinate]
+
+
+def mid_lane_reward(root_position: torch.Tensor, weight: float = 5.0):
+    """Reward for being in the center of the lane"""
+    dist_from_center = torch.abs(root_position[:, SIDE_IDX])
+    return torch.exp(-weight * dist_from_center.pow(2))
 
 
 def joint_limit_penalty(limit_torques: torch.Tensor, squared: bool = False):

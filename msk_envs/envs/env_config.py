@@ -29,7 +29,7 @@ class EnvConfig:
     """ Damping specifically for torso joint """
     toes_stiffness: float = 65.0
     """ Toes joint stiffness """
-    toes_damping: float = 0.1
+    toes_damping: float = 0.4
     """ Toes joint damping """
     use_specified_joint_limits: bool = True
     """ Whether to use joint limits defined in joint_limits_path, otherwise use limits defined in model file """
@@ -83,9 +83,9 @@ class EnvConfig:
     """ Starting pose file path (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
-    q_noise: float = 0.05
+    q_noise: float = 0.0
     """ std of starting joint position noise"""
-    qv_noise: float = 0.1
+    qv_noise: float = 0.0
     """ std of starting joint velocity noise"""
     swap_lr: bool = True
     """ Whether to swap left/right sides when adding noise to starting state """

@@ -1,5 +1,12 @@
 import os
 
+# Set Warp cache directory before importing warp to ensure it uses the correct location
+if 'WARP_CACHE_DIR' not in os.environ:
+    import tempfile
+
+    os.environ['WARP_CACHE_DIR'] = os.path.join(tempfile.gettempdir(), f'warp_cache_{os.getuid()}')
+    os.makedirs(os.environ['WARP_CACHE_DIR'], exist_ok=True)
+
 import torch
 import wandb
 import warp as wp
@@ -8,13 +15,6 @@ import msk_envs.train.fasttd3.train as fasttd3
 from msk_envs.utils.train_utils import set_seed
 from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
-
-# Set Warp cache directory before importing warp to ensure it uses the correct location
-if 'WARP_CACHE_DIR' not in os.environ:
-    import tempfile
-
-    os.environ['WARP_CACHE_DIR'] = os.path.join(tempfile.gettempdir(), f'warp_cache_{os.getuid()}')
-    os.makedirs(os.environ['WARP_CACHE_DIR'], exist_ok=True)
 
 wp.clear_kernel_cache()  # can't risk caching issues
 

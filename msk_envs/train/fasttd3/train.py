@@ -1,12 +1,3 @@
-import os
-
-# Set Warp cache directory before importing warp to ensure it uses the correct location
-if 'WARP_CACHE_DIR' not in os.environ:
-    import tempfile
-
-    os.environ['WARP_CACHE_DIR'] = os.path.join(tempfile.gettempdir(), f'warp_cache_{os.getuid()}')
-    os.makedirs(os.environ['WARP_CACHE_DIR'], exist_ok=True)
-
 from msk_envs.utils.logged_sim import LoggedSim
 
 from .buffer import SimpleReplayBuffer
@@ -17,6 +8,7 @@ from msk_envs.utils.train_utils import mark_step, save_params
 from msk_envs.train.fasttd3.td3_config import TD3Config
 
 import math
+import os
 import time
 import torch
 import tqdm
@@ -139,11 +131,15 @@ def train(
         list(qnet.parameters()),
         lr=torch.tensor(td3_config.critic_learning_rate, device=device),
         weight_decay=td3_config.weight_decay,
+        fused=True,
+        betas=(0.9, 0.95)
     )
     actor_optimizer = optim.AdamW(
         list(actor.parameters()),
         lr=torch.tensor(td3_config.actor_learning_rate, device=device),
         weight_decay=td3_config.weight_decay,
+        fused=True,
+        betas=(0.9, 0.95)
     )
 
     # Add learning rate schedulers

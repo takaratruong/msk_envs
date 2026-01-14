@@ -84,7 +84,7 @@ class WalkConfig(BaseArgs):
     lambda_cot: float = -1e-4
     lambda_head: float = -3e-2
     lambda_limit: float = -0.1
-    lambda_actuator: float = 1.0
+    lambda_actuator: float = -1.0
     lambda_alive: float = 1.0
 
 

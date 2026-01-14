@@ -2,10 +2,10 @@ import torch
 
 from msk_envs.utils.global_params import SIDE_IDX, build_axis
 from .env_config import EnvConfig
-from .env_max_effort_lanes import MaxEffortLanesEnv
+from .env_lanes import LanesEnv
 
 
-class SideShuffleEnv(MaxEffortLanesEnv):
+class SideShuffleEnv(LanesEnv):
     def __init__(
             self,
             num_envs: int,

@@ -8,8 +8,8 @@ from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, \
     actuator_sq_penalty, metabolic_penalty, fatigue_penalty, mid_lane_reward, has_fallen
 
 
-class MaxEffortLanesEnv(MSKEnv):
-    """ Represents a maximum effort environment where the agent must face a specific direction """
+class LanesEnv(MSKEnv):
+    """ Represents an environment where the agent must face a specific direction and stay within lanes """
 
     def __init__(
             self,

@@ -1,12 +1,16 @@
 import torch
-from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
+from msk_envs.utils.global_params import FWD_IDX, UP_IDX, SIDE_IDX, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
 from msk_envs.utils.quat import quat_diff_angle, rotate_vec
+
+
+def _get_velocity(body_velocities, body_id: int, linear: bool, idx: int):
+    return body_velocities[:, body_id, idx + 3] if linear else body_velocities[:, body_id, idx]
 
 
 def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool):
     """Forward velocity reward (x-velocity of root body)"""
-    root_velocity = body_velocities[:, body_id, :]
-    return root_velocity[:, coordinate + 3] if linear else root_velocity[:, coordinate]
+    root_velocity = _get_velocity(body_velocities, body_id, linear, coordinate)
+    return root_velocity
 
 
 def mid_lane_reward(root_position: torch.Tensor, weight: float = 5.0):
@@ -28,6 +32,11 @@ def joint_limit_penalty(limit_torques: torch.Tensor, squared: bool = False):
     if num_limits == 0:
         return torch.zeros_like(limit_torque_sum)
     return limit_torque_sum / num_limits
+
+
+def alive_bonus(fallen: torch.Tensor):
+    """Alive bonus based on whether the agent has fallen"""
+    return 1.0 - fallen.float()
 
 
 def actuator_sq_penalty(actuator_activations, num_actuators):
@@ -53,6 +62,25 @@ def metabolic_penalty(muscle_powers, num_muscles, squared: bool = False):
     if num_muscles == 0:
         return torch.zeros_like(total_power)
     return total_power / num_muscles
+
+
+def cost_of_transport(muscle_powers, body_velocities, root_id):
+    """Cost of transport based on total muscle power divided by forward velocity"""
+    total_power = torch.sum(muscle_powers, dim=1)
+    forward_velocity = _get_velocity(body_velocities, root_id, linear=True, idx=FWD_IDX)
+
+    # Avoid division by zero, ensure non-negative forward velocity
+    forward_velocity = torch.clamp(forward_velocity, min=1e-2)
+
+    cot = total_power / forward_velocity
+    return cot
+
+
+def head_acceleration_penalty(head_velocities, prev_head_velocities, delta_t):
+    """Penalty based on squared head accelerations"""
+    head_accelerations = (head_velocities - prev_head_velocities) / delta_t
+    head_acc_mag = torch.norm(head_accelerations, dim=1)
+    return head_acc_mag
 
 
 def fatigue_penalty(muscle_activations, num_muscles):

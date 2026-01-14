@@ -2,10 +2,10 @@ import torch
 
 from msk_envs.utils.global_params import FWD_IDX, build_axis
 from .env_config import EnvConfig
-from .env_max_effort_lanes import MaxEffortLanesEnv
+from .env_lanes import LanesEnv
 
 
-class BackPedalEnv(MaxEffortLanesEnv):
+class BackPedalEnv(LanesEnv):
     def __init__(
             self,
             num_envs: int,

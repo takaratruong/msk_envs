@@ -76,14 +76,15 @@ class WalkConfig(BaseArgs):
         env_variant=DerivedEnv.WALK,
         delta_t=1.0 / 100.0,
         max_episode_duration=5.0,
+        muscle_multiplier=1.0,
+        starting_pose="../msk_models/starting_pose_run.yaml",
     ))
 
     """Walk environment specific reward scales"""
-    lambda_cot: float = 1.0
-    lambda_head: float = 1.0
-    lambda_limit: float = 0.2
+    lambda_cot: float = -1e-4
+    lambda_head: float = -3e-2
+    lambda_limit: float = -0.1
     lambda_actuator: float = 1.0
-    lambda_activation: float = 1.0
     lambda_alive: float = 1.0
 
 
@@ -202,6 +203,10 @@ class PerturbConfig(BaseArgs):
         max_episode_duration=10.0,
     ))
     lambda_alive: float = 1.0
+    lambda_limit: float = -0.02
+    lambda_actuator: float = -1.0
+    lambda_fatigue: float = -0.2
+    lambda_metabolic: float = -0.02
 
 
 @dataclass

@@ -101,11 +101,6 @@ left_tibia_col:
   dissipation: 1.0
   priority: 1
 
-neck_col:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 1
-
 head_col:
   stiffness: 5e6
   dissipation: 1.0
@@ -116,22 +111,7 @@ torso_col_1_1:
   dissipation: 1.0
   priority: 1
 
-torso_col_1_2:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 1
-
-torso_col_2_1:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 1
-
-torso_col_2_2:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 1
-
-torso_col_3:
+torso_col_1_3:
   stiffness: 5e6
   dissipation: 1.0
   priority: 1
@@ -146,22 +126,12 @@ right_forearm_col:
   dissipation: 1.0
   priority: 1
 
-right_palm_col:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 1
-
 left_humerus_col:
   stiffness: 5e6
   dissipation: 1.0
   priority: 1
 
 left_forearm_col:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 1
-
-left_palm_col:
   stiffness: 5e6
   dissipation: 1.0
   priority: 1

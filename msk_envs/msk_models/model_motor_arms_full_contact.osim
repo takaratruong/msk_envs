@@ -11199,104 +11199,104 @@
 					<deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
 				</Thelen2003Muscle>
 				<ActivationCoordinateActuator name="lumbar_ext_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>lumbar_extension</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="lumbar_bend_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>lumbar_bending</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="lumbar_rot_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>lumbar_rotation</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 
 				<ActivationCoordinateActuator name="arm_flex_r_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>arm_flex_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_add_r_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>arm_add_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_rot_r_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>arm_rot_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="elbow_flex_r_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>elbow_flex_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="pro_sup_r_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>pro_sup_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="wrist_flex_r_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>wrist_flex_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="wrist_dev_r_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>wrist_dev_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_flex_l_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>arm_flex_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_add_l_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>arm_add_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_rot_l_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>arm_rot_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="elbow_flex_l_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>elbow_flex_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="pro_sup_l_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>pro_sup_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="wrist_flex_l_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>wrist_flex_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="wrist_dev_l_motor">
-					<optimal_force>125.0</optimal_force>
+					<optimal_force>100.0</optimal_force>
 					<coordinate>wrist_dev_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
@@ -11306,7 +11306,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>50</optimal_force>
+					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0.0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -11316,7 +11316,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>50</optimal_force>
+					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0.0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -12186,71 +12186,23 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.025 0.06 -0.075</location>
+					<location>0.025 0.205 -0.075</location>
 					<!--Orientation of geometry in the body frame-->
-					<orientation>1.4707 0 0</orientation>
-					<radius>0.05</radius>
-					<length>0.075</length>
-				</ContactCapsule>
-				<ContactCapsule name="torso_col_1_2">
-					<!--Body name to connect the contact geometry to-->
-					<socket_frame>torso</socket_frame>
-					<!--Location of geometry center in the body frame-->
-					<location>0.025 0.06 0.075</location>
-					<!--Orientation of geometry in the body frame-->
-					<orientation>1.6707 0 0</orientation>
-					<radius>0.05</radius>
-					<length>0.075</length>
+					<orientation>1.5707 0 0</orientation>
+					<radius>0.07</radius>
+					<length>0.125</length>
+					<filter>false</filter>
 				</ContactCapsule>
 				<ContactCapsule name="torso_col_1_3">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.025 0.06 0.0</location>
+					<location>0.025 0.205 0.075</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
-					<radius>0.05</radius>
-					<length>0.075</length>
-				</ContactCapsule>
-				<ContactCapsule name="torso_col_2_1">
-					<!--Body name to connect the contact geometry to-->
-					<socket_frame>torso</socket_frame>
-					<!--Location of geometry center in the body frame-->
-					<location>0.0 0.275 0.0</location>
-					<!--Orientation of geometry in the body frame-->
-					<orientation>0 0 0</orientation>
 					<radius>0.07</radius>
-					<length>0.065</length>
-				</ContactCapsule>
-				<ContactCapsule name="torso_col_2_2">
-					<!--Body name to connect the contact geometry to-->
-					<socket_frame>torso</socket_frame>
-					<!--Location of geometry center in the body frame-->
-					<location>0.025 0.2 0.0</location>
-					<!--Orientation of geometry in the body frame-->
-					<orientation>0 0 0</orientation>
-					<radius>0.07</radius>
-					<length>0.065</length>
-				</ContactCapsule>
-				<ContactCapsule name="torso_col_3">
-					<!--Body name to connect the contact geometry to-->
-					<socket_frame>torso</socket_frame>
-					<!--Location of geometry center in the body frame-->
-					<location>0.0 0.35 0.0</location>
-					<!--Orientation of geometry in the body frame-->
-					<orientation>0 0 0</orientation>
-					<radius>0.05</radius>
-					<length>0.1</length>
-				</ContactCapsule>
-				<ContactCapsule name="neck_col">
-					<!--Body name to connect the contact geometry to-->
-					<socket_frame>torso</socket_frame>
-					<!--Location of geometry center in the body frame-->
-					<location>-0.01 0.45 0.0</location>
-					<!--Orientation of geometry in the body frame-->
-					<orientation>1.5707 -0.2 0</orientation>
-					<radius>0.05</radius>
-					<length>0.05</length>
+					<length>0.125</length>
+					<filter>false</filter>
 				</ContactCapsule>
 				<ContactSphere name="head_col">
 					<!--Body name to connect the contact geometry to-->
@@ -12270,26 +12222,18 @@
 					<orientation>1.5707 0 0</orientation>
 					<radius>0.03</radius>
 					<length>0.15</length>
+					<filter>false</filter>
 				</ContactCapsule>
 				<ContactCapsule name="right_forearm_col">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>ulna_r</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>-0.01 -0.145 0.015</location>
+					<location>-0.01 -0.16 0.02</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
 					<radius>0.02</radius>
-					<length>0.135</length>
+					<length>0.12</length>
 				</ContactCapsule>
-				<ContactSphere name="right_palm_col">
-					<!--Body name to connect the contact geometry to-->
-					<socket_frame>hand_r</socket_frame>
-					<!--Location of geometry center in the body frame-->
-					<location>0.0 -0.05 0.0</location>
-					<!--Orientation of geometry in the body frame-->
-					<orientation>0 0 0</orientation>
-					<radius>0.02</radius>
-				</ContactSphere>
 
 				<ContactCapsule name="left_humerus_col">
 					<!--Body name to connect the contact geometry to-->
@@ -12300,26 +12244,18 @@
 					<orientation>1.5707 0 0</orientation>
 					<radius>0.03</radius>
 					<length>0.15</length>
+					<filter>false</filter>
 				</ContactCapsule>
 				<ContactCapsule name="left_forearm_col">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>ulna_l</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>-0.01 -0.145 -0.015</location>
+					<location>-0.01 -0.16 -0.02</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
 					<radius>0.02</radius>
-					<length>0.135</length>
+					<length>0.12</length>
 				</ContactCapsule>
-				<ContactSphere name="left_palm_col">
-					<!--Body name to connect the contact geometry to-->
-					<socket_frame>hand_l</socket_frame>
-					<!--Location of geometry center in the body frame-->
-					<location>0.0 -0.05 0.0</location>
-					<!--Orientation of geometry in the body frame-->
-					<orientation>0 0 0</orientation>
-					<radius>0.02</radius>
-				</ContactSphere>
 			</objects>
 			<groups />
 		</ContactGeometrySet>

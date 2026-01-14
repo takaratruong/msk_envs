@@ -1,6 +1,7 @@
 """ Provides a wrapper around an MSKEnv to log simulation data """
 from msk_envs.envs.env_base import MSKEnv
-from msk_envs.utils.checkpoint_parser import parse_frame, add_reference_visuals
+from msk_envs.envs.env_perturb import PerturbEnv
+from msk_envs.utils.checkpoint_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame
 from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
 
@@ -69,6 +70,11 @@ class LoggedSim:
             ref_times = self.envs.get_reference_times()
             add_reference = True
 
+        add_ext_forces = False
+        # if class is PerturbEnv, we can log external forces
+        if isinstance(self.envs, PerturbEnv):
+            add_ext_forces = True
+
         for i in range(len(self.worlds_to_save)):
             idx_world = self.worlds_to_save[i]
             if self.finished[idx_world]:
@@ -97,6 +103,14 @@ class LoggedSim:
                     frame,
                     ref_visuals_pos[closest_idx],
                     ref_visuals_rot[closest_idx],
+                )
+
+            if add_ext_forces:
+                add_ext_forces_to_frame(
+                    frame,
+                    self.envs.m,
+                    self.envs.d,
+                    idx_world
                 )
 
             self.frame_data[i].append(frame)

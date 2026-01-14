@@ -1,6 +1,7 @@
 import torch
 
-from msk_envs.utils.reward_lib import has_fallen
+from msk_envs.utils.reward_lib import joint_limit_penalty, \
+    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -20,14 +21,14 @@ class PerturbEnv(MSKEnv):
 
         # How long perturbations last
         self.perturbation_range = (0.2, 0.5)      # Duration of perturbations
-        self.perturbation_frequency = (1.0, 3.0)  # How often to wait between perturbations
+        self.perturbation_frequency = (0.25, 1.0)  # How often to wait between perturbations
         # Whether to apply perturbations this step
         self.perturbation_enabled = torch.zeros(num_envs, device=self.device, dtype=torch.bool)
         # Timers to track perturbation durations and wait times
         self.timer_target_duration = torch.zeros(num_envs, device=self.device, dtype=torch.float32)
         self.timer = torch.zeros(num_envs, device=self.device, dtype=torch.float32)
         # Standard deviation of force to apply
-        self.force_std = 1.0
+        self.force_std = 3.0
         return
 
     def sample_range(self, range_tuple: tuple) -> torch.Tensor:
@@ -54,10 +55,8 @@ class PerturbEnv(MSKEnv):
             perturb_durations = self.sample_range(self.perturbation_range)
             self.timer_target_duration[worlds_start] = perturb_durations[worlds_start]
 
-        # For any worlds applying perturbations, compute a random external force for each body
-        applying_perturb = self.perturbation_enabled
-        num_perturb = torch.sum(applying_perturb).item()
-        if num_perturb > 0:
+            # Sample a new random external force for these worlds
+            num_perturb = torch.sum(worlds_start).item()
             force_dir = torch.zeros((num_perturb, self.num_bodies, 3), device=self.device)
             force_magnitudes = torch.randn((num_perturb, self.num_bodies), device=self.device) * self.force_std
             force_directions = torch.randn((num_perturb, self.num_bodies, 3), device=self.device)
@@ -66,7 +65,7 @@ class PerturbEnv(MSKEnv):
             # Scale forces by body mass
             body_masses = self.body_mass.unsqueeze(0).repeat(num_perturb, 1)
             external_forces = force_dir * body_masses.unsqueeze(2)
-            self.body_user_forces[applying_perturb, :, :] = external_forces
+            self.body_user_forces[worlds_start, :, 0:3] = external_forces
 
         # Make sure we reset forces for worlds not applying perturbations
         no_perturb_mask = ~self.perturbation_enabled
@@ -84,6 +83,7 @@ class PerturbEnv(MSKEnv):
          3. Joint positions (q)
          4. Joint velocities (qv)
          5. Body positions relative to root, rotations, velocities
+         6. External forces applied
         """
         root_positions = self.body_positions[:, self.root_id, :]
         rel_body_positions = self.body_positions - root_positions.unsqueeze(1)
@@ -96,16 +96,25 @@ class PerturbEnv(MSKEnv):
             self.joint_positions[:, 1:],  # exclude x position
             self.joint_velocities,
             rel_body_positions.view(self.num_worlds, -1),
-            self.body_rotations.view(self.num_worlds, -1),
-            self.body_velocities.view(self.num_worlds, -1),
+            # self.body_rotations.view(self.num_worlds, -1),
+            # self.body_velocities.view(self.num_worlds, -1),
+            self.body_user_forces.view(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
         rew_alive = torch.ones(self.num_worlds, device=self.device)
+        rew_limit = joint_limit_penalty(self.limit_torques, squared=False)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
+        rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
 
         self.reward_dict = {
             "rew_alive": rew_alive,
+            "rew_limit": rew_limit.detach(),
+            "rew_actuator": rew_actuator.detach(),
+            "rew_fatigue": rew_fatigue.detach(),
+            "rew_metabolic": rew_metabolic.detach(),
         }
 
     def _get_terminated(self):

@@ -202,6 +202,25 @@ class NamedValue:
 
 
 @dataclass
+class Arrow:
+    start: list[float]
+    direction: list[float]
+
+    def to_dict(self):
+        return {
+            "start": list(self.start),
+            "direction": list(self.direction),
+        }
+
+    @staticmethod
+    def from_dict(data: dict) -> 'Arrow':
+        return Arrow(
+            start=data["start"],
+            direction=data["direction"],
+        )
+
+
+@dataclass
 class FrameData:
     time: float
     visuals: list[VisualData]
@@ -212,6 +231,7 @@ class FrameData:
     muscles: list[MuscleData]
     actuators: list[ActuatorData]
     kinetic_data: KineticData
+    arrows: list[Arrow]
     reward_data: dict
 
     def to_dict(self):
@@ -225,6 +245,7 @@ class FrameData:
             "muscles": [muscle.to_dict() for muscle in self.muscles],
             "actuators": [actuator.to_dict() for actuator in self.actuators],
             "kinetic_data": self.kinetic_data.to_dict(),
+            "arrows": [arrow.to_dict() for arrow in self.arrows],
             "reward_data": self.reward_data,
         }
 
@@ -240,6 +261,7 @@ class FrameData:
             muscles=[MuscleData.from_dict(muscle) for muscle in data["muscles"]],
             actuators=[ActuatorData.from_dict(actuator) for actuator in data["actuators"]],
             kinetic_data=KineticData.from_dict(data["kinetic_data"]),
+            arrows=[Arrow.from_dict(arrow) for arrow in data["arrows"]],
             reward_data=data["reward_data"],
         )
 
@@ -468,6 +490,7 @@ def parse_frame(
         muscles=muscles,
         actuators=actuators,
         kinetic_data=kinetic_data,
+        arrows=[],
         reward_data=reward_data
     )
 
@@ -490,3 +513,22 @@ def add_reference_visuals(
             opacity=0.3
         )
         frame.visuals.append(ref_visual)
+
+
+def add_ext_forces_to_frame(
+        frame: FrameData,
+        m: msk_warp.types.Model,
+        d: msk_warp.types.Data,
+        idx_world: int
+):
+    num_bodies = msk_warp.get_num_bodies(m)
+    body_positions = msk_warp.body_positions(d)
+    ext_forces = msk_warp.body_user_forces(d)
+    for i in range(1, num_bodies):
+        force = ext_forces[idx_world][i][0:3].tolist()
+        point = body_positions[idx_world][i].tolist()
+        arrow = Arrow(
+            start=point,
+            direction=force
+        )
+        frame.arrows.append(arrow)

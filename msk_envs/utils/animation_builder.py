@@ -28,12 +28,14 @@ def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: 
         visuals = [obj.to_dict() for obj in frame_data[i].visuals]
         colliders = [obj.to_dict() for obj in frame_data[i].colliders]
         muscles = [muscle.to_dict() for muscle in frame_data[i].muscles]
+        arrows = [arrow.to_dict() for arrow in frame_data[i].arrows]
         time = frame_data[i].time
         frame = {
             "time": time,
             "visuals": visuals,
             "colliders": colliders,
             "muscles": muscles,
+            "arrows": arrows,
             "cam_pos": list(cam_positions[i])
         }
         stacked_frames.append(frame)

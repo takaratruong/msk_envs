@@ -97,6 +97,42 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        for (const arrow of frame.arrows) {
+            const origin = new THREE.Vector3(arrow.start[0], arrow.start[1], arrow.start[2]);
+            const dir = new THREE.Vector3(arrow.direction[0], arrow.direction[1], arrow.direction[2]);
+            const length = dir.length();
+            if (length < 1e-12) continue;
+
+            dir.normalize();
+
+            // Create cylinder with unit length and thickness based on original length
+            const radius = 0.001 * Math.sqrt(length);
+            const cylinderLength = 0.2;
+            const geometry = new THREE.CylinderGeometry(radius, radius, cylinderLength, 8);
+            const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            const cylinder = new THREE.Mesh(geometry, material);
+
+            // Position cylinder at the midpoint
+            const midpoint = origin.clone().add(dir.clone().multiplyScalar(cylinderLength / 2));
+            cylinder.position.copy(midpoint);
+            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+            currentObjects.push(cylinder);
+            scene.add(cylinder);
+
+            // Create arrowhead (cone)
+            const coneHeight = radius * 4;
+            const coneRadius = radius * 2;
+            const coneGeometry = new THREE.ConeGeometry(coneRadius, coneHeight, 8);
+            const cone = new THREE.Mesh(coneGeometry, material);
+
+            // Position cone at the end of the cylinder
+            const conePosition = origin.clone().add(dir.clone().multiplyScalar(cylinderLength + coneHeight / 2));
+            cone.position.copy(conePosition);
+            cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+            currentObjects.push(cone);
+            scene.add(cone);
+        }
+
         currentFrame = frameIndex;
     }
 

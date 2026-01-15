@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 
-from msk_envs.nets.normalizers import EmpiricalNormalization
-from msk_envs.nets.simba import SimbaActor
+from msk_envs.train.nets.normalizers import EmpiricalNormalization
+from msk_envs.train.nets.simba import SimbaActor
 
 
 class DistributionalQNetwork(nn.Module):

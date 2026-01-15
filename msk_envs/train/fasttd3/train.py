@@ -1,10 +1,10 @@
 from msk_envs.utils.logged_sim import LoggedSim
 
-from .buffer import SimpleReplayBuffer
-from msk_envs.nets.normalizers import EmpiricalNormalization, RewardNormalizer
-from msk_envs.nets.networks import Actor, Critic, load_policy
-from msk_envs.nets.simba import SimbaActor, SimbaCritic
-from msk_envs.utils.train_utils import mark_step, save_params
+from msk_envs.train.nets.buffer import SimpleReplayBuffer
+from msk_envs.train.nets.normalizers import EmpiricalNormalization, RewardNormalizer
+from msk_envs.train.nets.td3_networks import Actor, Critic, load_policy
+from msk_envs.train.nets.simba import SimbaActor, SimbaCritic
+from msk_envs.utils.train_utils import mark_step, save_params_td3
 from msk_envs.train.fasttd3.td3_config import TD3Config
 
 import math
@@ -388,9 +388,7 @@ def train(
         if start_time is None and global_step >= td3_config.learning_starts:
             start_time = time.time()
 
-        with torch.no_grad(), autocast(
-                device_type=amp_device_type, dtype=amp_dtype, enabled=amp_enabled
-        ):
+        with torch.no_grad(), autocast(device_type=amp_device_type, dtype=amp_dtype, enabled=amp_enabled):
             norm_obs = normalize_obs(obs)
             actions = policy(obs=norm_obs, dones=dones)
 
@@ -411,9 +409,7 @@ def train(
                 "actions": torch.as_tensor(actions, device=device, dtype=torch.float),
                 "next": {
                     "observations": true_next_obs,
-                    "rewards": torch.as_tensor(
-                        rewards, device=device, dtype=torch.float
-                    ),
+                    "rewards": torch.as_tensor(rewards, device=device, dtype=torch.float),
                     "truncations": truncations.long(),
                     "dones": dones.long(),
                 },
@@ -429,9 +425,7 @@ def train(
             for i in range(td3_config.num_updates):
                 data = rb.sample(max(1, td3_config.batch_size // td3_config.num_envs))
                 data["observations"] = normalize_obs(data["observations"])
-                data["next"]["observations"] = normalize_obs(
-                    data["next"]["observations"]
-                )
+                data["next"]["observations"] = normalize_obs(data["next"]["observations"])
                 raw_rewards = data["next"]["rewards"]
                 data["next"]["rewards"] = normalize_reward(raw_rewards)
 
@@ -480,7 +474,7 @@ def train(
 
             if global_step > 0 and global_step % td3_config.save_interval == 0:
                 print(f"Saving model at global step {global_step}")
-                save_params(
+                save_params_td3(
                     global_step,
                     actor,
                     qnet,

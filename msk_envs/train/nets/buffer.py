@@ -64,25 +64,12 @@ class SimpleReplayBuffer(nn.Module):
             )
             obs_indices = indices.unsqueeze(-1).expand(-1, -1, self.n_obs)
             act_indices = indices.unsqueeze(-1).expand(-1, -1, self.n_act)
-            observations = torch.gather(self.observations, 1, obs_indices).reshape(
-                self.n_env * batch_size, self.n_obs
-            )
-            next_observations = torch.gather(
-                self.next_observations, 1, obs_indices
-            ).reshape(self.n_env * batch_size, self.n_obs)
-            actions = torch.gather(self.actions, 1, act_indices).reshape(
-                self.n_env * batch_size, self.n_act
-            )
-
-            rewards = torch.gather(self.rewards, 1, indices).reshape(
-                self.n_env * batch_size
-            )
-            dones = torch.gather(self.dones, 1, indices).reshape(
-                self.n_env * batch_size
-            )
-            truncations = torch.gather(self.truncations, 1, indices).reshape(
-                self.n_env * batch_size
-            )
+            observations = torch.gather(self.observations, 1, obs_indices).reshape(self.n_env * batch_size, self.n_obs)
+            next_observations = torch.gather(self.next_observations, 1, obs_indices).reshape(self.n_env * batch_size, self.n_obs)
+            actions = torch.gather(self.actions, 1, act_indices).reshape(self.n_env * batch_size, self.n_act)
+            rewards = torch.gather(self.rewards, 1, indices).reshape(self.n_env * batch_size)
+            dones = torch.gather(self.dones, 1, indices).reshape(self.n_env * batch_size)
+            truncations = torch.gather(self.truncations, 1, indices).reshape(self.n_env * batch_size)
             effective_n_steps = torch.ones_like(dones)
         else:
             # Sample base indices
@@ -92,9 +79,7 @@ class SimpleReplayBuffer(nn.Module):
                 # temporarily setting self.pos - 1 to truncated = True if not done
                 current_pos = self.ptr % self.buffer_size
                 curr_truncations = self.truncations[:, current_pos - 1].clone()
-                self.truncations[:, current_pos - 1] = torch.logical_not(
-                    self.dones[:, current_pos - 1]
-                )
+                self.truncations[:, current_pos - 1] = torch.logical_not(self.dones[:, current_pos - 1])
                 indices = torch.randint(
                     0,
                     self.buffer_size,

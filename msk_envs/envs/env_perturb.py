@@ -1,7 +1,7 @@
 import torch
 
 from msk_envs.utils.reward_lib import joint_limit_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen
+    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen, alive_bonus
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -20,7 +20,7 @@ class PerturbEnv(MSKEnv):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
 
         # How long perturbations last
-        self.perturbation_range = (0.2, 0.5)      # Duration of perturbations
+        self.perturbation_range = (0.1, 0.3)      # Duration of perturbations
         self.perturbation_frequency = (0.25, 1.0)  # How often to wait between perturbations
         # Whether to apply perturbations this step
         self.perturbation_enabled = torch.zeros(num_envs, device=self.device, dtype=torch.bool)
@@ -28,7 +28,7 @@ class PerturbEnv(MSKEnv):
         self.timer_target_duration = torch.zeros(num_envs, device=self.device, dtype=torch.float32)
         self.timer = torch.zeros(num_envs, device=self.device, dtype=torch.float32)
         # Standard deviation of force to apply
-        self.force_std = 3.0
+        self.force_std = 2.0
         return
 
     def sample_range(self, range_tuple: tuple) -> torch.Tensor:
@@ -103,7 +103,7 @@ class PerturbEnv(MSKEnv):
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
-        rew_alive = torch.ones(self.num_worlds, device=self.device)
+        rew_alive = alive_bonus(self._get_terminated())
         rew_limit = joint_limit_penalty(self.limit_torques, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)

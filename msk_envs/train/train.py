@@ -12,14 +12,33 @@ import wandb
 import warp as wp
 
 import msk_envs.train.fasttd3.train as fasttd3
+import msk_envs.train.fastsac.train as fastsac
 from msk_envs.utils.train_utils import set_seed
 from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
 
-wp.clear_kernel_cache()  # can't risk caching issues
+
+def _build_envs(num_envs, num_eval_envs, env_config, cuda, device):
+    envs = EnvFactory.create_env(
+        num_envs=num_envs,
+        env_config=env_config,
+        render=False,
+        cuda_graph=cuda,
+        device=device,
+    )
+    eval_envs = EnvFactory.create_env(
+        num_envs=num_eval_envs,
+        env_config=env_config,
+        render=False,
+        cuda_graph=cuda,
+        device=device,
+    )
+    return envs, eval_envs
 
 
 def main():
+    wp.clear_kernel_cache()  # can't risk caching issues
+
     # Restore original HOME after Warp has initialized (for wandb and other tools)
     if 'ORIG_HOME' in os.environ:
         os.environ['HOME'] = os.environ['ORIG_HOME']
@@ -28,26 +47,12 @@ def main():
     set_seed(args.seed)
     pretty_print_base_args(args)
 
-    td3_config, env_config = args.td3_config, args.env_config
+    env_config = args.env_config
+    td3_config = args.td3_config
+    sac_config = args.sac_config
     if args.cuda:
         assert torch.cuda.is_available(), "CUDA device not available"
     device = torch.device(f"cuda:{args.gpu_id}" if args.cuda else "cpu")
-
-    # Build envs. currently only uses cuda if it's available
-    envs = EnvFactory.create_env(
-        num_envs=td3_config.num_envs,
-        env_config=env_config,
-        render=False,
-        cuda_graph=args.cuda,
-        device=device,
-    )
-    eval_envs = EnvFactory.create_env(
-        num_envs=td3_config.num_eval_envs,
-        env_config=env_config,
-        render=False,
-        cuda_graph=args.cuda,
-        device=device,
-    )
 
     if args.use_wandb:
         wandb.init(
@@ -58,15 +63,42 @@ def main():
         )
 
     traj_out_folder, analytics_out_folder = args.traj_out_folder, args.analytics_out_folder
-    fasttd3.train(
-        td3_config=td3_config,
-        envs=envs, eval_envs=eval_envs,
-        traj_out_folder=traj_out_folder,
-        analytics_out_folder=analytics_out_folder,
-        exp_name=args.exp_name,
-        cuda=args.cuda,
-        use_wandb=args.use_wandb,
-    )
+    if args.algo == "td3":
+        envs, eval_envs = _build_envs(
+            num_envs=td3_config.num_envs,
+            num_eval_envs=td3_config.num_eval_envs,
+            env_config=env_config,
+            cuda=args.cuda,
+            device=device,
+        )
+        fasttd3.train(
+            td3_config=td3_config,
+            envs=envs,
+            eval_envs=eval_envs,
+            traj_out_folder=traj_out_folder,
+            analytics_out_folder=analytics_out_folder,
+            exp_name=args.exp_name,
+            cuda=args.cuda,
+            use_wandb=args.use_wandb,
+        )
+    elif args.algo == "sac":
+        envs, eval_envs = _build_envs(
+            num_envs=sac_config.num_envs,
+            num_eval_envs=sac_config.num_eval_envs,
+            env_config=env_config,
+            cuda=args.cuda,
+            device=device,
+        )
+        fastsac.train(
+            sac_config=sac_config,
+            envs=envs,
+            eval_envs=eval_envs,
+            traj_out_folder=traj_out_folder,
+            analytics_out_folder=analytics_out_folder,
+            exp_name=args.exp_name,
+            cuda=args.cuda,
+            use_wandb=args.use_wandb,
+        )
 
 
 if __name__ == "__main__":

@@ -7,11 +7,14 @@ import tyro
 
 from msk_envs.envs.env_config import EnvConfig
 from msk_envs.envs.env_variants import DerivedEnv
+from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
 
 
 @dataclass
 class BaseArgs:
+    algo: str = "sac"
+
     project: str = "msk_sprinter"
     exp_prefix: str = ""
     exp_name: str = ""
@@ -22,6 +25,7 @@ class BaseArgs:
     gpu_id: int = 0
 
     td3_config: TD3Config = field(default_factory=TD3Config)
+    sac_config: SACConfig = field(default_factory=SACConfig)
     env_config: EnvConfig = field(default_factory=EnvConfig)
 
     def __post_init__(self):
@@ -81,11 +85,11 @@ class WalkConfig(BaseArgs):
     ))
 
     """Walk environment specific reward scales"""
-    lambda_cot: float = -1e-4
-    lambda_head: float = -3e-2
-    lambda_limit: float = -0.1
-    lambda_actuator: float = -1.0
-    lambda_alive: float = 1.0
+    lambda_cot: float = -1e-5
+    lambda_head: float = -3e-3
+    lambda_limit: float = -1e-2
+    lambda_actuator: float = -1e-1
+    lambda_alive: float = 1e-1
 
 
 @dataclass
@@ -115,13 +119,13 @@ class SprintConfig(BaseArgs):
     ))
 
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 1.0
-    lambda_mid_lane: float = 1.0
-    lambda_limit: float = -2.0
-    lambda_actuator: float = -1.0
+    lambda_vel: float = 0.01
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_finish: float = 20.0
+    lambda_finish: float = 0.2
 
 
 @dataclass
@@ -134,13 +138,13 @@ class BackPedalConfig(BaseArgs):
     ))
 
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 1.0
-    lambda_mid_lane: float = 1.0
-    lambda_limit: float = -2.0
-    lambda_actuator: float = -1.0
+    lambda_vel: float = 0.01
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_finish: float = 20.0
+    lambda_finish: float = 0.2
 
 
 @dataclass
@@ -202,11 +206,11 @@ class PerturbConfig(BaseArgs):
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
     ))
-    lambda_alive: float = 1.0
-    lambda_limit: float = -0.02
-    lambda_actuator: float = -1.0
-    lambda_fatigue: float = -0.2
-    lambda_metabolic: float = -0.02
+    lambda_alive: float = 1e-1
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -1e-2
+    lambda_fatigue: float = -2e-2
+    lambda_metabolic: float = -2e-3
 
 
 @dataclass

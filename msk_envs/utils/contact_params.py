@@ -11,6 +11,11 @@ class ContactParam:
     dissipation: float
     priority: int
 
+    static_friction: float
+    dynamic_friction: float
+    viscous_friction: float
+    transition_velocity: float
+
 
 def load_yaml(file_path):
     with open(file_path, "r") as file:
@@ -27,7 +32,11 @@ def parse_contact_params(file_path: str, geom_id_lookup: dict[str, int]) -> list
             geom_id=geom_id_lookup[geom_name],
             stiffness=math.pow(float(geom_data["stiffness"]), 2.0 / 3.0),
             dissipation=float(geom_data["dissipation"]),
-            priority=int(geom_data["priority"])
+            priority=int(geom_data["priority"]),
+            static_friction=float(geom_data["static_friction"]),
+            dynamic_friction=float(geom_data["dynamic_friction"]),
+            viscous_friction=float(geom_data["viscous_friction"]),
+            transition_velocity=float(geom_data["transition_velocity"]),
         )
         params.append(param)
     return params

@@ -87,6 +87,8 @@ class MSKEnv:
             geom_stiffness = msk_warp.collider_stiffness(self.m)
             geom_dissipation = msk_warp.collider_dissipation(self.m)
             geom_priority = msk_warp.collider_priority(self.m)
+            geom_friction = msk_warp.collider_friction(self.m)
+            geom_transition_velocity = msk_warp.collider_transition_velocity(self.m)
 
             contact_params_path = os.path.join(self.curr_path, env_config.contact_params_path)
             contact_params = parse_contact_params(contact_params_path, self.collider_id_lookup)
@@ -95,6 +97,10 @@ class MSKEnv:
                 geom_stiffness[geom_id] = params.stiffness
                 geom_dissipation[geom_id] = params.dissipation
                 geom_priority[geom_id] = params.priority
+                geom_friction[geom_id][0] = params.static_friction
+                geom_friction[geom_id][1] = params.dynamic_friction
+                geom_friction[geom_id][2] = params.viscous_friction
+                geom_transition_velocity[geom_id] = params.transition_velocity
 
         # Contact model (Hunt-Crossley or MuJoCo)
         msk_warp.set_contact_type(self.m, env_config.contact_type)

@@ -80,8 +80,13 @@ class WalkConfig(BaseArgs):
         env_variant=DerivedEnv.WALK,
         delta_t=1.0 / 100.0,
         max_episode_duration=5.0,
-        muscle_multiplier=1.0,
         starting_pose="../msk_models/starting_pose_run.yaml",
+        # Use the walking-specific model with foot contacts
+        muscle_multiplier=1.0,
+        toes_stiffness=25.0,
+        toes_damping=1.9,
+        model_path="../msk_models/model_motor_arms_full_contact_walking.osim",
+        contact_params_path="../msk_models/contact_params_walking.yaml",
     ))
 
     """Walk environment specific reward scales"""

@@ -12186,22 +12186,22 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.025 0.205 -0.075</location>
+					<location>0.0 0.205 -0.05</location>
 					<!--Orientation of geometry in the body frame-->
-					<orientation>1.5707 0 0</orientation>
-					<radius>0.07</radius>
-					<length>0.125</length>
+					<orientation>1.5707 0.1 0.0</orientation>
+					<radius>0.09</radius>
+					<length>0.105</length>
 					<filter>false</filter>
 				</ContactCapsule>
 				<ContactCapsule name="torso_col_1_3">
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.025 0.205 0.075</location>
+					<location>0.0 0.205 0.05</location>
 					<!--Orientation of geometry in the body frame-->
-					<orientation>1.5707 0 0</orientation>
-					<radius>0.07</radius>
-					<length>0.125</length>
+					<orientation>1.5707 0.1 0</orientation>
+					<radius>0.09</radius>
+					<length>0.105</length>
 					<filter>false</filter>
 				</ContactCapsule>
 				<ContactSphere name="head_col">
@@ -12220,7 +12220,7 @@
 					<location>0.0 -0.15 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
-					<radius>0.03</radius>
+					<radius>0.035</radius>
 					<length>0.15</length>
 					<filter>false</filter>
 				</ContactCapsule>
@@ -12231,7 +12231,7 @@
 					<location>-0.01 -0.16 0.02</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
-					<radius>0.02</radius>
+					<radius>0.025</radius>
 					<length>0.12</length>
 				</ContactCapsule>
 
@@ -12242,7 +12242,7 @@
 					<location>0.0 -0.15 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
-					<radius>0.03</radius>
+					<radius>0.035</radius>
 					<length>0.15</length>
 					<filter>false</filter>
 				</ContactCapsule>
@@ -12253,7 +12253,7 @@
 					<location>-0.01 -0.16 -0.02</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0 0</orientation>
-					<radius>0.02</radius>
+					<radius>0.025</radius>
 					<length>0.12</length>
 				</ContactCapsule>
 			</objects>

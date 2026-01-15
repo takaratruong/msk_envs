@@ -35,10 +35,10 @@ arm_flex_r:
   upper: 1.5707963267948966
 arm_add_r:
   lower: -0.45397855376172874
-  upper: 0.20420553938582017
+  upper: 0.18
 arm_rot_r:
-  lower: -0.9449913792976203
-  upper: 0.6158772253363425
+  lower: -0.5
+  upper: 0.5
 elbow_flex_r:
   lower: 0.0
   upper: 2.866362864214132
@@ -78,10 +78,10 @@ arm_flex_l:
   upper: 1.5707963267948966
 arm_add_l:
   lower: -0.45397855376172874
-  upper: 0.20420553938582017
+  upper: 0.18
 arm_rot_l:
-  lower: -0.9449913792976203
-  upper: 0.6158772253363425
+  lower: -0.5
+  upper: 0.5
 elbow_flex_l:
   lower: 0.0
   upper: 2.866362864214132

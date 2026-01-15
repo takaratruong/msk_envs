@@ -12000,7 +12000,7 @@
 					<!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
 					<orientation>0 0 0</orientation>
 					<!--Radius of the sphere (default: 0).-->
-					<radius>0.02</radius>
+					<radius>0.025</radius>
 				</ContactSphere>
 				<ContactSphere name="right_2">
 					<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
@@ -12010,7 +12010,7 @@
 					<!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
 					<orientation>0 0 0</orientation>
 					<!--Radius of the sphere (default: 0).-->
-					<radius>0.02</radius>
+					<radius>0.025</radius>
 				</ContactSphere>
 				<ContactSphere name="right_3">
 					<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
@@ -12030,7 +12030,7 @@
 					<!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
 					<orientation>0 0 0</orientation>
 					<!--Radius of the sphere (default: 0).-->
-					<radius>0.02</radius>
+					<radius>0.025</radius>
 				</ContactSphere>
 				<ContactSphere name="left_2">
 					<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
@@ -12040,7 +12040,7 @@
 					<!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
 					<orientation>0 0 0</orientation>
 					<!--Radius of the sphere (default: 0).-->
-					<radius>0.02</radius>
+					<radius>0.025</radius>
 				</ContactSphere>
 				<ContactSphere name="left_3">
 					<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->

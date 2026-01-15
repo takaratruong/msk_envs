@@ -47,6 +47,7 @@ function loadModel(objFile, opacity, color, callback) {
 }
 
 function loadCollider (spheres, capsules, geomType, scale, rot, color, callback) {
+    const opacity = 0.8;
     if (geomType === 0) {
         // Plane
     } else if (geomType === 2 && spheres) {
@@ -54,7 +55,7 @@ function loadCollider (spheres, capsules, geomType, scale, rot, color, callback)
         const radius = scale[0];
         const sphere = new THREE.Mesh(
             new THREE.SphereGeometry(radius, 16, 16),
-            new THREE.MeshStandardMaterial({ color: color, wireframe: false})
+            new THREE.MeshStandardMaterial({ color: color, wireframe: false, transparent: true, opacity: opacity })
         );
         sphere.quaternion.set(rot[1], rot[2], rot[3], rot[0]);
         callback(sphere);
@@ -64,7 +65,7 @@ function loadCollider (spheres, capsules, geomType, scale, rot, color, callback)
         const half_height = scale[1];
         const capsule = new THREE.Mesh(
             new THREE.CapsuleGeometry(radius, 2 * half_height, 8, 16),
-            new THREE.MeshStandardMaterial({ color: color, wireframe: false})
+            new THREE.MeshStandardMaterial({ color: color, wireframe: false, transparent: true, opacity: opacity })
         );
         // Create quaternion for Z-up rotation (90 degrees around X-axis)
         const zUpQuat = new THREE.Quaternion();

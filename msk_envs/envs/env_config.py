@@ -23,7 +23,8 @@ class EnvConfig:
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
-    joint_armature: float = 0.001
+    joint_armature: float = 0.01
+    toe_armature: float = 0.001
     """ Armature added to all joints (increases inertia but improves stability) """
     torso_damping: float = 1.0
     """ Damping specifically for torso joint """

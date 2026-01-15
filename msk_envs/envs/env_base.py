@@ -37,6 +37,7 @@ class MSKEnv:
             stiffness[toe_id] = env_config.toes_stiffness
             dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
             dof_num = msk_warp.get_dof_num(self.m, toe_id)
+            armature[dof_adr:dof_adr + dof_num] = env_config.toe_armature
             damping[dof_adr:dof_adr + dof_num] = env_config.toes_damping
         # Joint limits: override if specified
         if env_config.use_specified_joint_limits:

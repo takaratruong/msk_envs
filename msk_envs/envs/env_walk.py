@@ -28,6 +28,28 @@ class WalkEnv(LanesEnv):
         self.prev_head_v = torch.zeros(self.num_worlds, 3, device=self.reset_tensor.device)
         return
 
+    def _get_obs(self) -> torch.Tensor:
+        """
+        Observations space:
+         1. Muscle activations, fiber lengths, fiber velocities, actuations
+         2. Actuator activations
+         3. Joint positions (q)
+         4. Joint velocities (qv)
+         5. Body positions relative to root, rotations, velocities
+        """
+        root_positions = self.body_positions[:, self.root_id, :]
+        rel_body_positions = self.body_positions - root_positions.unsqueeze(1)
+        obs = torch.cat([
+            self.time.view(self.num_worlds, 1),
+            self.muscle_activations,
+            self.muscle_fiber_lengths,
+            self.actuator_activations,
+            self.joint_positions[:, 1:],  # exclude x position
+            self.joint_velocities,
+            rel_body_positions.view(self.num_worlds, -1),
+        ], dim=1)
+        return obs.detach().clone()
+
     def _head_velocities(self):
         torso_ang = self.body_velocities[:, self.torso_id, :3]
         torso_vel = self.body_velocities[:, self.torso_id, 3:]

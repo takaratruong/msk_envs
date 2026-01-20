@@ -40,13 +40,13 @@ class LanesEnv(MSKEnv):
             self.time.view(self.num_worlds, 1),
             self.muscle_activations,
             self.muscle_fiber_lengths,
-            self.muscle_fiber_velocities,
+            # self.muscle_fiber_velocities,
             self.actuator_activations,
             self.joint_positions[:, 1:],  # exclude x position
             self.joint_velocities,
-            rel_body_positions.view(self.num_worlds, -1),
-            self.body_rotations.view(self.num_worlds, -1),
-            self.body_velocities.view(self.num_worlds, -1),
+            # rel_body_positions.view(self.num_worlds, -1),
+            # self.body_rotations.view(self.num_worlds, -1),
+            # self.body_velocities.view(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 

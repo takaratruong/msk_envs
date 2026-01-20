@@ -47,7 +47,7 @@ def get_joint_limits(
     return limits
 
 
-def get_exp_limit_curves(
+def get_limit_force_curves(
         file_path: str,
         limit_id_lookup: dict[str, int]
 ) -> list[LimitForceCurve]:

@@ -45,12 +45,6 @@ elbow_flex_r:
 pro_sup_r:
   lower: 0.8525047259169807
   upper: 1.5707963267948966
-wrist_flex_r:
-  lower: -0.6
-  upper: 0.2500901843342273
-wrist_dev_r:
-  lower: -0.43633231
-  upper: 0.5604107508506543
 
 hip_flexion_l:
   lower: -0.6981
@@ -88,9 +82,3 @@ elbow_flex_l:
 pro_sup_l:
   lower: 0.8525047259169807
   upper: 1.5707963267948966
-wrist_flex_l:
-  lower: -0.6
-  upper: 0.2500901843342273
-wrist_dev_l:
-  lower: -0.43633231
-  upper: 0.5604107508506543

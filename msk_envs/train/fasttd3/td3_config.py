@@ -3,78 +3,136 @@ from dataclasses import dataclass
 
 @dataclass
 class TD3Config:
-    agent: str = "simbav2"  # fasttd3, simbav2
+    agent: str = "fasttd3"
+    """the type of the agent (fasttd3, simbav2)"""
 
-    """ device/torch settings """
-    checkpoint_path: str = ""
-    amp: bool = True
-    amp_dtype: str = "bf16"
+    num_envs: int = 1024
+    """number of parallel environments"""
 
-    """ evaluation """
-    num_eval_envs: int = 1
-    eval_freq: int = 1000
+    num_learning_iterations: int = 150000
+    """total timesteps of the experiments"""
 
-    """ learning rates """
     critic_learning_rate: float = 3e-4
+    """the learning rate of the critic"""
+
     actor_learning_rate: float = 3e-4
+    """the learning rate for the actor"""
+
     critic_learning_rate_end: float = 3e-5
+    """the end learning rate of the critic"""
+
     actor_learning_rate_end: float = 3e-5
-    weight_decay: float = 0.001
+    """the end learning rate for the actor"""
 
-    use_grad_norm_clipping: bool = False
-    max_grad_norm: float = 0.0
+    buffer_size: int = 256 * 25
+    """the replay memory buffer size per environment"""
 
-    """ TD3 hyperparameters """
-    num_envs: int = 8192
-    total_timesteps: int = 25000
-    learning_starts: int = 10
-    num_updates: int = 8  # number of updates per step
-    policy_frequency: int = 4  # frequency of training policy (delayed)
+    num_steps: int = 1
+    """the number of steps to use for the multi-step return"""
 
-    buffer_size: int = 256  # (per env)
-    num_steps: int = 1  # n value of n-step returns
     gamma: float = 0.99
-    tau: float = 0.125  # target smoothing coefficient
+    """the discount factor gamma"""
+
+    tau: float = 0.05
+    """the soft update coefficient """
+
     batch_size: int = 8192
+    """the batch size of sample from the replay memory"""
 
-    """ Policy hyperparameters """
-    actor_hidden_dim: int = 512
-    init_scale: float = 0.01  # scale of initial weights
-    policy_noise: float = 0.001  # scale of target action noise
-    noise_clip: float = 0.5  # clip range for target action noise
+    learning_starts: int = 0
+    """timestep to start learning"""
 
-    """ Exploration hyperparameters """
-    std_min: float = 0.01  # minimum scale of exploration noise
-    std_max: float = 0.05  # maximum scale of exploration noise
-    use_gsde: bool = False  # whether to use generalized state-dependent exploration (gSDE)
-    gsde_steps: int = 10  # number of steps to sample new noise for gSDE
+    policy_frequency: int = 4
+    """the frequency of training policy (delayed)"""
 
-    """ Q/Value function hyperparameters
-    Distributional critic outputs logits over linspace(v_min, v_max, num_atoms)
-    """
-    critic_hidden_dim: int = 768
+    num_updates: int = 8
+    """the number of updates to perform per step"""
+
+    policy_noise: float = 0.001
+    """the scale of target action noise"""
+
+    noise_clip: float = 0.5
+    """the clip range of target action noise"""
+
     num_atoms: int = 101
+    """the number of atoms"""
+
     v_min: float = -10.0
+    """the minimum value of the support"""
+
     v_max: float = 10.0
-    use_cdq: bool = False  # whether to use Clipped Double Q-learning
-    disable_bootstrap: bool = False  # whether to disable bootstrap in the critic learning
+    """the maximum value of the support"""
 
-    """ Normalization """
-    obs_normalization: bool = True
-    reward_normalization: bool = True  # uses v_min, v_max
+    critic_hidden_dim: int = 768
+    """the hidden dimension of the critic network"""
 
-    """ Miscellaneous """
-    save_interval: int = 1000
+    critic_num_blocks: int = 2
+    """ SimbaV2 only, the number of blocks in the critic network """
+
+    actor_num_blocks: int = 1
+    """ SimbaV2 only, the number of blocks in the actor network """
+
+    actor_hidden_dim: int = 512
+    """the hidden dimension of the actor network"""
+
+    use_cdq: bool = False
+    """whether to use Clipped Double Q-learning"""
+
+    std_min: float = 0.001
+    """minimum scale of exploration noise"""
+
+    std_max: float = 0.4
+    """maximum scale of exploration noise"""
+
+    use_tanh: bool = True
+    """whether to use tanh for the action"""
+
+    use_gsde: bool = False
+    """ whether to use gSDE for exploration """
+    gsde_steps: int = 10
+    """ number of steps to sample new noise for gSDE """
 
     compile: bool = True
     """whether to use torch.compile."""
-    # compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
-    compile_mode: str = "max-autotune"
+    compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
     compile_backend: str = "inductor"  # "eager" is slower but safer
 
-    """ SimbaV2 """
-    critic_num_blocks: int = 2
-    actor_num_blocks: int = 1
+    obs_normalization: bool = True
+    """ whether to normalize observations """
+
+    reward_normalization: bool = False
+    """ whether to normalize rewards """
+
+    use_layer_norm: bool = False
+    """whether to use layer normalization"""
+
+    num_q_networks: int = 2
+    """number of Q-networks to ensemble"""
+
+    max_grad_norm: float = 0.0
+    """ maximum gradient norm for clipping """
+
+    amp: bool = True
+    """ wether to use amp """
+
+    amp_dtype: str = "bf16"
+    """the dtype of the amp"""
+
+    weight_decay: float = 0.001
+    """ weight decay for optimizers """
+
+    save_interval: int = 1000
+    """ the interval to save the model """
+
+    logging_interval: int = 100
+    """ the interval to log the metrics """
+
+    """ device/torch settings """
+    checkpoint_path: str = ""
+
+    """ Evaluation """
+    num_eval_envs: int = 1
+    eval_freq: int = 2000
 
     @staticmethod
     def pretty_print(td3_config):

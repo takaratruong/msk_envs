@@ -1,8 +1,8 @@
 pelvis_tx:
   q: 0.0
-  v: 2.0
+  v: 0.0
 pelvis_ty:
-  q: 1.03
+  q: 1.0
   v: 0.0
 pelvis_tz:
   q: 0.0
@@ -18,11 +18,11 @@ pelvis_rot_y:
   q: 0.0
   v: 0.0
 pelvis_rot_z:
-  q: 0.0
+  q: -0.05
   v: 0.0
 
 lumbar_extension:
-  q: 0.0
+  q: -0.1
   v: 0.0
 lumbar_bending:
   q: 0.0
@@ -32,8 +32,8 @@ lumbar_rotation:
   v: 0.0
 
 hip_flexion_r:
-  q: 0.5
-  v: 2.0
+  q: 0.2
+  v: 0.0
 hip_adduction_r:
   q: 0.0
   v: 0.0
@@ -41,10 +41,10 @@ hip_rotation_r:
   q: 0.0
   v: 0.0
 knee_angle_r:
-  q: -1.5
-  v: -1.0
+  q: -0.2
+  v: 0.0
 ankle_angle_r:
-  q: 0.6
+  q: 0.2
   v: 0.0
 subtalar_angle_r:
   q: 0.0
@@ -54,7 +54,7 @@ mtp_angle_r:
   v: 0.0
 
 arm_flex_r:
-  q: -0.2
+  q: 0.0
   v: 0.0
 arm_add_r:
   q: 0.0
@@ -63,20 +63,14 @@ arm_rot_r:
   q: 0.0
   v: 0.0
 elbow_flex_r:
-  q: 0.5
-  v: 0.0
-pro_sup_r:
-  q: 1.5
-  v: 0.0
-wrist_flex_r:
   q: 0.0
   v: 0.0
-wrist_dev_r:
+pro_sup_r:
   q: 0.0
   v: 0.0
 
 hip_flexion_l:
-  q: 0.165239
+  q: 0.2
   v: 0.0
 hip_adduction_l:
   q: 0.0
@@ -85,10 +79,10 @@ hip_rotation_l:
   q: 0.0
   v: 0.0
 knee_angle_l:
-  q: -0.288801
+  q: -0.2
   v: 0.0
 ankle_angle_l:
-  q: 0.01971
+  q: 0.2
   v: 0.0
 subtalar_angle_l:
   q: 0.0
@@ -97,7 +91,7 @@ mtp_angle_l:
   q: 0.0
   v: 0.0
 arm_flex_l:
-  q: 0.2
+  q: 0.0
   v: 0.0
 arm_add_l:
   q: 0.0
@@ -106,15 +100,8 @@ arm_rot_l:
   q: 0.0
   v: 0.0
 elbow_flex_l:
-  q: 0.5
+  q: 0.0
   v: 0.0
 pro_sup_l:
-  q: 1.5
-  v: 0.0
-wrist_flex_l:
   q: 0.0
   v: 0.0
-wrist_dev_l:
-  q: 0.0
-  v: 0.0
-

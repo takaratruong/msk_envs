@@ -57,7 +57,10 @@ def pretty_print_base_args(args: BaseArgs):
     print(line)
 
     EnvConfig.pretty_print(args.env_config)
-    TD3Config.pretty_print(args.td3_config)
+    if args.algo.lower() == "sac":
+        SACConfig.pretty_print(args.sac_config)
+    elif args.algo.lower() == "td3":
+        TD3Config.pretty_print(args.td3_config)
 
     print("BaseArgs:")
     for k in base_field_names:
@@ -120,7 +123,7 @@ class SprintConfig(BaseArgs):
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
-        starting_pose="../msk_models/starting_pose_run.yaml",
+        starting_pose="../msk_models/no_hands/starting_pose_run.yaml",
     ))
 
     """Sprint environment specific reward scales"""
@@ -178,16 +181,17 @@ class HopConfig(BaseArgs):
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
         starting_pose="../msk_models/starting_pose_left_leg_up.yaml",
+        swap_lr=False,
     ))
 
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 1.0
-    lambda_mid_lane: float = 1.0
-    lambda_limit: float = -2.0
-    lambda_actuator: float = -1.0
+    lambda_vel: float = 0.05
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_finish: float = 20.0
+    lambda_finish: float = 0.2
 
 
 @dataclass
@@ -219,14 +223,47 @@ class PerturbConfig(BaseArgs):
 
 
 @dataclass
+class DontFallConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+        env_variant=DerivedEnv.DONT_FALL,
+        delta_t=1.0 / 100.0,
+        delta_t_sim=1.0 / 5000.0,
+        max_episode_duration=10.0,
+        toes_stiffness=25.0,
+        toes_damping=1.9,
+        starting_pose="../msk_models/no_hands/starting_pose_stand_no_hand.yaml",
+        model_path="../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim",
+        use_specified_contact_params=True,
+        contact_params_path="../msk_models/contact_params_sprint.yaml",
+        use_specified_joint_limits=True,
+        joint_limits_path="../msk_models/no_hands/joint_limits_hc.yaml",
+        limit_force_curves_path="../msk_models/no_hands/limit_force_curves_no_hand_hc.yaml",
+        noise_start=False,
+    ))
+    lambda_alive: float = 0
+    lambda_limit: float = 0
+    lambda_actuator: float = 0
+    lambda_fatigue: float = 0
+    lambda_metabolic: float = 0
+    lambda_root_zero: float = 0
+    lambda_match_start: float = 1e-1
+
+
+@dataclass
 class ImitateConfig(BaseArgs):
     """ Default Imitate environment configuration. Tracks a two-step sprinting motion. """
     env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
         env_variant=DerivedEnv.IMITATE,
         delta_t=1.0 / 500.0,
         use_prescribed_starting_activations=True,
+        starting_activations_path="../msk_models/starting_activations.yaml",
+        use_specified_joint_limits = True,
         joint_limits_path="../msk_models/joint_limits_sprinting.yaml",
-        motion_name="../motions/pred_sprint_two_step.mot"
+        motion_name="../motions/pred_sprint_two_step.mot",
+    ))
+
+    td3_config: TD3Config = field(default_factory=lambda: TD3Config(
+        reward_normalization=True,
     ))
 
     """Imitate environment specific reward scales"""
@@ -270,6 +307,7 @@ Config = Union[
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
+    Annotated[DontFallConfig, tyro.conf.subcommand(name="dontfall")],
 ]
 
 

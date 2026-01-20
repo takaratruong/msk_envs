@@ -64,6 +64,22 @@ def metabolic_penalty(muscle_powers, num_muscles, squared: bool = False):
     return total_power / num_muscles
 
 
+def root_zero_reward(root_positions, weight: float):
+    """Reward for root being close to zero position in all axes"""
+    zero_pos = torch.zeros_like(root_positions)
+    zero_pos[:, UP_IDX] = root_positions[:, UP_IDX]  # Ignore vertical axis
+    dist_from_zero = torch.norm(root_positions - zero_pos, dim=1)
+    reward = torch.exp(-weight * dist_from_zero.pow(2))
+    return reward
+
+
+def match_start_pos_reward(joint_positions, start_positions, weight: float):
+    """Reward for root being close to start position in all axes"""
+    dist_from_start = torch.norm(joint_positions - start_positions, dim=1)
+    reward = torch.exp(-weight * dist_from_start.pow(2))
+    return reward
+
+
 def cost_of_transport(muscle_powers, body_velocities, root_id):
     """Cost of transport based on total muscle power divided by forward velocity"""
     total_power = torch.sum(muscle_powers, dim=1)

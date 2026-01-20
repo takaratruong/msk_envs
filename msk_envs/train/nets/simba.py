@@ -173,6 +173,50 @@ class HyperTanhPolicy(nn.Module):
         return mean
 
 
+class HyperNormalTanhPolicy(nn.Module):
+    def __init__(
+            self,
+            hidden_dim: int,
+            action_dim: int,
+            scaler_init: float,
+            scaler_scale: float,
+            log_std_min: float = -10.0,
+            log_std_max: float = 2.0,
+            device: torch.device = None,
+    ):
+        super().__init__()
+        self.mean_w1 = HyperDense(hidden_dim, hidden_dim, device=device)
+        self.mean_scaler = Scaler(hidden_dim, scaler_init, scaler_scale, device=device)
+        self.mean_w2 = HyperDense(hidden_dim, action_dim, device=device)
+        self.mean_bias = nn.Parameter(torch.zeros(action_dim, device=device))
+
+        self.std_w1 = HyperDense(hidden_dim, hidden_dim, device=device)
+        self.std_scaler = Scaler(hidden_dim, scaler_init, scaler_scale, device=device)
+        self.std_w2 = HyperDense(action_dim, hidden_dim, device=device)
+        self.std_bias = nn.Parameter(torch.zeros(action_dim, device=device))
+
+        self.log_std_min = log_std_min
+        self.log_std_max = log_std_max
+        return
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Mean path
+        mean = self.mean_w1(x)
+        mean = self.mean_scaler(mean)
+        mean = self.mean_w2(mean) + self.mean_bias.to(mean.dtype)
+
+        log_std = self.std_w1(x)
+        log_std = self.std_scaler(log_std)
+        log_std = self.std_w2(log_std) + self.std_bias.to(log_std.dtype)
+
+        # normalize log-stds for stability
+        log_std = self.log_std_min + (self.log_std_max - self.log_std_min) * 0.5 * (
+                1 + torch.tanh(log_std)
+        )
+
+        return mean, log_std
+
+
 class HyperCategoricalValue(nn.Module):
     """
     A value function that predicts a categorical distribution over a range of values.
@@ -501,4 +545,3 @@ class SimbaActor(nn.Module):
         else:
             self.noise.copy_(torch.randn_like(act) * self.noise_scales)
         return act + self.noise
-

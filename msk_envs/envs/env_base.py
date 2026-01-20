@@ -6,7 +6,7 @@ import os
 from .env_config import EnvConfig
 from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
 from msk_envs.utils.muscle_props import parse_starting_activations, parse_muscle_metabolic_params
-from msk_envs.utils.joint_limits import get_exp_limit_curves, get_joint_limits
+from msk_envs.utils.joint_limits import get_limit_force_curves, get_joint_limits
 from msk_envs.utils.contact_params import parse_contact_params
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 
@@ -31,7 +31,7 @@ class MSKEnv:
         dof_adr = msk_warp.get_dof_adr(self.m, torso_id)
         dof_num = msk_warp.get_dof_num(self.m, torso_id)
         damping[dof_adr:dof_adr + dof_num] = env_config.torso_damping
-        # Foot stiffness and damping
+        # Toe-specific stiffness and damping
         for toe in ["toes_l", "toes_r"]:
             toe_id = self.lookup_body_id(toe)
             stiffness[toe_id] = env_config.toes_stiffness
@@ -49,12 +49,13 @@ class MSKEnv:
                 joint_limit_ranges[limit_id][0] = joint_limit.lower
                 joint_limit_ranges[limit_id][1] = joint_limit.upper
         # Load exponential-spring force curve parameters
-        if env_config.limit_type == msk_warp.LimitType.EXPONENTIAL:
+        if env_config.limit_type == msk_warp.LimitType.EXPONENTIAL or \
+                env_config.limit_type == msk_warp.LimitType.HUNT_CROSSLEY:
             msk_warp.use_exponential_limit(self.m)
             exp_limit_forces = msk_warp.exp_limit_forces(self.m)
             exp_limit_shapes = msk_warp.exp_limit_shapes(self.m)
             limit_curves_path = os.path.join(self.curr_path, env_config.limit_force_curves_path)
-            limit_curves = get_exp_limit_curves(limit_curves_path, self.limit_id_lookup)
+            limit_curves = get_limit_force_curves(limit_curves_path, self.limit_id_lookup)
             for limit_curve in limit_curves:
                 limit_id = limit_curve.limit_id
                 exp_limit_forces[limit_id][0] = limit_curve.limit_force[0]
@@ -241,13 +242,16 @@ class MSKEnv:
 
         # Starting muscle activations
         if env_config.use_prescribed_starting_activations:
-            start_activations_path = os.path.join(self.curr_path, env_config.starting_activations)
+            start_activations_path = os.path.join(self.curr_path, env_config.starting_activations_path)
             start_activations = parse_starting_activations(
                 start_activations_path, self.muscle_id_lookup, env_config.default_activation)
             self.start_activations = torch.tensor(start_activations, device=device).unsqueeze(0).repeat(num_envs, 1)
         else:
-            self.start_activations = torch.ones((num_envs, self.num_muscles),
-                                                device=device) * env_config.default_activation
+            if env_config.default_activation == -1.0:
+                self.start_activations = torch.rand((num_envs, self.num_muscles), device=device)
+            else:
+                self.start_activations = torch.ones((num_envs, self.num_muscles),
+                                                    device=device) * env_config.default_activation
 
         # Rewards storage
         self.reward_dict = {}

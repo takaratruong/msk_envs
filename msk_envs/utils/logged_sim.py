@@ -70,11 +70,6 @@ class LoggedSim:
             ref_times = self.envs.get_reference_times()
             add_reference = True
 
-        add_ext_forces = False
-        # if class is PerturbEnv, we can log external forces
-        if isinstance(self.envs, PerturbEnv):
-            add_ext_forces = True
-
         for i in range(len(self.worlds_to_save)):
             idx_world = self.worlds_to_save[i]
             if self.finished[idx_world]:
@@ -105,13 +100,12 @@ class LoggedSim:
                     ref_visuals_rot[closest_idx],
                 )
 
-            if add_ext_forces:
-                add_ext_forces_to_frame(
-                    frame,
-                    self.envs.m,
-                    self.envs.d,
-                    idx_world
-                )
+            add_ext_forces_to_frame(
+                frame,
+                self.envs.m,
+                self.envs.d,
+                idx_world
+            )
 
             self.frame_data[i].append(frame)
         self.curr_step += 1

@@ -1,0 +1,110 @@
+# Parameters for Hunt-Crossley limit force curves.
+# limit_force will be used as the stiffness
+# shape_param will be used as the dissipation
+lumbar_extension:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+lumbar_bending:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+lumbar_rotation:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+hip_flexion_r:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+hip_adduction_r:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+hip_rotation_r:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+knee_angle_r:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+ankle_angle_r:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+subtalar_angle_r:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+mtp_angle_r:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+hip_flexion_l:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+hip_adduction_l:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+hip_rotation_l:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+knee_angle_l:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+ankle_angle_l:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+subtalar_angle_l:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+mtp_angle_l:
+  limit_force: [ 500.0, 500.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+arm_flex_r:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+arm_add_r:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+arm_rot_r:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+elbow_flex_r:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+pro_sup_r:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+arm_flex_l:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+arm_add_l:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+arm_rot_l:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+elbow_flex_l:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]
+
+pro_sup_l:
+  limit_force: [ 200.0, 200.0 ]
+  shape_param: [ 1.0, 1.0 ]

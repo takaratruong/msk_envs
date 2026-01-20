@@ -37,7 +37,7 @@ def _build_envs(num_envs, num_eval_envs, env_config, cuda, device):
 
 
 def main():
-    wp.clear_kernel_cache()  # can't risk caching issues
+    # wp.clear_kernel_cache()  # can't risk caching issues
 
     # Restore original HOME after Warp has initialized (for wandb and other tools)
     if 'ORIG_HOME' in os.environ:
@@ -79,7 +79,6 @@ def main():
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,
             cuda=args.cuda,
-            use_wandb=args.use_wandb,
         )
     elif args.algo == "sac":
         envs, eval_envs = _build_envs(
@@ -97,7 +96,6 @@ def main():
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,
             cuda=args.cuda,
-            use_wandb=args.use_wandb,
         )
 
 

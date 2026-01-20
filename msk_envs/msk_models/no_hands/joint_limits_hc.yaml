@@ -1,0 +1,85 @@
+lumbar_extension:
+  lower: -0.5235987755982988
+  upper: 0.17
+lumbar_bending:
+  lower: -0.3490658503988659
+  upper: 0.3490658503988659
+lumbar_rotation:
+  lower: -0.22407958193619684
+  upper: 0.22407958193619684
+
+hip_flexion_r:
+  lower: -0.6981
+  upper: 1.81
+hip_adduction_r:
+  lower: -0.4031859679075558
+  upper: 0.17958408747455165
+hip_rotation_r:
+  lower: -0.3900790538140224
+  upper: 0.390441186769998
+knee_angle_r:
+  lower: -2.4860982301056933
+  upper: 0.0
+ankle_angle_r:
+  lower: -0.7669438631158966
+  upper: 0.45850166876605164
+subtalar_angle_r:
+  lower: -0.6313079634729645
+  upper: 0.2176399432204734
+mtp_angle_r:
+  lower: -0.215558458842156
+  upper: 0.558314781330376
+
+hip_flexion_l:
+  lower: -0.6981
+  upper: 1.81
+hip_adduction_l:
+  lower: -0.4031859679075558
+  upper: 0.17958408747455165
+hip_rotation_l:
+  lower: -0.3900790538140224
+  upper: 0.390441186769998
+knee_angle_l:
+  lower: -2.4860982301056933
+  upper: 0.0
+ankle_angle_l:
+  lower: -0.7669438631158966
+  upper: 0.45850166876605164
+subtalar_angle_l:
+  lower: -0.6313079634729645
+  upper: 0.2176399432204734
+mtp_angle_l:
+  lower: -0.215558458842156
+  upper: 0.558314781330376
+
+arm_flex_r:
+  lower: -1.4738112439978084
+  upper: 1.2851092557906083
+arm_add_r:
+  lower: -0.373071692045299
+  upper: 0.20420553938582017
+arm_rot_r:
+  lower: -0.9449913792976203
+  upper: 0.6158772253363425
+elbow_flex_r:
+  lower: 0.0
+  upper: 2.618000000082912
+pro_sup_r:
+  lower: 0.6319628497546221
+  upper: 1.4805935971362496
+
+arm_flex_l:
+  lower: -1.4738112439978084
+  upper: 1.2851092557906083
+arm_add_l:
+  lower: -0.373071692045299
+  upper: 0.20420553938582017
+arm_rot_l:
+  lower: -0.9449913792976203
+  upper: 0.6158772253363425
+elbow_flex_l:
+  lower: 0.0
+  upper: 2.618000000082912
+pro_sup_l:
+  lower: 0.6319628497546221
+  upper: 1.4805935971362496

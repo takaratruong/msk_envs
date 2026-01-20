@@ -119,7 +119,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 x_data_sub=frame_ind,
                 x_fmt=".2f",
                 x_sub_fmt=".0f",
-                y_fmt=".1f",
+                y_fmt=".2f",
             )
         )
         for i, key in enumerate(reward_keys):

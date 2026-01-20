@@ -10,16 +10,18 @@ class EnvConfig:
     env_variant: DerivedEnv = DerivedEnv.SPRINT
     """ Environment type """
 
+    # --- Control and Simulation Frequency ---
     delta_t: float = 1.0 / 100.0
     """ Control/policy step size """
-    delta_t_sim: float = 1.0 / 10000.0
+    delta_t_sim: float = 1.0 / 5000.0
     """ Simulator/physics step size """
-
     max_episode_duration: float = 12.0
     """ Max episode duration in seconds """
+    integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_FIXED
+    """ Integrator type (EULER_FIXED, RK4_FIXED) """
 
-    # Model properties
-    model_path: str = "../msk_models/model_motor_arms_full_contact.osim"
+    # --- Model articulation properties ---
+    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim"
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
@@ -35,30 +37,16 @@ class EnvConfig:
     """ Toes joint damping """
     use_specified_joint_limits: bool = True
     """ Whether to use joint limits defined in joint_limits_path, otherwise use limits defined in model file """
-    joint_limits_path: str = "../msk_models/joint_limits.yaml"
+    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
     """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
-    enable_drag: bool = True
+    enable_drag: bool = False
     """ Whether to enable drag forces """
     use_specified_contact_params: bool = True
     """ Whether to use contact parameters defined in contact_params_path """
-    contact_params_path: str = "../msk_models/contact_params.yaml"
+    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
     """ Contact parameters file path (YAML). NOTE: this overrides contact parameters defined in the model file """
 
-    # Constraint properties
-    contact_type: msk_warp.ContactType = msk_warp.ContactType.HUNT_CROSSLEY
-    """ Contact model type (HUNT_CROSSLEY, HUNT_CROSSLEY_SMOOTH, MUJOCO) """
-    limit_type: msk_warp.LimitType = msk_warp.LimitType.EXPONENTIAL
-    """ Joint limit model type (MUJOCO, EXPONENTIAL) """
-    limit_force_curves_path: str = "../msk_models/limit_force_curves.yaml"
-    """ Exponential limit force curves file path (if using Exponential limits) """
-    solref: tuple[float, float] = (0.02, 1.0)
-    """ MuJoCo limit/contact parameters (if using MuJoCo limits/contacts) """
-
-    # Integrator properties
-    integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_FIXED
-    """ Integrator type (EULER_FIXED, RK4_FIXED) """
-
-    # Muscle properties
+    # --- Model muscle properties ---
     muscle_multiplier: float = 2.0
     """ Multiplier to max isometric force """
     muscle_fiber_damping: float = 0.01
@@ -80,8 +68,18 @@ class EnvConfig:
     metabolic_params_path: str = "../msk_models/muscle_metabolic_params.yaml"
     """ Muscle metabolic parameters file path (YAML) """
 
+    # --- Constraint properties ---
+    contact_type: msk_warp.ContactType = msk_warp.ContactType.HUNT_CROSSLEY
+    """ Contact model type (HUNT_CROSSLEY, HUNT_CROSSLEY_SMOOTH, MUJOCO) """
+    limit_type: msk_warp.LimitType = msk_warp.LimitType.HUNT_CROSSLEY
+    """ Joint limit model type (MUJOCO, EXPONENTIAL, HUNT_CROSSLEY) """
+    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
+    """ Limit force curves file path (if using EXPONENTIAL or HUNT_CROSSLEY limits) """
+    solref: tuple[float, float] = (0.02, 1.0)
+    """ MuJoCo limit/contact parameters (if using MuJoCo limits/contacts) """
+
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
-    starting_pose: str = "../msk_models/starting_pose_stand.yaml"
+    starting_pose: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     """ Starting pose file path (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
@@ -95,10 +93,10 @@ class EnvConfig:
     """ motion file name for IMITATE environments (or variants) """
     use_prescribed_starting_activations: bool = False
     """ Whether to use prescribed starting activations from file """
-    starting_activations: str = "../msk_models/starting_activations.yaml"
+    starting_activations_path: str = "../msk_models/starting_activations.yaml"
     """ Starting activations file path (YAML) """
-    default_activation: float = 0.05
-    """ Default activation value when prescribed activations are not used """
+    default_activation: float = -1.0
+    """ Default activation value when prescribed activations are not used. -1.0 is random. """
 
     # The following need to be set
     reward_lambdas: dict = field(default_factory=dict)

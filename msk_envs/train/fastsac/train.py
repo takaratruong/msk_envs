@@ -30,10 +30,9 @@ def train(
         analytics_out_folder: str,
         exp_name: str,
         cuda: bool,
-        use_wandb: bool,
 ):
     amp_enabled = sac_config.amp and cuda and torch.cuda.is_available()
-    amp_device_type = ("cuda" if cuda and torch.cuda.is_available() else "cpu")
+    amp_device_type = "cuda" if cuda and torch.cuda.is_available() else "cpu"
     amp_dtype = torch.bfloat16 if sac_config.amp_dtype == "bf16" else torch.float16
     scaler = GradScaler(enabled=amp_enabled and amp_dtype == torch.float16)
     device = torch.device("cuda:0" if cuda else "cpu")
@@ -55,15 +54,14 @@ def train(
 
     n_act = envs.num_actions()
     n_obs = envs.num_obs() if type(envs.num_obs()) == int else envs.num_obs()[0]
-    action_low, action_high = envs.action_range
     if sac_config.obs_normalization:
         obs_normalizer = EmpiricalNormalization(shape=n_obs, device=device)
     else:
         obs_normalizer = nn.Identity()
-    # actions_scale = torch.ones(n_act, device=device) * (action_high - action_low) / 2.0
-    # action_bias = torch.zeros(n_act, device=device) + (action_high + action_low) / 2.0
-    action_scale = None
-    action_bias = None
+
+    action_low, action_high = envs.action_range
+    action_scale = torch.ones(n_act, device=device) * (action_high - action_low) / 2.0
+    action_bias = torch.zeros(n_act, device=device) + (action_high + action_low) / 2.0
 
     actor = Actor(
         n_obs=n_obs,
@@ -78,6 +76,7 @@ def train(
         action_scale=action_scale,
         action_bias=action_bias,
     )
+    policy = actor.explore
 
     qnet = Critic(
         n_obs=n_obs,
@@ -90,9 +89,6 @@ def train(
         num_q_networks=sac_config.num_q_networks,
         device=device,
     )
-
-    log_alpha = torch.tensor([math.log(sac_config.alpha_init)], requires_grad=True, device=device)
-    policy = actor.explore
 
     qnet_target = Critic(
         n_obs=n_obs,
@@ -123,6 +119,7 @@ def train(
     )
 
     target_entropy = -n_act * sac_config.target_entropy_ratio
+    log_alpha = torch.tensor([math.log(sac_config.alpha_init)], requires_grad=True, device=device)
     alpha_optimizer = optim.AdamW([log_alpha], lr=sac_config.alpha_learning_rate, fused=True, betas=(0.9, 0.95))
 
     rb = SimpleReplayBuffer(
@@ -174,9 +171,10 @@ def train(
 
     def _update_main(data):
         with _maybe_amp():
+            observations = data["observations"]
             next_observations = data["next"]["observations"]
-            critic_observations = data["observations"]
-            next_critic_observations = data["next"]["observations"]
+            critic_observations = observations
+            next_critic_observations = next_observations
             actions = data["actions"]
             rewards = data["next"]["rewards"]
             dones = data["next"]["dones"].bool()
@@ -389,7 +387,8 @@ def train(
             logging_helper.update_episode_stats(rewards, dones)
 
             # Compute 'true' next_obs for saving
-            true_next_obs = torch.where(truncations[:, None] > 0, info["final_observation"], next_obs)
+            # true_next_obs = torch.where(truncations[:, None] > 0, info["final_observation"], next_obs)
+            true_next_obs = torch.where(dones[:, None] > 0, info["final_observation"], next_obs)
 
             transition = TensorDict(
                 {

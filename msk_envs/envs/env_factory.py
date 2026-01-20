@@ -7,6 +7,7 @@ from .env_hop import HopEnv
 from .env_vertical import VerticalEnv
 from .env_walk import WalkEnv
 from .env_perturb import PerturbEnv
+from .env_dont_fall import DontFallEnv
 from .env_imitate import ImitateEnv
 
 
@@ -32,6 +33,8 @@ class EnvFactory:
             return VerticalEnv(**kwargs)
         elif env_variant == DerivedEnv.PERTURB:
             return PerturbEnv(**kwargs)
+        elif env_variant == DerivedEnv.DONT_FALL:
+            return DontFallEnv(**kwargs)
         elif env_variant == DerivedEnv.IMITATE:
             return ImitateEnv(**kwargs)
         else:

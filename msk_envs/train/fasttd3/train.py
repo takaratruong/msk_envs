@@ -1,25 +1,24 @@
-from msk_envs.utils.logged_sim import LoggedSim
-
-from msk_envs.train.nets.buffer import SimpleReplayBuffer
-from msk_envs.train.nets.normalizers import EmpiricalNormalization, RewardNormalizer
-from msk_envs.train.nets.td3_networks import Actor, Critic, load_policy
-from msk_envs.train.nets.simba import SimbaActor, SimbaCritic
-from msk_envs.utils.train_utils import mark_step, save_params_td3
-from msk_envs.train.fasttd3.td3_config import TD3Config
-
 import math
 import os
-import time
-import torch
-import tqdm
-import wandb
+from contextlib import contextmanager
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
+import tqdm
+from tensordict import TensorDict
 from torch.amp import autocast, GradScaler
-from tensordict import TensorDict, from_module
+from loguru import logger
+from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
+
+from msk_envs.train.fasttd3.td3_config import TD3Config
+from msk_envs.train.nets.buffer import SimpleReplayBuffer
+from msk_envs.train.nets.normalizers import EmpiricalNormalization, RewardNormalizer
+from msk_envs.train.nets.simba import SimbaActor, SimbaCritic
+from msk_envs.train.nets.td3_networks import Actor, Critic, load_policy
+from msk_envs.utils.logged_sim import LoggedSim
+from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper, save_params_td3
 
 torch.set_float32_matmul_precision("high")
 
@@ -32,16 +31,27 @@ def train(
         analytics_out_folder: str,
         exp_name: str,
         cuda: bool,
-        use_wandb: bool,
 ):
     amp_enabled = td3_config.amp and cuda and torch.cuda.is_available()
-    amp_device_type = (
-        "cuda" if cuda and torch.cuda.is_available() else "cpu"
-    )
+    amp_device_type = "cuda" if cuda and torch.cuda.is_available() else "cpu"
     amp_dtype = torch.bfloat16 if td3_config.amp_dtype == "bf16" else torch.float16
     scaler = GradScaler(enabled=amp_enabled and amp_dtype == torch.float16)
-
     device = torch.device("cuda:0" if cuda else "cpu")
+
+    writer = TensorboardSummaryWriter(
+        log_dir=f"models/{exp_name}",
+        flush_secs=10
+    )
+    logging_helper = LoggingHelper(
+        writer,
+        log_dir=f"models/{exp_name}",
+        device="cuda" if cuda else "cpu",
+        num_envs=td3_config.num_envs,
+        num_steps_per_env=td3_config.logging_interval,
+        num_learning_iterations=td3_config.num_learning_iterations,
+        is_main_process=True,
+        num_gpus=1,
+    )
 
     n_act = envs.num_actions()
     n_obs = envs.num_obs() if type(envs.num_obs()) == int else envs.num_obs()[0]
@@ -66,11 +76,12 @@ def train(
         "n_obs": n_obs,
         "n_act": n_act,
         "num_envs": td3_config.num_envs,
-        "device": device,
-        "init_scale": td3_config.init_scale,
         "hidden_dim": td3_config.actor_hidden_dim,
         "std_min": td3_config.std_min,
         "std_max": td3_config.std_max,
+        "use_tanh": td3_config.use_tanh,
+        "use_layer_norm": td3_config.use_layer_norm,
+        "device": device,
         "use_gsde": td3_config.use_gsde,
         "gsde_steps": td3_config.gsde_steps,
     }
@@ -81,11 +92,16 @@ def train(
         "v_min": td3_config.v_min,
         "v_max": td3_config.v_max,
         "hidden_dim": td3_config.critic_hidden_dim,
+        "use_layer_norm": td3_config.use_layer_norm,
+        "num_q_networks": td3_config.num_q_networks,
         "device": device,
     }
 
     if td3_config.agent == "simbav2":
-        actor_kwargs.pop("init_scale")
+        actor_kwargs.pop("use_tanh")
+        actor_kwargs.pop("use_layer_norm")
+        critic_kwargs.pop("use_layer_norm")
+        critic_kwargs.pop("num_q_networks")
         actor_kwargs.update(
             {
                 "scaler_init": math.sqrt(2.0 / td3_config.actor_hidden_dim),
@@ -117,11 +133,7 @@ def train(
         raise ValueError(f"Agent {td3_config.agent} not supported")
 
     actor = actor_cls(**actor_kwargs)
-
-    actor_detach = actor_cls(**actor_kwargs)
-    # Copy params to actor_detach without grad
-    from_module(actor).data.to_module(actor_detach)
-    policy = actor_detach.explore
+    policy = actor.explore
 
     qnet = critic_cls(**critic_kwargs)
     qnet_target = critic_cls(**critic_kwargs)
@@ -145,12 +157,12 @@ def train(
     # Add learning rate schedulers
     q_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         q_optimizer,
-        T_max=td3_config.total_timesteps,
+        T_max=td3_config.num_learning_iterations,
         eta_min=td3_config.critic_learning_rate_end,
     )
     actor_scheduler = optim.lr_scheduler.CosineAnnealingLR(
         actor_optimizer,
-        T_max=td3_config.total_timesteps,
+        T_max=td3_config.num_learning_iterations,
         eta_min=td3_config.actor_learning_rate_end,
     )
 
@@ -166,6 +178,11 @@ def train(
 
     policy_noise = td3_config.policy_noise
     noise_clip = td3_config.noise_clip
+
+    @contextmanager
+    def _maybe_amp():
+        with autocast(device_type=amp_device_type, dtype=amp_dtype, enabled=td3_config.amp):
+            yield
 
     @torch.no_grad()
     @torch.compiler.disable
@@ -199,10 +216,8 @@ def train(
         obs_normalizer.to(device=device)
         return rewards_mean.item(), episode_length_mean.item()
 
-    def update_main(data, logs_dict):
-        with autocast(
-                device_type=amp_device_type, dtype=amp_dtype, enabled=amp_enabled
-        ):
+    def update_main(data):
+        with _maybe_amp():
             observations = data["observations"]
             next_observations = data["next"]["observations"]
             critic_observations = observations
@@ -211,19 +226,11 @@ def train(
             rewards = data["next"]["rewards"]
             dones = data["next"]["dones"].bool()
             truncations = data["next"]["truncations"].bool()
-            if td3_config.disable_bootstrap:
-                bootstrap = (~dones).float()
-            else:
-                bootstrap = (truncations | ~dones).float()
+            bootstrap = (truncations | ~dones).float()
 
             clipped_noise = torch.randn_like(actions)
-            clipped_noise = clipped_noise.mul(policy_noise).clamp(
-                -noise_clip, noise_clip
-            )
-
-            next_state_actions = (actor(next_observations) + clipped_noise).clamp(
-                action_low, action_high
-            )
+            clipped_noise = clipped_noise.mul(policy_noise).clamp(-noise_clip, noise_clip)
+            next_state_actions = (actor(next_observations) + clipped_noise).clamp(action_low, action_high)
             discount = td3_config.gamma ** data["next"]["effective_n_steps"]
 
             with torch.no_grad():
@@ -253,19 +260,15 @@ def train(
                     )
 
             qf1, qf2 = qnet(critic_observations, actions)
-            qf1_loss = -torch.sum(
-                qf1_next_target_dist * F.log_softmax(qf1, dim=1), dim=1
-            ).mean()
-            qf2_loss = -torch.sum(
-                qf2_next_target_dist * F.log_softmax(qf2, dim=1), dim=1
-            ).mean()
+            qf1_loss = -torch.sum(qf1_next_target_dist * F.log_softmax(qf1, dim=1), dim=1).mean()
+            qf2_loss = -torch.sum(qf2_next_target_dist * F.log_softmax(qf2, dim=1), dim=1).mean()
             qf_loss = qf1_loss + qf2_loss
 
         q_optimizer.zero_grad(set_to_none=True)
         scaler.scale(qf_loss).backward()
         scaler.unscale_(q_optimizer)
 
-        if td3_config.use_grad_norm_clipping:
+        if td3_config.max_grad_norm > 0:
             critic_grad_norm = torch.nn.utils.clip_grad_norm_(
                 qnet.parameters(),
                 max_norm=td3_config.max_grad_norm if td3_config.max_grad_norm > 0 else float("inf"),
@@ -275,16 +278,16 @@ def train(
         scaler.step(q_optimizer)
         scaler.update()
 
-        logs_dict["critic_grad_norm"] = critic_grad_norm.detach()
-        logs_dict["qf_loss"] = qf_loss.detach()
-        logs_dict["qf_max"] = qf1_next_target_value.max().detach()
-        logs_dict["qf_min"] = qf1_next_target_value.min().detach()
-        return logs_dict
+        return (
+            rewards.mean(),
+            critic_grad_norm.mean(),
+            qf_loss.mean(),
+            qf1_next_target_value.mean(),
+            qf1_next_target_value.min(),
+        )
 
-    def update_pol(data, logs_dict):
-        with autocast(
-                device_type=amp_device_type, dtype=amp_dtype, enabled=amp_enabled
-        ):
+    def update_pol(data):
+        with _maybe_amp():
             critic_observations = data["observations"]
             qf1, qf2 = qnet(critic_observations, actor(data["observations"]))
             qf1_value = qnet.get_value(F.softmax(qf1, dim=1))
@@ -298,7 +301,7 @@ def train(
         actor_optimizer.zero_grad(set_to_none=True)
         scaler.scale(actor_loss).backward()
         scaler.unscale_(actor_optimizer)
-        if td3_config.use_grad_norm_clipping:
+        if td3_config.max_grad_norm > 0:
             actor_grad_norm = torch.nn.utils.clip_grad_norm_(
                 actor.parameters(),
                 max_norm=td3_config.max_grad_norm if td3_config.max_grad_norm > 0 else float("inf"),
@@ -307,17 +310,51 @@ def train(
             actor_grad_norm = torch.tensor(0.0, device=device)
         scaler.step(actor_optimizer)
         scaler.update()
-        logs_dict["actor_grad_norm"] = actor_grad_norm.detach()
-        logs_dict["actor_loss"] = actor_loss.detach()
-        return logs_dict
+        return (
+            actor_grad_norm.detach(),
+            actor_loss.detach(),
+        )
 
-    @torch.no_grad()
-    def soft_update(src, tgt, tau: float):
-        src_ps = [p.data for p in src.parameters()]
-        tgt_ps = [p.data for p in tgt.parameters()]
+    def _sample_and_prepare_batches() -> list[TensorDict]:
+        """
+        Sample a large batch once and split it into smaller batches for each update.
+        This reduces sampling overhead by `num_updates` and normalization overhead by `num_updates`.
+        """
+        # Sample a large batch (batch_size * num_updates)
+        large_batch_size = batch_size * td3_config.num_updates
+        large_data = rb.sample(large_batch_size)
+        samples_per_update = batch_size * envs.num_worlds
 
-        torch._foreach_mul_(tgt_ps, 1.0 - tau)
-        torch._foreach_add_(tgt_ps, src_ps, alpha=tau)
+        # Normalize all data once
+        large_data["observations"] = normalize_obs(large_data["observations"])
+        large_data["next"]["observations"] = normalize_obs(large_data["next"]["observations"])
+        raw_rewards = large_data["next"]["rewards"]
+        large_data["next"]["rewards"] = normalize_reward(raw_rewards)
+
+        # Split into smaller batches
+        prepared_batches = []
+
+        for i in range(td3_config.num_updates):
+            start_idx = i * samples_per_update
+            end_idx = (i + 1) * samples_per_update
+
+            # Create a slice of the large batch
+            batch_data = TensorDict(
+                {
+                    "observations": large_data["observations"][start_idx:end_idx],
+                    "actions": large_data["actions"][start_idx:end_idx],
+                    "next": {
+                        "rewards": large_data["next"]["rewards"][start_idx:end_idx],
+                        "dones": large_data["next"]["dones"][start_idx:end_idx],
+                        "truncations": large_data["next"]["truncations"][start_idx:end_idx],
+                        "observations": large_data["next"]["observations"][start_idx:end_idx],
+                        "effective_n_steps": large_data["next"]["effective_n_steps"][start_idx:end_idx],
+                    },
+                },
+                batch_size=samples_per_update,
+            )
+            prepared_batches.append(batch_data)
+        return prepared_batches
 
     if td3_config.compile:
         # Default settings are kept the same, but can now be overridden via train_config.
@@ -362,7 +399,6 @@ def train(
             update_stats = reward_normalizer.update_stats
         normalize_reward = reward_normalizer.forward
 
-    obs = envs.reset()
     if td3_config.checkpoint_path:
         # Load checkpoint if specified
         torch_checkpoint = torch.load(
@@ -372,108 +408,117 @@ def train(
         obs_normalizer.load_state_dict(torch_checkpoint["obs_normalizer_state"])
         qnet.load_state_dict(torch_checkpoint["qnet_state_dict"])
         qnet_target.load_state_dict(torch_checkpoint["qnet_target_state_dict"])
-        # global_step = torch_checkpoint["global_step"]
-        global_step = 0
-    else:
-        global_step = 0
 
+    obs = envs.reset()
     dones = None
-    pbar = tqdm.tqdm(total=td3_config.total_timesteps, initial=global_step)
-    start_time = None
+    global_step = 0
+    training_metrics = TensorAverageMeterDict()
     latest_model_path = None
 
-    while global_step < td3_config.total_timesteps:
+    actor_loss = torch.tensor(0.0, device=device)
+    actor_grad_norm = torch.tensor(0.0, device=device)
+    pbar = tqdm.tqdm(total=td3_config.num_learning_iterations, initial=global_step)
+
+    while global_step < td3_config.num_learning_iterations:
         mark_step()
-        logs_dict = TensorDict()
-        if start_time is None and global_step >= td3_config.learning_starts:
-            start_time = time.time()
+        with logging_helper.record_collection_time():
+            with torch.no_grad(), _maybe_amp():
+                norm_obs = normalize_obs(obs)
+                actions = policy(obs=norm_obs, dones=dones)
 
-        with torch.no_grad(), autocast(device_type=amp_device_type, dtype=amp_dtype, enabled=amp_enabled):
-            norm_obs = normalize_obs(obs)
-            actions = policy(obs=norm_obs, dones=dones)
+            next_obs, rewards, terminated, truncations, info = envs.step(actions)
+            dones = (terminated + truncations).bool()
 
-        next_obs, rewards, terminated, truncations, info = envs.step(actions)
-        dones = (terminated + truncations).bool()
+            # Update episode stats using logging helper
+            logging_helper.update_episode_stats(rewards, dones)
 
-        if td3_config.reward_normalization:
-            update_stats(rewards, dones.float())
+            if td3_config.reward_normalization:
+                update_stats(rewards, dones.float())
 
-        final_obs = info["final_observation"]
-        true_next_obs = torch.where(
-            dones[:, None] > 0, final_obs, next_obs
-        )
+            # Compute 'true' next_obs for saving
+            true_next_obs = torch.where(dones[:, None] > 0, info["final_observation"], next_obs)
+            # true_next_obs = torch.where(truncations[:, None] > 0, info["final_observation"], next_obs)
 
-        transition = TensorDict(
-            {
-                "observations": obs,
-                "actions": torch.as_tensor(actions, device=device, dtype=torch.float),
-                "next": {
-                    "observations": true_next_obs,
-                    "rewards": torch.as_tensor(rewards, device=device, dtype=torch.float),
-                    "truncations": truncations.long(),
-                    "dones": dones.long(),
+            transition = TensorDict(
+                {
+                    "observations": obs,
+                    "actions": torch.as_tensor(actions, device=device, dtype=torch.float),
+                    "next": {
+                        "observations": true_next_obs,
+                        "rewards": torch.as_tensor(rewards, device=device, dtype=torch.float),
+                        "truncations": truncations.long(),
+                        "dones": dones.long(),
+                    },
                 },
-            },
-            batch_size=(envs.num_worlds,),
-            device=device,
-        )
-        rb.extend(transition)
+                batch_size=(envs.num_worlds,),
+                device=device,
+            )
+            rb.extend(transition)
 
-        obs = next_obs
+            obs = next_obs
 
+        batch_size = max(td3_config.batch_size // td3_config.num_envs, 1)
         if global_step > td3_config.learning_starts:
-            for i in range(td3_config.num_updates):
-                data = rb.sample(max(1, td3_config.batch_size // td3_config.num_envs))
-                data["observations"] = normalize_obs(data["observations"])
-                data["next"]["observations"] = normalize_obs(data["next"]["observations"])
-                raw_rewards = data["next"]["rewards"]
-                data["next"]["rewards"] = normalize_reward(raw_rewards)
+            with logging_helper.record_learn_time():
+                # Use batched sampling: sample once, normalize once, split into updates
+                prepared_batches = _sample_and_prepare_batches()
+                for i, data in enumerate(prepared_batches):
+                    buffer_rewards, critic_grad_norm, qf_loss, qf_max, qf_min = update_main(data)
+                    if td3_config.num_updates > 1:
+                        if i % td3_config.policy_frequency == 1:
+                            actor_grad_norm, actor_loss = update_pol(data)
+                    elif global_step % td3_config.policy_frequency == 0:
+                        actor_grad_norm, actor_loss = update_pol(data)
 
-                logs_dict = update_main(data, logs_dict)
-                if td3_config.num_updates > 1:
-                    if i % td3_config.policy_frequency == 1:
-                        logs_dict = update_pol(data, logs_dict)
-                else:
-                    if global_step % td3_config.policy_frequency == 0:
-                        logs_dict = update_pol(data, logs_dict)
-
-                soft_update(qnet, qnet_target, td3_config.tau)
-
-            if global_step % 100 == 0 and start_time is not None:
-                with torch.no_grad():
-                    logs = {
-                        "actor_loss": logs_dict["actor_loss"].mean(),
-                        "qf_loss": logs_dict["qf_loss"].mean(),
-                        "qf_max": logs_dict["qf_max"].mean(),
-                        "qf_min": logs_dict["qf_min"].mean(),
-                        "actor_grad_norm": logs_dict["actor_grad_norm"].mean(),
-                        "critic_grad_norm": logs_dict["critic_grad_norm"].mean(),
-                        "rewards/total": rewards.mean(),
+                    # Accumulate training metrics for smoother logging
+                    current_metrics = {
+                        "actor_loss": actor_loss,
+                        "qf_loss": qf_loss,
+                        "qf_max": qf_max,
+                        "qf_min": qf_min,
+                        "actor_grad_norm": actor_grad_norm,
+                        "critic_grad_norm": critic_grad_norm,
+                        "buffer_rewards": buffer_rewards,
                     }
 
                     # Log raw reward terms before lambda multiplication
+                    raw_rewards_dict = {}
                     for reward_name, reward_tensor in info["raw_rewards"].items():
-                        logs[f"rewards/{reward_name}_raw"] = reward_tensor.mean()
+                        raw_rewards_dict[f"{reward_name}_raw"] = reward_tensor.mean()
 
-                if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
-                    print(f"Evaluating at global step {global_step}")
-                    eval_avg_return, eval_avg_length = evaluate(latest_model_path)
-                    logs["eval_avg_return"] = eval_avg_return
-                    logs["eval_avg_length"] = eval_avg_length
+                    training_metrics.add(current_metrics)
 
-                if use_wandb:
-                    wandb.log(
-                        {
-                            "frame": global_step * td3_config.num_envs,
-                            "critic_lr": q_scheduler.get_last_lr()[0],
-                            "actor_lr": actor_scheduler.get_last_lr()[0],
-                            **logs,
-                        },
-                        step=global_step,
-                    )
+                    with torch.no_grad():
+                        src_ps = [p.data for p in qnet.parameters()]
+                        tgt_ps = [p.data for p in qnet_target.parameters()]
+                        torch._foreach_mul_(tgt_ps, 1.0 - td3_config.tau)
+                        torch._foreach_add_(tgt_ps, src_ps, alpha=td3_config.tau)
 
-            if global_step > 0 and global_step % td3_config.save_interval == 0:
-                print(f"Saving model at global step {global_step}")
+            if global_step % td3_config.logging_interval == 0:
+                with torch.no_grad():
+                    # Use accumulated training metrics for smoother logging (reduces noise)
+                    accumulated_metrics = training_metrics.mean_and_clear()
+
+                    # Convert tensor values to float for logging
+                    loss_dict = {}
+                    for key, value in accumulated_metrics.items():
+                        if isinstance(value, torch.Tensor):
+                            loss_dict[key] = value.item()
+                        else:
+                            loss_dict[key] = float(value)
+
+                    # Add current env rewards (not part of training loop accumulation)
+                    loss_dict["env_rewards"] = rewards.mean().item()
+
+                # Use logging helper
+                extra_log_dicts = {
+                    "raw_rewards": raw_rewards_dict,
+                }
+                logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts=extra_log_dicts)
+
+            if td3_config.save_interval > 0 and global_step > 0 and global_step % td3_config.save_interval == 0:
+                logger.info(f"Saving model at global step {global_step}")
+                latest_model_path = f"models/{exp_name}/{exp_name}_{global_step}.pt"
                 save_params_td3(
                     global_step,
                     actor,
@@ -481,10 +526,17 @@ def train(
                     qnet_target,
                     obs_normalizer,
                     td3_config,
-                    f"models/{exp_name}/{exp_name}_{global_step}.pt",
+                    latest_model_path,
                 )
-                latest_model_path = f"models/{exp_name}/{exp_name}_{global_step}.pt"
 
+            if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:
+                print(f"Evaluating at global step {global_step}")
+                eval_avg_return, eval_avg_length = evaluate(latest_model_path)
+                # Todo: log eval metrics
+                print(f"Eval Average Return: {eval_avg_return}, Eval Average Length: {eval_avg_length}")
+
+        if global_step >= td3_config.num_learning_iterations:
+            break
         global_step += 1
         actor_scheduler.step()
         q_scheduler.step()

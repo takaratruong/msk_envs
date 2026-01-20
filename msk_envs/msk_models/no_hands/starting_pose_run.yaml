@@ -68,12 +68,6 @@ elbow_flex_r:
 pro_sup_r:
   q: 1.5
   v: 0.0
-wrist_flex_r:
-  q: 0.0
-  v: 0.0
-wrist_dev_r:
-  q: 0.0
-  v: 0.0
 
 hip_flexion_l:
   q: 0.165239
@@ -111,10 +105,3 @@ elbow_flex_l:
 pro_sup_l:
   q: 1.5
   v: 0.0
-wrist_flex_l:
-  q: 0.0
-  v: 0.0
-wrist_dev_l:
-  q: 0.0
-  v: 0.0
-

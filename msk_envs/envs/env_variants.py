@@ -9,4 +9,5 @@ class DerivedEnv(Enum):
     HOP = 5
     PERTURB = 6
     VERTICAL = 7
-    IMITATE = 8
+    DONT_FALL = 8
+    IMITATE = 9

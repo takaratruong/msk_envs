@@ -10042,25 +10042,25 @@
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_add_r_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>75.0</optimal_force>
 					<coordinate>arm_add_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_rot_r_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>50.0</optimal_force>
 					<coordinate>arm_rot_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="elbow_flex_r_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>75.0</optimal_force>
 					<coordinate>elbow_flex_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="pro_sup_r_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>5.0</optimal_force>
 					<coordinate>pro_sup_r</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
@@ -10072,25 +10072,25 @@
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_add_l_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>75.0</optimal_force>
 					<coordinate>arm_add_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_rot_l_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>50.0</optimal_force>
 					<coordinate>arm_rot_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="elbow_flex_l_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>75.0</optimal_force>
 					<coordinate>elbow_flex_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="pro_sup_l_motor">
-					<optimal_force>100.0</optimal_force>
+					<optimal_force>5.0</optimal_force>
 					<coordinate>pro_sup_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
@@ -10102,7 +10102,7 @@
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.0</activation_time_constant>
+					<activation_time_constant>0.035</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
@@ -10112,7 +10112,7 @@
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.0</activation_time_constant>
+					<activation_time_constant>0.035</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>

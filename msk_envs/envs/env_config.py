@@ -21,7 +21,7 @@ class EnvConfig:
     """ Integrator type (EULER_FIXED, RK4_FIXED) """
 
     # --- Model articulation properties ---
-    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim"
+    model_path: str = "../msk_models/model_motor_arms_full_contact.osim"
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
@@ -37,7 +37,7 @@ class EnvConfig:
     """ Toes joint damping """
     use_specified_joint_limits: bool = True
     """ Whether to use joint limits defined in joint_limits_path, otherwise use limits defined in model file """
-    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
+    joint_limits_path: str = "../msk_models/joint_limits_hc.yaml"
     """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
     enable_drag: bool = False
     """ Whether to enable drag forces """
@@ -134,3 +134,22 @@ class EnvConfig:
         print("Environment Configuration:")
         for key, value in env_config.to_dict().items():
             print(f"  {key}: {value}")
+
+
+@dataclass
+class EnvConfigNoHands(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim"
+    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
+    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
+    starting_pose: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+
+
+@dataclass
+class EnvConfigNoHandsWalk(EnvConfig):
+    """ Environment configuration for no-hands model, with walking-specific contact params"""
+    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_walk_contact.osim"
+    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
+    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
+    starting_pose: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_walking.yaml"

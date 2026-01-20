@@ -5,7 +5,7 @@ from typing_extensions import Annotated
 
 import tyro
 
-from msk_envs.envs.env_config import EnvConfig
+from msk_envs.envs.env_config import EnvConfig, EnvConfigNoHands, EnvConfigNoHandsWalk
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -79,17 +79,14 @@ def pretty_print_base_args(args: BaseArgs):
 
 @dataclass
 class WalkConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsWalk(
         env_variant=DerivedEnv.WALK,
         delta_t=1.0 / 100.0,
         max_episode_duration=5.0,
-        starting_pose="../msk_models/starting_pose_run.yaml",
-        # Use the walking-specific model with foot contacts
+
         muscle_multiplier=1.0,
         toes_stiffness=25.0,
         toes_damping=1.9,
-        model_path="../msk_models/model_motor_arms_full_contact_walking.osim",
-        contact_params_path="../msk_models/contact_params_walking.yaml",
     ))
 
     """Walk environment specific reward scales"""
@@ -102,10 +99,11 @@ class WalkConfig(BaseArgs):
 
 @dataclass
 class JogConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfigNoHands = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.JOG,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
+        starting_pose="../msk_models/no_hands/starting_pose_run.yaml",
     ))
 
     """Walk environment specific reward scales"""
@@ -119,7 +117,7 @@ class JogConfig(BaseArgs):
 
 @dataclass
 class SprintConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
@@ -138,11 +136,11 @@ class SprintConfig(BaseArgs):
 
 @dataclass
 class BackPedalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.BACKPEDAL,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
-        starting_pose="../msk_models/starting_pose_stand_backward.yaml",
+        starting_pose="../msk_models/no_hands/starting_pose_stand_backward.yaml",
     ))
 
     """Sprint environment specific reward scales"""
@@ -157,11 +155,11 @@ class BackPedalConfig(BaseArgs):
 
 @dataclass
 class SideShuffleConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.SIDE_SHUFFLE,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
-        starting_pose="../msk_models/starting_pose_stand_side.yaml",
+        starting_pose="../msk_models/no_hands/starting_pose_stand_side.yaml",
     ))
 
     """Sprint environment specific reward scales"""
@@ -176,11 +174,11 @@ class SideShuffleConfig(BaseArgs):
 
 @dataclass
 class HopConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.HOP,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
-        starting_pose="../msk_models/starting_pose_left_leg_up.yaml",
+        starting_pose="../msk_models/no_hands/starting_pose_left_leg_up.yaml",
         swap_lr=False,
     ))
 
@@ -196,10 +194,11 @@ class HopConfig(BaseArgs):
 
 @dataclass
 class VerticalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 100.0,
         max_episode_duration=2.0,
+        starting_pose="../msk_models/no_hands/starting_pose_stand.yaml",
     ))
 
     """Vertical jump environment specific reward scales"""
@@ -210,10 +209,11 @@ class VerticalConfig(BaseArgs):
 
 @dataclass
 class PerturbConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.PERTURB,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
+        starting_pose="../msk_models/no_hands/starting_pose_stand.yaml",
     ))
     lambda_alive: float = 1e-1
     lambda_limit: float = -2e-3
@@ -224,20 +224,11 @@ class PerturbConfig(BaseArgs):
 
 @dataclass
 class DontFallConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.DONT_FALL,
         delta_t=1.0 / 100.0,
         delta_t_sim=1.0 / 5000.0,
         max_episode_duration=10.0,
-        toes_stiffness=25.0,
-        toes_damping=1.9,
-        starting_pose="../msk_models/no_hands/starting_pose_stand_no_hand.yaml",
-        model_path="../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim",
-        use_specified_contact_params=True,
-        contact_params_path="../msk_models/contact_params_sprint.yaml",
-        use_specified_joint_limits=True,
-        joint_limits_path="../msk_models/no_hands/joint_limits_hc.yaml",
-        limit_force_curves_path="../msk_models/no_hands/limit_force_curves_no_hand_hc.yaml",
         noise_start=False,
     ))
     lambda_alive: float = 0

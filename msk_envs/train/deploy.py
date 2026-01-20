@@ -2,9 +2,11 @@ import torch
 from tqdm import tqdm
 
 from msk_envs.envs.env_factory import EnvFactory
-from msk_envs.nets.networks import load_policy
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
+from msk_envs.train.dep.dep import DEP
 from msk_envs.utils.logged_sim import LoggedSim
+# from msk_envs.train.nets.sac_networks import load_policy
+from msk_envs.train.nets.td3_networks import load_policy
 
 
 def main():
@@ -19,17 +21,29 @@ def main():
 
     has_cuda_support = torch.cuda.is_available()
     device = torch.device("cuda" if has_cuda_support else f"cpu")
-    envs = EnvFactory.create_env(num_envs=1,
+    num_envs = 1
+    envs = EnvFactory.create_env(num_envs=num_envs,
                                  env_config=env_config,
                                  render=False,
                                  cuda_graph=has_cuda_support,
                                  device=device)
 
     actions = envs.get_blank_actions()
-
-    # policy = load_policy("/home/marth/Documents/msk_envs/models/sprint_gsde_lims_2026-01-07_17-10-24/sprint_gsde_lims_2026-01-07_17-10-24_10000.pt")
+    #
+    # policy = load_policy("/home/marth/Documents/msk_envs/models/sprint_2026-01-20_10-11/sprint_2026-01-20_10-11_74000.pt")
     # policy.to(device)
 
+    dep = DEP(n_motors=envs.num_muscles,
+              n_envs=num_envs,
+              buffer_size=200,
+              bias_rate=0.002,
+              kappa=1000,
+              tau=40,
+              s4avg=2,
+              regularization=32,
+              time_dist=5,
+              with_learning=True,
+              device=device)
 
     # Build a SimLogger to give us a whole pdf of stuff
     max_episode_length = int(env_config.max_episode_duration / env_config.delta_t)
@@ -38,11 +52,14 @@ def main():
 
     for _ in tqdm(range(max_episode_length)):
         # actions = torch.randn_like(actions)
+        # muscle_states = envs.muscle_fiber_lengths
+        # actions[:, :envs.num_muscles] = dep.step(muscle_states)
+        # actions = torch.randn_like(actions)
         # actions = envs.get_blank_actions()
         # with torch.no_grad():
         #     actions = policy(obs)
         finished, obs = sim.step(actions)
-        if finished:
+        if finished.all():
             break
     print("Mean rewards: ", sim.get_rewards_mean())
 

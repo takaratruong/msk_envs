@@ -259,6 +259,7 @@ class DistributionalQNetwork(nn.Module):
             num_blocks: int,
             c_shift: float,
             expansion: int,
+            use_layer_norm: bool = True,
             device: torch.device = None,
     ):
         super().__init__()
@@ -318,38 +319,38 @@ class DistributionalQNetwork(nn.Module):
         delta_z = (self.v_max - self.v_min) / (self.num_atoms - 1)
         batch_size = rewards.shape[0]
 
-        target_z = (
-                rewards.unsqueeze(1)
-                + bootstrap.unsqueeze(1) * discount.unsqueeze(1) * q_support
-        )
+        target_z = rewards.unsqueeze(1) + bootstrap.unsqueeze(1) * discount.unsqueeze(1) * q_support
         target_z = target_z.clamp(self.v_min, self.v_max)
         b = (target_z - self.v_min) / delta_z
-        l = torch.floor(b).long()
-        u = torch.ceil(b).long()
+        lower = torch.floor(b).long()
+        upper = torch.ceil(b).long()
 
-        is_int = (l == u)
-        l_mask = is_int & (l > 0)
-        u_mask = is_int & (l == 0)
+        is_integer = upper == lower
+        lower_mask = torch.logical_and((lower > 0), is_integer)
+        upper_mask = torch.logical_and((lower == 0), is_integer)
 
-        l = torch.where(l_mask, l - 1, l)
-        u = torch.where(u_mask, u + 1, u)
+        lower = torch.where(lower_mask, lower - 1, lower)
+        upper = torch.where(upper_mask, upper + 1, upper)
 
-        next_dist = F.softmax(self.forward(obs, actions), dim=1)
+        next_dist = F.softmax(self(obs, actions), dim=1)
         proj_dist = torch.zeros_like(next_dist)
         offset = (
-            torch.linspace(
-                0, (batch_size - 1) * self.num_atoms, batch_size, device=device
-            )
+            torch.linspace(0, (batch_size - 1) * self.num_atoms, batch_size, device=device)
             .unsqueeze(1)
             .expand(batch_size, self.num_atoms)
             .long()
         )
-        proj_dist.view(-1).index_add_(
-            0, (l + offset).view(-1), (next_dist * (u.float() - b)).view(-1)
-        )
-        proj_dist.view(-1).index_add_(
-            0, (u + offset).view(-1), (next_dist * (b - l.float())).view(-1)
-        )
+
+        # Additional safety check for indices
+        lower_indices = (lower + offset).view(-1)
+        upper_indices = (upper + offset).view(-1)
+        max_index = proj_dist.numel() - 1
+
+        lower_indices = torch.clamp(lower_indices, 0, max_index)
+        upper_indices = torch.clamp(upper_indices, 0, max_index)
+
+        proj_dist.view(-1).index_add_(0, lower_indices, (next_dist * (upper.float() - b)).view(-1))
+        proj_dist.view(-1).index_add_(0, upper_indices, (next_dist * (b - lower.float())).view(-1))
         return proj_dist
 
 
@@ -463,12 +464,22 @@ class SimbaActor(nn.Module):
             num_blocks: int,
             std_min: float,
             std_max: float,
+            use_tanh: bool = True,
+            use_layer_norm: bool = True,
             use_gsde: bool = False,
             gsde_steps: int = 10,
             device: torch.device = None,
+            action_scale: torch.Tensor | None = None,
+            action_bias: torch.Tensor | None = None,
     ):
         super().__init__()
+        self.n_obs = n_obs
         self.n_act = n_act
+        self.use_tanh = use_tanh
+        self.n_envs = num_envs
+        self.device = device
+        self.hidden_dim = hidden_dim
+        self.use_layer_norm = use_layer_norm
 
         self.embedder = HyperEmbedder(
             in_dim=n_obs,
@@ -500,17 +511,25 @@ class SimbaActor(nn.Module):
             device=device,
         )
 
+        # Register action scaling parameters as buffers
+        if action_scale is not None:
+            self.register_buffer("action_scale", action_scale.to(device))
+        else:
+            self.register_buffer("action_scale", torch.ones(n_act, device=device))
+
+        if action_bias is not None:
+            self.register_buffer("action_bias", action_bias.to(device))
+        else:
+            self.register_buffer("action_bias", torch.zeros(n_act, device=device))
+
         noise_scales = (torch.rand(num_envs, 1, device=device) * (std_max - std_min) + std_min)
         self.register_buffer("noise_scales", noise_scales)
-
         self.register_buffer("std_min", torch.as_tensor(std_min, device=device))
         self.register_buffer("std_max", torch.as_tensor(std_max, device=device))
         self.register_buffer("noise", torch.zeros(num_envs, n_act, device=device))
         self.register_buffer("gsde_step_count", torch.zeros(1, device=device, dtype=torch.int32))
-        self.n_envs = num_envs
         self.use_gsde = use_gsde
         self.gsde_steps = gsde_steps
-        self.device = device
 
     def forward(self, obs: torch.Tensor) -> torch.Tensor:
         x = obs

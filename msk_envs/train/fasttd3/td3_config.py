@@ -33,13 +33,13 @@ class TD3Config:
     gamma: float = 0.99
     """the discount factor gamma"""
 
-    tau: float = 0.05
+    tau: float = 0.1
     """the soft update coefficient """
 
     batch_size: int = 8192
     """the batch size of sample from the replay memory"""
 
-    learning_starts: int = 0
+    learning_starts: int = 10
     """timestep to start learning"""
 
     policy_frequency: int = 4
@@ -57,10 +57,10 @@ class TD3Config:
     num_atoms: int = 101
     """the number of atoms"""
 
-    v_min: float = -10.0
+    v_min: float = -15.0
     """the minimum value of the support"""
 
-    v_max: float = 10.0
+    v_max: float = 15.0
     """the maximum value of the support"""
 
     critic_hidden_dim: int = 768
@@ -75,7 +75,7 @@ class TD3Config:
     actor_hidden_dim: int = 512
     """the hidden dimension of the actor network"""
 
-    use_cdq: bool = False
+    use_cdq: bool = True
     """whether to use Clipped Double Q-learning"""
 
     std_min: float = 0.001

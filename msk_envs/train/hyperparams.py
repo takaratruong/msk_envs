@@ -103,7 +103,7 @@ class JogConfig(BaseArgs):
         env_variant=DerivedEnv.JOG,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
-        starting_pose="../msk_models/no_hands/starting_pose_run.yaml",
+        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
     ))
 
     """Walk environment specific reward scales"""
@@ -120,18 +120,19 @@ class SprintConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 100.0,
-        max_episode_duration=12.0,
-        starting_pose="../msk_models/no_hands/starting_pose_run.yaml",
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
     ))
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 0.01
     lambda_mid_lane: float = 0.01
     lambda_limit: float = -2e-3
+    lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_finish: float = 0.2
 
 
 @dataclass
@@ -139,18 +140,19 @@ class BackPedalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.BACKPEDAL,
         delta_t=1.0 / 100.0,
-        max_episode_duration=12.0,
-        starting_pose="../msk_models/no_hands/starting_pose_stand_backward.yaml",
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand_backward.yaml",
     ))
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 0.01
     lambda_mid_lane: float = 0.01
     lambda_limit: float = -2e-3
+    lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_finish: float = 0.2
 
 
 @dataclass
@@ -159,17 +161,17 @@ class SideShuffleConfig(BaseArgs):
         env_variant=DerivedEnv.SIDE_SHUFFLE,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
-        starting_pose="../msk_models/no_hands/starting_pose_stand_side.yaml",
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand_side.yaml",
     ))
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1.0
     lambda_mid_lane: float = 1.0
     lambda_limit: float = -2.0
+    lambda_damping: float = -1e-3
     lambda_actuator: float = -1.0
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_finish: float = 20.0
 
 
 @dataclass
@@ -178,7 +180,7 @@ class HopConfig(BaseArgs):
         env_variant=DerivedEnv.HOP,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
-        starting_pose="../msk_models/no_hands/starting_pose_left_leg_up.yaml",
+        starting_pose_path="../msk_models/no_hands/starting_pose_left_leg_up.yaml",
         swap_lr=False,
     ))
 
@@ -186,10 +188,10 @@ class HopConfig(BaseArgs):
     lambda_vel: float = 0.05
     lambda_mid_lane: float = 0.01
     lambda_limit: float = -2e-3
+    lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_finish: float = 0.2
 
 
 @dataclass
@@ -198,7 +200,7 @@ class VerticalConfig(BaseArgs):
         env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 100.0,
         max_episode_duration=2.0,
-        starting_pose="../msk_models/no_hands/starting_pose_stand.yaml",
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
     ))
 
     """Vertical jump environment specific reward scales"""
@@ -213,7 +215,7 @@ class PerturbConfig(BaseArgs):
         env_variant=DerivedEnv.PERTURB,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
-        starting_pose="../msk_models/no_hands/starting_pose_stand.yaml",
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
     ))
     lambda_alive: float = 1e-1
     lambda_limit: float = -2e-3
@@ -248,7 +250,7 @@ class ImitateConfig(BaseArgs):
         delta_t=1.0 / 500.0,
         use_prescribed_starting_activations=True,
         starting_activations_path="../msk_models/starting_activations.yaml",
-        use_specified_joint_limits = True,
+        use_specified_joint_limits=True,
         joint_limits_path="../msk_models/joint_limits_sprinting.yaml",
         motion_name="../motions/pred_sprint_two_step.mot",
     ))

@@ -330,7 +330,7 @@ class MSKEnv:
         return self._get_actions().shape[1]
 
     def get_time(self) -> torch.Tensor:
-        return msk_warp.time(self.d)
+        return self.time.detach().clone()
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         """ Hook for additional reset behavior in subclasses. Occurs before sim reset """

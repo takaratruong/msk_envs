@@ -55,9 +55,6 @@ def train(
 
     n_act = envs.num_actions()
     n_obs = envs.num_obs() if type(envs.num_obs()) == int else envs.num_obs()[0]
-    n_critic_obs = n_obs
-    action_low, action_high = envs.action_range
-
     if td3_config.obs_normalization:
         obs_normalizer = EmpiricalNormalization(shape=n_obs, device=device)
     else:
@@ -71,6 +68,10 @@ def train(
         )
     else:
         reward_normalizer = nn.Identity()
+
+    action_low, action_high = envs.action_range
+    action_scale = torch.ones(n_act, device=device) * (action_high - action_low) / 2.0
+    action_bias = torch.zeros(n_act, device=device) + (action_high + action_low) / 2.0
 
     actor_kwargs = {
         "n_obs": n_obs,
@@ -86,7 +87,7 @@ def train(
         "gsde_steps": td3_config.gsde_steps,
     }
     critic_kwargs = {
-        "n_obs": n_critic_obs,
+        "n_obs": n_obs,
         "n_act": n_act,
         "num_atoms": td3_config.num_atoms,
         "v_min": td3_config.v_min,
@@ -176,9 +177,6 @@ def train(
         device=device,
     )
 
-    policy_noise = td3_config.policy_noise
-    noise_clip = td3_config.noise_clip
-
     @contextmanager
     def _maybe_amp():
         with autocast(device_type=amp_device_type, dtype=amp_dtype, enabled=td3_config.amp):
@@ -228,12 +226,13 @@ def train(
             truncations = data["next"]["truncations"].bool()
             bootstrap = (truncations | ~dones).float()
 
-            clipped_noise = torch.randn_like(actions)
-            clipped_noise = clipped_noise.mul(policy_noise).clamp(-noise_clip, noise_clip)
-            next_state_actions = (actor(next_observations) + clipped_noise).clamp(action_low, action_high)
-            discount = td3_config.gamma ** data["next"]["effective_n_steps"]
-
             with torch.no_grad():
+                clipped_noise = torch.randn_like(actions)
+                clipped_noise = clipped_noise.mul(td3_config.policy_noise).clamp(-td3_config.noise_clip,
+                                                                                 td3_config.noise_clip)
+                next_state_actions = (actor(next_observations) + clipped_noise).clamp(action_low, action_high)
+                discount = td3_config.gamma ** data["next"]["effective_n_steps"]
+
                 qf1_next_target_projected, qf2_next_target_projected = (
                     qnet_target.projection(
                         next_critic_observations,

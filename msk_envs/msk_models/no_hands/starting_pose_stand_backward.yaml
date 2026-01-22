@@ -2,7 +2,7 @@ pelvis_tx:
   q: 0.0
   v: 0.0
 pelvis_ty:
-  q: 1.05
+  q: 1.03
   v: 0.0
 pelvis_tz:
   q: 0.0
@@ -105,4 +105,3 @@ elbow_flex_l:
 pro_sup_l:
   q: 0.0
   v: 0.0
-

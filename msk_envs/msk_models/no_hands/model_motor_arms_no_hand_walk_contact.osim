@@ -10347,7 +10347,7 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.0 0.205 -0.05</location>
+					<location>0.0 0.205 -0.045</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0.1 0.0</orientation>
 					<radius>0.09</radius>
@@ -10358,7 +10358,7 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.0 0.205 0.05</location>
+					<location>0.0 0.205 0.045</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>1.5707 0.1 0</orientation>
 					<radius>0.09</radius>

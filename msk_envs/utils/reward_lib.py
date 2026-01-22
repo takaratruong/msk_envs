@@ -13,7 +13,7 @@ def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool
     return root_velocity
 
 
-def mid_lane_reward(root_position: torch.Tensor, weight: float = 5.0):
+def mid_lane_reward(root_position: torch.Tensor, weight: float = 2.5):
     """Reward for being in the center of the lane"""
     dist_from_center = torch.abs(root_position[:, SIDE_IDX])
     return torch.exp(-weight * dist_from_center.pow(2))
@@ -32,6 +32,19 @@ def joint_limit_penalty(limit_torques: torch.Tensor, squared: bool = False):
     if num_limits == 0:
         return torch.zeros_like(limit_torque_sum)
     return limit_torque_sum / num_limits
+
+
+def joint_damping_penalty(qfrc_damper: torch.Tensor, squared: bool = False):
+    """Joint damping penalty based on sum of absolute damping forces"""
+    qfrc_damper_joints = qfrc_damper[:, 6:]
+    nv_joints = qfrc_damper_joints.shape[1]
+    if squared:
+        sq_damping = torch.pow(qfrc_damper_joints, 2)
+        damping_sum = torch.sum(sq_damping, dim=1)
+    else:
+        abs_damping = torch.abs(qfrc_damper_joints)
+        damping_sum = torch.sum(abs_damping, dim=1)
+    return damping_sum / nv_joints
 
 
 def alive_bonus(fallen: torch.Tensor):

@@ -68,6 +68,9 @@ class MSKEnv:
         muscle_metadata = msk_warp.muscle_metadata(self.m)
         for mm in muscle_metadata:
             mm.max_isometric_force *= env_config.muscle_multiplier
+            mm.activation_time_const = env_config.muscle_activation_time_const
+            mm.deactivation_time_const = env_config.muscle_deactivation_time_const
+            mm.activation_dynamics_smoothing = env_config.muscle_activation_dynamics_smoothing
             mm.fiber_damping = env_config.muscle_fiber_damping
             mm.min_activation = env_config.muscle_min_activation
             mm.max_activation = env_config.muscle_max_activation
@@ -199,6 +202,8 @@ class MSKEnv:
         self.joint_positions = msk_warp.joint_positions(self.d)
         # [num_envs, num_dofs]
         self.joint_velocities = msk_warp.joint_velocities(self.d)
+        # [num_envs, num_dofs]
+        self.qfrc_damper = msk_warp.qfrc_damper(self.d)
 
         # [num_envs, ]
         self.grf = msk_warp.grf(self.d)
@@ -220,7 +225,7 @@ class MSKEnv:
         self.reset_tensor = torch.zeros((num_envs, 1), dtype=torch.float32, device=device)
 
         # Starting position, load from file
-        start_pose_path = os.path.join(self.curr_path, env_config.starting_pose)
+        start_pose_path = os.path.join(self.curr_path, env_config.starting_pose_path)
         q, qv = parse_starting_pose(start_pose_path, self.dof_id_lookup, self.num_qpos, self.num_dofs)
         assert len(q) == self.num_qpos and len(qv) == self.num_dofs
         q_torch = torch.tensor(q, dtype=torch.float32, device=device)
@@ -469,6 +474,7 @@ class MSKEnv:
 
         assert not torch.isnan(obs).any(), "Observations contain NaN!"
         assert not torch.isnan(actions).any(), "Actions contain NaN!"
+        assert not torch.isnan(rew).any(), "Rewards contain NaN!"
 
         if self.render and hasattr(self.renderer, 'meshes') and len(
                 self.renderer.meshes) > 0:

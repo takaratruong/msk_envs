@@ -13,7 +13,7 @@ class EnvConfig:
     # --- Control and Simulation Frequency ---
     delta_t: float = 1.0 / 100.0
     """ Control/policy step size """
-    delta_t_sim: float = 1.0 / 5000.0
+    delta_t_sim: float = 1.0 / 10000.0
     """ Simulator/physics step size """
     max_episode_duration: float = 12.0
     """ Max episode duration in seconds """
@@ -25,9 +25,9 @@ class EnvConfig:
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
-    joint_armature: float = 0.01
+    joint_armature: float = 0.0
     """ Armature added to all joints (increases inertia but improves stability) """
-    toe_armature: float = 0.001
+    toe_armature: float = 0.0
     """ Armature specifically for toes joint """
     torso_damping: float = 1.0
     """ Damping specifically for torso joint """
@@ -49,6 +49,12 @@ class EnvConfig:
     # --- Model muscle properties ---
     muscle_multiplier: float = 2.0
     """ Multiplier to max isometric force """
+    muscle_activation_time_const: float = 0.015
+    """ Muscle activation time constant """
+    muscle_deactivation_time_const: float = 0.060
+    """ Muscle deactivation time constant """
+    muscle_activation_dynamics_smoothing: float = 0.1
+    """ Muscle activation dynamics smoothing factor """
     muscle_fiber_damping: float = 0.01
     """ Fiber damping (0.0 = undamped) """
     muscle_min_activation: float = 0.0
@@ -79,7 +85,7 @@ class EnvConfig:
     """ MuJoCo limit/contact parameters (if using MuJoCo limits/contacts) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
-    starting_pose: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     """ Starting pose file path (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
@@ -98,7 +104,7 @@ class EnvConfig:
     default_activation: float = -1.0
     """ Default activation value when prescribed activations are not used. -1.0 is random. """
 
-    # The following need to be set
+    # Rewards for specific env variants: The following need to be set
     reward_lambdas: dict = field(default_factory=dict)
     """ Reward weights """
     imitation_weights: dict = field(default_factory=dict)
@@ -142,7 +148,8 @@ class EnvConfigNoHands(EnvConfig):
     model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim"
     joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
     limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
-    starting_pose: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
 
 
 @dataclass
@@ -151,5 +158,5 @@ class EnvConfigNoHandsWalk(EnvConfig):
     model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_walk_contact.osim"
     joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
     limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
-    starting_pose: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_walking.yaml"

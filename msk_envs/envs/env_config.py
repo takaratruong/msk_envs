@@ -151,6 +151,15 @@ class EnvConfigNoHands(EnvConfig):
     starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
 
+@dataclass
+class EnvConfigNoHandsExp(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim"
+    limit_type: msk_warp.LimitType = msk_warp.LimitType.EXPONENTIAL
+    joint_limits_path: str = "../msk_models/no_hands/joint_limits_exp.yaml"
+    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_exp.yaml"
+    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
 
 @dataclass
 class EnvConfigNoHandsWalk(EnvConfig):

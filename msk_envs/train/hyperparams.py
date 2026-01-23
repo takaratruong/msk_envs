@@ -159,7 +159,8 @@ class SideShuffleConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
         env_variant=DerivedEnv.SIDE_SHUFFLE,
         delta_t=1.0 / 100.0,
-        max_episode_duration=12.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_stand_side.yaml",
     ))
 
@@ -175,18 +176,19 @@ class SideShuffleConfig(BaseArgs):
 
 @dataclass
 class HopConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
         env_variant=DerivedEnv.HOP,
         delta_t=1.0 / 100.0,
-        max_episode_duration=12.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_left_leg_up.yaml",
         swap_lr=False,
     ))
 
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 1.0
-    lambda_mid_lane: float = 1.0
-    lambda_limit: float = -2.0
+    lambda_vel: float = 0.01
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -2e-3
     lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0

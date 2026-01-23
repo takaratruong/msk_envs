@@ -5,7 +5,7 @@ from typing_extensions import Annotated
 
 import tyro
 
-from msk_envs.envs.env_config import EnvConfig, EnvConfigNoHands, EnvConfigNoHandsWalk
+from msk_envs.envs.env_config import EnvConfig, EnvConfigNoHands, EnvConfigNoHandsWalk, EnvConfigNoHandsExp
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -117,7 +117,7 @@ class JogConfig(BaseArgs):
 
 @dataclass
 class SprintConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
@@ -134,10 +134,9 @@ class SprintConfig(BaseArgs):
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
 
-
 @dataclass
 class BackPedalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
         env_variant=DerivedEnv.BACKPEDAL,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
@@ -157,7 +156,7 @@ class BackPedalConfig(BaseArgs):
 
 @dataclass
 class SideShuffleConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
         env_variant=DerivedEnv.SIDE_SHUFFLE,
         delta_t=1.0 / 100.0,
         max_episode_duration=12.0,
@@ -165,11 +164,11 @@ class SideShuffleConfig(BaseArgs):
     ))
 
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 1.0
-    lambda_mid_lane: float = 1.0
-    lambda_limit: float = -2.0
+    lambda_vel: float = 0.01
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -2e-3
     lambda_damping: float = -1e-3
-    lambda_actuator: float = -1.0
+    lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
 
@@ -185,9 +184,9 @@ class HopConfig(BaseArgs):
     ))
 
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 0.05
-    lambda_mid_lane: float = 0.01
-    lambda_limit: float = -2e-3
+    lambda_vel: float = 1.0
+    lambda_mid_lane: float = 1.0
+    lambda_limit: float = -2.0
     lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0

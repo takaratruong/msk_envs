@@ -57,7 +57,7 @@ class TD3Config:
     num_atoms: int = 101
     """the number of atoms"""
 
-    v_min: float = -15.0
+    v_min: float = -5.0
     """the minimum value of the support"""
 
     v_max: float = 15.0

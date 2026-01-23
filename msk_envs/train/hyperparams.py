@@ -13,7 +13,7 @@ from msk_envs.train.fasttd3.td3_config import TD3Config
 
 @dataclass
 class BaseArgs:
-    algo: str = "sac"
+    algo: str = "td3"
 
     project: str = "msk_sprinter"
     exp_prefix: str = ""

@@ -24,25 +24,6 @@ class HopEnv(LanesEnv):
         )
         return
 
-    def _get_obs(self) -> torch.Tensor:
-        """
-        Observations space:
-         1. Muscle activations, fiber lengths, fiber velocities, actuations
-         2. Actuator activations
-         3. Joint positions (q)
-         4. Joint velocities (qv)
-         5. Body positions relative to root, rotations, velocities
-        """
-        obs = torch.cat([
-            self.time.view(self.num_worlds, 1),
-            self.muscle_activations,
-            self.muscle_fiber_lengths,
-            self.actuator_activations,
-            self.joint_positions[:, 1:],  # exclude x position
-            self.joint_velocities,
-        ], dim=1)
-        return obs.detach().clone()
-
     def _get_terminated(self):
         # Get normal termination conditions
         terminated_lanes = super()._get_terminated()

@@ -77,13 +77,17 @@ def build_experiments(yaml_dict, exp_name):
 
 def yaml2cmd(exp_name, exp_dict):
     cmd = exp_dict['base_cmd']
+    task = exp_dict.get('task')
+    if task is not None and '{TASK}' in cmd:
+        cmd = cmd.replace('{TASK}', str(task))
     if '--exp-prefix' in exp_dict['base_cmd']:
         cmd += f" {exp_name}"  # name is automatically generated
     if 'eval.' in exp_dict['base_cmd']:
         cmd += f' --eval_name {exp_name}'  # name is automatically generated
-    for arg, val in exp_dict['args'].items():
+    args = exp_dict.get('args') or {}
+    for arg, val in args.items():
         cmd += f' --{arg} {val}'
-        if arg == 'eval_mode' and val == 'inversion' and 'guidance_param' not in exp_dict['args'].keys():
+        if arg == 'eval_mode' and val == 'inversion' and 'guidance_param' not in args.keys():
             cmd += f' --guidance_param 1.0'
     if 'store_trues' in exp_dict.keys():
         for arg, val in exp_dict['store_trues'].items():

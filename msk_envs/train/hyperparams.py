@@ -117,7 +117,7 @@ class JogConfig(BaseArgs):
 
 @dataclass
 class SprintConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
@@ -136,7 +136,7 @@ class SprintConfig(BaseArgs):
 
 @dataclass
 class BackPedalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.BACKPEDAL,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
@@ -156,7 +156,7 @@ class BackPedalConfig(BaseArgs):
 
 @dataclass
 class SideShuffleConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.SIDE_SHUFFLE,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
@@ -176,7 +176,7 @@ class SideShuffleConfig(BaseArgs):
 
 @dataclass
 class HopConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsExp(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.HOP,
         delta_t=1.0 / 100.0,
         max_episode_duration=10.0,

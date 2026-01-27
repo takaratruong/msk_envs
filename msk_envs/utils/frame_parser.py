@@ -59,12 +59,11 @@ def parse_muscle_data(
     muscle_actuations = msk_warp.muscle_actuations(d)
     muscle_path_lengths = msk_warp.muscle_path_lengths(d)
     muscle_path_velocities = msk_warp.muscle_path_velocities(d)
-    muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(d)
-    muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(d)
     muscle_moment_arms = msk_warp.muscle_moment_arms(d)
 
     muscle_metadata = msk_warp.muscle_metadata_np(m)
     muscle_length_info = msk_warp.muscle_length_info_np(d)
+    muscle_velocity_info = msk_warp.muscle_velocity_info_np(d)
 
     site_positions = msk_warp.site_positions(d)
     muscle_site_adr = msk_warp.muscle_site_adr(m)
@@ -78,13 +77,15 @@ def parse_muscle_data(
             name=muscle_idx_to_name[i],
             points=site_positions[world_id][pt_adr:pt_adr + n_pts].tolist(),
             max_isometric_force=float(muscle_metadata["max_isometric_force"][i]),
+            optimal_fiber_length=float(muscle_metadata["optimal_fiber_length"][i]),
+            tendon_slack_length=float(muscle_metadata["tendon_slack_length"][i]),
             activation=float(muscle_activations[world_id][i].item()),
             excitation=float(muscle_excitations[world_id][i].item()),
             actuation=float(muscle_actuations[world_id][i].item()),
             path_length=float(muscle_path_lengths[world_id][i].item()),
             path_velocity=float(muscle_path_velocities[world_id][i].item()),
-            fiber_length=float(muscle_fiber_lengths[world_id][i].item()),
-            fiber_velocity=float(muscle_fiber_velocities[world_id][i].item()),
+            fiber_length=float(muscle_length_info["fiber_length"][world_id][i].item()),
+            fiber_velocity=float(muscle_velocity_info["fiber_velocity"][world_id][i].item()),
             tendon_length=float(muscle_length_info["tendon_length"][world_id][i].item()),
             pennation_angle=float(muscle_length_info["pennation_angle"][world_id][i].item()),
             moment_arm=muscle_moment_arms[world_id][i].tolist(),

@@ -300,7 +300,8 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         muscle_ma = []
         for frame in frame_data:
             muscle_ae.append([(m.activation, m.excitation) for m in frame.muscles])
-            muscle_ftl.append([(m.fiber_length, m.tendon_length) for m in frame.muscles])
+            muscle_ftl.append([(m.fiber_length, m.tendon_length, m.optimal_fiber_length, m.tendon_slack_length) for m in
+                               frame.muscles])
             muscle_ma.append([m.moment_arm for m in frame.muscles])
 
         muscle_ae = np.array(muscle_ae)
@@ -315,10 +316,11 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                             alphas=[1.0, 0.5], horizontal_lines=zero_lines)
         create_generic_plot(muscle_names, times, frame_ind, muscle_ftl,
                             "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
-                            pdf, sublabels=["Fiber", "Tendon"], horizontal_lines=zero_lines)
+                            pdf, sublabels=["Fiber", "Tendon", "Optimal Fiber", "Tendon Slack"],
+                            alphas=[1.0, 1.0, 0.5, 0.5], linestyles=["solid", "solid", "dashed", "dashed"])
         create_generic_plot(muscle_names, times, frame_ind, muscle_ma,
                             "Muscle Moment Arms", "Moment Arm (m)", ".3f",
-                            pdf, sublabels=joint_dof_names, omit_zeros=True)
+                            pdf, sublabels=joint_dof_names, omit_zeros=True, horizontal_lines=zero_lines)
 
         # --- ACTUATOR PLOTS ---
         actuator_names = [a.name for a in frame_data[0].actuators]

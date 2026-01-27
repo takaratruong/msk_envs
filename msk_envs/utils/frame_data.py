@@ -74,6 +74,9 @@ class MuscleData:
     points: list
 
     max_isometric_force: float
+    optimal_fiber_length: float
+    tendon_slack_length: float
+
     activation: float
     excitation: float
     actuation: float
@@ -92,6 +95,8 @@ class MuscleData:
             "name": self.name,
             "points": self.points,
             "max_isometric_force": self.max_isometric_force,
+            "optimal_fiber_length": self.optimal_fiber_length,
+            "tendon_slack_length": self.tendon_slack_length,
             "activation": self.activation,
             "excitation": self.excitation,
             "actuation": self.actuation,
@@ -122,6 +127,8 @@ class MuscleData:
             name=data["name"],
             points=data["points"],
             max_isometric_force=data["max_isometric_force"],
+            optimal_fiber_length=data["optimal_fiber_length"],
+            tendon_slack_length=data["tendon_slack_length"],
             activation=data["activation"],
             excitation=data["excitation"],
             actuation=data["actuation"],

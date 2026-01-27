@@ -1,6 +1,6 @@
 import torch
 
-from msk_envs.utils.global_params import SIDE_IDX, FWD_IDX, build_axis
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
@@ -21,9 +21,16 @@ class LanesEnv(MSKEnv):
             target_dir: list[float],
     ):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
+        assert target_dir[UP_IDX] == 0.0, "Target direction should be horizontal only"
+
+        # Precompute 2d target facing direction
+        target_dir_horizontal = [v for v in target_dir]
+        target_dir_horizontal.pop(UP_IDX)
+        self.target_facing = torch.tensor(target_dir_horizontal, device=self.device).unsqueeze(0)
+        self.target_facing = self.target_facing / torch.norm(self.target_facing, dim=1, keepdim=True)
+
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
-        self.target_facing = torch.tensor(target_dir, device=self.device).unsqueeze(0)
         self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(30.0, device=self.device)))
         return
 
@@ -79,6 +86,9 @@ class LanesEnv(MSKEnv):
         # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, self.root_id]
         pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
+        pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
+        pelvis_fwd = pelvis_fwd / torch.norm(pelvis_fwd, dim=1, keepdim=True)
+
         pelvis_fwd_dot_target = torch.sum(pelvis_fwd * self.target_facing, dim=1)
         facing_direction = pelvis_fwd_dot_target >= self.cos_angle_threshold
         not_facing_direction = ~facing_direction

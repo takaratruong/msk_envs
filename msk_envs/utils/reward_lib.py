@@ -30,7 +30,7 @@ def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: b
 
     if num_limits == 0:
         return torch.zeros_like(limit_torque_sum)
-    return limit_torque_sum
+    return limit_torque_sum / num_limits
 
 
 def joint_damping_penalty(qfrc_damper: torch.Tensor, squared: bool = False):

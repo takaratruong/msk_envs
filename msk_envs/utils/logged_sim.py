@@ -1,7 +1,7 @@
 """ Provides a wrapper around an MSKEnv to log simulation data """
 from msk_envs.envs.env_base import MSKEnv
 from msk_envs.envs.env_perturb import PerturbEnv
-from msk_envs.utils.checkpoint_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame
+from msk_envs.utils.frame_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame
 from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
 

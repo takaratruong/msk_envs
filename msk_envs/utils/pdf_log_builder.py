@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
-from msk_envs.utils.checkpoint_parser import FrameData
+from msk_envs.utils.frame_parser import FrameData
 from .plot_helper import SequencePlot, PlotConfig
 
 
@@ -18,6 +18,7 @@ def create_generic_plot(
         sublabels: list[str] = None,
         alphas: list[float] = None,
         horizontal_lines: list[list[float]] = None,
+        omit_zeros: bool = False,
 ):
     n_vertical, n_horizontal = 3, 1
     n_plots = plot_data.shape[1]
@@ -66,6 +67,8 @@ def create_generic_plot(
 
                     for part in range(data_subset.shape[-1]):
                         alpha = 1.0 if alphas is None else alphas[part]
+                        if omit_zeros and np.all(data_subset[..., part] == 0.0):
+                            continue
                         seq_plot.add(idx_fig, data_subset[..., part],
                                      label=label[part],
                                      alpha=alpha,
@@ -252,7 +255,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         joint_names = [j.name for j in frame_data[0].joint_moments]
         joint_moments = []
         for frame in frame_data:
-            joint_moments.append([j.value for j in frame.joint_moments])
+            joint_moments.append([
+                (m.value, m.spring, m.damping, m.bias, m.muscle, m.actuator, m.limit)
+                for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
 
         def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
@@ -264,7 +269,10 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             frame_ind_selected = frame_ind[time_mask]
             title = f"Joint Moments ({time_start:.1f}s to {time_end:.1f}s)"
             create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_moments[time_mask, :],
-                                title, "Value (N m)", ".3f", pdf)
+                                title, "Value (N m)", ".3f", pdf,
+                                sublabels=["Value", "Spring", "Damping", "Bias", "Muscle", "Actuator", "Limit"],
+                                alphas=[1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                                omit_zeros=True)
 
         # Joint moments plot for entire duration, and 1 second intervals
         create_joint_moments_plot()

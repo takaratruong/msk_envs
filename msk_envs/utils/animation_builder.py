@@ -1,7 +1,7 @@
 import gzip
 import json
 
-from msk_envs.utils.checkpoint_parser import FrameData
+from msk_envs.utils.frame_parser import FrameData
 
 
 def track_com(frame_data: list[FrameData]):

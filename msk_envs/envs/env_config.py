@@ -117,6 +117,8 @@ class EnvConfig:
     """ List of DOFs to give extra reward for tracking (for debug) """
     lambda_extra_rewarded_dofs: float = 0.0
     """ Lambda for extra rewarded DOFs """
+    target_position: list = field(default_factory=lambda: [0.0, 1.0, 0.0])
+    """ Target position for STATIC env variant """
 
     def to_json(self):
         return json.dumps(self.__dict__, indent=4)

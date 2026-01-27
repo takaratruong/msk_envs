@@ -9,6 +9,7 @@ from .env_walk import WalkEnv
 from .env_perturb import PerturbEnv
 from .env_dont_fall import DontFallEnv
 from .env_imitate import ImitateEnv
+from .env_static import StaticEnv
 
 
 # factory
@@ -37,5 +38,7 @@ class EnvFactory:
             return DontFallEnv(**kwargs)
         elif env_variant == DerivedEnv.IMITATE:
             return ImitateEnv(**kwargs)
+        elif env_variant == DerivedEnv.STATIC:
+            return StaticEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

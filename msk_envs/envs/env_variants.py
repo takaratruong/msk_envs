@@ -11,3 +11,4 @@ class DerivedEnv(Enum):
     VERTICAL = 7
     DONT_FALL = 8
     IMITATE = 9
+    STATIC = 10

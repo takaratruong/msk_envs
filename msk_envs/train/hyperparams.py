@@ -290,7 +290,24 @@ class ImitateConfig(BaseArgs):
             self.env_config.extra_rewarded_dofs = [s.strip() for s in self.extra_rewarded_dofs.split(",") if s.strip()]
 
 
-# Register configs here
+@dataclass
+class StaticSquatConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+        env_variant=DerivedEnv.STATIC,
+        delta_t=1.0 / 100.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
+    ))
+
+    lambda_track: float = 0.1
+    imitation_weight_track: float = 10.0
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.env_config.target_position = [0.0, 0.9, 0.0]
+
+
 Config = Union[
     Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
@@ -302,6 +319,7 @@ Config = Union[
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
     Annotated[DontFallConfig, tyro.conf.subcommand(name="dontfall")],
+    Annotated[StaticSquatConfig, tyro.conf.subcommand(name="static")],
 ]
 
 

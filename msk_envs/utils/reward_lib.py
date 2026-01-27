@@ -19,9 +19,8 @@ def mid_lane_reward(root_position: torch.Tensor, weight: float = 2.5):
     return torch.exp(-weight * dist_from_center.pow(2))
 
 
-def joint_limit_penalty(limit_torques: torch.Tensor, squared: bool = False):
+def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: bool = False):
     """Joint limit penalty based on sum of absolute limit torques"""
-    num_limits = limit_torques.shape[1]
     if squared:
         sq_limit_torque = torch.pow(limit_torques, 2)
         limit_torque_sum = torch.sum(sq_limit_torque, dim=1)
@@ -31,7 +30,7 @@ def joint_limit_penalty(limit_torques: torch.Tensor, squared: bool = False):
 
     if num_limits == 0:
         return torch.zeros_like(limit_torque_sum)
-    return limit_torque_sum / num_limits
+    return limit_torque_sum
 
 
 def joint_damping_penalty(qfrc_damper: torch.Tensor, squared: bool = False):
@@ -149,6 +148,13 @@ def joint_angle_track_reward(joint_positions, target_joint_positions, qpos_adr, 
     return reward
 
 
+def single_body_pos_track_reward(body_positions, target_body_positions, weight):
+    """Imitation reward for body position tracking (for a single body)"""
+    mse = (body_positions - target_body_positions).pow(2).mean(dim=1)
+    reward = torch.exp(-weight * mse)
+    return reward
+
+
 def body_pos_track_reward(body_positions, target_body_positions, body_id, weight):
     """Imitation reward for body position tracking"""
     # If body_id can be either a range or an integer
@@ -179,14 +185,14 @@ def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight
     return reward
 
 
-def has_fallen(root_pos, torso_pos, torso_rot, head_offset):
+def has_fallen(root_pos, torso_pos, torso_rot, head_offset, min_root=MIN_ROOT_HEIGHT, min_head=MIN_HEAD_HEIGHT):
     # Root falls below threshold
     root_height = root_pos[:, UP_IDX]
-    pelvis_fallen = (root_height < MIN_ROOT_HEIGHT)
+    pelvis_fallen = (root_height < min_root)
 
     # Head falls below threshold
     head_pos = torso_pos + rotate_vec(torso_rot, head_offset)
-    head_fallen = (head_pos[:, UP_IDX] < MIN_HEAD_HEIGHT)
+    head_fallen = (head_pos[:, UP_IDX] < min_head)
 
     fallen = pelvis_fallen | head_fallen
     return fallen.detach()

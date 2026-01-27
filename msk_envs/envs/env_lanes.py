@@ -24,9 +24,8 @@ class LanesEnv(MSKEnv):
         assert target_dir[UP_IDX] == 0.0, "Target direction should be horizontal only"
 
         # Precompute 2d target facing direction
-        target_dir_horizontal = [v for v in target_dir]
-        target_dir_horizontal.pop(UP_IDX)
-        self.target_facing = torch.tensor(target_dir_horizontal, device=self.device).unsqueeze(0)
+        self.target_facing = torch.tensor(target_dir, device=self.device).unsqueeze(0)
+        self.target_facing = self.target_facing[:, [FWD_IDX, SIDE_IDX]]
         self.target_facing = self.target_facing / torch.norm(self.target_facing, dim=1, keepdim=True)
 
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
@@ -57,7 +56,7 @@ class LanesEnv(MSKEnv):
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
         rew_mid_lane = mid_lane_reward(self.root_pos)
-        rew_limit = joint_limit_penalty(self.limit_torques, squared=False)
+        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
         rew_damping = joint_damping_penalty(self.qfrc_damper, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)

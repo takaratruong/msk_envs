@@ -2,12 +2,18 @@ import bpy
 
 
 def setup_renderer(fps):
-    bpy.context.scene.render.fps = fps
+    scene = bpy.context.scene
 
-    bpy.context.scene.render.engine = "CYCLES"
-    bpy.context.scene.render.motion_blur_shutter = 0.15
-    bpy.context.scene.cycles.motion_blur_position = "CENTER"
+    scene.render.fps = fps
+    scene.render.engine = "CYCLES"
+    scene.render.motion_blur_shutter = 0.15
+
+    if hasattr(scene.render, "motion_blur_position"):
+        scene.render.motion_blur_position = 'CENTER'
+    elif hasattr(scene.cycles, "motion_blur_position"):
+        scene.cycles.motion_blur_position = 'CENTER'
+
     # quality settings
-    bpy.context.scene.cycles.samples = 128
-    bpy.context.scene.cycles.preview_samples = 32
+    scene.cycles.samples = 128
+    scene.cycles.preview_samples = 32
     return

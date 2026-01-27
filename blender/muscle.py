@@ -93,7 +93,8 @@ def update_muscle(muscle, frame_num):
     points = muscle.get("points", [])
     max_isometric_force = muscle["max_isometric_force"]
     activation = muscle["activation"]
-    radius = math.sqrt(max_isometric_force) / 8000
+    # radius = math.sqrt(max_isometric_force) / 8000
+    radius = 0.005
 
     # build cylinder between points
     for i in range(len(points) - 1):

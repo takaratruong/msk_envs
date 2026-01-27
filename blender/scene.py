@@ -56,7 +56,8 @@ def setup_lighting():
     bpy.ops.object.light_add(type='SUN', location=(5, -5, 10))
     sun_light = bpy.context.active_object
     sun_light.name = "SunLight"
-    sun_light.data.energy = 4.0
+    sun_light.data.energy = 5.0
+    sun_light.data.angle = 0.0873  # 5 deg
     sun_light.rotation_euler = (0.785, 0, 0.785)
     return
 
@@ -71,14 +72,22 @@ def setup_sky():
     nodes.clear()
     # Create nodes
     sky_tex = nodes.new("ShaderNodeTexSky")
-    sky_tex.sky_type = 'NISHITA'
     sky_tex.sun_disc = False
     sky_tex.sun_elevation = 0.785398  # 45 degrees in radians
     sky_tex.sun_rotation = 0.785398  # 45 degrees in radians
     sky_tex.altitude = 0.0
-    sky_tex.air_density = 1.0
-    sky_tex.dust_density = 0.0
-    sky_tex.ozone_density = 6.0
+
+    if 'NISHITA' in sky_tex.bl_rna.properties['sky_type'].enum_items:
+        sky_tex.sky_type = 'NISHITA'
+        sky_tex.air_density = 0.6
+        sky_tex.dust_density = 0.0
+        sky_tex.ozone_density = 2.0
+    else:
+        sky_tex.sky_type = 'SINGLE_SCATTERING'
+        sky_tex.air_density = 0.6
+        sky_tex.aerosol_density = 0.0
+        sky_tex.ozone_density = 2.0
+
     background = nodes.new("ShaderNodeBackground")
     background.inputs['Strength'].default_value = 0.025
     # Position nodes

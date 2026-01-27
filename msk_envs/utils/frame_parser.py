@@ -191,6 +191,7 @@ def parse_joint_moments(
     qfrc_muscle = msk_warp.qfrc_muscle(d)
     qfrc_actuator = msk_warp.qfrc_actuator(d)
     qfrc_limit = msk_warp.qfrc_limit(d)
+    qfrc_contact = msk_warp.qfrc_contact(d)
 
     qv = msk_warp.joint_velocities(d)
     moments = []
@@ -204,6 +205,7 @@ def parse_joint_moments(
             muscle=float(qfrc_muscle[world_id][i].item()),
             actuator=float(qfrc_actuator[world_id][i].item()),
             limit=float(qfrc_limit[world_id][i].item()),
+            contact=float(qfrc_contact[world_id][i].item()),
         )
         moments.append(angle)
     return moments

@@ -256,7 +256,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         joint_moments = []
         for frame in frame_data:
             joint_moments.append([
-                (m.value, m.spring, m.damping, m.bias, m.muscle, m.actuator, m.limit)
+                (m.value, m.spring, m.damping, m.bias, m.muscle, m.actuator, m.limit, m.contact)
                 for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
 
@@ -270,8 +270,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             title = f"Joint Moments ({time_start:.1f}s to {time_end:.1f}s)"
             create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_moments[time_mask, :],
                                 title, "Value (N m)", ".3f", pdf,
-                                sublabels=["Value", "Spring", "Damping", "Bias", "Muscle", "Actuator", "Limit"],
-                                alphas=[1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+                                sublabels=["Value", "Spring", "Damping", "Bias", "Muscle", "Actuator", "Limit",
+                                           "Contact"],
+                                alphas=[1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
                                 omit_zeros=True)
 
         # Joint moments plot for entire duration, and 1 second intervals

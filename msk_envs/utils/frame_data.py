@@ -208,6 +208,7 @@ class JointMoment:
     muscle: float
     actuator: float
     limit: float
+    contact: float
 
     def to_dict(self):
         return {
@@ -219,6 +220,7 @@ class JointMoment:
             "muscle": self.muscle,
             "actuator": self.actuator,
             "limit": self.limit,
+            "contact": self.contact,
         }
 
     @staticmethod
@@ -231,6 +233,8 @@ class JointMoment:
             bias=data["bias"],
             muscle=data["muscle"],
             limit=data["limit"],
+            actuator=data["actuator"],
+            contact=data["contact"],
         )
 
 

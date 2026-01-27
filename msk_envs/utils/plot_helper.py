@@ -91,9 +91,17 @@ class SequencePlot:
             if label != "":
                 self.labels_per_ax[ax_idx_x, ax_idx_y] += y_data.shape[1]
 
-    def add(self, idx: int, y_data: np.ndarray, label: str, alpha: float = 1.0, title: str = None):
+    def add(
+            self,
+            idx: int,
+            y_data: np.ndarray,
+            label: str,
+            alpha: float = 1.0,
+            linestyle: str = "solid",
+            title: str = None
+    ):
         ax = self.axs[idx]
-        ax.plot(self.x_data, y_data, label=label, alpha=alpha)
+        ax.plot(self.x_data, y_data, label=label, alpha=alpha, linestyle=linestyle)
 
         if title is not None:
             ax.set_title(title, fontsize=14, fontweight="bold")

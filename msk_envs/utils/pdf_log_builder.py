@@ -17,6 +17,7 @@ def create_generic_plot(
         enforced_range: tuple[float, float] = None,
         sublabels: list[str] = None,
         alphas: list[float] = None,
+        linestyles: list[str] = None,
         horizontal_lines: list[list[float]] = None,
         omit_zeros: bool = False,
 ):
@@ -67,11 +68,13 @@ def create_generic_plot(
 
                     for part in range(data_subset.shape[-1]):
                         alpha = 1.0 if alphas is None else alphas[part]
+                        linestyle = 'solid' if linestyles is None else linestyles[part]
                         if omit_zeros and np.all(data_subset[..., part] == 0.0):
                             continue
                         seq_plot.add(idx_fig, data_subset[..., part],
                                      label=label[part],
                                      alpha=alpha,
+                                     linestyle=linestyle,
                                      title=title)
 
                 # Add horizontal lines if specified. can be used for zero lines or joint limits
@@ -223,7 +226,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
 
         # --- JOINT ANGLES ---
         has_reference = frame_data[0].joint_angles[0].has_reference()
-        joint_names = [j.name for j in frame_data[0].joint_angles]
+        joint_qpos_names = [j.name for j in frame_data[0].joint_angles]
         joint_angles = []
         joint_angle_limits = [j.limits for j in frame_data[0].joint_angles]
         for frame in frame_data:
@@ -243,7 +246,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             title = f"Joint Angles ({time_start:.1f}s to {time_end:.1f}s)"
             sublabels = ["Value", "Reference"] if has_reference else None
             alpha = [1.0, 0.5] if has_reference else None
-            create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_angles[time_mask, :],
+            create_generic_plot(joint_qpos_names, time_selected, frame_ind_selected, joint_angles[time_mask, :],
                                 title, "Value (m or rad)", ".3f", pdf, sublabels=sublabels, alphas=alpha,
                                 horizontal_lines=joint_angle_limits)
 
@@ -252,13 +255,14 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         create_interval_plots(1.0, times, create_joint_angles_plot)
 
         # --- JOINT MOMENTS ---
-        joint_names = [j.name for j in frame_data[0].joint_moments]
+        joint_dof_names = [j.name for j in frame_data[0].joint_moments]
         joint_moments = []
         for frame in frame_data:
             joint_moments.append([
-                (m.value, m.spring, m.damping, m.bias, m.muscle, m.actuator, m.limit, m.contact)
+                (m.value, m.spring, m.damping, m.drag, m.bias, m.muscle, m.actuator, m.limit, m.contact)
                 for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
+        sublabels = ["Value", "Spring", "Damping", "Drag", "Bias", "Muscle", "Actuator", "Limit", "Contact"]
 
         def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
@@ -268,12 +272,21 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             time_selected = times[time_mask]
             frame_ind_selected = frame_ind[time_mask]
             title = f"Joint Moments ({time_start:.1f}s to {time_end:.1f}s)"
-            create_generic_plot(joint_names, time_selected, frame_ind_selected, joint_moments[time_mask, :],
-                                title, "Value (N m)", ".3f", pdf,
-                                sublabels=["Value", "Spring", "Damping", "Bias", "Muscle", "Actuator", "Limit",
-                                           "Contact"],
-                                alphas=[1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
-                                omit_zeros=True)
+            lss, lsd = "solid", "dashed"
+            create_generic_plot(
+                names=joint_dof_names,
+                times=time_selected,
+                frame_ind=frame_ind_selected,
+                plot_data=joint_moments[time_mask, :],
+                fig_title=title,
+                y_label="Value (N m)",
+                y_fmt=".1f",
+                pdf=pdf,
+                sublabels=sublabels,
+                alphas=[1.0] + [0.5] * (len(sublabels) - 1),
+                linestyles=[lss] + [lsd] * (len(sublabels) - 1),
+                omit_zeros=True
+            )
 
         # Joint moments plot for entire duration, and 1 second intervals
         create_joint_moments_plot()
@@ -281,23 +294,31 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
 
         # --- MUSCLE PLOTS ---
         muscle_names = [m.name for m in frame_data[0].muscles]
-        # Muscle activations, fiber/tendon lengths
+        # Muscle activations, fiber/tendon lengths, moment arms
         muscle_ae = []
         muscle_ftl = []
+        muscle_ma = []
         for frame in frame_data:
             muscle_ae.append([(m.activation, m.excitation) for m in frame.muscles])
             muscle_ftl.append([(m.fiber_length, m.tendon_length) for m in frame.muscles])
+            muscle_ma.append([m.moment_arm for m in frame.muscles])
 
+        muscle_ae = np.array(muscle_ae)
         muscle_ftl = np.array(muscle_ftl)
+        muscle_ma = np.array(muscle_ma)
+
         zero_lines = [[0.0, 0.0]] * len(muscle_names)
-        create_generic_plot(muscle_names, times, frame_ind, np.array(muscle_ae),
+        create_generic_plot(muscle_names, times, frame_ind, muscle_ae,
                             "Muscle Activations/Excitations", "Activation/Excitation", ".2f",
                             pdf, enforced_range=(0.0, 1.0),
                             sublabels=["Activation", "Excitation"],
                             alphas=[1.0, 0.5], horizontal_lines=zero_lines)
-        create_generic_plot(muscle_names, times, frame_ind, np.array(muscle_ftl),
+        create_generic_plot(muscle_names, times, frame_ind, muscle_ftl,
                             "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
                             pdf, sublabels=["Fiber", "Tendon"], horizontal_lines=zero_lines)
+        create_generic_plot(muscle_names, times, frame_ind, muscle_ma,
+                            "Muscle Moment Arms", "Moment Arm (m)", ".3f",
+                            pdf, sublabels=joint_dof_names, omit_zeros=True)
 
         # --- ACTUATOR PLOTS ---
         actuator_names = [a.name for a in frame_data[0].actuators]

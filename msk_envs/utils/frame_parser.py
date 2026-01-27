@@ -61,6 +61,7 @@ def parse_muscle_data(
     muscle_path_velocities = msk_warp.muscle_path_velocities(d)
     muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(d)
     muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(d)
+    muscle_moment_arms = msk_warp.muscle_moment_arms(d)
 
     muscle_metadata = msk_warp.muscle_metadata_np(m)
     muscle_length_info = msk_warp.muscle_length_info_np(d)
@@ -86,6 +87,7 @@ def parse_muscle_data(
             fiber_velocity=float(muscle_fiber_velocities[world_id][i].item()),
             tendon_length=float(muscle_length_info["tendon_length"][world_id][i].item()),
             pennation_angle=float(muscle_length_info["pennation_angle"][world_id][i].item()),
+            moment_arm=muscle_moment_arms[world_id][i].tolist(),
         )
         muscles.append(muscle_data)
     return muscles
@@ -187,13 +189,13 @@ def parse_joint_moments(
     joint_moments = msk_warp.joint_moments(d)
     qfrc_spring = msk_warp.qfrc_spring(d)
     qfrc_damper = msk_warp.qfrc_damper(d)
+    qfrc_drag= msk_warp.qfrc_drag(d)
     qfrc_bias = msk_warp.qfrc_bias(d)
     qfrc_muscle = msk_warp.qfrc_muscle(d)
     qfrc_actuator = msk_warp.qfrc_actuator(d)
     qfrc_limit = msk_warp.qfrc_limit(d)
     qfrc_contact = msk_warp.qfrc_contact(d)
 
-    qv = msk_warp.joint_velocities(d)
     moments = []
     for i in range(msk_warp.get_num_dofs(m)):
         angle = JointMoment(
@@ -201,6 +203,7 @@ def parse_joint_moments(
             value=float(joint_moments[world_id][i].item()),
             spring=float(qfrc_spring[world_id][i].item()),
             damping=float(qfrc_damper[world_id][i].item()),
+            drag=float(qfrc_drag[world_id][i].item()),
             bias=float(qfrc_bias[world_id][i].item()),
             muscle=float(qfrc_muscle[world_id][i].item()),
             actuator=float(qfrc_actuator[world_id][i].item()),

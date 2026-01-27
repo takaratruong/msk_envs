@@ -18,6 +18,9 @@ class ColliderData:
             "scale": list(self.scale),
         }
 
+    def to_anim_dict(self):
+        return self.to_dict()
+
     @staticmethod
     def from_dict(data: dict) -> 'ColliderData':
         return ColliderData(
@@ -51,6 +54,9 @@ class VisualData:
             "opacity": self.opacity,
         }
 
+    def to_anim_dict(self):
+        return self.to_dict()
+
     @staticmethod
     def from_dict(data: dict) -> 'VisualData':
         return VisualData(
@@ -79,6 +85,8 @@ class MuscleData:
     tendon_length: float
     pennation_angle: float
 
+    moment_arm: list[float]
+
     def to_dict(self):
         return {
             "name": self.name,
@@ -93,6 +101,19 @@ class MuscleData:
             "fiber_velocity": self.fiber_velocity,
             "tendon_length": self.tendon_length,
             "pennation_angle": self.pennation_angle,
+            "moment_arm": self.moment_arm,
+        }
+
+    def to_anim_dict(self):
+        return {
+            "name": self.name,
+            "points": self.points,
+            "max_isometric_force": self.max_isometric_force,
+            "activation": self.activation,
+            "excitation": self.excitation,
+            "path_length": self.path_length,
+            "fiber_length": self.fiber_length,
+            "tendon_length": self.tendon_length,
         }
 
     @staticmethod
@@ -110,6 +131,7 @@ class MuscleData:
             fiber_velocity=data["fiber_velocity"],
             tendon_length=data["tendon_length"],
             pennation_angle=data["pennation_angle"],
+            moment_arm=data["moment_arm"],
         )
 
 
@@ -205,6 +227,7 @@ class JointMoment:
     spring: float
     damping: float
     bias: float
+    drag: float
     muscle: float
     actuator: float
     limit: float
@@ -216,6 +239,7 @@ class JointMoment:
             "value": self.value,
             "spring": self.spring,
             "damping": self.damping,
+            "drag": self.drag,
             "bias": self.bias,
             "muscle": self.muscle,
             "actuator": self.actuator,
@@ -230,6 +254,7 @@ class JointMoment:
             value=data["value"],
             spring=data["spring"],
             damping=data["damping"],
+            drag=data["drag"],
             bias=data["bias"],
             muscle=data["muscle"],
             limit=data["limit"],

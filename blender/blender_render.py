@@ -15,7 +15,7 @@ if not cdir in sys.path:
 from camera import setup_camera, update_camera
 from muscle import update_muscle
 from options import setup_renderer
-from scene import reset_scene, hide_objects, setup_floor
+from scene import reset_scene, hide_objects, setup_floor, setup_meter_markers
 from visuals import update_visual, clear_visual_cache
 from colliders import update_collider, clear_collider_cache
 
@@ -49,6 +49,7 @@ def main():
 
     setup_floor(plane_texture_path, size=100, location=(-50, 0, 0))
     setup_floor(plane_texture_path, size=100, location=(50, 0, 0))
+    setup_meter_markers()
 
     # Create frames
     for frame_index, frame_data in enumerate(stacked_frames):

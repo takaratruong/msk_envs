@@ -48,6 +48,8 @@ class LoggedSim:
         self.muscle_idx_to_name = {v: k for k, v in self.envs.muscle_id_lookup.items()}
         # actuator idx to name
         self.actuator_idx_to_name = {v: k for k, v in self.envs.actuator_id_lookup.items()}
+        # collider idx to name
+        self.collider_idx_to_name = {v: k for k, v in self.envs.collider_id_lookup.items()}
 
     def add_to_log(self):
         # Track rewards
@@ -83,6 +85,7 @@ class LoggedSim:
                 dof_idx_to_name=self.dof_idx_to_name,
                 muscle_idx_to_name=self.muscle_idx_to_name,
                 actuation_idx_to_name=self.actuator_idx_to_name,
+                collider_idx_to_name=self.collider_idx_to_name,
                 visual_load_results=self.envs.visuals,
                 world_id=idx_world,
                 frame_time=frame_time,

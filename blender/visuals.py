@@ -84,7 +84,7 @@ def update_visual(visual, frame_num, dashboard_src):
     return
 
 
-def clear_cache():
+def clear_visual_cache():
     global loaded_objs, bone_material
     loaded_objs = {}
     bone_material = create_bone_material()

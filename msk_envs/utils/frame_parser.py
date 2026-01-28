@@ -29,6 +29,7 @@ def parse_visual_data(
 def parse_collider_data(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        collider_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[ColliderData]:
     collider_types = msk_warp.get_collider_types(m)
@@ -39,6 +40,7 @@ def parse_collider_data(
     colliders = []
     for i in range(msk_warp.get_num_colliders(m)):
         collider_data = ColliderData(
+            name=collider_idx_to_name[i],
             geom_type=int(collider_types[i]),
             pos=collider_positions[world_id][i].tolist(),
             rot=collider_rotations[world_id][i].tolist(),
@@ -222,6 +224,7 @@ def parse_frame(
         dof_idx_to_name: dict[int, str],
         muscle_idx_to_name: dict[int, str],
         actuation_idx_to_name: dict[int, str],
+        collider_idx_to_name: dict[int, str],
         visual_load_results: list[msk_warp.types.MeshLoadResult],
         world_id: int,
         frame_time: float,
@@ -229,7 +232,7 @@ def parse_frame(
         ref_joint_angles=None,
 ) -> FrameData:
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
-    colliders = parse_collider_data(m, d, world_id)
+    colliders = parse_collider_data(m, d, collider_idx_to_name, world_id)
     muscles = parse_muscle_data(m, d, muscle_idx_to_name, world_id)
     actuators = parse_actuator_data(m, d, actuation_idx_to_name, world_id)
     kinetic_data = parse_kinetic_data(m, d, world_id)

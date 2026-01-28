@@ -5,6 +5,7 @@ from typing import Optional
 
 @dataclass
 class ColliderData:
+    name: str
     geom_type: int
     pos: list[float]
     rot: list[float]
@@ -12,6 +13,7 @@ class ColliderData:
 
     def to_dict(self):
         return {
+            "name": self.name,
             "geom_type": int(self.geom_type),
             "pos": list(self.pos),
             "rot": list(self.rot),
@@ -24,6 +26,7 @@ class ColliderData:
     @staticmethod
     def from_dict(data: dict) -> 'ColliderData':
         return ColliderData(
+            name=data["name"],
             geom_type=data["geom_type"],
             pos=data["pos"],
             rot=data["rot"],

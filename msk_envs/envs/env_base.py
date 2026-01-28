@@ -15,7 +15,7 @@ class MSKEnv:
     """ Superclass for MSK environments """
 
     def _setup_model(self, env_config: EnvConfig) -> None:
-        """ We're going to modify some model parameters here. """
+        """ Modify model parameters here. """
         # Reset stiffness, damping, armature to zero
         stiffness = msk_warp.stiffness(self.m)  # [num_bodies]
         damping = msk_warp.damping(self.m)  # [num_dofs]
@@ -160,6 +160,7 @@ class MSKEnv:
             self.curr_path, env_config.muscle_function_path) if env_config.use_function_based_path else None
         load_result = msk_warp.load_model(self.model_path, num_envs, function_path)
         self.m, self.d = load_result.model, load_result.data
+        # Store all convenient lookups
         self.body_id_lookup = load_result.body_id_lookup
         self.dof_id_lookup = load_result.dof_id_lookup
         self.limit_id_lookup = load_result.limit_id_lookup
@@ -179,6 +180,7 @@ class MSKEnv:
         self.body_mass = msk_warp.body_mass(self.m)
         self.total_mass = self.body_mass.sum()
 
+        # Data properties. The following are all references
         # [num_envs]
         self.time = msk_warp.time(self.d)
         # [num_envs, num_muscles]
@@ -238,6 +240,7 @@ class MSKEnv:
         self.noise_start = env_config.noise_start
         self.q_noise = env_config.q_noise
         self.qv_noise = env_config.qv_noise
+        # Pre-compute left-right swap data
         self.swap_lr = env_config.swap_lr
         if self.swap_lr:
             self.swap_lr_data = get_swap_left_right_data(self.m, self.body_id_lookup)
@@ -245,6 +248,7 @@ class MSKEnv:
             self.swap_lr_data = []
 
         # Starting muscle activations
+        self.noise_act_start = False
         if env_config.use_prescribed_starting_activations:
             start_activations_path = os.path.join(self.curr_path, env_config.starting_activations_path)
             start_activations = parse_starting_activations(
@@ -253,6 +257,7 @@ class MSKEnv:
         else:
             if env_config.default_activation == -1.0:
                 self.start_activations = torch.rand((num_envs, self.num_muscles), device=device)
+                self.noise_act_start = True
             else:
                 self.start_activations = torch.ones((num_envs, self.num_muscles),
                                                     device=device) * env_config.default_activation
@@ -320,6 +325,11 @@ class MSKEnv:
 
         self.start_pose[reset_mask, :] = q[reset_mask, :]
         self.start_velocity[reset_mask, :] = qv[reset_mask, :]
+
+        # Noise starting muscle activations
+        if self.noise_act_start:
+            random_acts = torch.rand((self.num_worlds, self.num_muscles), device=self.device)
+            self.start_activations[reset_mask, :] = random_acts[reset_mask, :]
         return
 
     def num_obs(self) -> int:
@@ -340,16 +350,17 @@ class MSKEnv:
         return
 
     def _reset_sim(self):
-        msk_warp.set_reset(self.d, self.reset_tensor)  # Inform sim of resets
         # Reset time, starting pose, muscle and actuator activations
         reset_mask = self.reset_tensor.squeeze(-1).bool()
         if reset_mask.any():
-            self.time[reset_mask] = 0.0  # imitate envs may want to reset this ahead of time
+            self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[reset_mask, :]
             self.muscle_activations[reset_mask, :] = self.start_activations[reset_mask, :]
             self.actuator_activations[reset_mask, :] = 0.5
+
         # Reset sim
+        msk_warp.set_reset(self.d, self.reset_tensor)
         if self.cuda_graph:
             wp.capture_launch(self.reset_graph)
             wp.synchronize()

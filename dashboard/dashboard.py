@@ -124,6 +124,16 @@ def send_viewer_trajectory(file: str):
     timeline_slider.props['max'] = n_frames - 1
     timeline_slider.update()
     format_timeline_label()
+
+    # update fps
+    if len(traj) > 1:
+        fps = 1.0 / (traj[1]["time"] - traj[0]["time"])
+    else:
+        fps = 1.0 / traj[0]["time"]
+    timeline_controller.set_tick_rate(fps)
+    tick_rate_input.value = int(fps)
+    tick_rate_input.update()
+
     # send to viewer
     dispatch_custom_event('loadTrajectory', traj)
 

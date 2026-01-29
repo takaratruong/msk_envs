@@ -21,6 +21,8 @@ class EnvConfig:
     """ Integrator type (EULER_FIXED, RK4_FIXED) """
 
     # --- Model articulation properties ---
+    model_root_free: bool = True
+    """ Whether the model root is free (floating base) """
     model_path: str = "../msk_models/model_motor_arms_full_contact.osim"
     """ OpenSim model file path """
     joint_damping: float = 0.1
@@ -53,7 +55,7 @@ class EnvConfig:
     """ Muscle activation time constant """
     muscle_deactivation_time_const: float = 0.060
     """ Muscle deactivation time constant """
-    muscle_activation_dynamics_smoothing: float = 0.1
+    muscle_activation_dynamics_smoothing: float = 10.0
     """ Muscle activation dynamics smoothing factor """
     muscle_fiber_damping: float = 0.01
     """ Fiber damping (0.0 = undamped) """

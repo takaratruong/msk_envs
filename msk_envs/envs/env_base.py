@@ -158,7 +158,10 @@ class MSKEnv:
         self.model_path = os.path.join(self.curr_path, env_config.model_path)
         function_path = os.path.join(
             self.curr_path, env_config.muscle_function_path) if env_config.use_function_based_path else None
-        load_result = msk_warp.load_model(self.model_path, num_envs, function_path)
+        load_result = msk_warp.load_model(
+            model_path=self.model_path, n_worlds=num_envs,
+            root_free=env_config.model_root_free, polynomial_data_path=function_path
+        )
         self.m, self.d = load_result.model, load_result.data
         # Store all convenient lookups
         self.body_id_lookup = load_result.body_id_lookup

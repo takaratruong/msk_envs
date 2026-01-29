@@ -1,18 +1,45 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { LoopSubdivision } from 'https://unpkg.com/three-subdivide/build/index.module.js';
+import { VTKLoader } from 'three/addons/loaders/VTKLoader.js';
 
 const objLoader = new OBJLoader();
+const vtpLoader = new VTKLoader();
+
 
 const modelCache = {};
 
-function loadModel(objFile, opacity, color, callback) {
+function loadModel(file, opacity, color, callback) {
     opacity = opacity !== undefined ? opacity : 1.0;
-    const cache_key = objFile + color + opacity;
+    const cache_key = file + color + opacity;
+
     if (modelCache[cache_key]) {
         callback(modelCache[cache_key].clone());
+        return;
+    }
+
+    const isVtp = file.toLowerCase().endsWith('.vtp');
+    if (isVtp) {
+        vtpLoader.load(file, geometry => {
+            geometry.computeVertexNormals();
+
+            const material = new THREE.MeshStandardMaterial({
+                metalness: 0.3,
+                roughness: 0.7,
+                flatShading: false,
+                color: opacity < 1.0 ? 0x00ffff : color,
+                transparent: opacity < 1.0,
+                opacity: opacity,
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+
+            modelCache[cache_key] = mesh;
+            callback(mesh.clone());
+        });
     } else {
-        objLoader.load(objFile, obj => {
+            objLoader.load(file, obj => {
             obj.traverse(child => {
                 if (!child.isMesh) return;
                 child.castShadow = true;
@@ -25,26 +52,13 @@ function loadModel(objFile, opacity, color, callback) {
                     transparent: opacity < 1.0,
                     opacity: opacity,
                 });
-
-                // Smoothen
-                const iterations = 0;
-                const params = {
-                    split: false,
-                    uvSmooth: true,
-                    preserveEdges: false,
-                    flatOnly: false,
-                    maxTriangles: 5000,
-                };
-
-                const geometry = LoopSubdivision.modify(child.geometry, iterations, params);
-                child.geometry.dispose();
-                child.geometry = geometry;
             });
             modelCache[cache_key] = obj;
             callback(obj.clone());
         });
     }
 }
+
 
 function loadCollider (spheres, capsules, geomType, scale, rot, color, callback) {
     const opacity = 0.8;

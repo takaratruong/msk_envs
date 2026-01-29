@@ -46,8 +46,8 @@ class VisualData:
         # Remove .vtp if it exists and replace with .obj
         mesh_obj_file = self.mesh_file
         if mesh_obj_file.endswith('.vtp'):
-            mesh_obj_file = self.mesh_file[:-4] + '.obj'
-        mesh_obj_file = os.path.join("assets", "geometry", "obj", mesh_obj_file)
+            mesh_obj_file = self.mesh_file[:-4] + '.vtp'
+        mesh_obj_file = os.path.join("assets", "geometry", "vtp", mesh_obj_file)
 
         return {
             "mesh_file": mesh_obj_file,

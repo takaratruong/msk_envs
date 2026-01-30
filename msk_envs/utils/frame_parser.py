@@ -36,6 +36,7 @@ def parse_collider_data(
     collider_scales = msk_warp.get_collider_sizes(m)
     collider_positions = msk_warp.get_collider_positions(d)
     collider_rotations = msk_warp.get_collider_rotations(d)
+    collider_forces = msk_warp.collider_forces(d)
 
     colliders = []
     for i in range(msk_warp.get_num_colliders(m)):
@@ -45,6 +46,7 @@ def parse_collider_data(
             pos=collider_positions[world_id][i].tolist(),
             rot=collider_rotations[world_id][i].tolist(),
             scale=collider_scales[i].tolist(),
+            contact_force=collider_forces[world_id][i].item(),
         )
         colliders.append(collider_data)
     return colliders
@@ -84,6 +86,10 @@ def parse_muscle_data(
             activation=float(muscle_activations[world_id][i].item()),
             excitation=float(muscle_excitations[world_id][i].item()),
             actuation=float(muscle_actuations[world_id][i].item()),
+            length_multiplier=float(muscle_length_info["fiber_active_force_length_multiplier"][world_id][i].item()),
+            velocity_multiplier=float(muscle_velocity_info["fiber_force_velocity_multiplier"][world_id][i].item()),
+            passive_multiplier=float(muscle_length_info["fiber_passive_force_length_multiplier"][world_id][i].item()),
+            damping_multiplier=float(muscle_velocity_info["fiber_damping_force_multiplier"][world_id][i].item()),
             path_length=float(muscle_path_lengths[world_id][i].item()),
             path_velocity=float(muscle_path_velocities[world_id][i].item()),
             fiber_length=float(muscle_length_info["fiber_length"][world_id][i].item()),
@@ -121,14 +127,18 @@ def parse_actuator_data(
 def parse_kinetic_data(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        body_name_to_idx: dict[str, int],
         world_id: int
 ) -> KineticData:
     com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
+    body_com_positions = msk_warp.body_com_positions(d)[world_id]
     grf = msk_warp.grf(d)[world_id].tolist()
     mass = msk_warp.subtree_mass(m)[1]
     gravity = msk_warp.gravity(m)
     kinetic_data = KineticData(
         com=tuple(com),
+        foot_pos_l=tuple(body_com_positions[body_name_to_idx["talus_l"]].tolist()),
+        foot_pos_r=tuple(body_com_positions[body_name_to_idx["talus_r"]].tolist()),
         grf=tuple(grf),
         total_mass=float(mass),
         gravity=gravity,
@@ -220,6 +230,7 @@ def parse_joint_moments(
 def parse_frame(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        body_name_to_idx: dict[str, int],
         qpos_idx_to_name: dict[int, str],
         dof_idx_to_name: dict[int, str],
         muscle_idx_to_name: dict[int, str],
@@ -235,7 +246,7 @@ def parse_frame(
     colliders = parse_collider_data(m, d, collider_idx_to_name, world_id)
     muscles = parse_muscle_data(m, d, muscle_idx_to_name, world_id)
     actuators = parse_actuator_data(m, d, actuation_idx_to_name, world_id)
-    kinetic_data = parse_kinetic_data(m, d, world_id)
+    kinetic_data = parse_kinetic_data(m, d, body_name_to_idx, world_id)
     joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, world_id, ref_joint_angles)
     joint_velocities = parse_joint_velocities(m, d, world_id)
     joint_moments = parse_joint_moments(m, d, dof_idx_to_name, world_id)

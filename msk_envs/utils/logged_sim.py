@@ -39,6 +39,8 @@ class LoggedSim:
         self.device = device
 
         # Build lookups helpers: qpos idx to name
+        self.body_idx_to_name = {v: k for k, v in self.envs.body_id_lookup.items()}
+        # qpos idx to name
         qpos_idx_to_name = {v[0]: k for k, v in self.envs.dof_id_lookup.items()}
         self.qpos_idx_to_name = qpos_idx_to_name
         # dof idx to name
@@ -81,6 +83,7 @@ class LoggedSim:
             frame = parse_frame(
                 m=self.envs.m,
                 d=self.envs.d,
+                body_name_to_idx=self.envs.body_id_lookup,
                 qpos_idx_to_name=self.qpos_idx_to_name,
                 dof_idx_to_name=self.dof_idx_to_name,
                 muscle_idx_to_name=self.muscle_idx_to_name,

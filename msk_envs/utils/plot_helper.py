@@ -155,6 +155,18 @@ class SequencePlot:
         self.y_ranges[ax_idx_x, ax_idx_y, 1] = max(curr_max, y_value)
         return
 
+    def add_hline_with_bars(self, idx: int, y_value: float, y_var: float, label: str = "", color: str = 'r'):
+        ax = self.axs[idx]
+        ax.axhline(y=y_value, color=color, linestyle='--')
+        ax.fill_between(self.x_data, y_value - y_var, y_value + y_var, color=color, alpha=0.2, label=label)
+
+        # Update y range
+        ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)
+        curr_min, curr_max = self.y_ranges[ax_idx_x, ax_idx_y, :]
+        self.y_ranges[ax_idx_x, ax_idx_y, 0] = min(curr_min, y_value)
+        self.y_ranges[ax_idx_x, ax_idx_y, 1] = max(curr_max, y_value)
+        return
+
     def add_hline_at(self, ax_idx_x: int, ax_idx_y: int, y_value: float,
                      label: str = ""):
         self.add_hline(self._get_idx(ax_idx_x, ax_idx_y), y_value, label)

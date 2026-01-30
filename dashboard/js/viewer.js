@@ -1,8 +1,15 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers } from "./scene.js";
-import { loadModel, loadCollider } from "./loader.js";
-import { drawMuscleLine, resetMuscles } from "./muscle.js";
+import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import {setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers} from "./scene.js";
+import {loadModel, loadCollider} from "./loader.js";
+import {drawMuscleLine, resetMuscles} from "./muscle.js";
+
+const ViewMode = Object.freeze({
+    FULLSCREEN:   { key: "FULLSCREEN", label: "Full Screen" },
+    PANEL:        { key: "PANEL", label: "Panel View" },
+    PANEL_FEET:   { key: "PANEL_FEET", label: "Panel with Feet" },
+});
+
 
 document.addEventListener("DOMContentLoaded", () => {
     THREE.Object3D.DefaultUp = new THREE.Vector3(0, 1, 0);
@@ -12,24 +19,38 @@ document.addEventListener("DOMContentLoaded", () => {
     scene.background = new THREE.Color(0x000000);
     const width = container.clientWidth;
     const height = container.clientHeight;
-    let fullScreenMode = false;
+    let cameraViewMode = ViewMode.FULLSCREEN;
     let aspect = (width / 3) / height;
 
-    function updateCameras(com) {
+    function updateCameras(com, footL, footR) {
+        // backwards compatibility
+        if (footL === undefined) footL = [com[0], com[1] - 1.0, com[2]];
+        if (footR === undefined) footR = [com[0], com[1] - 1.0, com[2]];
+
         com[1] = 1.0; // fix for now
         if (autoFollow1) {
-            camera1.position.set(com[0], com[1] + 0.5, com[2] + 2.25);
-            controls1.target.set(com[0], com[1], com[2]);
+            cameras[0].position.set(com[0], com[1] + 0.5, com[2] + 2.25);
+            controls[0].target.set(com[0], com[1], com[2]);
         }
 
         if (autoFollow2) {
-            camera2.position.set(com[0] + 2.25, com[1] + 0.5, com[2]);
-            controls2.target.set(com[0], com[1], com[2]);
+            if (cameraViewMode === ViewMode.PANEL) {
+                cameras[1].position.set(com[0] + 2.25, com[1] + 0.5, com[2]);
+                controls[1].target.set(com[0], com[1], com[2]);
+            } else if (cameraViewMode === ViewMode.PANEL_FEET) {
+                cameras[1].position.set(footL[0], footL[1], footL[2] - 0.5);
+                controls[1].target.set(footL[0], footL[1], footL[2]);
+            }
         }
 
         if (autoFollow3) {
-            camera3.position.set(com[0] - 1.5, com[1] + 1.0, com[2]);
-            controls3.target.set(com[0], com[1], com[2]);
+            if (cameraViewMode === ViewMode.PANEL) {
+                cameras[2].position.set(com[0] - 1.5, com[1] + 1.0, com[2]);
+                controls[2].target.set(com[0], com[1], com[2]);
+            } else if (cameraViewMode === ViewMode.PANEL_FEET) {
+                cameras[2].position.set(footR[0], footR[1], footR[2] + 0.5);
+                controls[2].target.set(footR[0], footR[1], footR[2]);
+            }
         }
     }
 
@@ -38,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let frames = [];
     let currentObjects = [];
     let currentFrame = 0;
+
     function loadFrame(frameIndex) {
         // Clear scene
         currentObjects.forEach(obj => scene.remove(obj));
@@ -48,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!frame) return;
 
         // Follow com
-        updateCameras(frame.cam_pos)
+        updateCameras(frame.cam_pos, frame.foot_l_pos, frame.foot_r_pos);
 
         // Write time in text. Add directl to the scene
         const time = frame.time;
@@ -73,15 +95,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         for (const obj of frame.colliders) {
-            const color = 0x87CEEB;
+            let color = 0x87CEEB;
+            if (obj.contact_force) {
+                let inContact = obj.contact_force > 0.0;
+                color = inContact ? 0x6AEB9D : 0x87CEEB;
+            }
             loadCollider(drawSphereColliders, drawCapsuleColliders,
                 obj.geom_type, obj.scale, obj.rot, color, object => {
-                object.position.set(...obj.pos);
-                object.castShadow = true;
-                object.receiveShadow = true;
-                scene.add(object);
-                currentObjects.push(object);
-            });
+                    object.position.set(...obj.pos);
+                    object.castShadow = true;
+                    object.receiveShadow = true;
+                    scene.add(object);
+                    currentObjects.push(object);
+                });
         }
 
         // Draw muscles
@@ -109,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const radius = 0.001 * Math.sqrt(length);
             const cylinderLength = 0.2;
             const geometry = new THREE.CylinderGeometry(radius, radius, cylinderLength, 8);
-            const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            const material = new THREE.MeshStandardMaterial({color: 0xff0000});
             const cylinder = new THREE.Mesh(geometry, material);
 
             // Position cylinder at the midpoint
@@ -143,15 +169,19 @@ document.addEventListener("DOMContentLoaded", () => {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
-    const camera1 = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-    const camera2 = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-    const camera3 = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-    camera1.up.set(0, 1, 0);
-    camera2.up.set(0, 1, 0);
-    camera3.up.set(0, 1, 0);
-    const controls1 = new OrbitControls(camera1, renderer.domElement);
-    const controls2 = new OrbitControls(camera2, renderer.domElement);
-    const controls3 = new OrbitControls(camera3, renderer.domElement);
+    // Panel cameras
+    let cameras = [];
+    let controls = [];
+    for (let i = 0; i < 3; i++) {
+        const cam = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+        const control = new OrbitControls(cam, renderer.domElement);
+        cam.up.set(0, 1, 0);
+
+        cameras.push(cam);
+        controls.push(control);
+    }
+    cameras[0].aspect = width / height;
+    cameras[0].updateProjectionMatrix();
 
     const drawVisualsCheckbox = document.getElementById("drawVisuals");
     const drawSphereCollidersCheckbox = document.getElementById("drawSphereColliders");
@@ -173,41 +203,41 @@ document.addEventListener("DOMContentLoaded", () => {
     let autoFollow3 = true;
 
     function onMouseMove(event) {
-        if (fullScreenMode) {
-            controls1.enabled = true;
-            controls2.enabled = false;
-            controls3.enabled = false;
+        if (cameraViewMode === ViewMode.FULLSCREEN) {
+            for (let i = 0; i < controls.length; i++) {
+                controls[i].enabled = (i === 0);
+            }
             return;
         }
         const x = event.clientX;
         if (x < container.getBoundingClientRect().left + width / 3) {
-            controls1.enabled = true;
-            controls2.enabled = false;
-            controls3.enabled = false;
+            for (let i = 0; i < controls.length; i++) {
+                controls[i].enabled = (i === 0);
+            }
         } else if (x < container.getBoundingClientRect().left + 2 * width / 3) {
-            controls1.enabled = false;
-            controls2.enabled = true;
-            controls3.enabled = false;
+            for (let i = 0; i < controls.length; i++) {
+                controls[i].enabled = (i === 1);
+            }
         } else {
-            controls1.enabled = false;
-            controls2.enabled = false;
-            controls3.enabled = true;
+            for (let i = 0; i < controls.length; i++) {
+                controls[i].enabled = (i === 2);
+            }
         }
     }
 
     // Event listeners
     document.addEventListener("mousemove", onMouseMove, false);
-    window.addEventListener("sliderChanged", function(event) {
+    window.addEventListener("sliderChanged", function (event) {
         const frameIndex = parseInt(event.detail);
         loadFrame(frameIndex);
     });
 
-    window.addEventListener("loadTrajectory", function(event) {
+    window.addEventListener("loadTrajectory", function (event) {
         frames = event.detail;
         loadFrame(0);
     });
 
-    window.addEventListener("resetViewer", function(event) {
+    window.addEventListener("resetViewer", function (event) {
         frames = [];
         currentObjects.forEach(obj => scene.remove(obj));
         currentObjects = [];
@@ -216,24 +246,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     fullScreen.addEventListener('click', () => {
-        fullScreen.textContent = fullScreenMode ? "Full Screen" : "Panel View";
-        fullScreenMode = !fullScreenMode;
+        let viewModes = Object.values(ViewMode);
+
+        let currentIndex = viewModes.indexOf(cameraViewMode);
+        let nextIndex = (currentIndex + 1) % viewModes.length;
+        let nextNextIndex = (currentIndex + 2) % viewModes.length;
+
+        cameraViewMode = viewModes[nextIndex];
+        let nextMode = viewModes[nextNextIndex];
+        fullScreen.textContent = String(nextMode.label);
         // update camera aspect
-        if (fullScreenMode) {
-            camera1.aspect = width / height;
-            camera1.updateProjectionMatrix();
-        } else {
-            camera1.aspect = (width / 3) / height;
-            camera2.aspect = (width / 3) / height;
-            camera3.aspect = (width / 3) / height;
-            camera1.updateProjectionMatrix();
-            camera2.updateProjectionMatrix();
-            camera3.updateProjectionMatrix();
+        if (cameraViewMode === ViewMode.FULLSCREEN) {
+            cameras[0].aspect = width / height;
+            cameras[0].updateProjectionMatrix();
+        }
+        else if (cameraViewMode === ViewMode.PANEL || cameraViewMode === ViewMode.PANEL_FEET) {
+            for (let i = 0; i < cameras.length; i++) {
+                cameras[i].aspect = (width / 3) / height;
+                cameras[i].updateProjectionMatrix();
+            }
         }
         loadFrame(currentFrame);
     });
 
-    controls1.addEventListener("start", () => {
+    controls[0].addEventListener("start", () => {
         resetView1.style.display = "block";
         autoFollow1 = false;
     });
@@ -242,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
         autoFollow1 = true;
         loadFrame(currentFrame);
     });
-    controls2.addEventListener("start", () => {
+    controls[1].addEventListener("start", () => {
         resetView2.style.display = "block";
         autoFollow2 = false;
     });
@@ -251,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
         autoFollow2 = true;
         loadFrame(currentFrame);
     });
-    controls3.addEventListener("start", () => {
+    controls[2].addEventListener("start", () => {
         resetView3.style.display = "block";
         autoFollow3 = false;
     });
@@ -277,18 +313,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function animate() {
-        controls1.update();
-        controls2.update();
-        controls3.update();
+        for (let i = 0; i < controls.length; i++) {
+            controls[i].update();
+        }
 
         const borderWidth = 2;
         const viewWidth = (width - borderWidth) / 3;
         const viewHeight = height;
 
-        if (fullScreenMode) {
+        if (cameraViewMode === ViewMode.FULLSCREEN) {
             renderer.setViewport(0, 0, width, height);
             renderer.setScissor(0, 0, width, height);
-            renderer.render(scene, camera1);
+            renderer.render(scene, cameras[0]);
             return;
         }
 
@@ -296,16 +332,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         renderer.setViewport(0, 0, viewWidth, viewHeight);
         renderer.setScissor(0, 0, viewWidth, viewHeight);
-        renderer.render(scene, camera1);
+        renderer.render(scene, cameras[0]);
 
         renderer.setViewport(viewWidth + borderWidth, 0, viewWidth, viewHeight);
         renderer.setScissor(viewWidth + borderWidth, 0, viewWidth, viewHeight);
-        renderer.render(scene, camera2);
+        renderer.render(scene, cameras[1]);
 
         renderer.setViewport(2 * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
         renderer.setScissor(2 * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
-        renderer.render(scene, camera3);
-
+        renderer.render(scene, cameras[2]);
 
         renderer.setScissorTest(false);
     }

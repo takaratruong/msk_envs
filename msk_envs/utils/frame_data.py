@@ -10,6 +10,7 @@ class ColliderData:
     pos: list[float]
     rot: list[float]
     scale: list[float]
+    contact_force: float
 
     def to_dict(self):
         return {
@@ -18,6 +19,7 @@ class ColliderData:
             "pos": list(self.pos),
             "rot": list(self.rot),
             "scale": list(self.scale),
+            "contact_force": self.contact_force,
         }
 
     def to_anim_dict(self):
@@ -31,6 +33,7 @@ class ColliderData:
             pos=data["pos"],
             rot=data["rot"],
             scale=data["scale"],
+            contact_force=data["contact_force"],
         )
 
 
@@ -82,7 +85,12 @@ class MuscleData:
 
     activation: float
     excitation: float
+
     actuation: float
+    length_multiplier: float
+    velocity_multiplier: float
+    passive_multiplier: float
+    damping_multiplier: float
 
     path_length: float
     path_velocity: float
@@ -103,6 +111,10 @@ class MuscleData:
             "activation": self.activation,
             "excitation": self.excitation,
             "actuation": self.actuation,
+            "length_multiplier": self.length_multiplier,
+            "velocity_multiplier": self.velocity_multiplier,
+            "passive_multiplier": self.passive_multiplier,
+            "damping_multiplier": self.damping_multiplier,
             "path_length": self.path_length,
             "path_velocity": self.path_velocity,
             "fiber_length": self.fiber_length,
@@ -135,6 +147,10 @@ class MuscleData:
             activation=data["activation"],
             excitation=data["excitation"],
             actuation=data["actuation"],
+            length_multiplier=data["length_multiplier"],
+            velocity_multiplier=data["velocity_multiplier"],
+            passive_multiplier=data["passive_multiplier"],
+            damping_multiplier=data["damping_multiplier"],
             path_length=data["path_length"],
             path_velocity=data["path_velocity"],
             fiber_length=data["fiber_length"],
@@ -174,6 +190,8 @@ class ActuatorData:
 @dataclass
 class KineticData:
     com: tuple
+    foot_pos_l: tuple
+    foot_pos_r: tuple
     grf: tuple
     total_mass: float
     gravity: float
@@ -181,6 +199,8 @@ class KineticData:
     def to_dict(self):
         return {
             "com": list(self.com),
+            "foot_pos_l": list(self.foot_pos_l),
+            "foot_pos_r": list(self.foot_pos_r),
             "grf": list(self.grf),
             "total_mass": self.total_mass,
             "gravity": self.gravity,
@@ -190,6 +210,8 @@ class KineticData:
     def from_dict(data: dict) -> 'KineticData':
         return KineticData(
             com=tuple(data["com"]),
+            foot_pos_l=tuple(data["foot_pos_l"]),
+            foot_pos_r=tuple(data["foot_pos_r"]),
             grf=tuple(data["grf"]),
             total_mass=data["total_mass"],
             gravity=data["gravity"],

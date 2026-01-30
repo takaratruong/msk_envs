@@ -15,12 +15,23 @@ def track_com(frame_data: list[FrameData]):
     return com_positions
 
 
+def track_feet(frame_data: list[FrameData]):
+    """ Smoothly track the left and right foot positions. """
+    foot_l_positions = []
+    foot_r_positions = []
+    for frame in frame_data:
+        foot_l_positions.append(frame.kinetic_data.foot_pos_l)
+        foot_r_positions.append(frame.kinetic_data.foot_pos_r)
+    return foot_l_positions, foot_r_positions
+
+
 def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: bool):
     """ Dump all relevant animation data to json """
     n_frames = len(frame_data)
 
     # Where the camera(s) should look
     cam_positions = track_com(frame_data)
+    foot_l_pos, foot_r_pos = track_feet(frame_data)
 
     # Get all visuals, colliders, muscles
     stacked_frames = []
@@ -36,7 +47,9 @@ def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: 
             "colliders": colliders,
             "muscles": muscles,
             "arrows": arrows,
-            "cam_pos": list(cam_positions[i])
+            "cam_pos": list(cam_positions[i]),
+            "foot_l_pos": list(foot_l_pos[i]),
+            "foot_r_pos": list(foot_r_pos[i]),
         }
         stacked_frames.append(frame)
 

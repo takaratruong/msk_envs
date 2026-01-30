@@ -117,7 +117,7 @@ function setupNumbers(scene) {
                 font: font,
                 size: size,
                 depth: 0.02,      // Use 'depth' instead of 'height'
-                curveSegments: 4,
+                curveSegments: 16,
             });
 
             textGeo.computeBoundingBox();

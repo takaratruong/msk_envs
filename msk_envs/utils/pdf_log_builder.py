@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
 from msk_envs.utils.frame_parser import FrameData
+from msk_envs.utils.global_params import FWD_IDX, UP_IDX, SIDE_IDX, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
 from .plot_helper import SequencePlot, PlotConfig
 
 
@@ -105,6 +106,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
     frame_ind = np.arange(n_frames)
     frame0 = frame_data[0]
     with (PdfPages(out_file) as pdf):
+        # COM position
+        com_data = np.array([frame.kinetic_data.com for frame in frame_data])
+
         # Rewards plot
         reward_keys = list(frame0.reward_data.keys())
         reward_data = []
@@ -135,13 +139,13 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         rewards_plot.finish(pdf)
 
         # --- GROUND REACTION FORCE ---
-        grf_data = np.array([frame.kinetic_data.grf for frame in frame_data])
+        raw_grf_data = np.array([frame.kinetic_data.grf for frame in frame_data])
 
         # Express in terms of body weight
         kinetic_data = frame0.kinetic_data
         mass = kinetic_data.total_mass
         weight = abs(float(mass * kinetic_data.gravity))
-        grf_data /= weight
+        grf_bw_data = raw_grf_data / weight
 
         def create_grf_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
@@ -153,7 +157,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             time_mask = time_mask.flatten()
             time_selected = times[time_mask]
             frame_ind_selected = frame_ind[time_mask]
-            grf_selected = grf_data[time_mask, :]
+            grf_selected = grf_bw_data[time_mask, :]
 
             title = f"Ground Reaction Forces ({time_start:.1f}s to {time_end:.1f}s)"
             grf_plot = SequencePlot(
@@ -173,9 +177,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 )
             )
             grf_plot.add_hline(0, 0.0)
-            grf_plot.add(0, grf_selected[:, 0], label="X")
-            grf_plot.add(0, grf_selected[:, 1], label="Y")
-            grf_plot.add(0, grf_selected[:, 2], label="Z")
+            grf_plot.add(0, grf_selected[:, FWD_IDX], label="X")
+            grf_plot.add(0, grf_selected[:, UP_IDX], label="Y")
+            grf_plot.add(0, grf_selected[:, SIDE_IDX], label="Z")
             grf_plot.finish(pdf)
 
         # GRF plot for entire duration
@@ -183,11 +187,12 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
 
         # Find the intervals in which there is contact
         contact_intervals = []
-        contact_threshold = 1e-3
+        contact_threshold = 0.1  # 10% body weight
         in_contact = False
         contact_start = 0.0
         for i in range(n_frames):
-            grf_magnitude = np.linalg.norm(grf_data[i, :])
+            # grf_magnitude = np.linalg.norm(grf_data[i, :])
+            grf_magnitude = np.abs(grf_bw_data[i, UP_IDX])  # vertical component only
             if not in_contact and grf_magnitude >= contact_threshold:  # start of contact
                 in_contact = True
                 contact_start = times[i]
@@ -195,8 +200,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 in_contact = False
                 contact_end = times[i]
                 contact_intervals.append((contact_start, contact_end))
-        if contact_intervals:
-            contact_intervals = np.array(contact_intervals)
+
+        contact_intervals = np.array(contact_intervals)
+        if contact_intervals.size > 0:
             contact_durations = contact_intervals[:, 1] - contact_intervals[:, 0]
             contact_mid_times = 0.5 * (contact_intervals[:, 0] + contact_intervals[:, 1])
             contact_time_plot = SequencePlot(
@@ -204,7 +210,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                     num_vertical=1,
                     num_horizontal=1,
                     fig_size=(8.5, 6),
-                    title="Contact Durations",
+                    title="Duration of Contacts",
                     x_label="Time (s)",
                     x_label_sub="Frame",
                     y_label="Contact Duration",
@@ -219,7 +225,77 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                                           connect_line=True, labeled=True)
             contact_time_plot.finish(pdf)
 
-        # Create interval plots for each contact interval
+        # --- Step analytics ---
+        if contact_intervals.size > 2:
+            contact_times = (contact_intervals[:, 0] + contact_intervals[:, 1]) * 0.5
+            time_between_steps = []
+            length_between_steps = []
+            for i in range(1, contact_times.shape[0]):
+                t0, t1 = contact_times[i - 1], contact_times[i]
+                time_between_steps.append(t1 - t0)
+                # Find the frames corresponding to these contact times, grab COM x position
+                frame_0, frame_1 = np.searchsorted(times, t0), np.searchsorted(times, t1)
+                x0, x1 = com_data[frame_0, 0], com_data[frame_1, 0]
+                length_between_steps.append(x1 - x0)
+
+            # Time between steps plot
+            time_between_steps = np.array(time_between_steps)
+            step_time_plot = SequencePlot(
+                PlotConfig(
+                    num_vertical=1,
+                    num_horizontal=1,
+                    fig_size=(8.5, 6),
+                    title="Time between Steps",
+                    x_label="Time (s)",
+                    x_label_sub="Frame",
+                    y_label="Time between Steps (s)",
+                    x_data=times,
+                    x_data_sub=frame_ind,
+                    x_fmt=".2f",
+                    x_sub_fmt=".0f",
+                    y_fmt=".3f",
+                )
+            )
+            step_time_plot.add_scatter(0, contact_times[1:], time_between_steps, label="Time between Steps",
+                                       connect_line=True, labeled=True)
+
+            time_between_steps_mean = np.mean(time_between_steps)
+            time_between_steps_std = np.std(time_between_steps)
+            step_time_plot.add_hline_with_bars(
+                0, time_between_steps_mean, time_between_steps_std,
+                label=rf"$\mu$: {time_between_steps_mean:.3f}s, $\sigma$: {time_between_steps_std:.3f}s")
+            step_time_plot.enforce_y_range(0, 0.0, 0.5)
+            step_time_plot.finish(pdf)
+
+            # Length between steps plot
+            length_between_steps = np.array(length_between_steps)
+            step_length_plot = SequencePlot(
+                PlotConfig(
+                    num_vertical=1,
+                    num_horizontal=1,
+                    fig_size=(8.5, 6),
+                    title="Length between Steps",
+                    x_label="Time (s)",
+                    x_label_sub="Frame",
+                    y_label="Length between Steps (m)",
+                    x_data=times,
+                    x_data_sub=frame_ind,
+                    x_fmt=".2f",
+                    x_sub_fmt=".0f",
+                    y_fmt=".3f",
+                )
+            )
+            step_length_plot.add_scatter(0, contact_times[1:], length_between_steps, label="Length between Steps",
+                                         connect_line=True, labeled=True)
+            length_between_steps_mean = np.mean(length_between_steps)
+            length_between_steps_std = np.std(length_between_steps)
+            step_length_plot.add_hline_with_bars(
+                0, length_between_steps_mean, length_between_steps_std,
+                label=rf"$\mu$: {length_between_steps_mean:.3f}m, $\sigma$: {length_between_steps_std:.3f}m")
+            step_length_plot.enforce_y_range(0, 0.0, 3.0)
+            step_length_plot.finish(pdf)
+
+        # Create grf plots for each contact interval
         dt = times[1] - times[0]
         for (start_time, end_time) in contact_intervals:
             create_grf_plot(start_time - dt, end_time + dt)
@@ -300,17 +376,22 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         muscle_ftl = []
         muscle_ma = []
         muscle_frc = []
+        muscle_frc_mult = []
         for frame in frame_data:
             muscle_ae.append([(m.activation, m.excitation) for m in frame.muscles])
             muscle_ftl.append([(m.fiber_length, m.tendon_length, m.optimal_fiber_length, m.tendon_slack_length) for m in
                                frame.muscles])
             muscle_ma.append([m.moment_arm for m in frame.muscles])
             muscle_frc.append([(m.actuation, m.max_isometric_force) for m in frame.muscles])
+            muscle_frc_mult.append([
+                (m.length_multiplier, m.velocity_multiplier, m.passive_multiplier, m.damping_multiplier)
+                for m in frame.muscles])
 
         muscle_ae = np.array(muscle_ae)
         muscle_ftl = np.array(muscle_ftl)
         muscle_ma = np.array(muscle_ma)
         muscle_frc = np.array(muscle_frc)
+        muscle_frc_mult = np.array(muscle_frc_mult)
         zero_lines = [[0.0, 0.0]] * len(muscle_names)
 
         # Activation/excitation
@@ -345,10 +426,17 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         # Muscle actuation
         enforced_range = [(0.0, 2.0 * m.max_isometric_force) for m in frame0.muscles]
         create_generic_plot(muscle_names, times, frame_ind, muscle_frc,
-                            "Muscle Actuation", "Actuation (N)", ".3f",
+                            "Muscle Actuation", "Actuation (N)", ".1f",
                             pdf, sublabels=["Actuation", "Max Isometric Force"],
                             alphas=[1.0, 0.5],
                             enforced_y_range=enforced_range)
+
+        # Muscle force multipliers
+        create_generic_plot(muscle_names, times, frame_ind, muscle_frc_mult,
+                            "Muscle Force Multipliers", "Multiplier", ".2f",
+                            pdf, sublabels=["Active Length", "Active Velocity", "Passive Length", "Damping"],
+                            alphas=[0.5] * muscle_frc_mult.shape[-1],
+                            enforced_y_range=[(0.0, 2.5)] * len(muscle_names))
 
         # --- ACTUATOR PLOTS ---
         actuator_names = [a.name for a in frame0.actuators]
@@ -360,6 +448,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                             "Actuator Activations/Excitations", "Activation/Excitation", ".2f",
                             pdf, enforced_y_range=[(0.0, 1.0)] * len(actuator_names),
                             sublabels=["Activation", "Excitation"],
-                            alphas=[1.0, 0.5])
+                            alphas=[1.0, 0.5],
+                            horizontal_lines=[[0.5]] * len(actuator_names))
 
     return

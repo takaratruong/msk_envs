@@ -229,7 +229,7 @@ with ui.row().classes('w-full z-50 bg-white').style(
                     <label for="drawMuscles">Draw muscles</label>
                     <input type="checkbox" id="drawMuscles" checked>
                 </div>
-                <button id="fullScreenButton">Full Screen</button>
+                <button id="fullScreenButton">Panel View</button>
                 <div class="control-row">
                     <button id="resetButton1">Camera 1 follow</button>
                     <button id="resetButton2">Camera 2 follow</button>

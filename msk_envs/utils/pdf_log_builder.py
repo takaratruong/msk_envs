@@ -14,7 +14,7 @@ def create_generic_plot(
         y_label: str,
         y_fmt: str,
         pdf: PdfPages,
-        enforced_range: tuple[float, float] = None,
+        enforced_y_range: list[tuple[float, float]] = None,
         sublabels: list[str] = None,
         alphas: list[float] = None,
         linestyles: list[str] = None,
@@ -83,9 +83,8 @@ def create_generic_plot(
                     for hline in horizontal_lines[idx_entry]:
                         seq_plot.add_hline(idx_fig, hline)
 
-            # Enforce y range if specified
-            if enforced_range is not None:
-                seq_plot.enforce_y_range(idx_fig, enforced_range[0], enforced_range[1])
+                if enforced_y_range is not None and enforced_y_range[start_idx] is not None:
+                    seq_plot.enforce_y_range(idx_fig, enforced_y_range[start_idx][0], enforced_y_range[start_idx][1])
 
         seq_plot.finish(pdf)
 
@@ -104,9 +103,10 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
     n_frames = len(frame_data)
     times = np.array([frame.time for frame in frame_data])
     frame_ind = np.arange(n_frames)
+    frame0 = frame_data[0]
     with (PdfPages(out_file) as pdf):
         # Rewards plot
-        reward_keys = list(frame_data[0].reward_data.keys())
+        reward_keys = list(frame0.reward_data.keys())
         reward_data = []
         for frame in frame_data:
             reward_data.append([frame.reward_data[k] for k in reward_keys])
@@ -138,7 +138,7 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         grf_data = np.array([frame.kinetic_data.grf for frame in frame_data])
 
         # Express in terms of body weight
-        kinetic_data = frame_data[0].kinetic_data
+        kinetic_data = frame0.kinetic_data
         mass = kinetic_data.total_mass
         weight = abs(float(mass * kinetic_data.gravity))
         grf_data /= weight
@@ -225,10 +225,10 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
             create_grf_plot(start_time - dt, end_time + dt)
 
         # --- JOINT ANGLES ---
-        has_reference = frame_data[0].joint_angles[0].has_reference()
-        joint_qpos_names = [j.name for j in frame_data[0].joint_angles]
+        has_reference = frame0.joint_angles[0].has_reference()
+        joint_qpos_names = [j.name for j in frame0.joint_angles]
         joint_angles = []
-        joint_angle_limits = [j.limits for j in frame_data[0].joint_angles]
+        joint_angle_limits = [j.limits for j in frame0.joint_angles]
         for frame in frame_data:
             if has_reference:
                 joint_angles.append([(j.value, j.reference) for j in frame.joint_angles])
@@ -255,14 +255,14 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         create_interval_plots(1.0, times, create_joint_angles_plot)
 
         # --- JOINT MOMENTS ---
-        joint_dof_names = [j.name for j in frame_data[0].joint_moments]
+        joint_dof_names = [j.name for j in frame0.joint_moments]
         joint_moments = []
         for frame in frame_data:
             joint_moments.append([
-                (m.value, m.spring, m.damping, m.drag, m.bias, m.muscle, m.actuator, m.limit, m.contact)
+                (m.spring, m.drag, m.muscle, m.actuator, m.limit, m.contact)
                 for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
-        sublabels = ["Value", "Spring", "Damping", "Drag", "Bias", "Muscle", "Actuator", "Limit", "Contact"]
+        sublabels = ["Spring", "Drag", "Muscle", "Actuator", "Limit", "Contact"]
 
         def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
@@ -283,8 +283,9 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 y_fmt=".1f",
                 pdf=pdf,
                 sublabels=sublabels,
-                alphas=[1.0] + [0.5] * (len(sublabels) - 1),
-                linestyles=[lss] + [lsd] * (len(sublabels) - 1),
+                alphas=[0.5] * (len(sublabels)),
+                linestyles=[lss] * (len(sublabels)),
+                horizontal_lines=[[0.0]] * len(joint_dof_names),
                 omit_zeros=True
             )
 
@@ -293,44 +294,71 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         create_interval_plots(1.0, times, create_joint_moments_plot)
 
         # --- MUSCLE PLOTS ---
-        muscle_names = [m.name for m in frame_data[0].muscles]
+        muscle_names = [m.name for m in frame0.muscles]
         # Muscle activations, fiber/tendon lengths, moment arms
         muscle_ae = []
         muscle_ftl = []
         muscle_ma = []
+        muscle_frc = []
         for frame in frame_data:
             muscle_ae.append([(m.activation, m.excitation) for m in frame.muscles])
             muscle_ftl.append([(m.fiber_length, m.tendon_length, m.optimal_fiber_length, m.tendon_slack_length) for m in
                                frame.muscles])
             muscle_ma.append([m.moment_arm for m in frame.muscles])
+            muscle_frc.append([(m.actuation, m.max_isometric_force) for m in frame.muscles])
 
         muscle_ae = np.array(muscle_ae)
         muscle_ftl = np.array(muscle_ftl)
         muscle_ma = np.array(muscle_ma)
-
+        muscle_frc = np.array(muscle_frc)
         zero_lines = [[0.0, 0.0]] * len(muscle_names)
+
+        # Activation/excitation
         create_generic_plot(muscle_names, times, frame_ind, muscle_ae,
                             "Muscle Activations/Excitations", "Activation/Excitation", ".2f",
-                            pdf, enforced_range=(0.0, 1.0),
+                            pdf, enforced_y_range=[(0.0, 1.0)] * len(muscle_names),
                             sublabels=["Activation", "Excitation"],
                             alphas=[1.0, 0.5], horizontal_lines=zero_lines)
-        create_generic_plot(muscle_names, times, frame_ind, muscle_ftl,
-                            "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
-                            pdf, sublabels=["Fiber", "Tendon", "Optimal Fiber", "Tendon Slack"],
-                            alphas=[1.0, 1.0, 0.5, 0.5], linestyles=["solid", "solid", "dashed", "dashed"])
+
+        # Fiber/tendon lengths
+        enforced_range = []
+        for m in frame0.muscles:
+            min_range = min(0.75 * m.optimal_fiber_length, 0.75 * m.tendon_slack_length)
+            max_range = max(1.25 * m.optimal_fiber_length, 1.25 * m.tendon_slack_length)
+            enforced_range.append((min_range, max_range))
+        create_generic_plot(
+            muscle_names, times, frame_ind, muscle_ftl,
+            "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
+            pdf,
+            sublabels=["Fiber", "Tendon", "Optimal Fiber", "Tendon Slack"],
+            alphas=[1.0, 1.0, 0.5, 0.5],
+            linestyles=["solid", "solid", "dashed", "dashed"],
+            enforced_y_range=enforced_range)
+
+        # Moment arms
+        enforced_range = [(-0.1, 0.1)] * len(muscle_names)
         create_generic_plot(muscle_names, times, frame_ind, muscle_ma,
-                            "Muscle Moment Arms", "Moment Arm (m)", ".3f",
-                            pdf, sublabels=joint_dof_names, omit_zeros=True, horizontal_lines=zero_lines)
+                            "Muscle Moment Arms", "Moment Arm (m)", ".2f",
+                            pdf, sublabels=joint_dof_names, omit_zeros=True, horizontal_lines=zero_lines,
+                            enforced_y_range=enforced_range)
+
+        # Muscle actuation
+        enforced_range = [(0.0, 2.0 * m.max_isometric_force) for m in frame0.muscles]
+        create_generic_plot(muscle_names, times, frame_ind, muscle_frc,
+                            "Muscle Actuation", "Actuation (N)", ".3f",
+                            pdf, sublabels=["Actuation", "Max Isometric Force"],
+                            alphas=[1.0, 0.5],
+                            enforced_y_range=enforced_range)
 
         # --- ACTUATOR PLOTS ---
-        actuator_names = [a.name for a in frame_data[0].actuators]
+        actuator_names = [a.name for a in frame0.actuators]
         actuator_ae = []
         for frame in frame_data:
             actuator_ae.append([(a.activation, a.excitation) for a in frame.actuators])
         actuator_ae = np.array(actuator_ae)
         create_generic_plot(actuator_names, times, frame_ind, np.array(actuator_ae),
                             "Actuator Activations/Excitations", "Activation/Excitation", ".2f",
-                            pdf, enforced_range=(0.0, 1.0),
+                            pdf, enforced_y_range=[(0.0, 1.0)] * len(actuator_names),
                             sublabels=["Activation", "Excitation"],
                             alphas=[1.0, 0.5])
 

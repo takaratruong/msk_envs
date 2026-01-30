@@ -24,8 +24,9 @@ class MSKEnv:
         stiffness[:] = 0.0
         armature[:] = 0.0
         # Joint damping, armature
-        damping[6:] = env_config.joint_damping
-        armature[6:] = env_config.joint_armature
+        idx_joint_start = 6 if env_config.model_root_free else 0
+        damping[idx_joint_start:] = env_config.joint_damping
+        armature[idx_joint_start:] = env_config.joint_armature
         # Torso damping
         torso_id = self.lookup_body_id("torso")
         dof_adr = msk_warp.get_dof_adr(self.m, torso_id)

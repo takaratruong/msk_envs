@@ -30,6 +30,17 @@ def load_yaml(file_path):
     return data
 
 
+def lookup_limit_skip(
+        limit_name: str,
+        limit_id_lookup: dict[str, int]
+):
+    """ Lookup limit ID, skip if not found """
+    if limit_name not in limit_id_lookup:
+        print(f"Warning: limit for '{limit_name}' not found in limit_id_lookup, skipping.")
+        return None
+    return limit_id_lookup[limit_name]
+
+
 def get_joint_limits(
         file_path: str,
         limit_id_lookup: dict[str, int]
@@ -38,6 +49,10 @@ def get_joint_limits(
     data = load_yaml(file_path)
     limits = []
     for limit_name, limit_data in data.items():
+        limit_id = lookup_limit_skip(limit_name, limit_id_lookup)
+        if limit_id is None:
+            continue
+
         limit = JointLimit(
             limit_id=limit_id_lookup[limit_name],
             lower=limit_data["lower"],
@@ -55,7 +70,10 @@ def get_limit_force_curves(
     data = load_yaml(file_path)
     limit_curves = []
     for limit_name, curve_data in data.items():
-        limit_id = limit_id_lookup[limit_name]
+        limit_id = lookup_limit_skip(limit_name, limit_id_lookup)
+        if limit_id is None:
+            continue
+
         limit_force = curve_data["limit_force"]
         shape_param = curve_data["shape_param"]
         limit_curve = LimitForceCurve(

@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cameras[0].updateProjectionMatrix();
             // Split the other 2/3 among the remaining four cameras
             for (let i = 1; i < cameras.length; i++) {
-                cameras[i].aspect = (width / 2) / (height / 2);
+                cameras[i].aspect = (width / 3) / (height / 2);
                 cameras[i].updateProjectionMatrix();
             }
         }

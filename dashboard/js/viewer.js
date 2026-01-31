@@ -329,19 +329,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         renderer.setScissorTest(true);
-
-        renderer.setViewport(0, 0, viewWidth, viewHeight);
-        renderer.setScissor(0, 0, viewWidth, viewHeight);
-        renderer.render(scene, cameras[0]);
-
-        renderer.setViewport(viewWidth + borderWidth, 0, viewWidth, viewHeight);
-        renderer.setScissor(viewWidth + borderWidth, 0, viewWidth, viewHeight);
-        renderer.render(scene, cameras[1]);
-
-        renderer.setViewport(2 * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
-        renderer.setScissor(2 * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
-        renderer.render(scene, cameras[2]);
-
+        for (let i = 0; i < 3; i++) {
+            renderer.setViewport(i * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
+            renderer.setScissor(i * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
+            renderer.render(scene, cameras[i]);
+        }
         renderer.setScissorTest(false);
     }
 

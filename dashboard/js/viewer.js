@@ -52,6 +52,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 controls[2].target.set(footR[0], footR[1], footR[2]);
             }
         }
+
+        if (cameraViewMode === ViewMode.PANEL_FEET) {
+                cameras[3].position.set(footL[0] + 0.5, footL[1], footL[2]);
+                controls[3].target.set(footL[0], footL[1], footL[2]);
+                cameras[4].position.set(footR[0] + 0.5, footR[1], footR[2]);
+                controls[4].target.set(footR[0], footR[1], footR[2]);
+        }
     }
 
 
@@ -172,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Panel cameras
     let cameras = [];
     let controls = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
         const cam = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
         const control = new OrbitControls(cam, renderer.domElement);
         cam.up.set(0, 1, 0);
@@ -260,9 +267,18 @@ document.addEventListener("DOMContentLoaded", () => {
             cameras[0].aspect = width / height;
             cameras[0].updateProjectionMatrix();
         }
-        else if (cameraViewMode === ViewMode.PANEL || cameraViewMode === ViewMode.PANEL_FEET) {
+        else if (cameraViewMode === ViewMode.PANEL) {
             for (let i = 0; i < cameras.length; i++) {
                 cameras[i].aspect = (width / 3) / height;
+                cameras[i].updateProjectionMatrix();
+            }
+        }
+        else if (cameraViewMode === ViewMode.PANEL_FEET) {
+            cameras[0].aspect = (width / 3) / height;
+            cameras[0].updateProjectionMatrix();
+            // Split the other 2/3 among the remaining four cameras
+            for (let i = 1; i < cameras.length; i++) {
+                cameras[i].aspect = (width / 2) / (height / 2);
                 cameras[i].updateProjectionMatrix();
             }
         }
@@ -326,15 +342,37 @@ document.addEventListener("DOMContentLoaded", () => {
             renderer.setScissor(0, 0, width, height);
             renderer.render(scene, cameras[0]);
             return;
-        }
+        } else if (cameraViewMode === ViewMode.PANEL) {
+            renderer.setScissorTest(true);
+            for (let i = 0; i < 3; i++) {
+                renderer.setViewport(i * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
+                renderer.setScissor(i * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
+                renderer.render(scene, cameras[i]);
+            }
+            renderer.setScissorTest(false);
+        } else if (cameraViewMode === ViewMode.PANEL_FEET) {
+            renderer.setScissorTest(true);
 
-        renderer.setScissorTest(true);
-        for (let i = 0; i < 3; i++) {
-            renderer.setViewport(i * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
-            renderer.setScissor(i * (viewWidth + borderWidth), 0, viewWidth, viewHeight);
-            renderer.render(scene, cameras[i]);
+            // Main camera (left third)
+            renderer.setViewport(0, 0, viewWidth, viewHeight);
+            renderer.setScissor(0, 0, viewWidth, viewHeight);
+            renderer.render(scene, cameras[0]);
+
+            // Right cameras (right two thirds, split each third vertically among two cameras each)
+            const halfViewHeight = viewHeight / 2;
+            for (let i = 1; i < cameras.length; i++) {
+                const col = (i - 1) % 2;
+                const row = 1 - Math.floor((i - 1) / 2);
+                const x = viewWidth + borderWidth + col * (viewWidth + borderWidth);
+                const y = row * (halfViewHeight + borderWidth);
+                
+                renderer.setViewport(x, y, viewWidth, halfViewHeight);
+                renderer.setScissor(x, y, viewWidth, halfViewHeight);
+                renderer.render(scene, cameras[i]);
+            }
+            renderer.setScissorTest(false);
+
         }
-        renderer.setScissorTest(false);
     }
 
     setupGround(scene, new THREE.Vector3(-50, 0, 0));

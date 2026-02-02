@@ -5,9 +5,9 @@ import {loadModel, loadCollider} from "./loader.js";
 import {drawMuscleLine, resetMuscles} from "./muscle.js";
 
 const ViewMode = Object.freeze({
-    FULLSCREEN:   { key: "FULLSCREEN", label: "Full Screen" },
-    PANEL:        { key: "PANEL", label: "Panel View" },
-    PANEL_FEET:   { key: "PANEL_FEET", label: "Panel with Feet" },
+    FULLSCREEN: {key: "FULLSCREEN", label: "Full Screen"},
+    PANEL: {key: "PANEL", label: "Panel View"},
+    PANEL_FEET: {key: "PANEL_FEET", label: "Panel with Feet"},
 });
 
 
@@ -32,32 +32,26 @@ document.addEventListener("DOMContentLoaded", () => {
             cameras[0].position.set(com[0], com[1] + 0.5, com[2] + 2.25);
             controls[0].target.set(com[0], com[1], com[2]);
         }
-
-        if (autoFollow2) {
-            if (cameraViewMode === ViewMode.PANEL) {
+        if (cameraViewMode === ViewMode.PANEL) {
+            if (autoFollow2) {
                 cameras[1].position.set(com[0] + 2.25, com[1] + 0.5, com[2]);
                 controls[1].target.set(com[0], com[1], com[2]);
-            } else if (cameraViewMode === ViewMode.PANEL_FEET) {
-                cameras[1].position.set(footL[0], footL[1], footL[2] - 0.5);
-                controls[1].target.set(footL[0], footL[1], footL[2]);
             }
-        }
-
-        if (autoFollow3) {
-            if (cameraViewMode === ViewMode.PANEL) {
+            if (autoFollow3) {
                 cameras[2].position.set(com[0] - 1.5, com[1] + 1.0, com[2]);
                 controls[2].target.set(com[0], com[1], com[2]);
-            } else if (cameraViewMode === ViewMode.PANEL_FEET) {
-                cameras[2].position.set(footR[0], footR[1], footR[2] + 0.5);
-                controls[2].target.set(footR[0], footR[1], footR[2]);
             }
         }
+        else if (cameraViewMode === ViewMode.PANEL_FEET) {
+            cameras[1].position.set(footR[0], footR[1], footR[2] + 0.5);
+            controls[1].target.set(footR[0], footR[1], footR[2]);
+            cameras[3].position.set(footR[0] + 0.5, footR[1], footR[2]);
+            controls[3].target.set(footR[0], footR[1], footR[2]);
 
-        if (cameraViewMode === ViewMode.PANEL_FEET) {
-                cameras[3].position.set(footL[0] + 0.5, footL[1], footL[2]);
-                controls[3].target.set(footL[0], footL[1], footL[2]);
-                cameras[4].position.set(footR[0] + 0.5, footR[1], footR[2]);
-                controls[4].target.set(footR[0], footR[1], footR[2]);
+            cameras[2].position.set(footL[0], footL[1], footL[2] - 0.5);
+            controls[2].target.set(footL[0], footL[1], footL[2]);
+            cameras[4].position.set(footL[0] + 0.5, footL[1], footL[2]);
+            controls[4].target.set(footL[0], footL[1], footL[2]);
         }
     }
 
@@ -266,14 +260,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cameraViewMode === ViewMode.FULLSCREEN) {
             cameras[0].aspect = width / height;
             cameras[0].updateProjectionMatrix();
-        }
-        else if (cameraViewMode === ViewMode.PANEL) {
+        } else if (cameraViewMode === ViewMode.PANEL) {
             for (let i = 0; i < cameras.length; i++) {
                 cameras[i].aspect = (width / 3) / height;
                 cameras[i].updateProjectionMatrix();
             }
-        }
-        else if (cameraViewMode === ViewMode.PANEL_FEET) {
+        } else if (cameraViewMode === ViewMode.PANEL_FEET) {
             cameras[0].aspect = (width / 3) / height;
             cameras[0].updateProjectionMatrix();
             // Split the other 2/3 among the remaining four cameras
@@ -365,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const row = 1 - Math.floor((i - 1) / 2);
                 const x = viewWidth + borderWidth + col * (viewWidth + borderWidth);
                 const y = row * (halfViewHeight + borderWidth);
-                
+
                 renderer.setViewport(x, y, viewWidth, halfViewHeight);
                 renderer.setScissor(x, y, viewWidth, halfViewHeight);
                 renderer.render(scene, cameras[i]);

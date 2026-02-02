@@ -10,6 +10,8 @@ from .env_perturb import PerturbEnv
 from .env_dont_fall import DontFallEnv
 from .env_imitate import ImitateEnv
 from .env_static import StaticEnv
+from .env_ankle_flex import AnkleFlexEnv
+from .env_race_walk import RaceWalkEnv
 
 
 # factory
@@ -40,5 +42,9 @@ class EnvFactory:
             return ImitateEnv(**kwargs)
         elif env_variant == DerivedEnv.STATIC:
             return StaticEnv(**kwargs)
+        elif env_variant == DerivedEnv.ANKLE_FLEX:
+            return AnkleFlexEnv(**kwargs)
+        elif env_variant == DerivedEnv.RACE_WALK:
+            return RaceWalkEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

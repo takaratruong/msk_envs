@@ -12,3 +12,5 @@ class DerivedEnv(Enum):
     DONT_FALL = 8
     IMITATE = 9
     STATIC = 10
+    ANKLE_FLEX = 11
+    RACE_WALK = 12

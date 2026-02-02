@@ -57,7 +57,7 @@ class EnvConfig:
     """ Muscle deactivation time constant """
     muscle_activation_dynamics_smoothing: float = 10.0
     """ Muscle activation dynamics smoothing factor """
-    muscle_fiber_damping: float = 0.01
+    muscle_fiber_damping: float = 0.1
     """ Fiber damping (0.0 = undamped) """
     muscle_min_activation: float = 0.0
     """ Minimum muscle activation. Use non-zero for undamped muscle """
@@ -155,6 +155,7 @@ class EnvConfigNoHands(EnvConfig):
     starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
 
+
 @dataclass
 class EnvConfigNoHandsExp(EnvConfig):
     """ Environment configuration for no-hands model"""
@@ -165,6 +166,7 @@ class EnvConfigNoHandsExp(EnvConfig):
     starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
 
+
 @dataclass
 class EnvConfigNoHandsWalk(EnvConfig):
     """ Environment configuration for no-hands model, with walking-specific contact params"""
@@ -173,3 +175,14 @@ class EnvConfigNoHandsWalk(EnvConfig):
     limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
     starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_walking.yaml"
+
+
+@dataclass
+class EnvConfigStaticLegs(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    model_root_free: bool = False
+    model_path: str = "../msk_models/static/model_just_legs.osim"
+    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
+    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
+    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"

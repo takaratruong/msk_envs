@@ -22,6 +22,7 @@ class RaceWalkEnv(LanesEnv):
             cuda_graph=cuda_graph,
             target_dir=build_axis(FWD_IDX, 1.0),
         )
+        self.weight = torch.abs(self.total_mass * self.gravity)
         return
 
     def _get_terminated(self):
@@ -29,8 +30,9 @@ class RaceWalkEnv(LanesEnv):
         terminated_lanes = super()._get_terminated().bool()
 
         # In race-walking, one foot must always be on the ground
+        # to prevent foot dragging, we set threshold to 10% of body weight
         grf_mag = torch.norm(self.grf, dim=1)
-        not_touching_ground = ~(grf_mag > 0.0)
+        not_touching_ground = ~(grf_mag > self.weight * 0.1)
 
         terminated = (terminated_lanes | not_touching_ground).bool()
         return terminated.detach()

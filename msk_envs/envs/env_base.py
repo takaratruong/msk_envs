@@ -193,6 +193,7 @@ class MSKEnv:
         # [num_envs, num_bodies]
         self.body_mass = msk_warp.body_mass(self.m)
         self.total_mass = self.body_mass.sum()
+        self.gravity = msk_warp.gravity(self.m)
 
         # Data properties. The following are all references
         # [num_envs]
@@ -221,7 +222,7 @@ class MSKEnv:
         # [num_envs, num_dofs]
         self.qfrc_damper = msk_warp.qfrc_damper(self.d)
 
-        # [num_envs, ]
+        # [num_envs, 3]
         self.grf = msk_warp.grf(self.d)
         # [num_envs, num_joint_limits]
         self.limit_torques = msk_warp.qfrc_limit(self.d)

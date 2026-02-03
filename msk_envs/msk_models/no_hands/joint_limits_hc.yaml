@@ -24,7 +24,7 @@ ankle_angle_r:
   lower: -0.7669438631158966
   upper: 0.45850166876605164
 subtalar_angle_r:
-  lower: -0.6313079634729645
+  lower: -0.33919271009
   upper: 0.2176399432204734
 mtp_angle_r:
   lower: -0.215558458842156
@@ -46,7 +46,7 @@ ankle_angle_l:
   lower: -0.7669438631158966
   upper: 0.45850166876605164
 subtalar_angle_l:
-  lower: -0.6313079634729645
+  lower: -0.33919271009
   upper: 0.2176399432204734
 mtp_angle_l:
   lower: -0.215558458842156
@@ -54,7 +54,7 @@ mtp_angle_l:
 
 arm_flex_r:
   lower: -1.30899694
-  upper: 1.57079632679
+  upper: 2.79252632679
 arm_add_r:
   lower: -0.373071692045299
   upper: 0.20420553938582017
@@ -70,7 +70,7 @@ pro_sup_r:
 
 arm_flex_l:
   lower: -1.30899694
-  upper: 1.57079632679
+  upper: 2.79252632679
 arm_add_l:
   lower: -0.373071692045299
   upper: 0.20420553938582017

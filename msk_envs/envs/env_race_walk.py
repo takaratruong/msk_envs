@@ -29,9 +29,8 @@ class RaceWalkEnv(LanesEnv):
         terminated_lanes = super()._get_terminated().bool()
 
         # In race-walking, one foot must always be on the ground
-        grf_mag = torch.norm(self.grf, dim=2)
-        touching_ground = grf_mag > 0.0
-        not_touching_ground = ~torch.any(touching_ground, dim=1)
+        grf_mag = torch.norm(self.grf, dim=1)
+        not_touching_ground = ~(grf_mag > 0.0)
 
         terminated = (terminated_lanes | not_touching_ground).bool()
         return terminated.detach()

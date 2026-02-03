@@ -471,13 +471,13 @@ def train(
 
                     # Accumulate training metrics for smoother logging
                     current_metrics = {
-                        "actor_loss": actor_loss,
-                        "qf_loss": qf_loss,
-                        "qf_max": qf_max,
-                        "qf_min": qf_min,
-                        "actor_grad_norm": actor_grad_norm,
-                        "critic_grad_norm": critic_grad_norm,
-                        "buffer_rewards": buffer_rewards,
+                        "actor_loss": actor_loss.detach().clone(),
+                        "qf_loss": qf_loss.detach().clone(),
+                        "qf_max": qf_max.detach().clone(),
+                        "qf_min": qf_min.detach().clone(),
+                        "actor_grad_norm": actor_grad_norm.detach().clone(),
+                        "critic_grad_norm": critic_grad_norm.detach().clone(),
+                        "buffer_rewards": buffer_rewards.detach().clone(),
                     }
 
                     # Log raw reward terms before lambda multiplication

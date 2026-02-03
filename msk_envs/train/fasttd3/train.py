@@ -310,8 +310,8 @@ def train(
         scaler.step(actor_optimizer)
         scaler.update()
         return (
-            actor_grad_norm.detach().clone(),
-            actor_loss.detach().clone(),
+            actor_grad_norm.detach(),
+            actor_loss.detach(),
         )
 
     def _sample_and_prepare_batches() -> list[TensorDict]:

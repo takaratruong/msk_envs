@@ -107,7 +107,7 @@ class TensorAverageMeter:
     def add(self, x):
         if len(x.shape) == 0:
             x = x.unsqueeze(0)
-        self.tensors.append(x)
+        self.tensors.append(x.clone())
 
     def mean(self):
         if len(self.tensors) == 0:

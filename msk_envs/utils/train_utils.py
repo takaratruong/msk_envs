@@ -102,23 +102,23 @@ def mark_step():
 
 class TensorAverageMeter:
     def __init__(self):
-        self.tensors = []
+        self.values = []
 
     def add(self, x):
-        if len(x.shape) == 0:
-            x = x.unsqueeze(0)
-        self.tensors.append(x)
+        if isinstance(x, (int, float)):
+            self.values.append(float(x))
+        else:
+            if len(x.shape) == 0:
+                x = x.unsqueeze(0)
+            self.values.append(x.item() if x.numel() == 1 else x.mean().item())
 
     def mean(self):
-        if len(self.tensors) == 0:
+        if len(self.values) == 0:
             return 0
-        cat = torch.cat(self.tensors, dim=0)
-        if cat.numel() == 0:
-            return 0
-        return cat.mean()
+        return sum(self.values) / len(self.values)
 
     def clear(self):
-        self.tensors = []
+        self.values = []
 
     def mean_and_clear(self):
         mean = self.mean()

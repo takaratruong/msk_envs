@@ -11,7 +11,7 @@ class EnvConfig:
     """ Environment type """
 
     # --- Control and Simulation Frequency ---
-    delta_t: float = 1.0 / 100.0
+    delta_t: float = 1.0 / 30.0
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 10000.0
     """ Simulator/physics step size """
@@ -27,9 +27,9 @@ class EnvConfig:
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
-    joint_armature: float = 0.0
+    joint_armature: float = 0.002
     """ Armature added to all joints (increases inertia but improves stability) """
-    toe_armature: float = 0.0
+    toe_armature: float = 0.002
     """ Armature specifically for toes joint """
     torso_damping: float = 1.0
     """ Damping specifically for torso joint """

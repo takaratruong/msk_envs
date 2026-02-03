@@ -1,4 +1,5 @@
 import torch
+import math
 import msk_warp
 import warp as wp
 import os
@@ -131,12 +132,22 @@ class MSKEnv:
     def _setup_cuda_graphs(self):
         if self.cuda_graph:
             assert torch.cuda.is_available()
+            # Step graph
             with wp.ScopedCapture() as capture:
-                msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
+                msk_warp.step_to(self.m, self.d, self.delta_t_sim)
             self.step_graph = capture.graph
+
+            # Reset graph: call after resetting any the worlds
             with wp.ScopedCapture() as capture:
                 msk_warp.reset(self.m, self.d)
             self.reset_graph = capture.graph
+
+            # Post-step graph: computes things like joint torques. Needed for rewards, observations, etc.
+            with wp.ScopedCapture() as capture:
+                msk_warp.post(self.m, self.d)
+            self.post_graph = capture.graph
+
+            # Forward kinematics graph, useful for motion tracking
             with wp.ScopedCapture() as capture:
                 msk_warp.fk(self.m, self.d)
             self.fk_graph = capture.graph
@@ -150,7 +161,6 @@ class MSKEnv:
             render: bool,
             cuda_graph: bool
     ):
-        self.debug = True
         self.num_worlds = num_envs
         self.device = device
 
@@ -228,6 +238,7 @@ class MSKEnv:
         self.delta_t = env_config.delta_t
         self.delta_t_sim = env_config.delta_t_sim
         self.reset_tensor = torch.zeros((num_envs, 1), dtype=torch.float32, device=device)
+        self.sim_steps_per_env_step = math.ceil(self.delta_t / self.delta_t_sim)
 
         # Starting position, load from file
         start_pose_path = os.path.join(self.curr_path, env_config.starting_pose_path)
@@ -263,8 +274,8 @@ class MSKEnv:
                 self.start_activations = torch.rand((num_envs, self.num_muscles), device=device)
                 self.noise_act_start = True
             else:
-                self.start_activations = torch.ones((num_envs, self.num_muscles),
-                                                    device=device) * env_config.default_activation
+                self.start_activations = torch.ones(
+                    (num_envs, self.num_muscles), device=device) * env_config.default_activation
 
         # Rewards storage
         self.reward_dict = {}
@@ -452,26 +463,34 @@ class MSKEnv:
         self._upon_reset_post_sim(reset_mask.squeeze(-1).bool())
         self.reset_tensor.fill_(0.0)
 
-    def step(self, actions):
-        """ External step call """
+    # The following impl of step is kinda jank, but we need this separation for logging
+    def pre_step(self, actions) -> None:
         self._pre_step()
-
-        # Sim step
         self._set_actions(actions)
+        assert not torch.isnan(actions).any(), "Actions contain NaN!"
+        return
+
+    def launch_step(self):
         if self.cuda_graph:
-            wp.capture_launch(self.step_graph)
+            for _ in range(self.sim_steps_per_env_step):
+                wp.capture_launch(self.step_graph)
+            wp.capture_launch(self.post_graph)
             wp.synchronize()
         else:
-            msk_warp.step_to(self.m, self.d, self.delta_t, self.delta_t_sim)
+            for _ in range(self.sim_steps_per_env_step):
+                msk_warp.step_to(self.m, self.d, self.delta_t_sim)
+            msk_warp.post(self.m, self.d)
+        return
 
+    def rl_step(self):
         # Only compute reward dict once per step
         self._compute_raw_reward_dict()
 
-        # RL outputs
         final_obs = self._get_obs()
         rew = self.get_rewards()
         terminated = self._get_terminated()
         truncated = self._get_truncated()
+
         # Reset any worlds that are done
         done = torch.clamp(terminated + truncated, 0.0, 1.0).unsqueeze(-1)
         if done.any():
@@ -487,7 +506,6 @@ class MSKEnv:
         }
 
         assert not torch.isnan(obs).any(), "Observations contain NaN!"
-        assert not torch.isnan(actions).any(), "Actions contain NaN!"
         assert not torch.isnan(rew).any(), "Rewards contain NaN!"
 
         if self.render and hasattr(self.renderer, 'meshes') and len(
@@ -495,6 +513,12 @@ class MSKEnv:
             self.renderer.render(self.m, self.d)
 
         return obs, rew, terminated, truncated, info
+
+    def step(self, actions):
+        """ External step call """
+        self.pre_step(actions)
+        self.launch_step()
+        return self.rl_step()
 
     def reset(self):
         """ External reset call, resets all envs """

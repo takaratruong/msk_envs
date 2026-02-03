@@ -99,7 +99,7 @@ def create_interval_plots(interval_duration: float, times: np.ndarray, fn):
     return
 
 
-def create_pdf_output(frame_data: list[FrameData], out_file: str):
+def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict], out_file: str):
     """ Create a pdf with all the relevant plots """
     n_frames = len(frame_data)
     times = np.array([frame.time for frame in frame_data])
@@ -109,12 +109,15 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
         # COM position
         com_data = np.array([frame.kinetic_data.com for frame in frame_data])
 
-        # Rewards plot
-        reward_keys = list(frame0.reward_data.keys())
+        # Rewards plot: these are logged separately
+        reward_keys = list(logged_reward_data[0].keys())
         reward_data = []
-        for frame in frame_data:
-            reward_data.append([frame.reward_data[k] for k in reward_keys])
+        for rd in logged_reward_data:
+            reward_data.append([rd[k] for k in reward_keys])
         reward_data = np.array(reward_data)
+        reward_data = np.array(reward_data)
+        reward_frame_ind = np.arange(reward_data.shape[0])
+        reward_frame_time = np.linspace(0.0, times[-1], reward_data.shape[0])
 
         rewards_plot = SequencePlot(
             PlotConfig(
@@ -123,10 +126,10 @@ def create_pdf_output(frame_data: list[FrameData], out_file: str):
                 fig_size=(8.5, 6),
                 title="Rewards",
                 x_label="Time (s)",
-                x_label_sub="Frame",
+                x_label_sub="Env Step",
                 y_label="Reward",
-                x_data=times,
-                x_data_sub=frame_ind,
+                x_data=reward_frame_time,
+                x_data_sub=reward_frame_ind,
                 x_fmt=".2f",
                 x_sub_fmt=".0f",
                 y_fmt=".2f",

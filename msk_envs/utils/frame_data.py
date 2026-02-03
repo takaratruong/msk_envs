@@ -326,7 +326,6 @@ class FrameData:
     actuators: list[ActuatorData]
     kinetic_data: KineticData
     arrows: list[Arrow]
-    reward_data: dict
 
     def to_dict(self):
         return {
@@ -340,7 +339,6 @@ class FrameData:
             "actuators": [actuator.to_dict() for actuator in self.actuators],
             "kinetic_data": self.kinetic_data.to_dict(),
             "arrows": [arrow.to_dict() for arrow in self.arrows],
-            "reward_data": self.reward_data,
         }
 
     @staticmethod
@@ -356,5 +354,4 @@ class FrameData:
             actuators=[ActuatorData.from_dict(actuator) for actuator in data["actuators"]],
             kinetic_data=KineticData.from_dict(data["kinetic_data"]),
             arrows=[Arrow.from_dict(arrow) for arrow in data["arrows"]],
-            reward_data=data["reward_data"],
         )

@@ -239,7 +239,6 @@ def parse_frame(
         visual_load_results: list[msk_warp.types.MeshLoadResult],
         world_id: int,
         frame_time: float,
-        reward_data: dict,
         ref_joint_angles=None,
 ) -> FrameData:
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
@@ -262,7 +261,6 @@ def parse_frame(
         actuators=actuators,
         kinetic_data=kinetic_data,
         arrows=[],
-        reward_data=reward_data
     )
 
     return frame_visuals

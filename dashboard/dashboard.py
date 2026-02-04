@@ -49,36 +49,15 @@ def reset_dashboard():
     reset_slider()
 
 
-def locate_traj_dirs():
-    traj_dir_options.clear()
-    # Look for all subdirectories in trajectories/
-    dirs = [d for d in os.listdir(TRAJ_DIR) if os.path.isdir(os.path.join(TRAJ_DIR, d))]
-    dirs = sorted(dirs)
+def _matches_dir_filter(dir_name: str, filter_text: str) -> bool:
+    if not filter_text:
+        return True
 
-    with traj_dir_options:
-        # Add option to show all trajectories
-        ui.item("All", on_click=lambda: select_traj_dir(""))
-        for dir_name in dirs:
-            ui.item(dir_name, on_click=lambda d=dir_name: select_traj_dir(d))
-    return
+    pattern = re.escape(filter_text).replace(r'\*', '.*')
+    return re.search(pattern, dir_name, re.IGNORECASE) is not None
 
 
-def select_traj_dir(dir_name: str):
-    global selected_traj_dir
-    selected_traj_dir = dir_name
-    traj_dir_label.set_text(f"Dir: {dir_name if dir_name else 'All'}")
-    return
-
-
-def locate_trajectories():
-    trajectory_options.clear()
-
-    base_path = (
-        Path(TRAJ_DIR) / selected_traj_dir
-        if selected_traj_dir
-        else Path(TRAJ_DIR)
-    )
-
+def _get_traj_files(base_path: Path):
     # Find .json and .json.gz files
     traj_files = list(base_path.rglob("*.json")) + list(base_path.rglob("*.json.gz"))
 
@@ -99,7 +78,50 @@ def locate_trajectories():
         return (dir_name, numeric_part, file_name)
 
     # Sort by directory then by numeric value, then by filename
-    traj_files = sorted(traj_files, key=sort_key)
+    return sorted(traj_files, key=sort_key)
+
+
+def locate_traj_dirs():
+    traj_dir_options.clear()
+    # Look for all subdirectories in trajectories/
+    dirs = [d for d in os.listdir(TRAJ_DIR) if os.path.isdir(os.path.join(TRAJ_DIR, d))]
+    dirs = sorted(dirs)
+    filter_text = dir_filter_input.value.strip()
+
+    with traj_dir_options:
+        # Add option to show all trajectories
+        ui.item("All", on_click=lambda: select_traj_dir(""))
+        for dir_name in dirs:
+            if _matches_dir_filter(dir_name, filter_text):
+                ui.item(dir_name, on_click=lambda d=dir_name: select_traj_dir(d))
+    return
+
+
+def select_traj_dir(dir_name: str):
+    global selected_traj_dir
+    selected_traj_dir = dir_name
+    traj_dir_label.set_text(f"Dir: {dir_name if dir_name else 'All'}")
+    base_path = (
+        Path(TRAJ_DIR) / selected_traj_dir
+        if selected_traj_dir
+        else Path(TRAJ_DIR)
+    )
+    traj_files = _get_traj_files(base_path)
+    if traj_files:
+        send_viewer_trajectory(str(traj_files[-1]))
+    return
+
+
+def locate_trajectories():
+    trajectory_options.clear()
+
+    base_path = (
+        Path(TRAJ_DIR) / selected_traj_dir
+        if selected_traj_dir
+        else Path(TRAJ_DIR)
+    )
+
+    traj_files = _get_traj_files(base_path)
 
     with trajectory_options:
         for path in traj_files:
@@ -193,6 +215,11 @@ with ui.row().classes('w-full z-50 bg-white').style(
     with ui.row().classes("w-full justify-center mt-4"):
         ui.label("MSK Dashboard").classes("text-2xl font-bold")
         with ui.row().classes("items-center justify-center gap-4"):
+            dir_filter_input = ui.input(
+                label="Filter dir",
+                placeholder="e.g. exp*",
+                on_change=locate_traj_dirs,
+            ).classes("w-48")
             traj_dir_options = ui.dropdown_button("Traj Dir",
                                                   auto_close=True,
                                                   on_click=locate_traj_dirs)

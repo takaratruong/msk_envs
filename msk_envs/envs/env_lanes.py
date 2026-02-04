@@ -19,6 +19,7 @@ class LanesEnv(MSKEnv):
             render: bool,
             cuda_graph: bool,
             target_dir: list[float],
+            angle_tolerance: float = 30.0,
     ):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
         assert target_dir[UP_IDX] == 0.0, "Target direction should be horizontal only"
@@ -30,7 +31,7 @@ class LanesEnv(MSKEnv):
 
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
-        self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(30.0, device=self.device)))
+        self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
         return
 
     def _get_obs(self) -> torch.Tensor:

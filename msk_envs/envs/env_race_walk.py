@@ -21,6 +21,7 @@ class RaceWalkEnv(LanesEnv):
             render=render,
             cuda_graph=cuda_graph,
             target_dir=build_axis(FWD_IDX, 1.0),
+            angle_tolerance=90.0,  # we're more lenient since hip swaying is fine
         )
         self.weight = torch.abs(self.total_mass * self.gravity)
         return

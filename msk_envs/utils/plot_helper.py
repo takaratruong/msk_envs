@@ -91,9 +91,17 @@ class SequencePlot:
             if label != "":
                 self.labels_per_ax[ax_idx_x, ax_idx_y] += y_data.shape[1]
 
-    def add(self, idx: int, y_data: np.ndarray, label: str, alpha: float = 1.0, title: str = None):
+    def add(
+            self,
+            idx: int,
+            y_data: np.ndarray,
+            label: str,
+            alpha: float = 1.0,
+            linestyle: str = "solid",
+            title: str = None
+    ):
         ax = self.axs[idx]
-        ax.plot(self.x_data, y_data, label=label, alpha=alpha)
+        ax.plot(self.x_data, y_data, label=label, alpha=alpha, linestyle=linestyle)
 
         if title is not None:
             ax.set_title(title, fontsize=14, fontweight="bold")
@@ -139,6 +147,18 @@ class SequencePlot:
     def add_hline(self, idx: int, y_value: float, label: str = "", color: str = 'r'):
         ax = self.axs[idx]
         ax.axhline(y=y_value, color=color, linestyle='--', label=label)
+
+        # Update y range
+        ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)
+        curr_min, curr_max = self.y_ranges[ax_idx_x, ax_idx_y, :]
+        self.y_ranges[ax_idx_x, ax_idx_y, 0] = min(curr_min, y_value)
+        self.y_ranges[ax_idx_x, ax_idx_y, 1] = max(curr_max, y_value)
+        return
+
+    def add_hline_with_bars(self, idx: int, y_value: float, y_var: float, label: str = "", color: str = 'r'):
+        ax = self.axs[idx]
+        ax.axhline(y=y_value, color=color, linestyle='--')
+        ax.fill_between(self.x_data, y_value - y_var, y_value + y_var, color=color, alpha=0.2, label=label)
 
         # Update y range
         ax_idx_x, ax_idx_y = self._get_x_y_idx(idx)

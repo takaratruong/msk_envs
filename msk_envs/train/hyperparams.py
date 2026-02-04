@@ -5,7 +5,8 @@ from typing_extensions import Annotated
 
 import tyro
 
-from msk_envs.envs.env_config import EnvConfig, EnvConfigNoHands, EnvConfigNoHandsWalk, EnvConfigNoHandsExp
+from msk_envs.envs.env_config import EnvConfig, EnvConfigNoHands, EnvConfigNoHandsWalk, EnvConfigNoHandsExp, \
+    EnvConfigStaticLegs
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -81,7 +82,7 @@ def pretty_print_base_args(args: BaseArgs):
 class WalkConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsWalk(
         env_variant=DerivedEnv.WALK,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=5.0,
 
         muscle_multiplier=1.0,
@@ -101,7 +102,7 @@ class WalkConfig(BaseArgs):
 class JogConfig(BaseArgs):
     env_config: EnvConfigNoHands = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.JOG,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
     ))
@@ -119,7 +120,7 @@ class JogConfig(BaseArgs):
 class SprintConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.SPRINT,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
@@ -134,11 +135,32 @@ class SprintConfig(BaseArgs):
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
 
+
+@dataclass
+class RaceWalkConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+        env_variant=DerivedEnv.RACE_WALK,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 0.01
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -2e-3
+    lambda_damping: float = -1e-3
+    lambda_actuator: float = -1e-2
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+
+
 @dataclass
 class BackPedalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.BACKPEDAL,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_stand_backward.yaml",
@@ -158,7 +180,7 @@ class BackPedalConfig(BaseArgs):
 class SideShuffleConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.SIDE_SHUFFLE,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_stand_side.yaml",
@@ -199,7 +221,7 @@ class HopConfig(BaseArgs):
 class VerticalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.VERTICAL,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
     ))
@@ -214,7 +236,7 @@ class VerticalConfig(BaseArgs):
 class PerturbConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.PERTURB,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
     ))
@@ -229,8 +251,7 @@ class PerturbConfig(BaseArgs):
 class DontFallConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.DONT_FALL,
-        delta_t=1.0 / 100.0,
-        delta_t_sim=1.0 / 5000.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         noise_start=False,
     ))
@@ -290,11 +311,41 @@ class ImitateConfig(BaseArgs):
             self.env_config.extra_rewarded_dofs = [s.strip() for s in self.extra_rewarded_dofs.split(",") if s.strip()]
 
 
-# Register configs here
+@dataclass
+class StaticSquatConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+        env_variant=DerivedEnv.STATIC,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
+    ))
+
+    lambda_track: float = 0.1
+    imitation_weight_track: float = 10.0
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.env_config.target_position = [0.0, 0.9, 0.0]
+
+
+@dataclass
+class AnkleFlexConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigStaticLegs(
+        env_variant=DerivedEnv.ANKLE_FLEX,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+    ))
+
+    lambda_test: float = 0.1
+
+
 Config = Union[
     Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
     Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
+    Annotated[RaceWalkConfig, tyro.conf.subcommand(name="racewalk")],
     Annotated[BackPedalConfig, tyro.conf.subcommand(name="backpedal")],
     Annotated[SideShuffleConfig, tyro.conf.subcommand(name="sideshuffle")],
     Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
@@ -302,6 +353,8 @@ Config = Union[
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
     Annotated[DontFallConfig, tyro.conf.subcommand(name="dontfall")],
+    Annotated[StaticSquatConfig, tyro.conf.subcommand(name="static")],
+    Annotated[AnkleFlexConfig, tyro.conf.subcommand(name="ankleflex")],
 ]
 
 

@@ -26,10 +26,10 @@ def parse_starting_pose(
 
     with open(file_path, "r") as f:
         data = yaml.safe_load(f)
-
     for coord_name, values in data.items():
         if coord_name not in dof_id_lookup:
-            raise ValueError(f"Coordinate '{coord_name}' not found")
+            print(f"Warning: Coordinate '{coord_name}' not found for starting pose, skipping.")
+            continue
         qpos_id, qvel_id = dof_id_lookup[coord_name]
         qpos, qvel = values["q"], values["v"]
         if qpos_id != -1:

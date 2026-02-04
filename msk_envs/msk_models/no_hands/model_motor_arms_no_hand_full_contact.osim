@@ -11077,7 +11077,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>50</optimal_force>
+					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0.01</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -11087,7 +11087,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>50</optimal_force>
+					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0.01</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -11426,10 +11426,10 @@
 					<!--Body name to connect the contact geometry to-->
 					<socket_frame>torso</socket_frame>
 					<!--Location of geometry center in the body frame-->
-					<location>0.0 0.55 0.0</location>
+					<location>0.01 0.54 0.0</location>
 					<!--Orientation of geometry in the body frame-->
 					<orientation>0 0 0</orientation>
-					<radius>0.1</radius>
+					<radius>0.11</radius>
 				</ContactSphere>
 				<ContactCapsule name="right_humerus_col">
 					<!--Body name to connect the contact geometry to-->

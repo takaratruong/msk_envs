@@ -146,6 +146,16 @@ def send_viewer_trajectory(file: str):
     timeline_slider.props['max'] = n_frames - 1
     timeline_slider.update()
     format_timeline_label()
+
+    # update fps
+    if len(traj) > 1:
+        fps = 1.0 / (traj[1]["time"] - traj[0]["time"])
+    else:
+        fps = 1.0 / traj[0]["time"]
+    timeline_controller.set_tick_rate(fps)
+    tick_rate_input.value = int(fps)
+    tick_rate_input.update()
+
     # send to viewer
     dispatch_custom_event('loadTrajectory', traj)
 
@@ -246,7 +256,7 @@ with ui.row().classes('w-full z-50 bg-white').style(
                     <label for="drawMuscles">Draw muscles</label>
                     <input type="checkbox" id="drawMuscles" checked>
                 </div>
-                <button id="fullScreenButton">Full Screen</button>
+                <button id="fullScreenButton">Panel View</button>
                 <div class="control-row">
                     <button id="resetButton1">Camera 1 follow</button>
                     <button id="resetButton2">Camera 2 follow</button>

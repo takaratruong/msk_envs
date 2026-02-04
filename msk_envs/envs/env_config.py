@@ -11,7 +11,7 @@ class EnvConfig:
     """ Environment type """
 
     # --- Control and Simulation Frequency ---
-    delta_t: float = 1.0 / 100.0
+    delta_t: float = 1.0 / 30.0
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 10000.0
     """ Simulator/physics step size """
@@ -21,13 +21,15 @@ class EnvConfig:
     """ Integrator type (EULER_FIXED, RK4_FIXED) """
 
     # --- Model articulation properties ---
+    model_root_free: bool = True
+    """ Whether the model root is free (floating base) """
     model_path: str = "../msk_models/model_motor_arms_full_contact.osim"
     """ OpenSim model file path """
     joint_damping: float = 0.1
     """ Joint damping applied to all joints """
-    joint_armature: float = 0.0
+    joint_armature: float = 0.002
     """ Armature added to all joints (increases inertia but improves stability) """
-    toe_armature: float = 0.0
+    toe_armature: float = 0.002
     """ Armature specifically for toes joint """
     torso_damping: float = 1.0
     """ Damping specifically for torso joint """
@@ -53,9 +55,9 @@ class EnvConfig:
     """ Muscle activation time constant """
     muscle_deactivation_time_const: float = 0.060
     """ Muscle deactivation time constant """
-    muscle_activation_dynamics_smoothing: float = 0.1
+    muscle_activation_dynamics_smoothing: float = 10.0
     """ Muscle activation dynamics smoothing factor """
-    muscle_fiber_damping: float = 0.01
+    muscle_fiber_damping: float = 0.1
     """ Fiber damping (0.0 = undamped) """
     muscle_min_activation: float = 0.0
     """ Minimum muscle activation. Use non-zero for undamped muscle """
@@ -117,6 +119,8 @@ class EnvConfig:
     """ List of DOFs to give extra reward for tracking (for debug) """
     lambda_extra_rewarded_dofs: float = 0.0
     """ Lambda for extra rewarded DOFs """
+    target_position: list = field(default_factory=lambda: [0.0, 1.0, 0.0])
+    """ Target position for STATIC env variant """
 
     def to_json(self):
         return json.dumps(self.__dict__, indent=4)
@@ -151,6 +155,7 @@ class EnvConfigNoHands(EnvConfig):
     starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
 
+
 @dataclass
 class EnvConfigNoHandsExp(EnvConfig):
     """ Environment configuration for no-hands model"""
@@ -161,6 +166,7 @@ class EnvConfigNoHandsExp(EnvConfig):
     starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
 
+
 @dataclass
 class EnvConfigNoHandsWalk(EnvConfig):
     """ Environment configuration for no-hands model, with walking-specific contact params"""
@@ -169,3 +175,14 @@ class EnvConfigNoHandsWalk(EnvConfig):
     limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
     starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_walking.yaml"
+
+
+@dataclass
+class EnvConfigStaticLegs(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    model_root_free: bool = False
+    model_path: str = "../msk_models/static/model_just_legs.osim"
+    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
+    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
+    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"

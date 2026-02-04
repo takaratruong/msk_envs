@@ -190,7 +190,7 @@ def train(
         # Build logged sim wrapper
         sim = LoggedSim(eval_envs, device=device)
         eval_obs = sim.reset()
-        for _ in range(sim.max_episode_length):
+        for _ in range(sim.max_env_steps):
             with torch.no_grad():
                 eval_actions = policy_eval(eval_obs)
                 finished, eval_obs = sim.step(eval_actions)
@@ -310,8 +310,8 @@ def train(
         scaler.step(actor_optimizer)
         scaler.update()
         return (
-            actor_grad_norm.detach(),
-            actor_loss.detach(),
+            actor_grad_norm.detach().item(),
+            actor_loss.detach().item(),
         )
 
     def _sample_and_prepare_batches() -> list[TensorDict]:

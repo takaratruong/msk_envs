@@ -6,7 +6,7 @@ def setup_renderer(fps):
 
     scene.render.fps = fps
     scene.render.engine = "CYCLES"
-    scene.render.motion_blur_shutter = 0.15
+    scene.render.motion_blur_shutter = 0.3
 
     if hasattr(scene.render, "motion_blur_position"):
         scene.render.motion_blur_position = 'CENTER'

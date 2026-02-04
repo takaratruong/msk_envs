@@ -74,7 +74,7 @@ class JoggingEnv(MSKEnv):
         rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles, squared=True)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
         rew_acc = acceleration_sq_penalty(joint_accelerations)
-        rew_limit = joint_limit_penalty(self.limit_torques, squared=True)
+        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=True)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         # Scale energy terms by energy factor
         rew_metabolic = rew_metabolic * self.energy_factor

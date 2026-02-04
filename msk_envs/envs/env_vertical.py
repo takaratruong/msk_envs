@@ -33,7 +33,7 @@ class VerticalEnv(MSKEnv):
         self.max_height_achieved = torch.max(self.max_height_achieved, current_max_height)
         rew_max_vertical = self.max_height_achieved.clone()  # Cloned to avoid early reset issues
 
-        rew_limit = joint_limit_penalty(self.limit_torques)
+        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
 
         self.reward_dict = {

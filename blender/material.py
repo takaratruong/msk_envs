@@ -112,3 +112,41 @@ def create_plane_material(plane_texture_path):
     elif 'Specular' in bsdf.inputs:
         bsdf.inputs['Specular'].default_value = 0.5
     return plane_material
+
+
+def create_collider_material():
+    """Light blue, semi-transparent collider material"""
+    collider_material = bpy.data.materials.new(name="ColliderMaterial")
+    collider_material.use_nodes = True
+
+    nodes = collider_material.node_tree.nodes
+    links = collider_material.node_tree.links
+    nodes.clear()
+
+    # Principled BSDF
+    bsdf = nodes.new(type='ShaderNodeBsdfPrincipled')
+    bsdf.location = (0, 0)
+
+    # Light blue color
+    bsdf.inputs['Base Color'].default_value = (0.4, 0.7, 1.0, 1.0)
+
+    # Matte look
+    bsdf.inputs['Roughness'].default_value = 1.0
+    bsdf.inputs['Metallic'].default_value = 0.0
+
+    # Transparency
+    if 'Alpha' in bsdf.inputs:
+        bsdf.inputs['Alpha'].default_value = 0.3
+
+    # Reduce reflections
+    if 'Specular IOR' in bsdf.inputs:
+        bsdf.inputs['Specular IOR'].default_value = 1.1
+    elif 'Specular' in bsdf.inputs:
+        bsdf.inputs['Specular'].default_value = 0.05
+
+    # Material Output
+    output = nodes.new(type='ShaderNodeOutputMaterial')
+    output.location = (200, 0)
+
+    links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+    return collider_material

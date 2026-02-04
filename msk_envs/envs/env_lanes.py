@@ -1,6 +1,6 @@
 import torch
 
-from msk_envs.utils.global_params import SIDE_IDX, FWD_IDX, build_axis
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
@@ -19,12 +19,19 @@ class LanesEnv(MSKEnv):
             render: bool,
             cuda_graph: bool,
             target_dir: list[float],
+            angle_tolerance: float = 30.0,
     ):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
+        assert target_dir[UP_IDX] == 0.0, "Target direction should be horizontal only"
+
+        # Precompute 2d target facing direction
+        self.target_facing = torch.tensor(target_dir, device=self.device).unsqueeze(0)
+        self.target_facing = self.target_facing[:, [FWD_IDX, SIDE_IDX]]
+        self.target_facing = self.target_facing / torch.norm(self.target_facing, dim=1, keepdim=True)
+
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
-        self.target_facing = torch.tensor(target_dir, device=self.device).unsqueeze(0)
-        self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(30.0, device=self.device)))
+        self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -50,7 +57,7 @@ class LanesEnv(MSKEnv):
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
         rew_mid_lane = mid_lane_reward(self.root_pos)
-        rew_limit = joint_limit_penalty(self.limit_torques, squared=False)
+        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
         rew_damping = joint_damping_penalty(self.qfrc_damper, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
@@ -79,6 +86,9 @@ class LanesEnv(MSKEnv):
         # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, self.root_id]
         pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
+        pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
+        pelvis_fwd = pelvis_fwd / torch.norm(pelvis_fwd, dim=1, keepdim=True)
+
         pelvis_fwd_dot_target = torch.sum(pelvis_fwd * self.target_facing, dim=1)
         facing_direction = pelvis_fwd_dot_target >= self.cos_angle_threshold
         not_facing_direction = ~facing_direction

@@ -1,14 +1,11 @@
-matplotlib==3.10.8
-nicegui==3.4.1
-numpy==2.4.0
-plotly==6.3.0
-PyYAML==6.0.3
-scipy==1.16.3
-tensordict==0.7.2
-torch==2.6.0
-tqdm==4.67.1
-tyro==1.0.3
-vtk==9.5.0
-warp_lang==1.10.0
-wandb==0.19.11
+loguru
+pyvista
+rich
+scipy
+tensorboard
+tensordict
+tqdm
+tyro
+vtk
+wandb
 

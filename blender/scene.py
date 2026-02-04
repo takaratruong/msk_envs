@@ -100,6 +100,21 @@ def setup_sky():
     links.new(background.outputs['Background'], output.inputs['Surface'])
 
 
+def setup_meter_markers():
+    """
+    Create 3d text markers every 10m
+    """
+    for i in range(0, 101, 10):
+        bpy.ops.object.text_add(location=(i, 1.5, 0.05))
+        text_obj = bpy.context.active_object
+        text_obj.name = f"MeterMarker_{i}m"
+        text_obj.data.body = f"{i}"
+        text_obj.data.size = 1.0
+        text_obj.data.extrude = 0.05
+        text_obj.rotation_euler = (1.5708, 0, 0)
+    return
+
+
 def setup_floor(plane_texture_path, size, location):
     # Create the plane mesh
     bpy.ops.mesh.primitive_plane_add(size=size, location=location)

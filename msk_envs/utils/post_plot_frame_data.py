@@ -1,5 +1,5 @@
 import json
-from .checkpoint_parser import FrameData
+from .frame_parser import FrameData
 from .pdf_log_builder import create_pdf_output
 
 

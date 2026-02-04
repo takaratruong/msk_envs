@@ -1,269 +1,7 @@
 import msk_warp
-import os
 import torch
 
-from dataclasses import dataclass
-from typing import Optional
-
-
-@dataclass
-class ColliderData:
-    geom_type: int
-    pos: list[float]
-    rot: list[float]
-    scale: list[float]
-
-    def to_dict(self):
-        return {
-            "geom_type": int(self.geom_type),
-            "pos": list(self.pos),
-            "rot": list(self.rot),
-            "scale": list(self.scale),
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> 'ColliderData':
-        return ColliderData(
-            geom_type=data["geom_type"],
-            pos=data["pos"],
-            rot=data["rot"],
-            scale=data["scale"],
-        )
-
-
-@dataclass
-class VisualData:
-    mesh_file: str
-    pos: list[float]
-    rot: list[float]
-    scale: list[float]
-    opacity: float = 1.0
-
-    def to_dict(self):
-        # Remove .vtp if it exists and replace with .obj
-        mesh_obj_file = self.mesh_file
-        if mesh_obj_file.endswith('.vtp'):
-            mesh_obj_file = self.mesh_file[:-4] + '.obj'
-        mesh_obj_file = os.path.join("assets", "geometry", "obj", mesh_obj_file)
-
-        return {
-            "mesh_file": mesh_obj_file,
-            "pos": list(self.pos),
-            "rot": list(self.rot),
-            "scale": list(self.scale),
-            "opacity": self.opacity,
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> 'VisualData':
-        return VisualData(
-            mesh_file=data["mesh_file"],
-            pos=data["pos"],
-            rot=data["rot"],
-            scale=data["scale"],
-            opacity=data.get("opacity", 1.0),
-        )
-
-
-@dataclass
-class MuscleData:
-    name: str
-    points: list
-
-    max_isometric_force: float
-    activation: float
-    excitation: float
-    actuation: float
-
-    path_length: float
-    path_velocity: float
-    fiber_length: float
-    fiber_velocity: float
-    tendon_length: float
-    pennation_angle: float
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "points": self.points,
-            "max_isometric_force": self.max_isometric_force,
-            "activation": self.activation,
-            "excitation": self.excitation,
-            "actuation": self.actuation,
-            "path_length": self.path_length,
-            "path_velocity": self.path_velocity,
-            "fiber_length": self.fiber_length,
-            "fiber_velocity": self.fiber_velocity,
-            "tendon_length": self.tendon_length,
-            "pennation_angle": self.pennation_angle,
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> 'MuscleData':
-        return MuscleData(
-            name=data["name"],
-            points=data["points"],
-            max_isometric_force=data["max_isometric_force"],
-            activation=data["activation"],
-            excitation=data["excitation"],
-            actuation=data["actuation"],
-            path_length=data["path_length"],
-            path_velocity=data["path_velocity"],
-            fiber_length=data["fiber_length"],
-            fiber_velocity=data["fiber_velocity"],
-            tendon_length=data["tendon_length"],
-            pennation_angle=data["pennation_angle"],
-        )
-
-
-@dataclass
-class ActuatorData:
-    name: str
-
-    optimal_force: float
-    activation: float
-    excitation: float
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "optimal_force": self.optimal_force,
-            "activation": self.activation,
-            "excitation": self.excitation,
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> 'ActuatorData':
-        return ActuatorData(
-            name=data["name"],
-            optimal_force=data["optimal_force"],
-            activation=data["activation"],
-            excitation=data["excitation"],
-        )
-
-
-@dataclass
-class KineticData:
-    com: tuple
-    grf: tuple
-    total_mass: float
-    gravity: float
-
-    def to_dict(self):
-        return {
-            "com": list(self.com),
-            "grf": list(self.grf),
-            "total_mass": self.total_mass,
-            "gravity": self.gravity,
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> 'KineticData':
-        return KineticData(
-            com=tuple(data["com"]),
-            grf=tuple(data["grf"]),
-            total_mass=data["total_mass"],
-            gravity=data["gravity"],
-        )
-
-
-@dataclass
-class NamedValue:
-    name: str
-    value: float
-    reference: Optional[float] = None
-    limits: Optional[tuple[float, float]] = None
-
-    def has_reference(self) -> bool:
-        return self.reference is not None
-
-    def has_limits(self) -> bool:
-        return self.limits is not None
-
-    def to_dict(self):
-        ret = {
-            "name": self.name,
-            "value": self.value,
-        }
-        if self.reference is not None:
-            ret["reference"] = self.reference
-        if self.limits is not None:
-            ret["limits"] = list(self.limits)
-        return ret
-
-    @staticmethod
-    def from_dict(data: dict) -> 'NamedValue':
-        return NamedValue(
-            name=data["name"],
-            value=data["value"],
-            reference=data.get("reference"),
-            limits=tuple(data["limits"]) if "limits" in data else None,
-        )
-
-
-@dataclass
-class Arrow:
-    start: list[float]
-    direction: list[float]
-
-    def to_dict(self):
-        return {
-            "start": list(self.start),
-            "direction": list(self.direction),
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> 'Arrow':
-        return Arrow(
-            start=data["start"],
-            direction=data["direction"],
-        )
-
-
-@dataclass
-class FrameData:
-    time: float
-    visuals: list[VisualData]
-    colliders: list[ColliderData]
-    joint_angles: list[NamedValue]
-    joint_velocities: list[NamedValue]
-    joint_moments: list[NamedValue]
-    muscles: list[MuscleData]
-    actuators: list[ActuatorData]
-    kinetic_data: KineticData
-    arrows: list[Arrow]
-    reward_data: dict
-
-    def to_dict(self):
-        return {
-            "time": self.time,
-            "visuals": [obj.to_dict() for obj in self.visuals],
-            "colliders": [obj.to_dict() for obj in self.colliders],
-            "joint_angles": [angle.to_dict() for angle in self.joint_angles],
-            "joint_velocities": [vel.to_dict() for vel in self.joint_velocities],
-            "joint_moments": [moment.to_dict() for moment in self.joint_moments],
-            "muscles": [muscle.to_dict() for muscle in self.muscles],
-            "actuators": [actuator.to_dict() for actuator in self.actuators],
-            "kinetic_data": self.kinetic_data.to_dict(),
-            "arrows": [arrow.to_dict() for arrow in self.arrows],
-            "reward_data": self.reward_data,
-        }
-
-    @staticmethod
-    def from_dict(data: dict) -> 'FrameData':
-        return FrameData(
-            time=data["time"],
-            visuals=[VisualData.from_dict(obj) for obj in data["visuals"]],
-            colliders=[ColliderData.from_dict(obj) for obj in data["colliders"]],
-            joint_angles=[NamedValue.from_dict(angle) for angle in data["joint_angles"]],
-            joint_velocities=[NamedValue.from_dict(vel) for vel in data["joint_velocities"]],
-            joint_moments=[NamedValue.from_dict(moment) for moment in data["joint_moments"]],
-            muscles=[MuscleData.from_dict(muscle) for muscle in data["muscles"]],
-            actuators=[ActuatorData.from_dict(actuator) for actuator in data["actuators"]],
-            kinetic_data=KineticData.from_dict(data["kinetic_data"]),
-            arrows=[Arrow.from_dict(arrow) for arrow in data["arrows"]],
-            reward_data=data["reward_data"],
-        )
+from msk_envs.utils.frame_data import *
 
 
 def parse_visual_data(
@@ -291,20 +29,24 @@ def parse_visual_data(
 def parse_collider_data(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        collider_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[ColliderData]:
     collider_types = msk_warp.get_collider_types(m)
     collider_scales = msk_warp.get_collider_sizes(m)
     collider_positions = msk_warp.get_collider_positions(d)
     collider_rotations = msk_warp.get_collider_rotations(d)
+    collider_forces = msk_warp.collider_forces(d)
 
     colliders = []
     for i in range(msk_warp.get_num_colliders(m)):
         collider_data = ColliderData(
+            name=collider_idx_to_name[i],
             geom_type=int(collider_types[i]),
             pos=collider_positions[world_id][i].tolist(),
             rot=collider_rotations[world_id][i].tolist(),
             scale=collider_scales[i].tolist(),
+            contact_force=collider_forces[world_id][i].item(),
         )
         colliders.append(collider_data)
     return colliders
@@ -321,11 +63,11 @@ def parse_muscle_data(
     muscle_actuations = msk_warp.muscle_actuations(d)
     muscle_path_lengths = msk_warp.muscle_path_lengths(d)
     muscle_path_velocities = msk_warp.muscle_path_velocities(d)
-    muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(d)
-    muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(d)
+    muscle_moment_arms = msk_warp.muscle_moment_arms(d)
 
     muscle_metadata = msk_warp.muscle_metadata_np(m)
     muscle_length_info = msk_warp.muscle_length_info_np(d)
+    muscle_velocity_info = msk_warp.muscle_velocity_info_np(d)
 
     site_positions = msk_warp.site_positions(d)
     muscle_site_adr = msk_warp.muscle_site_adr(m)
@@ -339,15 +81,22 @@ def parse_muscle_data(
             name=muscle_idx_to_name[i],
             points=site_positions[world_id][pt_adr:pt_adr + n_pts].tolist(),
             max_isometric_force=float(muscle_metadata["max_isometric_force"][i]),
+            optimal_fiber_length=float(muscle_metadata["optimal_fiber_length"][i]),
+            tendon_slack_length=float(muscle_metadata["tendon_slack_length"][i]),
             activation=float(muscle_activations[world_id][i].item()),
             excitation=float(muscle_excitations[world_id][i].item()),
             actuation=float(muscle_actuations[world_id][i].item()),
+            length_multiplier=float(muscle_length_info["fiber_active_force_length_multiplier"][world_id][i].item()),
+            velocity_multiplier=float(muscle_velocity_info["fiber_force_velocity_multiplier"][world_id][i].item()),
+            passive_multiplier=float(muscle_length_info["fiber_passive_force_length_multiplier"][world_id][i].item()),
+            damping_multiplier=float(muscle_velocity_info["fiber_damping_force_multiplier"][world_id][i].item()),
             path_length=float(muscle_path_lengths[world_id][i].item()),
             path_velocity=float(muscle_path_velocities[world_id][i].item()),
-            fiber_length=float(muscle_fiber_lengths[world_id][i].item()),
-            fiber_velocity=float(muscle_fiber_velocities[world_id][i].item()),
+            fiber_length=float(muscle_length_info["fiber_length"][world_id][i].item()),
+            fiber_velocity=float(muscle_velocity_info["fiber_velocity"][world_id][i].item()),
             tendon_length=float(muscle_length_info["tendon_length"][world_id][i].item()),
             pennation_angle=float(muscle_length_info["pennation_angle"][world_id][i].item()),
+            moment_arm=muscle_moment_arms[world_id][i].tolist(),
         )
         muscles.append(muscle_data)
     return muscles
@@ -378,14 +127,18 @@ def parse_actuator_data(
 def parse_kinetic_data(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        body_name_to_idx: dict[str, int],
         world_id: int
 ) -> KineticData:
     com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
+    body_com_positions = msk_warp.body_com_positions(d)[world_id]
     grf = msk_warp.grf(d)[world_id].tolist()
     mass = msk_warp.subtree_mass(m)[1]
     gravity = msk_warp.gravity(m)
     kinetic_data = KineticData(
         com=tuple(com),
+        foot_pos_l=tuple(body_com_positions[body_name_to_idx["talus_l"]].tolist()),
+        foot_pos_r=tuple(body_com_positions[body_name_to_idx["talus_r"]].tolist()),
         grf=tuple(grf),
         total_mass=float(mass),
         gravity=gravity,
@@ -445,14 +198,30 @@ def parse_joint_moments(
         d: msk_warp.types.Data,
         dof_idx_to_name: dict[int, str],
         world_id: int
-) -> list[NamedValue]:
+) -> list[JointMoment]:
     joint_moments = msk_warp.joint_moments(d)
-    moments = []
+    qfrc_spring = msk_warp.qfrc_spring(d)
+    qfrc_damper = msk_warp.qfrc_damper(d)
+    qfrc_drag= msk_warp.qfrc_drag(d)
+    qfrc_bias = msk_warp.qfrc_bias(d)
+    qfrc_muscle = msk_warp.qfrc_muscle(d)
+    qfrc_actuator = msk_warp.qfrc_actuator(d)
+    qfrc_limit = msk_warp.qfrc_limit(d)
+    qfrc_contact = msk_warp.qfrc_contact(d)
 
+    moments = []
     for i in range(msk_warp.get_num_dofs(m)):
-        angle = NamedValue(
+        angle = JointMoment(
             name=dof_idx_to_name[i],
             value=float(joint_moments[world_id][i].item()),
+            spring=float(qfrc_spring[world_id][i].item()),
+            damping=float(qfrc_damper[world_id][i].item()),
+            drag=float(qfrc_drag[world_id][i].item()),
+            bias=float(qfrc_bias[world_id][i].item()),
+            muscle=float(qfrc_muscle[world_id][i].item()),
+            actuator=float(qfrc_actuator[world_id][i].item()),
+            limit=float(qfrc_limit[world_id][i].item()),
+            contact=float(qfrc_contact[world_id][i].item()),
         )
         moments.append(angle)
     return moments
@@ -461,21 +230,22 @@ def parse_joint_moments(
 def parse_frame(
         m: msk_warp.types.Model,
         d: msk_warp.types.Data,
+        body_name_to_idx: dict[str, int],
         qpos_idx_to_name: dict[int, str],
         dof_idx_to_name: dict[int, str],
         muscle_idx_to_name: dict[int, str],
         actuation_idx_to_name: dict[int, str],
+        collider_idx_to_name: dict[int, str],
         visual_load_results: list[msk_warp.types.MeshLoadResult],
         world_id: int,
         frame_time: float,
-        reward_data: dict,
         ref_joint_angles=None,
 ) -> FrameData:
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
-    colliders = parse_collider_data(m, d, world_id)
+    colliders = parse_collider_data(m, d, collider_idx_to_name, world_id)
     muscles = parse_muscle_data(m, d, muscle_idx_to_name, world_id)
     actuators = parse_actuator_data(m, d, actuation_idx_to_name, world_id)
-    kinetic_data = parse_kinetic_data(m, d, world_id)
+    kinetic_data = parse_kinetic_data(m, d, body_name_to_idx, world_id)
     joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, world_id, ref_joint_angles)
     joint_velocities = parse_joint_velocities(m, d, world_id)
     joint_moments = parse_joint_moments(m, d, dof_idx_to_name, world_id)
@@ -491,7 +261,6 @@ def parse_frame(
         actuators=actuators,
         kinetic_data=kinetic_data,
         arrows=[],
-        reward_data=reward_data
     )
 
     return frame_visuals

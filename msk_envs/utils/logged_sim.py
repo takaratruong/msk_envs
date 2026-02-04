@@ -1,14 +1,16 @@
 """ Provides a wrapper around an MSKEnv to log simulation data """
 from msk_envs.envs.env_base import MSKEnv
-from msk_envs.envs.env_perturb import PerturbEnv
-from msk_envs.utils.checkpoint_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame
+from msk_envs.utils.frame_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame
 from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
 
+import math
+import msk_warp
 import os
 import gzip
 import json
 import torch
+import warp as wp
 
 
 class LoggedSim:
@@ -16,9 +18,11 @@ class LoggedSim:
             self,
             envs: MSKEnv,
             device: torch.device,
+            delta_t_log: float = 0.01,  # 100 fps
     ):
         self.envs = envs
         self.worlds_to_save = list(range(envs.num_worlds))
+        self.delta_t_log = delta_t_log
         n_worlds = envs.num_worlds
         n_worlds_to_save = len(self.worlds_to_save)
         assert n_worlds_to_save <= n_worlds
@@ -26,19 +30,26 @@ class LoggedSim:
         assert max(self.worlds_to_save) < n_worlds
 
         # Build storage for things to track
-        max_ep_len = int(envs.max_episode_duration / envs.delta_t)
+        max_env_steps = int(envs.max_episode_duration / envs.delta_t)
         self.finished = torch.zeros((n_worlds,), dtype=torch.bool, device=device)
-        self.rewards = torch.zeros((n_worlds_to_save, max_ep_len), dtype=torch.float32, device=device)
-        self.frame_data = [[] for _ in range(n_worlds_to_save)]
+        self.rewards = torch.zeros((n_worlds_to_save, max_env_steps), dtype=torch.float32, device=device)
         self.episode_length = torch.zeros((n_worlds,), dtype=torch.int32, device=device)
+        self.reward_data = [[] for _ in range(n_worlds_to_save)]
+        self.max_env_steps = max_env_steps
+
+        # Frame data: logged every delta_t_log seconds
+        self.num_sim_steps_per_log = math.ceil(self.delta_t_log / self.envs.delta_t_sim)
+        self.frame_data = [[] for _ in range(n_worlds_to_save)]
 
         self.n_worlds = n_worlds
         self.n_worlds_to_save = n_worlds_to_save
-        self.max_episode_length = max_ep_len
-        self.curr_step = 0
+        self.curr_policy_step = 0
+        self.curr_sim_step = 0
         self.device = device
 
         # Build lookups helpers: qpos idx to name
+        self.body_idx_to_name = {v: k for k, v in self.envs.body_id_lookup.items()}
+        # qpos idx to name
         qpos_idx_to_name = {v[0]: k for k, v in self.envs.dof_id_lookup.items()}
         self.qpos_idx_to_name = qpos_idx_to_name
         # dof idx to name
@@ -48,18 +59,33 @@ class LoggedSim:
         self.muscle_idx_to_name = {v: k for k, v in self.envs.muscle_id_lookup.items()}
         # actuator idx to name
         self.actuator_idx_to_name = {v: k for k, v in self.envs.actuator_id_lookup.items()}
+        # collider idx to name
+        self.collider_idx_to_name = {v: k for k, v in self.envs.collider_id_lookup.items()}
 
-    def add_to_log(self):
+    def add_to_rl_log(self):
         # Track rewards
-        rew = self.envs.get_rewards()
         ind_not_finished = torch.where(self.finished == 0)[0]
         if len(ind_not_finished) == 0:
             return
-        self.rewards[ind_not_finished, self.curr_step] = rew[ind_not_finished]
+        # Total rewards, episode length
+        rew = self.envs.get_rewards()
+        self.rewards[ind_not_finished, self.curr_policy_step] = rew[ind_not_finished]
         self.episode_length[ind_not_finished] += 1
 
-        times = self.envs.get_time()
+        # Reward breakdown
         reward_dict = self.envs.get_scaled_reward_dict()
+        for i in range(self.n_worlds_to_save):
+            idx_world = self.worlds_to_save[i]
+            if self.finished[idx_world]:
+                continue
+            reward_info = {k: float(v[idx_world].item()) for k, v in reward_dict.items()}
+            self.reward_data[i].append(reward_info)
+
+        self.curr_policy_step += 1
+        return
+
+    def add_to_log(self):
+        times = self.envs.get_time()
 
         # If we are using the ImitateEnv, add reference visuals
         add_reference, ref_joint_angles = False, None
@@ -75,18 +101,18 @@ class LoggedSim:
             if self.finished[idx_world]:
                 continue
             frame_time = float(times[idx_world].item())
-            reward_data = {k: v[idx_world].item() for k, v in reward_dict.items()}
             frame = parse_frame(
                 m=self.envs.m,
                 d=self.envs.d,
+                body_name_to_idx=self.envs.body_id_lookup,
                 qpos_idx_to_name=self.qpos_idx_to_name,
                 dof_idx_to_name=self.dof_idx_to_name,
                 muscle_idx_to_name=self.muscle_idx_to_name,
                 actuation_idx_to_name=self.actuator_idx_to_name,
+                collider_idx_to_name=self.collider_idx_to_name,
                 visual_load_results=self.envs.visuals,
                 world_id=idx_world,
                 frame_time=frame_time,
-                reward_data=reward_data,
                 ref_joint_angles=ref_joint_angles,
             )
 
@@ -108,22 +134,45 @@ class LoggedSim:
             )
 
             self.frame_data[i].append(frame)
-        self.curr_step += 1
+        return
+
+    def check_post_step_log(self):
+        if (self.curr_sim_step % self.num_sim_steps_per_log) == 0:
+            wp.capture_launch(self.envs.post_graph)
+            wp.synchronize()
+            self.add_to_log()
+        self.curr_sim_step += 1
         return
 
     def step(self, actions: torch.Tensor):
         if self.finished.all():
             return True, None
 
-        obs, rew, terminated, truncated, info = self.envs.step(actions)
-        done = (terminated + truncated).bool()
+        # We're overriding typical env step to allow for logging
+        self.envs.pre_step(actions)
 
+        if self.envs.cuda_graph:
+            for _ in range(self.envs.sim_steps_per_env_step):
+                wp.capture_launch(self.envs.step_graph)
+                self.check_post_step_log()
+            wp.capture_launch(self.envs.post_graph)
+            wp.synchronize()
+        else:
+            for _ in range(self.envs.sim_steps_per_env_step):
+                msk_warp.step_to(self.envs.m, self.envs.d, self.envs.delta_t_sim)
+                self.check_post_step_log()
+            msk_warp.post(self.envs.m, self.envs.d)
+
+        # Now the policy step is done
+        obs, rew, terminated, truncated, info = self.envs.rl_step()
+        done = (terminated + truncated).bool()
         self.finished = self.finished | done
-        self.add_to_log()
+        self.add_to_rl_log()
         return self.finished, obs
 
     def reset(self):
-        self.curr_step = 0
+        self.curr_policy_step = 0
+        self.curr_sim_step = 0
         self.finished[:] = 0
         self.rewards[:] = 0
         self.episode_length[:] = 0
@@ -177,6 +226,6 @@ class LoggedSim:
         for i in range(self.n_worlds_to_save):
             idx_world = self.worlds_to_save[i]
             out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.pdf")
-            create_pdf_output(self.frame_data[i], out_file)
+            create_pdf_output(self.frame_data[i], self.reward_data[i], out_file)
             print("Saved analytics to", out_file)
         return

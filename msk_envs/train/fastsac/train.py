@@ -145,7 +145,7 @@ def train(
         # Build logged sim wrapper
         sim = LoggedSim(eval_envs, device=device)
         eval_obs = sim.reset()
-        for _ in range(sim.max_episode_length):
+        for _ in range(sim.max_env_steps):
             with torch.no_grad():
                 eval_actions = policy_eval(eval_obs)
                 finished, eval_obs = sim.step(eval_actions)

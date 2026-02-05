@@ -114,6 +114,36 @@ def create_plane_material(plane_texture_path):
     return plane_material
 
 
+def create_wr_line_material():
+    """Yellow world-record line material"""
+    wr_material = bpy.data.materials.new(name="WorldRecordMaterial")
+    wr_material.use_nodes = True
+
+    nodes = wr_material.node_tree.nodes
+    links = wr_material.node_tree.links
+    nodes.clear()
+
+    # Principled BSDF
+    bsdf = nodes.new(type='ShaderNodeBsdfPrincipled')
+    bsdf.location = (0, 0)
+    bsdf.inputs['Base Color'].default_value = (1.0, 0.84, 0.0, 1.0)
+    bsdf.inputs['Roughness'].default_value = 0.3
+    if 'Specular IOR' in bsdf.inputs:
+        bsdf.inputs['Specular IOR'].default_value = 1.45
+    elif 'Specular' in bsdf.inputs:
+        bsdf.inputs['Specular'].default_value = 0.6
+
+    # Brightness boost
+    bsdf.inputs['Emission Color'].default_value = (1.0, 0.9, 0.2, 1.0)
+    bsdf.inputs['Emission Strength'].default_value = 0.1
+
+    # Material Output
+    output = nodes.new(type='ShaderNodeOutputMaterial')
+    output.location = (200, 0)
+    links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+    return wr_material
+
+
 def create_collider_material():
     """Light blue, semi-transparent collider material"""
     collider_material = bpy.data.materials.new(name="ColliderMaterial")

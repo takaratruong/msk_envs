@@ -56,7 +56,7 @@ def setup_lighting():
     bpy.ops.object.light_add(type='SUN', location=(5, -5, 10))
     sun_light = bpy.context.active_object
     sun_light.name = "SunLight"
-    sun_light.data.energy = 5.0
+    sun_light.data.energy = 7.5
     sun_light.data.angle = 0.0873  # 5 deg
     sun_light.rotation_euler = (0.785, 0, 0.785)
     return
@@ -89,7 +89,7 @@ def setup_sky():
         sky_tex.ozone_density = 2.0
 
     background = nodes.new("ShaderNodeBackground")
-    background.inputs['Strength'].default_value = 0.025
+    background.inputs['Strength'].default_value = 0.05
     # Position nodes
     output = nodes.new("ShaderNodeOutputWorld")
     sky_tex.location = (-400, 0)

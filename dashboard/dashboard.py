@@ -103,7 +103,11 @@ def locate_trajectories():
 
     with trajectory_options:
         for path in traj_files:
-            name = str(path.relative_to(TRAJ_DIR))
+            # if "All" selected, show relative path from TRAJ_DIR
+            if selected_traj_dir == "":
+                name = str(path.relative_to(TRAJ_DIR))
+            else:
+                name = os.path.basename(path)
             ui.item(name, on_click=lambda p=path: send_viewer_trajectory(str(p)))
     return
 

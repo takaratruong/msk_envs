@@ -51,10 +51,12 @@ class EnvConfig:
     # --- Model muscle properties ---
     muscle_multiplier: float = 2.0
     """ Multiplier to max isometric force """
-    muscle_activation_time_const: float = 0.015
-    """ Muscle activation time constant """
-    muscle_deactivation_time_const: float = 0.060
-    """ Muscle deactivation time constant """
+    muscle_activation_dynamics: msk_warp.ActivationType = msk_warp.ActivationType.MILLARD
+    """ Muscle activation dynamics type (DGF, MILLARD) """
+    muscle_activation_time_const: float = 0.010
+    """ Muscle activation time constant. Default 15ms for DGF, 10ms for Millard """
+    muscle_deactivation_time_const: float = 0.040
+    """ Muscle deactivation time constant. Default 60ms for DGF, 40ms for Millard """
     muscle_activation_dynamics_smoothing: float = 10.0
     """ Muscle activation dynamics smoothing factor """
     muscle_fiber_damping: float = 0.1

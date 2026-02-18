@@ -43,14 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         else if (cameraViewMode === ViewMode.PANEL_FEET) {
-            cameras[1].position.set(footR[0], footR[1], footR[2] + 0.5);
+            cameras[1].position.set(footR[0], footR[1], footR[2] + 1.0);
             controls[1].target.set(footR[0], footR[1], footR[2]);
-            cameras[3].position.set(footR[0] + 0.5, footR[1], footR[2]);
+            cameras[3].position.set(footR[0] + 1.0, footR[1], footR[2]);
             controls[3].target.set(footR[0], footR[1], footR[2]);
 
-            cameras[2].position.set(footL[0], footL[1], footL[2] - 0.5);
+            cameras[2].position.set(footL[0], footL[1], footL[2] - 1.0);
             controls[2].target.set(footL[0], footL[1], footL[2]);
-            cameras[4].position.set(footL[0] + 0.5, footL[1], footL[2]);
+            cameras[4].position.set(footL[0] + 1.0, footL[1], footL[2]);
             controls[4].target.set(footL[0], footL[1], footL[2]);
         }
     }

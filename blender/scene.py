@@ -1,6 +1,6 @@
 import bpy
 
-from material import create_plane_material
+from material import create_plane_material, create_wr_line_material
 
 
 def clear_scene():
@@ -56,7 +56,7 @@ def setup_lighting():
     bpy.ops.object.light_add(type='SUN', location=(5, -5, 10))
     sun_light = bpy.context.active_object
     sun_light.name = "SunLight"
-    sun_light.data.energy = 5.0
+    sun_light.data.energy = 7.5
     sun_light.data.angle = 0.0873  # 5 deg
     sun_light.rotation_euler = (0.785, 0, 0.785)
     return
@@ -89,7 +89,7 @@ def setup_sky():
         sky_tex.ozone_density = 2.0
 
     background = nodes.new("ShaderNodeBackground")
-    background.inputs['Strength'].default_value = 0.025
+    background.inputs['Strength'].default_value = 0.05
     # Position nodes
     output = nodes.new("ShaderNodeOutputWorld")
     sky_tex.location = (-400, 0)
@@ -112,6 +112,47 @@ def setup_meter_markers():
         text_obj.data.size = 1.0
         text_obj.data.extrude = 0.05
         text_obj.rotation_euler = (1.5708, 0, 0)
+    return
+
+
+def create_wr_line():
+    """ create a world-record line object (yellow line) """
+    bpy.ops.mesh.primitive_plane_add(size=0.1, location=(0, 0, 0.01))
+    wr_line = bpy.context.active_object
+    wr_line.name = "WorldRecordLine"
+    wr_line.scale[0] = 0.5
+    wr_line.scale[1] = 1000.0
+
+    wr_material = create_wr_line_material()
+    if wr_line.data.materials:
+        wr_line.data.materials[0] = wr_material
+    else:
+        wr_line.data.materials.append(wr_material)
+    return wr_line
+
+
+def update_wr_line(wr_line, time, frame_num):
+    # determine position of line based on 2.5m splits
+    split_length = 2.5
+    splits = [0.87, 0.41, 0.33, 0.29, 0.27, 0.25, 0.24, 0.23, 0.23, 0.23, 0.22, 0.22, 0.22, 0.22, 0.21, 0.21, 0.21,
+              0.21, 0.21, 0.21, 0.21, 0.21, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.21, 0.21, 0.21, 0.21, 0.21, 0.21,
+              0.21, 0.21, 0.21, 0.21]
+
+    time = max(0.0, min(time, sum(splits)))
+
+    distance, elapsed = 0.0, 0.0
+    for split in splits:
+        if time <= elapsed + split:  # within split
+            frac = (time - elapsed) / split
+            distance += frac * split_length
+            break
+        else:
+            distance += split_length
+            elapsed += split
+
+    distance = min(distance, 100.0)
+    wr_line.location.x = distance
+    wr_line.keyframe_insert(data_path="location", frame=frame_num)
     return
 
 

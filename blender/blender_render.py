@@ -15,7 +15,7 @@ if not cdir in sys.path:
 from camera import setup_camera, update_camera
 from muscle import update_muscle
 from options import setup_renderer
-from scene import reset_scene, hide_objects, setup_floor, setup_meter_markers
+from scene import reset_scene, hide_objects, setup_floor, setup_meter_markers, create_wr_line, update_wr_line
 from visuals import update_visual, clear_visual_cache
 from colliders import update_collider, clear_collider_cache
 
@@ -24,6 +24,8 @@ script_dir = Path(__file__).resolve().parent.parent.parent
 dashboard_src = os.path.join(script_dir, "dashboard")
 json_path = os.path.join(dashboard_src, "trajectories/test/render.json.gz")  # Trajectory to render
 plane_texture_path = os.path.join(dashboard_src, "assets/textures/plane.png")  # Additional assets
+
+use_wr_line = True
 
 
 def main():
@@ -50,14 +52,20 @@ def main():
     setup_floor(plane_texture_path, size=100, location=(-50, 0, 0))
     setup_floor(plane_texture_path, size=100, location=(50, 0, 0))
     setup_meter_markers()
+    if use_wr_line:
+        wr_line = create_wr_line()
 
     # Create frames
     for frame_index, frame_data in enumerate(stacked_frames):
+        time = frame_data["time"]
         frame_num = frame_index + 1  # (Blender frames start at 1)
         bpy.context.scene.frame_set(frame_num)
 
         cam_pos = frame_data["cam_pos"]
         update_camera(camera, cam_pos, frame_num)
+
+        if use_wr_line:
+            update_wr_line(wr_line, time, frame_num)
 
         for visual in frame_data["visuals"]:
             update_visual(visual, frame_num, dashboard_src)

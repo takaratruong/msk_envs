@@ -53,7 +53,6 @@ class MSKEnv:
         # Load exponential-spring force curve parameters
         if env_config.limit_type == msk_warp.LimitType.EXPONENTIAL or \
                 env_config.limit_type == msk_warp.LimitType.HUNT_CROSSLEY:
-            msk_warp.use_exponential_limit(self.m)
             exp_limit_forces = msk_warp.exp_limit_forces(self.m)
             exp_limit_shapes = msk_warp.exp_limit_shapes(self.m)
             limit_curves_path = os.path.join(self.curr_path, env_config.limit_force_curves_path)
@@ -65,7 +64,8 @@ class MSKEnv:
                 exp_limit_shapes[limit_id][0] = limit_curve.shape_param[0]
                 exp_limit_shapes[limit_id][1] = limit_curve.shape_param[1]
 
-        # Muscles fiber dynamics
+        # Muscles activation and fiber dynamic
+        msk_warp.set_activation_type(self.m, env_config.muscle_activation_dynamics)
         msk_warp.set_muscle_dynamics_substeps(self.m, env_config.muscle_dynamics_substeps)
         muscle_metadata = msk_warp.muscle_metadata(self.m)
         for mm in muscle_metadata:

@@ -9,6 +9,7 @@ import msk_warp
 import os
 import gzip
 import json
+import numpy as np
 import torch
 import warp as wp
 
@@ -38,7 +39,11 @@ class LoggedSim:
         self.max_env_steps = max_env_steps
 
         # Frame data: logged every delta_t_log seconds
-        self.num_sim_steps_per_log = math.ceil(self.delta_t_log / self.envs.delta_t_sim)
+        self.is_adaptive = self.envs.is_adaptive
+        if self.is_adaptive:
+            self.num_sim_steps_per_log = 1
+        else:
+            self.num_sim_steps_per_log = math.ceil(self.delta_t_log / self.envs.delta_t_sim)
         self.frame_data = [[] for _ in range(n_worlds_to_save)]
 
         self.n_worlds = n_worlds
@@ -144,6 +149,24 @@ class LoggedSim:
         self.curr_sim_step += 1
         return
 
+    def perform_step(self, dt_step: float):
+        msk_warp.increment_next_time(self.envs.m, self.envs.d, dt_step)
+        if self.envs.cuda_graph:
+            wp.capture_launch(self.envs.step_graph)
+            self.check_post_step_log()
+        else:
+            msk_warp.step(self.envs.m, self.envs.d)
+            self.check_post_step_log()
+        return
+
+    def perform_post(self):
+        if self.envs.cuda_graph:
+            wp.capture_launch(self.envs.post_graph)
+            wp.synchronize()
+        else:
+            msk_warp.post(self.envs.m, self.envs.d)
+        return
+
     def step(self, actions: torch.Tensor):
         if self.finished.all():
             return True, None
@@ -151,17 +174,32 @@ class LoggedSim:
         # We're overriding typical env step to allow for logging
         self.envs.pre_step(actions)
 
-        if self.envs.cuda_graph:
+        # We need to report at the correct logging event times
+        #  For fixed time-stepping, we assume [delta_t_sim] is small and just check after every sim step
+        #  For adaptive time-stepping, we integrate to all logging events within this env step
+        if not self.is_adaptive:  # fixed time-stepping
             for _ in range(self.envs.sim_steps_per_env_step):
-                wp.capture_launch(self.envs.step_graph)
-                self.check_post_step_log()
-            wp.capture_launch(self.envs.post_graph)
-            wp.synchronize()
-        else:
-            for _ in range(self.envs.sim_steps_per_env_step):
-                msk_warp.step_to(self.envs.m, self.envs.d, self.envs.delta_t_sim)
-                self.check_post_step_log()
-            msk_warp.post(self.envs.m, self.envs.d)
+                self.perform_step(self.envs.delta_t_sim)
+            self.perform_post()
+        else:  # adaptive time-stepping
+            # we should only look at worlds that aren't finished, they should all be at the same time
+            idx_not_finished = torch.where(self.finished == 0)[0][0].item()
+            # find all logging events in (curr_time, curr_time + delta_t)
+            delta_t = self.envs.delta_t
+            curr_time = self.envs.time[idx_not_finished].item()
+            end_time = curr_time + delta_t
+            k_min = math.ceil(curr_time / self.delta_t_log)
+            k_max = math.floor(end_time / self.delta_t_log)
+            logging_times = np.arange(k_min + 1, k_max + 1) * self.delta_t_log
+            # integrate to each logging time
+            for _ in range(len(logging_times)):
+                self.perform_step(self.delta_t_log)
+            # check if we need to add an extra step to reach end_time
+            if logging_times.size == 0 or not np.isclose(logging_times[-1], end_time):
+                dt_step = end_time - logging_times[-1]
+                self.perform_step(float(dt_step))
+
+            self.perform_post()
 
         # Now the policy step is done
         obs, rew, terminated, truncated, info = self.envs.rl_step()

@@ -123,6 +123,8 @@ class MSKEnv:
 
         # Integrator type
         msk_warp.set_integrator_type(self.m, env_config.integrator)
+        msk_warp.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
+        msk_warp.set_integrator_use_inf_norm(self.m, env_config.integrator_use_inf_norm)
         # Toggle drag forces
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
 
@@ -134,7 +136,7 @@ class MSKEnv:
             assert torch.cuda.is_available()
             # Step graph
             with wp.ScopedCapture() as capture:
-                msk_warp.step_to(self.m, self.d, self.delta_t_sim)
+                msk_warp.step(self.m, self.d)
             self.step_graph = capture.graph
 
             # Reset graph: call after resetting any the worlds
@@ -221,6 +223,8 @@ class MSKEnv:
         self.joint_velocities = msk_warp.joint_velocities(self.d)
         # [num_envs, num_dofs]
         self.qfrc_damper = msk_warp.qfrc_damper(self.d)
+        # [num_envs, num_colliders]
+        self.collider_forces = msk_warp.collider_forces(self.d)
 
         # [num_envs, 3]
         self.grf = msk_warp.grf(self.d)
@@ -237,9 +241,17 @@ class MSKEnv:
         self.action_range = (-1.0, 1.0)
         self.max_episode_duration = env_config.max_episode_duration
         self.delta_t = env_config.delta_t
-        self.delta_t_sim = env_config.delta_t_sim
         self.reset_tensor = torch.zeros((num_envs, 1), dtype=torch.float32, device=device)
-        self.sim_steps_per_env_step = math.ceil(self.delta_t / self.delta_t_sim)
+
+        # Simulation steps required to reach env step. if adaptive, just step to desired time
+        #  otherwise step in increments of [delta_t_sim]
+        self.is_adaptive = msk_warp.is_adaptive(env_config.integrator)
+        if self.is_adaptive:
+            self.delta_t_sim = self.delta_t
+            self.sim_steps_per_env_step = 1
+        else:
+            self.delta_t_sim = env_config.delta_t_sim
+            self.sim_steps_per_env_step = math.ceil(self.delta_t / self.delta_t_sim)
 
         # Starting position, load from file
         start_pose_path = os.path.join(self.curr_path, env_config.starting_pose_path)
@@ -474,12 +486,14 @@ class MSKEnv:
     def launch_step(self):
         if self.cuda_graph:
             for _ in range(self.sim_steps_per_env_step):
+                msk_warp.increment_next_time(self.m, self.d, self.delta_t_sim)
                 wp.capture_launch(self.step_graph)
             wp.capture_launch(self.post_graph)
             wp.synchronize()
         else:
             for _ in range(self.sim_steps_per_env_step):
-                msk_warp.step_to(self.m, self.d, self.delta_t_sim)
+                msk_warp.increment_next_time(self.m, self.d, self.delta_t_sim)
+                msk_warp.step(self.m, self.d)
             msk_warp.post(self.m, self.d)
         return
 

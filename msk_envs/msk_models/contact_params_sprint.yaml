@@ -10,7 +10,7 @@ ground:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-right_1:
+right_foot_1:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -19,7 +19,7 @@ right_1:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-right_2:
+right_foot_2:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -28,7 +28,7 @@ right_2:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-right_3:
+right_foot_3:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -37,7 +37,7 @@ right_3:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-right_4:
+right_foot_4:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -46,7 +46,7 @@ right_4:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-right_5:
+right_foot_5:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -55,7 +55,7 @@ right_5:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-right_6:
+right_foot_6:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -64,7 +64,7 @@ right_6:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-right_7:
+right_foot_7:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -73,7 +73,7 @@ right_7:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-left_1:
+left_foot_1:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -82,7 +82,7 @@ left_1:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-left_2:
+left_foot_2:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -91,7 +91,7 @@ left_2:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-left_3:
+left_foot_3:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -100,7 +100,7 @@ left_3:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-left_4:
+left_foot_4:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -109,7 +109,7 @@ left_4:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-left_5:
+left_foot_5:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -118,7 +118,7 @@ left_5:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-left_6:
+left_foot_6:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0
@@ -127,7 +127,7 @@ left_6:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-left_7:
+left_foot_7:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 0

@@ -202,7 +202,7 @@ def parse_joint_moments(
     joint_moments = msk_warp.joint_moments(d)
     qfrc_spring = msk_warp.qfrc_spring(d)
     qfrc_damper = msk_warp.qfrc_damper(d)
-    qfrc_drag= msk_warp.qfrc_drag(d)
+    qfrc_drag = msk_warp.qfrc_drag(d)
     qfrc_bias = msk_warp.qfrc_bias(d)
     qfrc_muscle = msk_warp.qfrc_muscle(d)
     qfrc_actuator = msk_warp.qfrc_actuator(d)
@@ -239,6 +239,7 @@ def parse_frame(
         visual_load_results: list[msk_warp.types.MeshLoadResult],
         world_id: int,
         frame_time: float,
+        scene_settings: SceneSettings,
         ref_joint_angles=None,
 ) -> FrameData:
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
@@ -252,6 +253,7 @@ def parse_frame(
 
     frame_visuals = FrameData(
         time=frame_time,
+        scene_settings=scene_settings,
         visuals=visuals,
         colliders=colliders,
         joint_angles=joint_angles,
@@ -261,6 +263,7 @@ def parse_frame(
         actuators=actuators,
         kinetic_data=kinetic_data,
         arrows=[],
+        targets=[],
     )
 
     return frame_visuals
@@ -282,6 +285,21 @@ def add_reference_visuals(
             opacity=0.3
         )
         frame.visuals.append(ref_visual)
+
+
+def add_target(
+        frame: FrameData,
+        pos: list,
+        radius: float,
+        active: bool
+):
+    target = TargetData(
+        pos=pos,
+        rot=[1.0, 0.0, 0.0, 0.0],
+        radius=radius,
+        active=active,
+    )
+    frame.targets.append(target)
 
 
 def add_ext_forces_to_frame(

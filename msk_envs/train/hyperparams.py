@@ -129,7 +129,7 @@ class SprintConfig(BaseArgs):
     """Sprint environment specific reward scales"""
     lambda_vel: float = 0.01
     lambda_mid_lane: float = 0.01
-    lambda_limit: float = -2e-3
+    lambda_limit: float = -5e-3
     lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
@@ -160,7 +160,7 @@ class RaceWalkConfig(BaseArgs):
 class BackPedalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.BACKPEDAL,
-        delta_t=1.0 / 30.0,
+        delta_t=1.0 / 100.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_stand_backward.yaml",
@@ -200,7 +200,7 @@ class SideShuffleConfig(BaseArgs):
 class HopConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.HOP,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 60.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_left_leg_up.yaml",
@@ -210,7 +210,7 @@ class HopConfig(BaseArgs):
     """Sprint environment specific reward scales"""
     lambda_vel: float = 0.01
     lambda_mid_lane: float = 0.01
-    lambda_limit: float = -2e-3
+    lambda_limit: float = -0.005
     lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
@@ -341,6 +341,40 @@ class AnkleFlexConfig(BaseArgs):
     lambda_test: float = 0.1
 
 
+@dataclass
+class ShuttleRunConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+        env_variant=DerivedEnv.SHUTTLE_RUN,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_target_closer: float = 1.0
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -1e-2
+    lambda_alive: float = 3e-2
+
+
+@dataclass
+class RandomTargetConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+        env_variant=DerivedEnv.RANDOM_TARGET,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_target_closer: float = 1.0
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -1e-2
+    lambda_alive: float = 3e-2
+
+
 Config = Union[
     Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
@@ -355,6 +389,8 @@ Config = Union[
     Annotated[DontFallConfig, tyro.conf.subcommand(name="dontfall")],
     Annotated[StaticSquatConfig, tyro.conf.subcommand(name="static")],
     Annotated[AnkleFlexConfig, tyro.conf.subcommand(name="ankleflex")],
+    Annotated[ShuttleRunConfig, tyro.conf.subcommand(name="shuttlerun")],
+    Annotated[RandomTargetConfig, tyro.conf.subcommand(name="randomtarget")],
 ]
 
 

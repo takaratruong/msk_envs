@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from typing import Optional
+from msk_envs.utils.scene_settings import SceneSettings
 
 
 @dataclass
@@ -315,6 +316,34 @@ class Arrow:
 
 
 @dataclass
+class TargetData:
+    pos: list[float]
+    rot: list[float]
+    radius: float
+    active: bool
+
+    def to_dict(self):
+        return {
+            "pos": list(self.pos),
+            "rot": list(self.rot),
+            "radius": self.radius,
+            "active": self.active,
+        }
+
+    def to_anim_dict(self):
+        return self.to_dict()
+
+    @staticmethod
+    def from_dict(data: dict) -> 'TargetData':
+        return TargetData(
+            pos=data["pos"],
+            rot=data["rot"],
+            radius=data["radius"],
+            active=data["active"],
+        )
+
+
+@dataclass
 class FrameData:
     time: float
     visuals: list[VisualData]
@@ -326,6 +355,8 @@ class FrameData:
     actuators: list[ActuatorData]
     kinetic_data: KineticData
     arrows: list[Arrow]
+    targets: list[TargetData]
+    scene_settings: SceneSettings
 
     def to_dict(self):
         return {
@@ -339,6 +370,8 @@ class FrameData:
             "actuators": [actuator.to_dict() for actuator in self.actuators],
             "kinetic_data": self.kinetic_data.to_dict(),
             "arrows": [arrow.to_dict() for arrow in self.arrows],
+            "targets": [target.to_dict() for target in self.targets],
+            "scene_settings": self.scene_settings.to_dict(),
         }
 
     @staticmethod
@@ -354,4 +387,6 @@ class FrameData:
             actuators=[ActuatorData.from_dict(actuator) for actuator in data["actuators"]],
             kinetic_data=KineticData.from_dict(data["kinetic_data"]),
             arrows=[Arrow.from_dict(arrow) for arrow in data["arrows"]],
+            targets=[TargetData.from_dict(target) for target in data["targets"]],
+            scene_settings=SceneSettings.from_dict(data["scene_settings"]),
         )

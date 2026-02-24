@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers} from "./scene.js";
-import {loadModel, loadCollider} from "./loader.js";
+import {loadModel, loadCollider, loadTarget} from "./loader.js";
 import {drawMuscleLine, resetMuscles} from "./muscle.js";
 
 const ViewMode = Object.freeze({
@@ -41,8 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 cameras[2].position.set(com[0] - 1.5, com[1] + 1.0, com[2]);
                 controls[2].target.set(com[0], com[1], com[2]);
             }
-        }
-        else if (cameraViewMode === ViewMode.PANEL_FEET) {
+        } else if (cameraViewMode === ViewMode.PANEL_FEET) {
             cameras[1].position.set(footR[0], footR[1], footR[2] + 1.0);
             controls[1].target.set(footR[0], footR[1], footR[2]);
             cameras[3].position.set(footR[0] + 1.0, footR[1], footR[2]);
@@ -59,7 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Frame loading
     let frames = [];
     let currentObjects = [];
+    let staticObjects = [];
     let currentFrame = 0;
+    let setupDone = false;
 
     function loadFrame(frameIndex) {
         // Clear scene
@@ -69,6 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Load frame
         const frame = frames[frameIndex];
         if (!frame) return;
+
+        // Setup scene again
+        setupScene();
 
         // Follow com
         updateCameras(frame.cam_pos, frame.foot_l_pos, frame.foot_r_pos);
@@ -109,6 +113,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     scene.add(object);
                     currentObjects.push(object);
                 });
+        }
+
+        // Targets
+        if (frame.targets) {
+            for (const obj of frame.targets) {
+                let color = 0x87CEEB;
+                color = obj.active ? 0x6AEB9D : 0x87CEEB;
+                loadTarget(obj.radius, obj.rot, color, object => {
+                    object.position.set(...obj.pos);
+                    object.castShadow = true;
+                    object.receiveShadow = true;
+                    scene.add(object);
+                    currentObjects.push(object);
+                });
+            }
         }
 
         // Draw muscles
@@ -235,6 +254,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("loadTrajectory", function (event) {
         frames = event.detail;
+        setupDone = false;
+        staticObjects.forEach(obj => scene.remove(obj));
+        staticObjects = [];
         loadFrame(0);
     });
 
@@ -242,6 +264,8 @@ document.addEventListener("DOMContentLoaded", () => {
         frames = [];
         currentObjects.forEach(obj => scene.remove(obj));
         currentObjects = [];
+        staticObjects.forEach(obj => scene.remove(obj));
+        staticObjects = [];
         currentFrame = 0;
         resetMuscles();
     });
@@ -319,6 +343,22 @@ document.addEventListener("DOMContentLoaded", () => {
         loadFrame(currentFrame);
     });
 
+    function setupScene() {
+        if (setupDone) return;
+        setupDone = true;
+
+        if (frames.length === 0) return;
+        if(frames[0].scene_settings) {
+            const settings = frames[0].scene_settings;
+            if (settings.meter_markers) setupNumbers(scene, staticObjects);
+            if (settings.lanes) setupLanes(scene, staticObjects);
+            if (settings.axes) setupAxes(scene, staticObjects);
+        } else {
+            setupNumbers(scene, staticObjects);
+            setupLanes(scene, staticObjects);
+            setupAxes(scene, staticObjects);
+        }
+    }
 
     function animate() {
         for (let i = 0; i < controls.length; i++) {
@@ -367,11 +407,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    setupLightsSky(scene);
     setupGround(scene, new THREE.Vector3(-50, 0, 0));
     setupGround(scene, new THREE.Vector3(50, 0, 0));
-    setupNumbers(scene);
-    setupLightsSky(scene);
-    setupLanes(scene);
-    setupAxes(scene);
     renderer.setAnimationLoop(animate);
 });

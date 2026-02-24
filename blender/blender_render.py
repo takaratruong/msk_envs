@@ -18,14 +18,13 @@ from options import setup_renderer
 from scene import reset_scene, hide_objects, setup_floor, setup_meter_markers, create_wr_line, update_wr_line
 from visuals import update_visual, clear_visual_cache
 from colliders import update_collider, clear_collider_cache
+from targets import update_target, clear_target_cache
 
 # Locate dashboard
 script_dir = Path(__file__).resolve().parent.parent.parent
 dashboard_src = os.path.join(script_dir, "dashboard")
 json_path = os.path.join(dashboard_src, "trajectories/test/render.json.gz")  # Trajectory to render
 plane_texture_path = os.path.join(dashboard_src, "assets/textures/plane.png")  # Additional assets
-
-use_wr_line = True
 
 
 def main():
@@ -45,14 +44,22 @@ def main():
     reset_scene()
     clear_visual_cache()
     clear_collider_cache()
+    clear_target_cache()
     setup_renderer(fps=int(round(fps)))
     camera = setup_camera()
     hide_objects()
 
     setup_floor(plane_texture_path, size=100, location=(-50, 0, 0))
     setup_floor(plane_texture_path, size=100, location=(50, 0, 0))
-    setup_meter_markers()
-    if use_wr_line:
+
+    frame0 = stacked_frames[0]
+    if "scene_settings" in frame0:
+        scene_settings = frame0["scene_settings"]
+        if scene_settings["meter_markers"]:
+            setup_meter_markers()
+        wr_line = None
+    else:
+        setup_meter_markers()
         wr_line = create_wr_line()
 
     # Create frames
@@ -64,8 +71,7 @@ def main():
         cam_pos = frame_data["cam_pos"]
         update_camera(camera, cam_pos, frame_num)
 
-        if use_wr_line:
-            update_wr_line(wr_line, time, frame_num)
+        update_wr_line(wr_line, time, frame_num)
 
         for visual in frame_data["visuals"]:
             update_visual(visual, frame_num, dashboard_src)
@@ -78,6 +84,10 @@ def main():
 
         for muscle in frame_data["muscles"]:
             update_muscle(muscle, frame_num)
+
+        if "targets" in frame_data:
+            for i, target in enumerate(frame_data["targets"]):
+                update_target(f"target_{i}", target, frame_num)
 
         print(f"Built frame: {frame_num} of {len(stacked_frames)}")
 

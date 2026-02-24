@@ -180,3 +180,41 @@ def create_collider_material():
 
     links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
     return collider_material
+
+
+def create_target_material(active: bool):
+    target_material = bpy.data.materials.new(name="TargetMaterial")
+    target_material.use_nodes = True
+    nodes = target_material.node_tree.nodes
+    links = target_material.node_tree.links
+    # Clear default nodes
+    nodes.clear()
+    # Add Principled BSDF node
+    bsdf = nodes.new(type="ShaderNodeBsdfPrincipled")
+    bsdf.location = (0, 0)
+    if active:
+        bsdf.inputs["Base Color"].default_value = (0.0, 1.0, 0.0, 1.0)
+    else:
+        bsdf.inputs["Base Color"].default_value = (0.5, 0.5, 0.5, 1.0)
+    bsdf.inputs["Roughness"].default_value = 1.0
+
+    # Handle different Blender versions for specular input - reduce reflectivity
+    if 'Specular IOR' in bsdf.inputs:
+        bsdf.inputs['Specular IOR'].default_value = 1.1  # Even lower IOR for minimal reflection
+    elif 'Specular' in bsdf.inputs:
+        bsdf.inputs['Specular'].default_value = 0.05  # Very low specular for matte look
+    # Handle subsurface scattering (may vary by version)
+    if 'Subsurface Weight' in bsdf.inputs:
+        bsdf.inputs['Subsurface Weight'].default_value = 0.15
+        if 'Subsurface Color' in bsdf.inputs:
+            bsdf.inputs['Subsurface Color'].default_value = (0.8, 0.7, 0.55, 1.0)  # Warmer subsurface
+    elif 'Subsurface' in bsdf.inputs:
+        bsdf.inputs['Subsurface'].default_value = 0.15
+        if 'Subsurface Color' in bsdf.inputs:
+            bsdf.inputs['Subsurface Color'].default_value = (0.8, 0.7, 0.55, 1.0)  # Warmer subsurface
+    # Add Material Output node
+    output = nodes.new(type='ShaderNodeOutputMaterial')
+    output.location = (200, 0)
+    # Link BSDF to Material Output
+    links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+    return target_material

@@ -30,8 +30,8 @@ def main():
 
     actions = envs.get_blank_actions()
     #
-    # policy = load_policy("/home/marth/Documents/msk_envs/models/sprint_2026-01-20_10-11/sprint_2026-01-20_10-11_74000.pt")
-    # policy.to(device)
+    policy = load_policy("/home/marth/Documents/msk_envs/models/randomtarget_2026-02-23_12-47/randomtarget_2026-02-23_12-47_32000.pt")
+    policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,
               n_envs=num_envs,
@@ -51,16 +51,17 @@ def main():
     obs = sim.reset()
 
     for _ in tqdm(range(max_episode_length)):
-        # actions = torch.randn_like(actions)
+        actions = torch.randn_like(actions)
         # muscle_states = envs.muscle_fiber_lengths
         # actions[:, :envs.num_muscles] = dep.step(muscle_states)
         # actions = torch.randn_like(actions)
         # actions = envs.get_blank_actions()
-        # with torch.no_grad():
-        #     actions = policy(obs)
+        with torch.no_grad():
+            actions = policy(obs)
         finished, obs = sim.step(actions)
         if finished.all():
             break
+
     print("Mean rewards: ", sim.get_rewards_mean())
 
     # write to torch

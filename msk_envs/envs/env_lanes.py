@@ -6,6 +6,7 @@ from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, joint_damping_penalty, \
     actuator_sq_penalty, metabolic_penalty, fatigue_penalty, mid_lane_reward, has_fallen
+from ..utils.scene_settings import SceneSettings
 
 
 class LanesEnv(MSKEnv):
@@ -95,3 +96,11 @@ class LanesEnv(MSKEnv):
 
         terminated = (fallen | toes_out | not_facing_direction).float()
         return terminated.detach()
+
+    def scene_settings(self) -> SceneSettings:
+        return SceneSettings(
+            lanes=True,
+            lane_width=0.6,
+            meter_markers=True,
+            axes=False
+        )

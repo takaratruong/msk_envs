@@ -136,7 +136,7 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
             )
         )
         for i, key in enumerate(reward_keys):
-            rewards_plot.add(0, reward_data[:, i], label=key)
+            rewards_plot.add(0, reward_data[:, i], label=key, alpha=0.5)
         rewards_plot.add(0, np.sum(reward_data, axis=1), label="Total")
         rewards_plot.add_hline(0, 0.0)
         rewards_plot.finish(pdf)

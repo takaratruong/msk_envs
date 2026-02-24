@@ -40,13 +40,17 @@ def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: 
         colliders = [obj.to_anim_dict() for obj in frame_data[i].colliders]
         muscles = [muscle.to_anim_dict() for muscle in frame_data[i].muscles]
         arrows = [arrow.to_dict() for arrow in frame_data[i].arrows]
+        targets = [target.to_dict() for target in frame_data[i].targets]
         time = frame_data[i].time
+        scene_settings = frame_data[i].scene_settings.to_dict()
         frame = {
+            "scene_settings": scene_settings,
             "time": time,
             "visuals": visuals,
             "colliders": colliders,
             "muscles": muscles,
             "arrows": arrows,
+            "targets": targets,
             "cam_pos": list(cam_positions[i]),
             "foot_l_pos": list(foot_l_pos[i]),
             "foot_r_pos": list(foot_r_pos[i]),

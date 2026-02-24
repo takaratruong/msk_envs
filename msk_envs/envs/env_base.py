@@ -10,6 +10,7 @@ from msk_envs.utils.muscle_props import parse_starting_activations, parse_muscle
 from msk_envs.utils.joint_limits import get_limit_force_curves, get_joint_limits
 from msk_envs.utils.contact_params import parse_contact_params
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
+from msk_envs.utils.scene_settings import SceneSettings
 
 
 class MSKEnv:
@@ -122,7 +123,6 @@ class MSKEnv:
             msk_warp.set_solver_type(self.m, msk_warp.SolverType.CG)
 
         # Integrator type
-        msk_warp.set_integrator_type(self.m, env_config.integrator)
         msk_warp.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
         msk_warp.set_integrator_use_inf_norm(self.m, env_config.integrator_use_inf_norm)
         # Toggle drag forces
@@ -172,8 +172,11 @@ class MSKEnv:
         function_path = os.path.join(
             self.curr_path, env_config.muscle_function_path) if env_config.use_function_based_path else None
         load_result = msk_warp.load_model(
-            model_path=self.model_path, n_worlds=num_envs,
-            root_free=env_config.model_root_free, polynomial_data_path=function_path
+            model_path=self.model_path,
+            n_worlds=num_envs,
+            integrator=env_config.integrator,
+            root_free=env_config.model_root_free,
+            polynomial_data_path=function_path
         )
         self.m, self.d = load_result.model, load_result.data
         # Store all convenient lookups
@@ -550,3 +553,7 @@ class MSKEnv:
 
     def lookup_body_id(self, body_name: str) -> int:
         return self.body_id_lookup[body_name]
+
+    def scene_settings(self) -> SceneSettings:
+        """ Override to provide custom scene settings for viewer/renderer """
+        return SceneSettings()

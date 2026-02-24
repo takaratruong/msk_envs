@@ -41,7 +41,7 @@ mtp_angle_r:
   shape_param: [ 70.08, 14.87 ]
 
 arm_flex_r:
-  limit_force: [ 5.03, 0.813 ]
+  limit_force: [ 0.503, 0.813 ]
   shape_param: [ 21.88, 5.05 ]
 
 arm_add_r:
@@ -89,7 +89,7 @@ mtp_angle_l:
   shape_param: [ 70.08, 14.87 ]
 
 arm_flex_l:
-  limit_force: [ 5.03, 0.813 ]
+  limit_force: [ 0.503, 0.813 ]
   shape_param: [ 21.88, 5.05 ]
 
 arm_add_l:

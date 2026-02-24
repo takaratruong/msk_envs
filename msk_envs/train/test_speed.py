@@ -38,10 +38,12 @@ def main():
     # Build a SimLogger to give us a whole pdf of stuff
     max_steps = 20
     time_start = perf_counter()
+    steps_attempted = wp.to_torch(envs.d.steps_attempted)
     for _ in tqdm(range(max_steps)):
         actions = torch.randn_like(actions)
         envs.step(actions)
         all_steps_attempted.append(steps_taken.clone())
+        print(torch.min(steps_taken), torch.max(steps_taken))
     time_end = perf_counter()
     simulated_time = max_steps * env_config.delta_t
     print("Real time factor (1 world): ", simulated_time / (time_end - time_start))

@@ -18,7 +18,7 @@ class EnvConfig:
     max_episode_duration: float = 12.0
     """ Max episode duration in seconds """
     integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_ADAPTIVE
-    """ Integrator type (EULER_FIXED, RK4_FIXED, EULER_ADAPTIVE) """
+    """ Integrator type (EULER_FIXED, RK4_FIXED, EULER_ADAPTIVE, RK4_ADAPTIVE) """
     integrator_use_inf_norm: bool = False
     """ For adaptive integrator, whether to use inf norm or L2-norm error calculation """
     integrator_accuracy: float = 1.0

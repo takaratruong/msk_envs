@@ -9257,8 +9257,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>20</optimal_force>
-					<bias>-20</bias>
+					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0.01</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -9268,8 +9267,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>20</optimal_force>
-					<bias>-20</bias>
+					<optimal_force>40</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0.01</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->

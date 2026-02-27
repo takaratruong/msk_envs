@@ -2455,30 +2455,13 @@
 						</PhysicalOffsetFrame>
 					</frames>
 				</PinJoint>
-				<PinJoint name="radioulnar_r">
+				<WeldJoint name="radioulnar_r">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>ulna_r_offset</socket_parent_frame>
 					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
 					<socket_child_frame>radius_r_offset</socket_child_frame>
 					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
-					<coordinates>
-						<Coordinate name="pro_sup_r">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 1.5707963300000001</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
-							<prescribed_function />
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-					</coordinates>
+					<coordinates></coordinates>
 					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
 					<frames>
 						<PhysicalOffsetFrame name="ulna_r_offset">
@@ -2487,7 +2470,7 @@
 							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
 							<translation>-0.00508764 -0.0138963 0.0197266</translation>
 							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
-							<orientation>-1.5688412137311776 0.056427970555123504 0.05631781350868147</orientation>
+							<orientation>0 0 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="radius_r_offset">
 							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
@@ -2495,10 +2478,10 @@
 							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
 							<translation>0 0 0</translation>
 							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
-							<orientation>-1.5688412137311776 0.056427970555123504 0.05631781350868147</orientation>
+							<orientation>0 -1.5707 0</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-				</PinJoint>
+				</WeldJoint>
 				<WeldJoint name="radius_hand_r">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>radius_r_offset</socket_parent_frame>
@@ -2647,30 +2630,13 @@
 						</PhysicalOffsetFrame>
 					</frames>
 				</PinJoint>
-				<PinJoint name="radioulnar_l">
+				<WeldJoint name="radioulnar_l">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>ulna_l_offset</socket_parent_frame>
 					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
 					<socket_child_frame>radius_l_offset</socket_child_frame>
 					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
-					<coordinates>
-						<Coordinate name="pro_sup_l">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 1.5707963300000001</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
-							<prescribed_function />
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-					</coordinates>
+					<coordinates></coordinates>
 					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
 					<frames>
 						<PhysicalOffsetFrame name="ulna_l_offset">
@@ -2679,7 +2645,7 @@
 							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
 							<translation>-0.00508764 -0.0138963 -0.0197266</translation>
 							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
-							<orientation>1.5688412137311776 -0.056427970555123504 0.05631781350868147</orientation>
+							<orientation>0 0 0</orientation>
 						</PhysicalOffsetFrame>
 						<PhysicalOffsetFrame name="radius_l_offset">
 							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
@@ -2687,10 +2653,10 @@
 							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
 							<translation>0 0 0</translation>
 							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
-							<orientation>1.5688412137311776 -0.056427970555123504 0.05631781350868147</orientation>
+							<orientation>0 1.5707 0</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-				</PinJoint>
+				</WeldJoint>
 				<WeldJoint name="radius_hand_l">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>radius_l_offset</socket_parent_frame>
@@ -9262,12 +9228,6 @@
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="pro_sup_r_motor">
-					<optimal_force>5.0</optimal_force>
-					<coordinate>pro_sup_r</coordinate>
-					<activation_time_constant>0.035</activation_time_constant>
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="arm_flex_l_motor">
 					<optimal_force>100.0</optimal_force>
 					<coordinate>arm_flex_l</coordinate>
@@ -9289,12 +9249,6 @@
 				<ActivationCoordinateActuator name="elbow_flex_l_motor">
 					<optimal_force>75.0</optimal_force>
 					<coordinate>elbow_flex_l</coordinate>
-					<activation_time_constant>0.035</activation_time_constant>
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="pro_sup_l_motor">
-					<optimal_force>5.0</optimal_force>
-					<coordinate>pro_sup_l</coordinate>
 					<activation_time_constant>0.035</activation_time_constant>
 					<default_activation>0.5</default_activation>
 				</ActivationCoordinateActuator>

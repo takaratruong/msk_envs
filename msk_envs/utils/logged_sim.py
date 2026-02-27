@@ -68,6 +68,9 @@ class LoggedSim:
         # collider idx to name
         self.collider_idx_to_name = {v: k for k, v in self.envs.collider_id_lookup.items()}
 
+        max_episode_duration = self.envs.max_episode_duration
+        self.log_times = torch.arange(0, max_episode_duration + self.delta_t_log, self.delta_t_log, device=device)
+
     def add_to_rl_log(self):
         # Track rewards
         ind_not_finished = torch.where(self.finished == 0)[0]
@@ -160,13 +163,14 @@ class LoggedSim:
         self.curr_sim_step += 1
         return
 
-    def perform_step(self, dt_step: float):
+    def perform_step(self, dt_step: float, force_no_log: bool = False):
         msk_warp.increment_next_time(self.envs.m, self.envs.d, dt_step)
         if self.envs.cuda_graph:
             wp.capture_launch(self.envs.step_graph)
-            self.check_post_step_log()
         else:
             msk_warp.step(self.envs.m, self.envs.d)
+
+        if not force_no_log:
             self.check_post_step_log()
         return
 
@@ -199,16 +203,21 @@ class LoggedSim:
             delta_t = self.envs.delta_t
             curr_time = self.envs.time[idx_not_finished].item()
             end_time = curr_time + delta_t
-            k_min = math.ceil(curr_time / self.delta_t_log)
-            k_max = math.floor(end_time / self.delta_t_log)
-            logging_times = np.arange(k_min + 1, k_max + 1) * self.delta_t_log
+
+            # Determine which logging times are in (curr_time, end_time]
+            logging_times = self.log_times
+            times_in_interval = (logging_times > curr_time) & (logging_times <= end_time)
+            logging_times_in_interval = logging_times[times_in_interval]
             # integrate to each logging time
-            for _ in range(len(logging_times)):
-                self.perform_step(self.delta_t_log)
-            # check if we need to add an extra step to reach end_time
-            if logging_times.size == 0 or not np.isclose(logging_times[-1], end_time):
-                dt_step = end_time - logging_times[-1]
-                self.perform_step(float(dt_step))
+            for i in range(len(logging_times_in_interval)):
+                curr_time = self.envs.time[idx_not_finished].item()
+                delta_t = logging_times_in_interval[i] - curr_time
+                self.perform_step(float(delta_t))
+            # check if we need to add an extra step to reach end_time, don't log
+            if len(logging_times_in_interval) == 0 or not np.isclose(logging_times_in_interval[-1].item(), end_time):
+                curr_time = self.envs.time[idx_not_finished].item()
+                dt_step = end_time - curr_time
+                self.perform_step(float(dt_step), force_no_log=True)
 
             self.perform_post()
 

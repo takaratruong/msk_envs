@@ -22,6 +22,9 @@ class ReachTargetEnv(MSKEnv):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
 
+        self.right_hand_id = self.lookup_body_id("hand_r")
+        self.right_hand_pos = self.body_positions[:, self.right_hand_id]
+
         self.curr_target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
         self.next_target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
         self.curr_closest_dist = torch.zeros(self.num_worlds, device=self.device)
@@ -59,7 +62,7 @@ class ReachTargetEnv(MSKEnv):
         raise NotImplementedError
 
     def _distance_to_target(self):
-        to_target_vec = self.curr_target_pos - self.root_pos
+        to_target_vec = self.curr_target_pos - self.right_hand_pos
         to_target_vec[:, UP_IDX] = 0.0  # ignore vertical displacement to target
         dist_to_target = torch.norm(to_target_vec, dim=1)
         return dist_to_target
@@ -81,15 +84,15 @@ class ReachTargetEnv(MSKEnv):
         self.curr_closest_dist = torch.min(self.curr_closest_dist, dist_to_target)
 
         # Reward for facing the target
-        pelvis_rot = self.body_rotations[:, self.root_id]
-        pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
-        pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
-        pelvis_fwd = pelvis_fwd / torch.norm(pelvis_fwd, dim=1, keepdim=True)
-        to_target_vec = self.curr_target_pos - self.root_pos
-        to_target_vec = to_target_vec[:, [FWD_IDX, SIDE_IDX]]
-        to_target_vec = to_target_vec / torch.norm(to_target_vec, dim=1, keepdim=True)
-        facing_target = torch.sum(pelvis_fwd * to_target_vec, dim=1)
-        rew_facing_target = torch.clamp(facing_target, min=0.0)
+        # pelvis_rot = self.body_rotations[:, self.root_id]
+        # pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
+        # pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
+        # pelvis_fwd = pelvis_fwd / torch.norm(pelvis_fwd, dim=1, keepdim=True)
+        # to_target_vec = self.curr_target_pos - self.root_pos
+        # to_target_vec = to_target_vec[:, [FWD_IDX, SIDE_IDX]]
+        # to_target_vec = to_target_vec / torch.norm(to_target_vec, dim=1, keepdim=True)
+        # facing_target = torch.sum(pelvis_fwd * to_target_vec, dim=1)
+        # rew_facing_target = torch.clamp(facing_target, min=0.0)
 
         # Reset target positions for envs that have reached the target
         reached_target_mask = dist_to_target < self.target_tolerance

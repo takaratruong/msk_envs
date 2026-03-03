@@ -1,6 +1,6 @@
 import torch
 
-from msk_envs.utils.global_params import FWD_IDX, build_axis
+from msk_envs.utils.global_params import FWD_IDX, UP_IDX, build_axis
 from .env_config import EnvConfig
 from .env_lanes import LanesEnv
 
@@ -56,8 +56,8 @@ class RaceWalkEnv(LanesEnv):
         terminated_lanes = super()._get_terminated().bool()
 
         # Foot on ground. we add a threshold to ensure the contact can be "judged by eye"
-        grf_mag = torch.norm(self.grf, dim=1)
-        not_touching_ground = ~(grf_mag > self.weight * 0.25)
+        grf_vert = self.grf[:, UP_IDX]
+        not_touching_ground = ~(grf_vert > self.weight * 0.15)
 
         # Advancing leg, if touching ground, must be straight. first find the advanced foot
         left_toes_pos = self.body_positions[:, self.left_toes_id]
@@ -65,12 +65,12 @@ class RaceWalkEnv(LanesEnv):
         left_forward = left_toes_pos[:, FWD_IDX] > right_toes_pos[:, FWD_IDX]
         right_forward = ~left_forward
         # now check if the advanced foot is making contact with the ground
-        threshold = self.weight * 0.1
-        left_foot_collider_forces = self.collider_forces[:, self.left_foot_contact_ids]
-        right_foot_collider_forces = self.collider_forces[:, self.right_foot_contact_ids]
+        threshold = self.weight * 0.15
+        left_foot_collider_forces = torch.sum(self.collider_forces[:, self.left_foot_contact_ids], dim=1)
+        right_foot_collider_forces = torch.sum(self.collider_forces[:, self.right_foot_contact_ids], dim=1)
         adv_foot_in_contact = torch.zeros(self.num_worlds, dtype=torch.bool, device=self.device)
-        adv_foot_in_contact[left_forward] = torch.any(left_foot_collider_forces[left_forward] > threshold, dim=1)
-        adv_foot_in_contact[right_forward] = torch.any(right_foot_collider_forces[right_forward] > threshold, dim=1)
+        adv_foot_in_contact[left_forward] = left_foot_collider_forces[left_forward, UP_IDX] > threshold
+        adv_foot_in_contact[right_forward] = right_foot_collider_forces[right_forward, UP_IDX] > threshold
         # first point of contact: check if advanced foot *previously* was not in contact but now is
         adv_foot_first_contact = adv_foot_in_contact & ~self.adv_foot_in_contact
         self.adv_foot_in_contact[:] = adv_foot_in_contact
@@ -78,8 +78,8 @@ class RaceWalkEnv(LanesEnv):
         # if the advancing foot is in contact with the ground, check if the leg is straight enough
         left_knee_angle = self.joint_positions[:, self.left_knee_qpos_idx]
         right_knee_angle = self.joint_positions[:, self.right_knee_qpos_idx]
-        left_knee_straight = torch.abs(left_knee_angle) < torch.deg2rad(torch.tensor(15.0, device=self.device))
-        right_knee_straight = torch.abs(right_knee_angle) < torch.deg2rad(torch.tensor(15.0, device=self.device))
+        left_knee_straight = torch.abs(left_knee_angle) < torch.deg2rad(torch.tensor(25.0, device=self.device))
+        right_knee_straight = torch.abs(right_knee_angle) < torch.deg2rad(torch.tensor(25.0, device=self.device))
         advancing_leg_straight = (left_forward & left_knee_straight) | (right_forward & right_knee_straight)
         advancing_leg_ok = ~adv_foot_first_contact | (adv_foot_first_contact & advancing_leg_straight)
 

@@ -14,6 +14,7 @@ from .env_ankle_flex import AnkleFlexEnv
 from .env_race_walk import RaceWalkEnv
 from.env_shuttle_run import ShuttleRunEnv
 from.env_random_target import RandomTargetEnv
+from.env_waddle import WaddleEnv
 
 # factory
 class EnvFactory:
@@ -51,5 +52,7 @@ class EnvFactory:
             return ShuttleRunEnv(**kwargs)
         elif env_variant == DerivedEnv.RANDOM_TARGET:
             return RandomTargetEnv(**kwargs)
+        elif env_variant == DerivedEnv.WADDLE:
+            return WaddleEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

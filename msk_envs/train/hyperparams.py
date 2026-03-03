@@ -149,7 +149,7 @@ class RaceWalkConfig(BaseArgs):
     """Sprint environment specific reward scales"""
     lambda_vel: float = 0.01
     lambda_mid_lane: float = 0.01
-    lambda_limit: float = -2e-3
+    lambda_limit: float = -5e-3
     lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
@@ -160,7 +160,7 @@ class RaceWalkConfig(BaseArgs):
 class BackPedalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.BACKPEDAL,
-        delta_t=1.0 / 100.0,
+        delta_t=1.0 / 50.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_stand_backward.yaml",
@@ -169,7 +169,7 @@ class BackPedalConfig(BaseArgs):
     """Sprint environment specific reward scales"""
     lambda_vel: float = 0.01
     lambda_mid_lane: float = 0.01
-    lambda_limit: float = -2e-3
+    lambda_limit: float = -5e-3
     lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
@@ -359,6 +359,26 @@ class ShuttleRunConfig(BaseArgs):
 
 
 @dataclass
+class WaddleConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+        env_variant=DerivedEnv.WADDLE,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand_waddle.yaml",
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 0.01
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -5e-3
+    lambda_damping: float = -1e-3
+    lambda_actuator: float = -1e-2
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+
+
+@dataclass
 class RandomTargetConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
         env_variant=DerivedEnv.RANDOM_TARGET,
@@ -391,6 +411,7 @@ Config = Union[
     Annotated[AnkleFlexConfig, tyro.conf.subcommand(name="ankleflex")],
     Annotated[ShuttleRunConfig, tyro.conf.subcommand(name="shuttlerun")],
     Annotated[RandomTargetConfig, tyro.conf.subcommand(name="randomtarget")],
+    Annotated[WaddleConfig, tyro.conf.subcommand(name="waddle")],
 ]
 
 

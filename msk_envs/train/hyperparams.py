@@ -395,6 +395,20 @@ class RandomTargetConfig(BaseArgs):
     lambda_alive: float = 3e-2
 
 
+@dataclass
+class BroadJumpConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+        env_variant=DerivedEnv.BROAD_JUMP,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=3.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
+    ))
+
+    lambda_alive: float = 1e-1
+    # TODO:
+
+
 Config = Union[
     Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
@@ -412,6 +426,7 @@ Config = Union[
     Annotated[ShuttleRunConfig, tyro.conf.subcommand(name="shuttlerun")],
     Annotated[RandomTargetConfig, tyro.conf.subcommand(name="randomtarget")],
     Annotated[WaddleConfig, tyro.conf.subcommand(name="waddle")],
+    Annotated[BroadJumpConfig, tyro.conf.subcommand(name="broadjump")],
 ]
 
 

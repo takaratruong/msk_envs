@@ -226,7 +226,7 @@ class MSKEnv:
         self.joint_velocities = msk_warp.joint_velocities(self.d)
         # [num_envs, num_dofs]
         self.qfrc_damper = msk_warp.qfrc_damper(self.d)
-        # [num_envs, num_colliders]
+        # [num_envs, num_colliders, 3]
         self.collider_forces = msk_warp.collider_forces(self.d)
 
         # [num_envs, 3]

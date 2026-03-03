@@ -46,7 +46,7 @@ def parse_collider_data(
             pos=collider_positions[world_id][i].tolist(),
             rot=collider_rotations[world_id][i].tolist(),
             scale=collider_scales[i].tolist(),
-            contact_force=collider_forces[world_id][i].item(),
+            contact_force=torch.norm(collider_forces[world_id][i], dim=0).item(),
         )
         colliders.append(collider_data)
     return colliders

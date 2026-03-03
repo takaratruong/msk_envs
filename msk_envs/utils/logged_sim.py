@@ -157,7 +157,11 @@ class LoggedSim:
 
     def check_post_step_log(self):
         if (self.curr_sim_step % self.num_sim_steps_per_log) == 0:
-            wp.capture_launch(self.envs.post_graph)
+            if self.envs.cuda_graph:
+                wp.capture_launch(self.envs.post_graph)
+            else:
+                msk_warp.post(self.envs.m, self.envs.d)
+
             wp.synchronize()
             self.add_to_log()
         self.curr_sim_step += 1

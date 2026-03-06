@@ -1,5 +1,7 @@
 import math
 import os
+import signal
+import sys
 from contextlib import contextmanager
 
 import torch
@@ -21,6 +23,13 @@ from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, Loggin
 
 torch.set_float32_matmul_precision("high")
 
+save_requested = False
+
+
+def on_sigusr1(signum, frame):
+    global save_requested
+    save_requested = True
+
 
 def train(
         sac_config: SACConfig,
@@ -31,6 +40,8 @@ def train(
         exp_name: str,
         cuda: bool,
 ):
+    global save_requested
+
     amp_enabled = sac_config.amp and cuda and torch.cuda.is_available()
     amp_device_type = "cuda" if cuda and torch.cuda.is_available() else "cpu"
     amp_dtype = torch.bfloat16 if sac_config.amp_dtype == "bf16" else torch.float16
@@ -343,6 +354,10 @@ def train(
         policy = policy
         normalize_obs = obs_normalizer.forward
 
+    # Register handler for pre-timeout checkpointing
+    signal.signal(signal.SIGUSR1, on_sigusr1)
+
+    global_step = 0
     if sac_config.checkpoint_path:
         torch_checkpoint = torch.load(sac_config.checkpoint_path, map_location=device, weights_only=False)
         # Handle DDP-wrapped models
@@ -362,7 +377,6 @@ def train(
 
     obs = envs.reset()
     dones = None
-    global_step = 0
     training_metrics = TensorAverageMeterDict()
     latest_model_path = None
 
@@ -410,7 +424,8 @@ def train(
 
         # NOTE: args.batch_size is the global batch size
         batch_size = max(sac_config.batch_size // sac_config.num_envs, 1)
-        if global_step > sac_config.learning_starts:
+        # Wait until the replay buffer has collected enough transitions before learning.
+        if rb.ptr >= sac_config.learning_starts:
             with logging_helper.record_learn_time():
                 # Use batched sampling: sample once, normalize once, split into updates
                 prepared_batches = _sample_and_prepare_batches()
@@ -475,6 +490,13 @@ def train(
                 eval_avg_return, eval_avg_length = evaluate(latest_model_path)
                 # Todo: log eval metrics
                 print(f"Eval Average Return: {eval_avg_return}, Eval Average Length: {eval_avg_length}")
+
+        if save_requested:
+            path = latest_model_path or f"models/{exp_name}/{exp_name}_{global_step}.pt"
+            logger.info(f"SIGUSR1 received, saving checkpoint at global step {global_step} and exiting with code 42.")
+            save(path)
+            save_requested = False
+            sys.exit(42)
 
         # Avoid global_step being incremented beyond args.num_learning_iterations, so that the final checkpoint is
         # saved at exactly args.num_learning_iterations. In the `while` condition, we check for self.global_step <=

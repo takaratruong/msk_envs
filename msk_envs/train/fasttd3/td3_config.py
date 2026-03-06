@@ -130,6 +130,9 @@ class TD3Config:
     """ device/torch settings """
     checkpoint_path: str = ""
 
+    # Checkpoint details
+    save_optimizer_state: bool = False
+
     """ Evaluation """
     num_eval_envs: int = 1
     eval_freq: int = 2000

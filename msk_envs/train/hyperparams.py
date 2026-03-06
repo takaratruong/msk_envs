@@ -10,6 +10,7 @@ from msk_envs.envs.env_config import EnvConfig, EnvConfigNoHands, EnvConfigNoHan
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
+from msk_envs.utils.train_utils import find_latest_checkpoint
 
 
 @dataclass
@@ -20,6 +21,8 @@ class BaseArgs:
     exp_prefix: str = ""
     exp_name: str = ""
     disable_wandb: bool = False
+    resume: bool = False
+    override_wandb_config: bool = False
 
     seed: int = 1
     cuda: bool = True
@@ -31,8 +34,27 @@ class BaseArgs:
 
     def __post_init__(self):
         """Compute derived fields after exp_prefix is set from outside"""
-        date_name: str = datetime.now().strftime("%Y-%m-%d_%H-%M")
-        self.exp_name = f"{self.exp_prefix}_{date_name}" if self.exp_prefix else date_name
+        # Handle resume logic
+        if self.resume and self.exp_prefix:
+            checkpoint_path, found_exp_name, global_step = find_latest_checkpoint(self.exp_prefix)
+            if checkpoint_path:
+                self.exp_name = found_exp_name
+                if self.algo.lower() == "sac":
+                    self.sac_config.checkpoint_path = checkpoint_path
+                elif self.algo.lower() == "td3":
+                    self.td3_config.checkpoint_path = checkpoint_path
+                print(f"Resuming training from checkpoint: {checkpoint_path} at global_step={global_step}")
+            else:
+                print(f"No checkpoint found for exp_prefix '{self.exp_prefix}'. Starting new training.")
+        
+        # Control whether optimizer/scheduler state is included in checkpoints
+        self.td3_config.save_optimizer_state = self.resume
+
+        # Generate exp_name if not set by resume
+        if not self.exp_name:
+            date_name: str = datetime.now().strftime("%Y-%m-%d_%H-%M")
+            self.exp_name = f"{self.exp_prefix}_{date_name}" if self.exp_prefix else date_name
+        
         self.traj_out_folder = f"dashboard/trajectories/{self.exp_name}"
         self.analytics_out_folder = f"models/frame_data/{self.exp_name}"
 

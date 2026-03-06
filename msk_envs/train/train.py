@@ -8,12 +8,11 @@ if 'WARP_CACHE_DIR' not in os.environ:
     os.makedirs(os.environ['WARP_CACHE_DIR'], exist_ok=True)
 
 import torch
-import wandb
 import warp as wp
 
 import msk_envs.train.fasttd3.train as fasttd3
 import msk_envs.train.fastsac.train as fastsac
-from msk_envs.utils.train_utils import set_seed
+from msk_envs.utils.train_utils import set_seed, init_wandb_run
 from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
 
@@ -55,12 +54,7 @@ def main():
     device = torch.device(f"cuda:{args.gpu_id}" if args.cuda else "cpu")
 
     if args.use_wandb:
-        wandb.init(
-            project=args.project,
-            name=args.exp_name,
-            config=vars(args),
-            save_code=True,
-        )
+        init_wandb_run(args)
 
     traj_out_folder, analytics_out_folder = args.traj_out_folder, args.analytics_out_folder
     if args.algo == "td3":

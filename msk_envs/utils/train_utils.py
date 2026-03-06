@@ -1,11 +1,12 @@
 import os
 import pathlib
 import random
+import re
 import statistics
 import time
 from collections import deque
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Any, Generator, Optional, Tuple
 
 import numpy as np
 import torch
@@ -39,7 +40,21 @@ def load_ddp_state_dict(model, state_dict):
         model.load_state_dict(state_dict)
 
 
-def save_params_td3(global_step, actor, qnet, qnet_target, obs_normalizer, args, save_path):
+def save_params_td3(
+    global_step,
+    actor,
+    qnet,
+    qnet_target,
+    obs_normalizer,
+    args,
+    save_path,
+    actor_optimizer=None,
+    q_optimizer=None,
+    actor_scheduler=None,
+    q_scheduler=None,
+    scaler=None,
+    include_optim_state: bool = False,
+):
     """Save model parameters and training configuration to disk."""
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     save_dict = {
@@ -51,9 +66,22 @@ def save_params_td3(global_step, actor, qnet, qnet_target, obs_normalizer, args,
             if hasattr(obs_normalizer, "state_dict")
             else None
         ),
-        "args": vars(args),  # Save all arguments
+        "args": vars(args),
         "global_step": global_step,
     }
+    if include_optim_state:
+        if actor_optimizer is not None:
+            save_dict["actor_optimizer_state_dict"] = actor_optimizer.state_dict()
+        if q_optimizer is not None:
+            save_dict["q_optimizer_state_dict"] = q_optimizer.state_dict()
+        if actor_scheduler is not None:
+            save_dict["actor_scheduler_state_dict"] = actor_scheduler.state_dict()
+        if q_scheduler is not None:
+            save_dict["q_scheduler_state_dict"] = q_scheduler.state_dict()
+        if scaler is not None:
+            save_dict["grad_scaler_state_dict"] = scaler.state_dict()
+    if wandb.run is not None:
+        save_dict["wandb_run_id"] = wandb.run.id
     torch.save(save_dict, save_path, _use_new_zipfile_serialization=True)
     print(f"Saved parameters and configuration to {save_path}")
 
@@ -80,6 +108,9 @@ def save_params_sac(
         "args": vars(args),  # Save all arguments
         "global_step": global_step,
     }
+    # Save wandb run ID if available
+    if wandb.run is not None:
+        save_dict["wandb_run_id"] = wandb.run.id
     if metadata is None:
         raise ValueError("Checkpoint metadata is required when saving FastSAC parameters.")
     save_dict.update(metadata)
@@ -87,11 +118,113 @@ def save_params_sac(
     print(f"Saved parameters and configuration to {save_path}")
 
 
+def init_wandb_run(args):
+    if not getattr(args, "use_wandb", False):
+        return None
+
+    wandb_resume = None
+    wandb_run_id = None
+
+    if getattr(args, "resume", False):
+        checkpoint_path = ""
+        algo = getattr(args, "algo", "").lower()
+        if algo == "sac" and getattr(args.sac_config, "checkpoint_path", ""):
+            checkpoint_path = args.sac_config.checkpoint_path
+        elif algo == "td3" and getattr(args.td3_config, "checkpoint_path", ""):
+            checkpoint_path = args.td3_config.checkpoint_path
+
+        if checkpoint_path:
+            checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+            if "wandb_run_id" in checkpoint:
+                wandb_run_id = checkpoint["wandb_run_id"]
+                wandb_resume = "must"
+
+        if wandb_resume is None:
+            wandb_resume = "allow"
+
+    wandb_kwargs = {
+        "project": args.project,
+        "name": args.exp_name,
+        "save_code": True,
+    }
+    if wandb_resume:
+        wandb_kwargs["resume"] = wandb_resume
+    if wandb_run_id:
+        wandb_kwargs["id"] = wandb_run_id
+
+    if getattr(args, "resume", False) and getattr(args, "override_wandb_config", False):
+        run = wandb.init(**wandb_kwargs)
+        run.config.update(vars(args), allow_val_change=True)
+        return run
+
+    wandb_kwargs["config"] = vars(args)
+    return wandb.init(**wandb_kwargs)
+
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
+
+
+def find_latest_checkpoint(exp_prefix: str, models_dir: str = "models") -> Tuple[Optional[str], Optional[str], Optional[int]]:
+    """
+    Find the latest checkpoint for an experiment prefix.
+    
+    Searches models/ directory for subdirectories matching {exp_prefix}_* pattern,
+    then finds the checkpoint with the highest global_step.
+    
+    Args:
+        exp_prefix: Experiment prefix to search for
+        models_dir: Directory containing model checkpoints (default: "models")
+    
+    Returns:
+        Tuple of (checkpoint_path, exp_name, global_step) if found, else (None, None, None)
+    """
+    if not exp_prefix:
+        return None, None, None
+    
+    models_path = pathlib.Path(models_dir)
+    if not models_path.exists():
+        return None, None, None
+    
+    latest_checkpoint = None
+    latest_exp_name = None
+    latest_global_step = -1
+    
+    # Pattern to match directories starting with exp_prefix_
+    prefix_pattern = re.compile(f"^{re.escape(exp_prefix)}_.*")
+    
+    # Search for matching directories
+    for exp_dir in models_path.iterdir():
+        if not exp_dir.is_dir():
+            continue
+        
+        dir_name = exp_dir.name
+        if not prefix_pattern.match(dir_name):
+            continue
+        
+        # Search for checkpoint files in this directory
+        # Pattern: {exp_name}_{global_step}.pt
+        checkpoint_pattern = re.compile(rf"^{re.escape(dir_name)}_(\d+)\.pt$")
+        
+        for checkpoint_file in exp_dir.iterdir():
+            if not checkpoint_file.is_file() or not checkpoint_file.suffix == ".pt":
+                continue
+            
+            match = checkpoint_pattern.match(checkpoint_file.name)
+            if match:
+                global_step = int(match.group(1))
+                if global_step > latest_global_step:
+                    latest_global_step = global_step
+                    latest_checkpoint = str(checkpoint_file)
+                    latest_exp_name = dir_name
+    
+    if latest_checkpoint is None:
+        return None, None, None
+    
+    return latest_checkpoint, latest_exp_name, latest_global_step
 
 
 @torch.no_grad()

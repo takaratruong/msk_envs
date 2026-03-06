@@ -1,0 +1,8 @@
+base_cmd: python -m msk_envs.train.train {TASK} --td3_config.no-amp --exp-prefix
+task: "sprint"
+args: 
+  env-config.delta_t: 0.0333
+  seed: [1, 2, 3, 4]
+store_trues:
+  resume: true
+  

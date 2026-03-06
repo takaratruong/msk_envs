@@ -14,11 +14,15 @@ class EnvConfig:
     delta_t: float = 1.0 / 30.0
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 10000.0
-    """ Simulator/physics step size """
+    """ Simulator/physics step size. Ignored if using adaptive integrator """
     max_episode_duration: float = 12.0
     """ Max episode duration in seconds """
-    integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_FIXED
-    """ Integrator type (EULER_FIXED, RK4_FIXED) """
+    integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_ADAPTIVE
+    """ Integrator type (EULER_FIXED, RK4_FIXED, EULER_ADAPTIVE, RK4_ADAPTIVE) """
+    integrator_use_inf_norm: bool = False
+    """ For adaptive integrator, whether to use inf norm or L2-norm error calculation """
+    integrator_accuracy: float = 1.0
+    """ For adaptive integrator, overall accuracy/tolerance """
 
     # --- Model articulation properties ---
     model_root_free: bool = True

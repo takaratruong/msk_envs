@@ -132,6 +132,8 @@ def create_wr_line():
 
 
 def update_wr_line(wr_line, time, frame_num):
+    if wr_line is None:
+        return
     # determine position of line based on 2.5m splits
     split_length = 2.5
     splits = [0.87, 0.41, 0.33, 0.29, 0.27, 0.25, 0.24, 0.23, 0.23, 0.23, 0.22, 0.22, 0.22, 0.22, 0.21, 0.21, 0.21,

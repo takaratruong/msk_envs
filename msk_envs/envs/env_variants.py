@@ -14,3 +14,7 @@ class DerivedEnv(Enum):
     STATIC = 10
     ANKLE_FLEX = 11
     RACE_WALK = 12
+    SHUTTLE_RUN = 13
+    RANDOM_TARGET = 14
+    WADDLE = 15
+    BROAD_JUMP = 16

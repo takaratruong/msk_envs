@@ -1,24 +1,24 @@
 lumbar_extension:
-  lower: -0.5235987755982988
+  lower: -0.35
   upper: 0.17
 lumbar_bending:
-  lower: -0.3490658503988659
-  upper: 0.3490658503988659
+  lower: -0.17
+  upper: 0.17
 lumbar_rotation:
-  lower: -0.3490658503988659
-  upper: 0.3490658503988659
+  lower: -0.17
+  upper: 0.17
 
 hip_flexion_r:
-  lower: -0.6981
+  lower: -0.47
   upper: 1.81
 hip_adduction_r:
-  lower: -0.5
-  upper: 0.5
+  lower: -0.50
+  upper: 0.50
 hip_rotation_r:
   lower: -0.92
   upper: 0.92
 knee_angle_r:
-  lower: -2.4
+  lower: -2.40
   upper: 0.13
 ankle_angle_r:
   lower: -0.74
@@ -27,20 +27,20 @@ subtalar_angle_r:
   lower: -0.65
   upper: 0.65
 mtp_angle_r:
-  lower: 0.0
-  upper: 1.134464013796314
+  lower: -0.02
+  upper: 0.21
 
 hip_flexion_l:
-  lower: -0.6981
+  lower: -0.47
   upper: 1.81
 hip_adduction_l:
-  lower: -0.5
-  upper: 0.5
+  lower: -0.50
+  upper: 0.50
 hip_rotation_l:
   lower: -0.92
   upper: 0.92
 knee_angle_l:
-  lower: -2.4
+  lower: -2.40
   upper: 0.13
 ankle_angle_l:
   lower: -0.74
@@ -49,12 +49,12 @@ subtalar_angle_l:
   lower: -0.65
   upper: 0.65
 mtp_angle_l:
-  lower: 0.0
-  upper: 1.134464013796314
+  lower: -0.02
+  upper: 0.21
 
 arm_flex_r:
-  lower: -1.30899694
-  upper: 1.57079632679
+  lower: -1.0
+  upper: 2.45
 arm_add_r:
   lower: -0.373071692045299
   upper: 0.20420553938582017
@@ -69,8 +69,8 @@ pro_sup_r:
   upper: 1.4805935971362496
 
 arm_flex_l:
-  lower: -1.30899694
-  upper: 1.57079632679
+  lower: -1.0
+  upper: 2.45
 arm_add_l:
   lower: -0.373071692045299
   upper: 0.20420553938582017

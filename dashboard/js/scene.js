@@ -32,14 +32,9 @@ function setupLightsSky(scene) {
         new THREE.MeshBasicMaterial({color: 0x87ceeb, side: THREE.BackSide})
     );
     scene.add(skybox);
-
-    // Add xyz axes helper, thick
-    const axesHelper = new THREE.AxesHelper(1);
-    axesHelper.material.linewidth = 16;
-    scene.add(axesHelper);
 }
 
-function setupAxes(scene) {
+function setupAxes(scene, currentObjects) {
     const axesHelper = new THREE.Group();
     const axisLength = 1;
     const axisRadius = 0.025;
@@ -62,6 +57,7 @@ function setupAxes(scene) {
     axesHelper.add(createAxis(0xef553b));
     axesHelper.add(createAxis(0x00cc96, new THREE.Vector3(1, 0, 0), Math.PI / 2));
     scene.add(axesHelper);
+    currentObjects.push(axesHelper);
 }
 
 function setupGround(scene, position) {
@@ -79,7 +75,7 @@ function setupGround(scene, position) {
     scene.add(ground);
 }
 
-function setupLanes(scene) {
+function setupLanes(scene, currentObjects) {
     // Lane 1
     const laneWidth = 100;     // Length of the lane
     const laneThickness = 0.05; // Thickness of the line (height of the plane)
@@ -92,6 +88,7 @@ function setupLanes(scene) {
     lane1.rotation.x = -Math.PI / 2; // Rotate to lay flat on the XZ plane
 
     scene.add(lane1);
+    currentObjects.push(lane1);
 
     // Lane 2
     const laneGeometry2 = new THREE.PlaneGeometry(laneWidth, laneThickness);
@@ -102,9 +99,10 @@ function setupLanes(scene) {
     lane2.rotation.x = -Math.PI / 2;
 
     scene.add(lane2);
+    currentObjects.push(lane2);
 }
 
-function setupNumbers(scene) {
+function setupNumbers(scene, currentObjects) {
     const loader = new FontLoader();
     loader.load("assets/fonts/helvetiker.json", (font) => {
 
@@ -130,6 +128,7 @@ function setupNumbers(scene) {
             text.receiveShadow = true;
 
             scene.add(text);
+            currentObjects.push(text);
         }
     })
 }

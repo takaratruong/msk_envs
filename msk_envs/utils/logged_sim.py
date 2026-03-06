@@ -1,6 +1,7 @@
 """ Provides a wrapper around an MSKEnv to log simulation data """
 from msk_envs.envs.env_base import MSKEnv
-from msk_envs.utils.frame_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame
+from msk_envs.envs.env_reach_target import ReachTargetEnv
+from msk_envs.utils.frame_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame, add_target
 from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
 
@@ -9,6 +10,7 @@ import msk_warp
 import os
 import gzip
 import json
+import numpy as np
 import torch
 import warp as wp
 
@@ -38,7 +40,11 @@ class LoggedSim:
         self.max_env_steps = max_env_steps
 
         # Frame data: logged every delta_t_log seconds
-        self.num_sim_steps_per_log = math.ceil(self.delta_t_log / self.envs.delta_t_sim)
+        self.is_adaptive = self.envs.is_adaptive
+        if self.is_adaptive:
+            self.num_sim_steps_per_log = 1
+        else:
+            self.num_sim_steps_per_log = math.ceil(self.delta_t_log / self.envs.delta_t_sim)
         self.frame_data = [[] for _ in range(n_worlds_to_save)]
 
         self.n_worlds = n_worlds
@@ -61,6 +67,9 @@ class LoggedSim:
         self.actuator_idx_to_name = {v: k for k, v in self.envs.actuator_id_lookup.items()}
         # collider idx to name
         self.collider_idx_to_name = {v: k for k, v in self.envs.collider_id_lookup.items()}
+
+        max_episode_duration = self.envs.max_episode_duration
+        self.log_times = torch.arange(0, max_episode_duration + self.delta_t_log, self.delta_t_log, device=device)
 
     def add_to_rl_log(self):
         # Track rewards
@@ -86,6 +95,7 @@ class LoggedSim:
 
     def add_to_log(self):
         times = self.envs.get_time()
+        scene_settings = self.envs.scene_settings()
 
         # If we are using the ImitateEnv, add reference visuals
         add_reference, ref_joint_angles = False, None
@@ -113,6 +123,7 @@ class LoggedSim:
                 visual_load_results=self.envs.visuals,
                 world_id=idx_world,
                 frame_time=frame_time,
+                scene_settings=scene_settings,
                 ref_joint_angles=ref_joint_angles,
             )
 
@@ -126,6 +137,14 @@ class LoggedSim:
                     ref_visuals_rot[closest_idx],
                 )
 
+            # if ReachTarget env or inheriting from it, add target position to frame
+            if isinstance(self.envs, ReachTargetEnv) or issubclass(type(self.envs), ReachTargetEnv):
+                target_pos = self.envs.curr_target_pos[idx_world].cpu().numpy().tolist()
+                next_target_pos = self.envs.next_target_pos[idx_world].cpu().numpy().tolist()
+                radius = float(self.envs.target_tolerance)
+                add_target(frame, target_pos, radius, active=True)
+                add_target(frame, next_target_pos, radius, active=False)
+
             add_ext_forces_to_frame(
                 frame,
                 self.envs.m,
@@ -138,10 +157,33 @@ class LoggedSim:
 
     def check_post_step_log(self):
         if (self.curr_sim_step % self.num_sim_steps_per_log) == 0:
-            wp.capture_launch(self.envs.post_graph)
+            if self.envs.cuda_graph:
+                wp.capture_launch(self.envs.post_graph)
+            else:
+                msk_warp.post(self.envs.m, self.envs.d)
+
             wp.synchronize()
             self.add_to_log()
         self.curr_sim_step += 1
+        return
+
+    def perform_step(self, dt_step: float, force_no_log: bool = False):
+        msk_warp.increment_next_time(self.envs.m, self.envs.d, dt_step)
+        if self.envs.cuda_graph:
+            wp.capture_launch(self.envs.step_graph)
+        else:
+            msk_warp.step(self.envs.m, self.envs.d)
+
+        if not force_no_log:
+            self.check_post_step_log()
+        return
+
+    def perform_post(self):
+        if self.envs.cuda_graph:
+            wp.capture_launch(self.envs.post_graph)
+            wp.synchronize()
+        else:
+            msk_warp.post(self.envs.m, self.envs.d)
         return
 
     def step(self, actions: torch.Tensor):
@@ -151,17 +193,37 @@ class LoggedSim:
         # We're overriding typical env step to allow for logging
         self.envs.pre_step(actions)
 
-        if self.envs.cuda_graph:
+        # We need to report at the correct logging event times
+        #  For fixed time-stepping, we assume [delta_t_sim] is small and just check after every sim step
+        #  For adaptive time-stepping, we integrate to all logging events within this env step
+        if not self.is_adaptive:  # fixed time-stepping
             for _ in range(self.envs.sim_steps_per_env_step):
-                wp.capture_launch(self.envs.step_graph)
-                self.check_post_step_log()
-            wp.capture_launch(self.envs.post_graph)
-            wp.synchronize()
-        else:
-            for _ in range(self.envs.sim_steps_per_env_step):
-                msk_warp.step_to(self.envs.m, self.envs.d, self.envs.delta_t_sim)
-                self.check_post_step_log()
-            msk_warp.post(self.envs.m, self.envs.d)
+                self.perform_step(self.envs.delta_t_sim)
+            self.perform_post()
+        else:  # adaptive time-stepping
+            # we should only look at worlds that aren't finished, they should all be at the same time
+            idx_not_finished = torch.where(self.finished == 0)[0][0].item()
+            # find all logging events in (curr_time, curr_time + delta_t)
+            delta_t = self.envs.delta_t
+            curr_time = self.envs.time[idx_not_finished].item()
+            end_time = curr_time + delta_t
+
+            # Determine which logging times are in (curr_time, end_time]
+            logging_times = self.log_times
+            times_in_interval = (logging_times > curr_time) & (logging_times <= end_time)
+            logging_times_in_interval = logging_times[times_in_interval]
+            # integrate to each logging time
+            for i in range(len(logging_times_in_interval)):
+                curr_time = self.envs.time[idx_not_finished].item()
+                delta_t = logging_times_in_interval[i] - curr_time
+                self.perform_step(float(delta_t))
+            # check if we need to add an extra step to reach end_time, don't log
+            if len(logging_times_in_interval) == 0 or not np.isclose(logging_times_in_interval[-1].item(), end_time):
+                curr_time = self.envs.time[idx_not_finished].item()
+                dt_step = end_time - curr_time
+                self.perform_step(float(dt_step), force_no_log=True)
+
+            self.perform_post()
 
         # Now the policy step is done
         obs, rew, terminated, truncated, info = self.envs.rl_step()

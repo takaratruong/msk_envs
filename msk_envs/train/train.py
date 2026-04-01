@@ -21,14 +21,16 @@ def _build_envs(num_envs, num_eval_envs, env_config, cuda, device):
     envs = EnvFactory.create_env(
         num_envs=num_envs,
         env_config=env_config,
-        render=False,
+        live_render=False,
+        requires_visuals=False,
         cuda_graph=cuda,
         device=device,
     )
     eval_envs = EnvFactory.create_env(
         num_envs=num_eval_envs,
         env_config=env_config,
-        render=False,
+        live_render=False,
+        requires_visuals=True,
         cuda_graph=cuda,
         device=device,
     )

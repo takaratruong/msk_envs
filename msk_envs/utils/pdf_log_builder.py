@@ -21,6 +21,7 @@ def create_generic_plot(
         linestyles: list[str] = None,
         horizontal_lines: list[list[float]] = None,
         omit_zeros: bool = False,
+        omit_tolerance: float = 1e-4
 ):
     n_vertical, n_horizontal = 3, 1
     n_plots = plot_data.shape[1]
@@ -70,7 +71,7 @@ def create_generic_plot(
                     for part in range(data_subset.shape[-1]):
                         alpha = 1.0 if alphas is None else alphas[part]
                         linestyle = 'solid' if linestyles is None else linestyles[part]
-                        if omit_zeros and np.all(data_subset[..., part] == 0.0):
+                        if omit_zeros and np.all(np.abs(data_subset[..., part]) < omit_tolerance):
                             continue
                         seq_plot.add(idx_fig, data_subset[..., part],
                                      label=label[part],
@@ -82,7 +83,8 @@ def create_generic_plot(
                 idx_entry = start_idx + i
                 if horizontal_lines and horizontal_lines[idx_entry] is not None:
                     for hline in horizontal_lines[idx_entry]:
-                        seq_plot.add_hline(idx_fig, hline)
+                        if np.isfinite(hline):  # we use -inf, inf for limits that are not defined
+                            seq_plot.add_hline(idx_fig, hline)
 
                 if enforced_y_range is not None and enforced_y_range[start_idx] is not None:
                     seq_plot.enforce_y_range(idx_fig, enforced_y_range[start_idx][0], enforced_y_range[start_idx][1])
@@ -90,7 +92,7 @@ def create_generic_plot(
         seq_plot.finish(pdf)
 
 
-def create_interval_plots(interval_duration: float, times: np.ndarray, fn):
+def _create_interval_plots(interval_duration: float, times: np.ndarray, fn):
     time_current, final_time = 0.0, times[-1]
     if final_time - time_current > interval_duration:  # only if longer than interval
         while time_current < final_time:
@@ -99,7 +101,12 @@ def create_interval_plots(interval_duration: float, times: np.ndarray, fn):
     return
 
 
-def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict], out_file: str):
+def create_pdf_output(
+        frame_data: list[FrameData],
+        logged_reward_data: list[dict],
+        out_file: str,
+        interval_plots: bool = False
+):
     """ Create a pdf with all the relevant plots """
     n_frames = len(frame_data)
     times = np.array([frame.time for frame in frame_data])
@@ -193,6 +200,7 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
         contact_threshold = 0.1  # 10% body weight
         in_contact = False
         contact_start = 0.0
+        dt = times[1] - times[0]
         for i in range(n_frames):
             # grf_magnitude = np.linalg.norm(grf_data[i, :])
             grf_magnitude = np.abs(grf_bw_data[i, UP_IDX])  # vertical component only
@@ -202,7 +210,7 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
             elif in_contact and grf_magnitude < contact_threshold:  # end of contact
                 in_contact = False
                 contact_end = times[i]
-                contact_intervals.append((contact_start, contact_end))
+                contact_intervals.append((contact_start - dt, contact_end + dt))
 
         contact_intervals = np.array(contact_intervals)
         if contact_intervals.size > 0:
@@ -331,17 +339,16 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
 
         # Joint angles plot for entire duration, and 1 second intervals
         create_joint_angles_plot()
-        create_interval_plots(1.0, times, create_joint_angles_plot)
+        if interval_plots:
+            _create_interval_plots(1.0, times, create_joint_angles_plot)
 
         # --- JOINT MOMENTS ---
         joint_dof_names = [j.name for j in frame0.joint_moments]
         joint_moments = []
         for frame in frame_data:
-            joint_moments.append([
-                (m.spring, m.drag, m.muscle, m.actuator, m.limit, m.contact)
-                for m in frame.joint_moments])
+            joint_moments.append([(m.spring, m.muscle, m.actuator, m.limit, m.damping) for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
-        sublabels = ["Spring", "Drag", "Muscle", "Actuator", "Limit", "Contact"]
+        sublabels = ["Spring", "Muscle", "Actuator", "Limit", "Damping"]
 
         def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
@@ -370,7 +377,8 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
 
         # Joint moments plot for entire duration, and 1 second intervals
         create_joint_moments_plot()
-        create_interval_plots(1.0, times, create_joint_moments_plot)
+        if interval_plots:
+            _create_interval_plots(1.0, times, create_joint_moments_plot)
 
         # --- MUSCLE PLOTS ---
         muscle_names = [m.name for m in frame0.muscles]
@@ -423,8 +431,8 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
         enforced_range = [(-0.1, 0.1)] * len(muscle_names)
         create_generic_plot(muscle_names, times, frame_ind, muscle_ma,
                             "Muscle Moment Arms", "Moment Arm (m)", ".2f",
-                            pdf, sublabels=joint_dof_names, omit_zeros=True, horizontal_lines=zero_lines,
-                            enforced_y_range=enforced_range)
+                            pdf, sublabels=joint_qpos_names, omit_zeros=True, omit_tolerance=1e-3,
+                            horizontal_lines=zero_lines, enforced_y_range=enforced_range)
 
         # Muscle actuation
         enforced_range = [(0.0, 2.0 * m.max_isometric_force) for m in frame0.muscles]

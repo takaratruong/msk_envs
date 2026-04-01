@@ -33,15 +33,15 @@ def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: b
     return limit_torque_sum / num_limits
 
 
-def joint_damping_penalty(qfrc_damper: torch.Tensor, squared: bool = False):
+def joint_damping_penalty(ufrc_damper: torch.Tensor, squared: bool = False):
     """Joint damping penalty based on sum of absolute damping forces"""
-    qfrc_damper_joints = qfrc_damper[:, 6:]
-    nv_joints = qfrc_damper_joints.shape[1]
+    ufrc_damper_joints = ufrc_damper[:, 6:]
+    nv_joints = ufrc_damper_joints.shape[1]
     if squared:
-        sq_damping = torch.pow(qfrc_damper_joints, 2)
+        sq_damping = torch.pow(ufrc_damper_joints, 2)
         damping_sum = torch.sum(sq_damping, dim=1)
     else:
-        abs_damping = torch.abs(qfrc_damper_joints)
+        abs_damping = torch.abs(ufrc_damper_joints)
         damping_sum = torch.sum(abs_damping, dim=1)
     return damping_sum / nv_joints
 
@@ -185,14 +185,14 @@ def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight
     return reward
 
 
-def has_fallen(root_pos, torso_pos, torso_rot, head_offset, min_root=MIN_ROOT_HEIGHT, min_head=MIN_HEAD_HEIGHT):
+def has_fallen(root_pos, head_pos, head_rot, head_offset, min_root=MIN_ROOT_HEIGHT, min_head=MIN_HEAD_HEIGHT):
     # Root falls below threshold
     root_height = root_pos[:, UP_IDX]
     pelvis_fallen = (root_height < min_root)
 
     # Head falls below threshold
-    head_pos = torso_pos + rotate_vec(torso_rot, head_offset)
-    head_fallen = (head_pos[:, UP_IDX] < min_head)
+    actual_head_pos = head_pos + rotate_vec(head_rot, head_offset)
+    head_fallen = (actual_head_pos[:, UP_IDX] < min_head)
 
     fallen = pelvis_fallen | head_fallen
     return fallen.detach()

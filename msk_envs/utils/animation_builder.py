@@ -37,6 +37,7 @@ def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: 
     stacked_frames = []
     for i in range(n_frames):
         visuals = [obj.to_anim_dict() for obj in frame_data[i].visuals]
+        beam_points = [point.to_dict() for point in frame_data[i].beam_points]
         colliders = [obj.to_anim_dict() for obj in frame_data[i].colliders]
         muscles = [muscle.to_anim_dict() for muscle in frame_data[i].muscles]
         arrows = [arrow.to_dict() for arrow in frame_data[i].arrows]
@@ -47,6 +48,7 @@ def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: 
             "scene_settings": scene_settings,
             "time": time,
             "visuals": visuals,
+            "beam_points": beam_points,
             "colliders": colliders,
             "muscles": muscles,
             "arrows": arrows,

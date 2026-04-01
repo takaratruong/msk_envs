@@ -13,24 +13,29 @@ def main():
     args = get_args()
     pretty_print_base_args(args)
 
+    # set seed
+    torch.manual_seed(args.seed)
+
     # no noise
     env_config = args.env_config
     env_config.q_noise = 0.0
     env_config.qv_noise = 0.0
     env_config.swap_lr = False
+    env_config.integrator_accuracy = 0.1
 
     has_cuda_support = torch.cuda.is_available()
     device = torch.device("cuda" if has_cuda_support else f"cpu")
     num_envs = 1
     envs = EnvFactory.create_env(num_envs=num_envs,
                                  env_config=env_config,
-                                 render=False,
+                                 live_render=False,
+                                 requires_visuals=True,
                                  cuda_graph=has_cuda_support,
                                  device=device)
 
     actions = envs.get_blank_actions()
     #
-    policy = load_policy("/home/marth/Documents/msk_envs/models/randomtarget_2026-02-23_12-47/randomtarget_2026-02-23_12-47_32000.pt")
+    policy = load_policy("/home/marth/Documents/msk_envs/models/regression_2026-03-26_12-11/regression_2026-03-26_12-11_82000.pt")
     policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,
@@ -51,13 +56,16 @@ def main():
     obs = sim.reset()
 
     for _ in tqdm(range(max_episode_length)):
-        actions = torch.randn_like(actions)
+        # actions = torch.randn_like(actions)
+        # actions = torch.ones_like(actions) * -1
         # muscle_states = envs.muscle_fiber_lengths
         # actions[:, :envs.num_muscles] = dep.step(muscle_states)
-        # actions = torch.randn_like(actions)
-        # actions = envs.get_blank_actions()
+        # actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
+
         with torch.no_grad():
             actions = policy(obs)
+
+        # try to step the sim, but if it takes too long, break out of the loop
         finished, obs = sim.step(actions)
         if finished.all():
             break

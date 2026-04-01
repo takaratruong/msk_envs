@@ -17,12 +17,20 @@ class LanesEnv(MSKEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            requires_visuals: bool,
+            live_render: bool,
             cuda_graph: bool,
             target_dir: list[float],
             angle_tolerance: float = 30.0,
     ):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
+        super().__init__(
+            num_envs=num_envs,
+            env_config=env_config,
+            device=device,
+            requires_visuals=requires_visuals,
+            live_render=live_render,
+            cuda_graph=cuda_graph
+        )
         assert target_dir[UP_IDX] == 0.0, "Target direction should be horizontal only"
 
         # Precompute 2d target facing direction
@@ -59,10 +67,10 @@ class LanesEnv(MSKEnv):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
         rew_mid_lane = mid_lane_reward(self.root_pos)
         rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
-        rew_damping = joint_damping_penalty(self.qfrc_damper, squared=False)
+        rew_damping = joint_damping_penalty(self.ufrc_damper, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
-        rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
+        # rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
@@ -71,20 +79,20 @@ class LanesEnv(MSKEnv):
             "rew_damping": rew_damping.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_fatigue": rew_fatigue.detach(),
-            "rew_metabolic": rew_metabolic.detach(),
+            # "rew_metabolic": rew_metabolic.detach(),
         }
 
     def _get_terminated(self):
         # Has fallen
-        fallen = has_fallen(self.root_pos, self.torso_pos, self.torso_rot, self.head_offset)
+        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
 
-        # Any of the *toes* are out of the lanes
+        # # Any of the *toes* are out of the lanes
         toes_out = torch.zeros_like(fallen, dtype=torch.bool)
         for body_idx in self.toes_ids:
             body_pos = self.body_positions[:, body_idx]
             toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
 
-        # Pelvis no longer facing forward (within N degrees)
+        # # Pelvis no longer facing forward (within N degrees)
         pelvis_rot = self.body_rotations[:, self.root_id]
         pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
         pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components

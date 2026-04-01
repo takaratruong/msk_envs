@@ -11,14 +11,14 @@ class RaceWalkEnv(LanesEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            live_render: bool,
             cuda_graph: bool
     ):
         super().__init__(
             num_envs=num_envs,
             env_config=env_config,
             device=device,
-            render=render,
+            live_render=live_render,
             cuda_graph=cuda_graph,
             target_dir=build_axis(FWD_IDX, 1.0),
             angle_tolerance=90.0,  # we're more lenient since hip swaying is fine

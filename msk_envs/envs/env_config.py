@@ -11,45 +11,29 @@ class EnvConfig:
     """ Environment type """
 
     # --- Control and Simulation Frequency ---
-    delta_t: float = 1.0 / 30.0
+    delta_t: float = 1.0 / 50.0
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 10000.0
     """ Simulator/physics step size. Ignored if using adaptive integrator """
     max_episode_duration: float = 12.0
     """ Max episode duration in seconds """
     integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_ADAPTIVE
-    """ Integrator type (EULER_FIXED, RK4_FIXED, EULER_ADAPTIVE, RK4_ADAPTIVE) """
+    """ Integrator type (EULER_FIXED, RK4_FIXED, EULER_ADAPTIVE, RK_MERSON_ADAPTIVE) """
     integrator_use_inf_norm: bool = False
     """ For adaptive integrator, whether to use inf norm or L2-norm error calculation """
     integrator_accuracy: float = 1.0
-    """ For adaptive integrator, overall accuracy/tolerance """
+    """ For adaptive integrator, overall accuracy/tolerance. Lower = more accurate but slower """
 
     # --- Model articulation properties ---
     model_root_free: bool = True
     """ Whether the model root is free (floating base) """
     model_path: str = "../msk_models/model_motor_arms_full_contact.osim"
     """ OpenSim model file path """
-    joint_damping: float = 0.1
-    """ Joint damping applied to all joints """
-    joint_armature: float = 0.002
-    """ Armature added to all joints (increases inertia but improves stability) """
-    toe_armature: float = 0.002
-    """ Armature specifically for toes joint """
-    torso_damping: float = 1.0
-    """ Damping specifically for torso joint """
-    toes_stiffness: float = 65.0
-    """ Toes joint stiffness """
-    toes_damping: float = 0.4
-    """ Toes joint damping """
-    use_specified_joint_limits: bool = True
-    """ Whether to use joint limits defined in joint_limits_path, otherwise use limits defined in model file """
-    joint_limits_path: str = "../msk_models/joint_limits_hc.yaml"
-    """ Joint limits file path (YAML). NOTE: this overrides limits defined in the model file """
     enable_drag: bool = False
     """ Whether to enable drag forces """
     use_specified_contact_params: bool = True
     """ Whether to use contact parameters defined in contact_params_path """
-    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
+    contact_params_path: str = "../msk_models/contact_params.yaml"
     """ Contact parameters file path (YAML). NOTE: this overrides contact parameters defined in the model file """
 
     # --- Model muscle properties ---
@@ -65,7 +49,7 @@ class EnvConfig:
     """ Muscle activation dynamics smoothing factor """
     muscle_fiber_damping: float = 0.1
     """ Fiber damping (0.0 = undamped) """
-    muscle_min_activation: float = 0.0
+    muscle_min_activation: float = 0.01
     """ Minimum muscle activation. Use non-zero for undamped muscle """
     muscle_max_activation: float = 1.0
     """ Maximum muscle activation """
@@ -75,25 +59,15 @@ class EnvConfig:
     """ Number of substeps for muscle dynamics integration (can improve stability) """
     use_function_based_path: bool = True
     """ Whether to use function-based path (or geometry path)"""
-    muscle_function_path: str = "../msk_models/muscle_fn_path_info.json"
-    """ Function-based path data file (JSON) """
+    muscle_function_path: str = "../msk_models/athlete_model_FunctionBasedPathSet.xml"
+    """ Function-based path data file """
     use_specified_metabolic_params: bool = True
     """ Whether to use metabolic parameters defined in metabolic_params_path """
     metabolic_params_path: str = "../msk_models/muscle_metabolic_params.yaml"
     """ Muscle metabolic parameters file path (YAML) """
 
-    # --- Constraint properties ---
-    contact_type: msk_warp.ContactType = msk_warp.ContactType.HUNT_CROSSLEY
-    """ Contact model type (HUNT_CROSSLEY, HUNT_CROSSLEY_SMOOTH, MUJOCO) """
-    limit_type: msk_warp.LimitType = msk_warp.LimitType.HUNT_CROSSLEY
-    """ Joint limit model type (MUJOCO, EXPONENTIAL, HUNT_CROSSLEY) """
-    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
-    """ Limit force curves file path (if using EXPONENTIAL or HUNT_CROSSLEY limits) """
-    solref: tuple[float, float] = (0.02, 1.0)
-    """ MuJoCo limit/contact parameters (if using MuJoCo limits/contacts) """
-
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
-    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     """ Starting pose file path (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
@@ -155,40 +129,22 @@ class EnvConfig:
 @dataclass
 class EnvConfigNoHands(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim"
-    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
-    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
-    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
+    model_path: str = "../msk_models/athlete_lower.osim"
+    muscle_function_path: str = "../msk_models/athlete_lower_body_model_FunctionBasedPathSet.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
 
 
 @dataclass
-class EnvConfigNoHandsExp(EnvConfig):
+class EnvConfigUpperRight(EnvConfig):
+    model_path: str = "../msk_models/athlete_upper_right_only.osim"
+    use_function_based_path: bool = False
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+
+
+@dataclass
+class EnvConfigRegression(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_full_contact.osim"
-    limit_type: msk_warp.LimitType = msk_warp.LimitType.EXPONENTIAL
-    joint_limits_path: str = "../msk_models/no_hands/joint_limits_exp.yaml"
-    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_exp.yaml"
-    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
-
-
-@dataclass
-class EnvConfigNoHandsWalk(EnvConfig):
-    """ Environment configuration for no-hands model, with walking-specific contact params"""
-    model_path: str = "../msk_models/no_hands/model_motor_arms_no_hand_walk_contact.osim"
-    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
-    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
-    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_walking.yaml"
-
-
-@dataclass
-class EnvConfigStaticLegs(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    model_root_free: bool = False
-    model_path: str = "../msk_models/static/model_just_legs.osim"
-    joint_limits_path: str = "../msk_models/no_hands/joint_limits_hc.yaml"
-    limit_force_curves_path: str = "../msk_models/no_hands/limit_force_curves_hc.yaml"
-    starting_pose_path: str = "../msk_models/no_hands/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_sprint.yaml"
+    model_path: str = "../msk_models/regression/regression_model.osim"
+    muscle_function_path: str = "../msk_models/regression/regression_fn.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/regression/contact_params_regression.yaml"

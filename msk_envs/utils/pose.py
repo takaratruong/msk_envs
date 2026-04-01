@@ -17,7 +17,8 @@ class SwapPair:
 
 def parse_starting_pose(
         file_path,
-        dof_id_lookup: dict[str, tuple[int, int]],
+        qpos_id_lookup: dict[str, int],
+        dof_id_lookup: dict[str, int],
         num_qpos: int,
         num_dofs: int,
 ):
@@ -27,21 +28,25 @@ def parse_starting_pose(
     with open(file_path, "r") as f:
         data = yaml.safe_load(f)
     for coord_name, values in data.items():
+        if coord_name not in qpos_id_lookup:
+            print(f"Warning: Coordinate '{coord_name}' not found in model's qpos, skipping.")
+        else:
+            qpos_adr = qpos_id_lookup[coord_name]
+            qpos = values["q"]
+            start_q[qpos_adr] = qpos
+
         if coord_name not in dof_id_lookup:
-            print(f"Warning: Coordinate '{coord_name}' not found for starting pose, skipping.")
-            continue
-        qpos_id, qvel_id = dof_id_lookup[coord_name]
-        qpos, qvel = values["q"], values["v"]
-        if qpos_id != -1:
-            start_q[qpos_id] = qpos
-        if qvel_id != -1:
-            start_qv[qvel_id] = qvel
+            print(f"Warning: Coordinate '{coord_name}' not found in model's speeds, skipping.")
+        else:
+            dof_adr = dof_id_lookup[coord_name]
+            qvel = values["v"]
+            start_qv[dof_adr] = qvel
 
     return start_q, start_qv
 
 
 def get_swap_left_right_data(
-        m: msk_warp.types.Model,
+        m: msk_warp.Model,
         body_id_lookup: dict[str, int]
 ) -> list[SwapPair]:
     all_bodies = list(body_id_lookup.keys())

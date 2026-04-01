@@ -5,6 +5,28 @@ from msk_envs.utils.scene_settings import SceneSettings
 
 
 @dataclass
+class PointData:
+    name: str
+    pos: list[float]
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "pos": list(self.pos),
+        }
+
+    def to_anim_dict(self):
+        return self.to_dict()
+
+    @staticmethod
+    def from_dict(data: dict) -> 'PointData':
+        return PointData(
+            name=data["name"],
+            pos=data["pos"],
+        )
+
+
+@dataclass
 class ColliderData:
     name: str
     geom_type: int
@@ -50,8 +72,8 @@ class VisualData:
         # Remove .vtp if it exists and replace with .obj
         mesh_obj_file = self.mesh_file
         if mesh_obj_file.endswith('.vtp'):
-            mesh_obj_file = self.mesh_file[:-4] + '.vtp'
-        mesh_obj_file = os.path.join("assets", "geometry", "vtp", mesh_obj_file)
+            mesh_obj_file = self.mesh_file
+        mesh_obj_file = os.path.join("assets", "geometry", mesh_obj_file)
 
         return {
             "mesh_file": mesh_obj_file,
@@ -256,43 +278,31 @@ class NamedValue:
 @dataclass
 class JointMoment:
     name: str
-    value: float
     spring: float
     damping: float
-    bias: float
-    drag: float
     muscle: float
     actuator: float
     limit: float
-    contact: float
 
     def to_dict(self):
         return {
             "name": self.name,
-            "value": self.value,
             "spring": self.spring,
             "damping": self.damping,
-            "drag": self.drag,
-            "bias": self.bias,
             "muscle": self.muscle,
             "actuator": self.actuator,
             "limit": self.limit,
-            "contact": self.contact,
         }
 
     @staticmethod
     def from_dict(data: dict) -> 'JointMoment':
         return JointMoment(
             name=data["name"],
-            value=data["value"],
             spring=data["spring"],
             damping=data["damping"],
-            drag=data["drag"],
-            bias=data["bias"],
             muscle=data["muscle"],
             limit=data["limit"],
             actuator=data["actuator"],
-            contact=data["contact"],
         )
 
 
@@ -356,6 +366,7 @@ class FrameData:
     kinetic_data: KineticData
     arrows: list[Arrow]
     targets: list[TargetData]
+    beam_points: list[PointData]
     scene_settings: SceneSettings
 
     def to_dict(self):
@@ -371,6 +382,7 @@ class FrameData:
             "kinetic_data": self.kinetic_data.to_dict(),
             "arrows": [arrow.to_dict() for arrow in self.arrows],
             "targets": [target.to_dict() for target in self.targets],
+            "beam_points": [point.to_dict() for point in self.beam_points],
             "scene_settings": self.scene_settings.to_dict(),
         }
 
@@ -388,5 +400,6 @@ class FrameData:
             kinetic_data=KineticData.from_dict(data["kinetic_data"]),
             arrows=[Arrow.from_dict(arrow) for arrow in data["arrows"]],
             targets=[TargetData.from_dict(target) for target in data["targets"]],
+            beam_points=[PointData.from_dict(point) for point in data["beam_points"]],
             scene_settings=SceneSettings.from_dict(data["scene_settings"]),
         )

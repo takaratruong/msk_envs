@@ -92,10 +92,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 loadModel(obj.mesh_file, obj.opacity, color, object => {
                     object.scale.set(...obj.scale);
                     object.position.set(...obj.pos);
-                    object.quaternion.set(obj.rot[1], obj.rot[2], obj.rot[3], obj.rot[0]);
+                    object.quaternion.set(obj.rot[0], obj.rot[1], obj.rot[2], obj.rot[3]);
                     scene.add(object);
                     currentObjects.push(object);
                 });
+            }
+            if (frame.beam_points) {
+                const color = 0xF1ECE4;
+                const points = [];
+                for (const obj of frame.beam_points) {
+                    points.push(new THREE.Vector3(...obj.pos));
+                    const sphereGeometry = new THREE.SphereGeometry(0.015, 8, 8);
+                    const sphereMaterial = new THREE.MeshStandardMaterial({color: color});
+                    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                    sphere.position.set(...obj.pos);
+                    scene.add(sphere);
+                    currentObjects.push(sphere);
+                }
+                const curve = new THREE.CatmullRomCurve3(points);
+                const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false);
+                const material = new THREE.MeshStandardMaterial({color: color});
+                const tube = new THREE.Mesh(geometry, material);
+                scene.add(tube);
+                currentObjects.push(tube);
             }
         }
 

@@ -12,20 +12,21 @@ class ShuttleRunEnv(ReachTargetEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            live_render: bool,
             cuda_graph: bool
     ):
         super().__init__(
             num_envs=num_envs,
             env_config=env_config,
             device=device,
-            render=render,
+            live_render=live_render,
             cuda_graph=cuda_graph,
+            ignore_vertical=False,
         )
-        self.target_1 = torch.tensor(build_axis(FWD_IDX, 2.5), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1)
-        self.target_2 = torch.tensor(build_axis(FWD_IDX, -2.5), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1)
-        self.target_1[:, UP_IDX] = 1.0
-        self.target_2[:, UP_IDX] = 1.0
+        self.target_1 = torch.tensor(build_axis(FWD_IDX, 5.0), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1)
+        self.target_2 = torch.tensor(build_axis(FWD_IDX, -5.0), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1)
+        self.target_1[:, UP_IDX] = self.target_tolerance / 2.0
+        self.target_2[:, UP_IDX] = self.target_tolerance / 2.0
 
         self.curr_target_pos[:] = self.target_1
         self.next_target_pos[:] = self.target_2

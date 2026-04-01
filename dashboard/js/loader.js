@@ -71,7 +71,16 @@ function loadCollider(spheres, capsules, geomType, scale, rot, color, callback) 
             new THREE.SphereGeometry(radius, 16, 16),
             new THREE.MeshStandardMaterial({color: color, wireframe: false, transparent: true, opacity: opacity})
         );
-        sphere.quaternion.set(rot[1], rot[2], rot[3], rot[0]);
+        sphere.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
+        callback(sphere);
+    } else if (geomType === 4 && spheres) { // ellipsoids
+        // Create a sphere geometry and scale it to create an ellipsoid
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(1, 16, 16),
+            new THREE.MeshStandardMaterial({color: color, wireframe: false, transparent: true, opacity: opacity})
+        );
+        sphere.scale.set(scale[0], scale[1], scale[2]);
+        sphere.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
         callback(sphere);
     } else if (geomType === 3 && capsules) {
         // Capsule
@@ -86,7 +95,7 @@ function loadCollider(spheres, capsules, geomType, scale, rot, color, callback) 
         zUpQuat.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
 
         // Create quaternion from rotation data
-        const dataQuat = new THREE.Quaternion(rot[1], rot[2], rot[3], rot[0]);
+        const dataQuat = new THREE.Quaternion(rot[0], rot[1], rot[2], rot[3]);
 
         // Multiply quaternions: first apply Z-up, then apply data rotation
         capsule.quaternion.copy(dataQuat).multiply(zUpQuat);

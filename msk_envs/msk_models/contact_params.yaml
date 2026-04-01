@@ -1,0 +1,272 @@
+#  Ground-feet contacts are based on calibrated contact parameters for sprinting
+#  (https://pmc.ncbi.nlm.nih.gov/articles/PMC7950206/)
+#  Other contacts are given high stiffness and dissipation to prevent penetration
+ground_collider:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+right_foot_1:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+right_foot_2:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+right_foot_3:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+right_foot_4:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+right_foot_5:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+right_foot_6:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+right_foot_7:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+left_foot_1:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+left_foot_2:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+left_foot_3:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+left_foot_4:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+left_foot_5:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+left_foot_6:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+left_foot_7:
+  stiffness: 1602213.464769315
+  dissipation: 0.0725
+  priority: 0
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
+
+head:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+tibia_r_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+tibia_l_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+femur_r_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+femur_l_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+pelvis_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+lumbar_spine_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+thorax_capsule1:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+thorax_capsule2:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+humerus_r_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+ulna_r_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+humerus_l_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+ulna_l_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+hand_r:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+hand_l:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 1
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1

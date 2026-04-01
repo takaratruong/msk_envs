@@ -2,13 +2,16 @@ import torch
 
 
 def rotate_vec(rot: torch.Tensor, v: torch.Tensor):
-    pure = rot[..., 1:]
-    scalar = rot[..., :1]
+    # (x, y, z, w) format
+    pure = rot[..., :3]
+    scalar = rot[..., 3:]
+
     pure_x_v = torch.cross(pure, v, dim=-1)
     pure_x_pure_x_v = torch.cross(pure, pure_x_v, dim=-1)
     return v + 2.0 * (pure_x_v * scalar + pure_x_pure_x_v)
 
 
+# fixme later
 def quat_mul(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
     w1, x1, y1, z1 = q1.unbind(-1)
     w2, x2, y2, z2 = q2.unbind(-1)

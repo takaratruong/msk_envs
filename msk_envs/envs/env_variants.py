@@ -18,3 +18,4 @@ class DerivedEnv(Enum):
     RANDOM_TARGET = 14
     WADDLE = 15
     BROAD_JUMP = 16
+    UPPER_REACH = 17

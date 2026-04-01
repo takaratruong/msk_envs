@@ -6,11 +6,11 @@ import os
 
 from .env_config import EnvConfig
 from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
-from msk_envs.utils.muscle_props import parse_starting_activations, parse_muscle_metabolic_params
-from msk_envs.utils.joint_limits import get_limit_force_curves, get_joint_limits
+from msk_envs.utils.muscle_props import parse_starting_activations
 from msk_envs.utils.contact_params import parse_contact_params
-from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from msk_envs.utils.scene_settings import SceneSettings
+from msk_envs.utils.transforms import get_position_from_transform, get_rotation_from_transform
+from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 
 
 class MSKEnv:
@@ -18,56 +18,8 @@ class MSKEnv:
 
     def _setup_model(self, env_config: EnvConfig) -> None:
         """ Modify model parameters here. """
-        # Reset stiffness, damping, armature to zero
-        stiffness = msk_warp.stiffness(self.m)  # [num_bodies]
-        damping = msk_warp.damping(self.m)  # [num_dofs]
-        armature = msk_warp.armature(self.m)  # [num_dofs]
-        damping[:] = 0.0
-        stiffness[:] = 0.0
-        armature[:] = 0.0
-        # Joint damping, armature
-        idx_joint_start = 6 if env_config.model_root_free else 0
-        damping[idx_joint_start:] = env_config.joint_damping
-        armature[idx_joint_start:] = env_config.joint_armature
-        # Torso damping
-        torso_id = self.lookup_body_id("torso")
-        dof_adr = msk_warp.get_dof_adr(self.m, torso_id)
-        dof_num = msk_warp.get_dof_num(self.m, torso_id)
-        damping[dof_adr:dof_adr + dof_num] = env_config.torso_damping
-        # Toe-specific stiffness and damping
-        for toe in ["toes_l", "toes_r"]:
-            toe_id = self.lookup_body_id(toe)
-            stiffness[toe_id] = env_config.toes_stiffness
-            dof_adr = msk_warp.get_dof_adr(self.m, toe_id)
-            dof_num = msk_warp.get_dof_num(self.m, toe_id)
-            armature[dof_adr:dof_adr + dof_num] = env_config.toe_armature
-            damping[dof_adr:dof_adr + dof_num] = env_config.toes_damping
-        # Joint limits: override if specified
-        if env_config.use_specified_joint_limits:
-            joint_limit_ranges = msk_warp.joint_limit_ranges(self.m)
-            joint_limits_path = os.path.join(self.curr_path, env_config.joint_limits_path)
-            joint_limits = get_joint_limits(joint_limits_path, self.limit_id_lookup)
-            for joint_limit in joint_limits:
-                limit_id = joint_limit.limit_id
-                joint_limit_ranges[limit_id][0] = joint_limit.lower
-                joint_limit_ranges[limit_id][1] = joint_limit.upper
-        # Load exponential-spring force curve parameters
-        if env_config.limit_type == msk_warp.LimitType.EXPONENTIAL or \
-                env_config.limit_type == msk_warp.LimitType.HUNT_CROSSLEY:
-            exp_limit_forces = msk_warp.exp_limit_forces(self.m)
-            exp_limit_shapes = msk_warp.exp_limit_shapes(self.m)
-            limit_curves_path = os.path.join(self.curr_path, env_config.limit_force_curves_path)
-            limit_curves = get_limit_force_curves(limit_curves_path, self.limit_id_lookup)
-            for limit_curve in limit_curves:
-                limit_id = limit_curve.limit_id
-                exp_limit_forces[limit_id][0] = limit_curve.limit_force[0]
-                exp_limit_forces[limit_id][1] = limit_curve.limit_force[1]
-                exp_limit_shapes[limit_id][0] = limit_curve.shape_param[0]
-                exp_limit_shapes[limit_id][1] = limit_curve.shape_param[1]
-
         # Muscles activation and fiber dynamic
         msk_warp.set_activation_type(self.m, env_config.muscle_activation_dynamics)
-        msk_warp.set_muscle_dynamics_substeps(self.m, env_config.muscle_dynamics_substeps)
         muscle_metadata = msk_warp.muscle_metadata(self.m)
         for mm in muscle_metadata:
             mm.max_isometric_force *= env_config.muscle_multiplier
@@ -79,15 +31,15 @@ class MSKEnv:
             mm.max_activation = env_config.muscle_max_activation
             mm.v_max = env_config.muscle_v_max
         # Muscle metabolic properties
-        if env_config.use_specified_metabolic_params:
-            metabolic_params_path = os.path.join(self.curr_path, env_config.metabolic_params_path)
-            metabolic_params = parse_muscle_metabolic_params(metabolic_params_path, self.muscle_id_lookup)
-            for params in metabolic_params:
-                muscle_id = params.muscle_id
-                mm = muscle_metadata[muscle_id]
-                mm.specific_tension = params.specific_tension
-                mm.slow_twitch_ratio = params.slow_twitch_ratio
-                mm.density = params.density
+        # if env_config.use_specified_metabolic_params:
+        #     metabolic_params_path = os.path.join(self.curr_path, env_config.metabolic_params_path)
+        #     metabolic_params = parse_muscle_metabolic_params(metabolic_params_path, self.muscle_id_lookup)
+        #     for params in metabolic_params:
+        #         muscle_id = params.muscle_id
+        #         mm = muscle_metadata[muscle_id]
+        #         mm.specific_tension = params.specific_tension
+        #         mm.slow_twitch_ratio = params.slow_twitch_ratio
+        #         mm.density = params.density
 
         # Collider properties
         if env_config.use_specified_contact_params:
@@ -108,19 +60,6 @@ class MSKEnv:
                 geom_friction[geom_id][1] = params.dynamic_friction
                 geom_friction[geom_id][2] = params.viscous_friction
                 geom_transition_velocity[geom_id] = params.transition_velocity
-
-        # Contact model (Hunt-Crossley or MuJoCo)
-        msk_warp.set_contact_type(self.m, env_config.contact_type)
-        # Joint limit model (Exponential or MuJoCo)
-        msk_warp.set_limit_type(self.m, env_config.limit_type)
-        # MuJoCo-parameters
-        msk_warp.set_solref(self.m, env_config.solref)
-
-        # Newton solver faster for GPU, CG for CPU
-        if self.device.type == "cuda":
-            msk_warp.set_solver_type(self.m, msk_warp.SolverType.NEWTON)
-        else:
-            msk_warp.set_solver_type(self.m, msk_warp.SolverType.CG)
 
         # Integrator type
         msk_warp.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
@@ -149,6 +88,11 @@ class MSKEnv:
                 msk_warp.post(self.m, self.d)
             self.post_graph = capture.graph
 
+            # Analytics graph: anything else needed for analytics
+            with wp.ScopedCapture() as capture:
+                msk_warp.compute_muscle_moments(self.m, self.d)
+            self.analytics_graph = capture.graph
+
             # Forward kinematics graph, useful for motion tracking
             with wp.ScopedCapture() as capture:
                 msk_warp.fk(self.m, self.d)
@@ -160,7 +104,8 @@ class MSKEnv:
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            requires_visuals: bool,
+            live_render: bool,
             cuda_graph: bool
     ):
         self.num_worlds = num_envs
@@ -175,18 +120,19 @@ class MSKEnv:
             model_path=self.model_path,
             n_worlds=num_envs,
             integrator=env_config.integrator,
-            root_free=env_config.model_root_free,
+            requires_visuals=requires_visuals,
             polynomial_data_path=function_path
         )
         self.m, self.d = load_result.model, load_result.data
         # Store all convenient lookups
         self.body_id_lookup = load_result.body_id_lookup
         self.dof_id_lookup = load_result.dof_id_lookup
+        self.qpos_id_lookup = load_result.qpos_id_lookup
         self.limit_id_lookup = load_result.limit_id_lookup
         self.muscle_id_lookup = load_result.muscle_id_lookup
         self.actuator_id_lookup = load_result.actuator_id_lookup
         self.collider_id_lookup = load_result.collider_id_lookup
-        self.visuals = load_result.visuals
+        self.visuals = load_result.mesh_load_results
         self._setup_model(env_config)
 
         # Model properties
@@ -212,12 +158,14 @@ class MSKEnv:
         # [num_envs, num_actuators]
         self.actuator_activations = msk_warp.actuator_activations(self.d)
         self.actuator_excitations = msk_warp.actuator_excitations(self.d)
+        # [num_envs, num_bodies, 7]
+        self.body_transforms = msk_warp.body_transforms(self.d)
         # [num_envs, num_bodies, 3]
         self.body_positions = msk_warp.body_com_positions(self.d)
         # [num_envs, num_bodies, 4] (w, x, y, z)
-        self.body_rotations = msk_warp.body_rotations(self.d)
+        self.body_rotations = get_rotation_from_transform(self.body_transforms)
         # [num_envs, num_bodies, 6] (ang, lin)
-        self.body_velocities = msk_warp.body_com_velocities(self.d)
+        self.body_velocities = msk_warp.body_velocities(self.d)
         # [num_envs, num_bodies, 6] (frc, trq)
         self.body_user_forces = msk_warp.body_user_forces(self.d)
         # [num_envs, num_qpos]
@@ -225,20 +173,21 @@ class MSKEnv:
         # [num_envs, num_dofs]
         self.joint_velocities = msk_warp.joint_velocities(self.d)
         # [num_envs, num_dofs]
-        self.qfrc_damper = msk_warp.qfrc_damper(self.d)
+        self.ufrc_damper = msk_warp.ufrc_damper(self.d)
         # [num_envs, num_colliders, 3]
         self.collider_forces = msk_warp.collider_forces(self.d)
 
         # [num_envs, 3]
         self.grf = msk_warp.grf(self.d)
         # [num_envs, num_joint_limits]
-        self.limit_torques = msk_warp.qfrc_limit(self.d)
+        self.limit_torques = msk_warp.ufrc_limit(self.d)
         self.num_limits = msk_warp.get_num_limits(self.m)
 
         # [num_envs, num_visuals, 3]
-        self.visual_positions = msk_warp.get_visual_positions(self.d)
+        self.visual_transforms = msk_warp.get_visual_transforms(self.d)
+        self.visual_positions = get_position_from_transform(self.visual_transforms)
         # [num_envs, num_visuals, 4]
-        self.visual_rotations = msk_warp.get_visual_rotations(self.d)
+        self.visual_rotations = get_rotation_from_transform(self.visual_transforms)
 
         # RL Environment metadata
         self.action_range = (-1.0, 1.0)
@@ -258,7 +207,8 @@ class MSKEnv:
 
         # Starting position, load from file
         start_pose_path = os.path.join(self.curr_path, env_config.starting_pose_path)
-        q, qv = parse_starting_pose(start_pose_path, self.dof_id_lookup, self.num_qpos, self.num_dofs)
+        q, qv = parse_starting_pose(
+            start_pose_path, self.qpos_id_lookup, self.dof_id_lookup, self.num_qpos, self.num_dofs)
         assert len(q) == self.num_qpos and len(qv) == self.num_dofs
         q_torch = torch.tensor(q, dtype=torch.float32, device=device)
         qv_torch = torch.tensor(qv, dtype=torch.float32, device=device)
@@ -297,12 +247,14 @@ class MSKEnv:
         self.reward_dict = {}
         self.reward_lambdas = env_config.reward_lambdas
 
-        self.render = render
-        if render:
+        self.render = live_render
+        if live_render:
             self.renderer = msk_warp.create_renderer(
                 load_result=load_result,
-                renderer_type=msk_warp.RendererType.TILED,
+                renderer_type=msk_warp.RendererType.OPENGL,
                 draw_visuals=True,
+                draw_beams=True,
+                draw_body_mass=False,
                 draw_colliders=False,
                 draw_muscles=True
             )
@@ -315,11 +267,17 @@ class MSKEnv:
 
         # Pre-compute useful body IDs and offsets
         self.root_id = self.lookup_body_id("pelvis")
-        self.torso_id = self.lookup_body_id("torso")
+        self.head_id = self.lookup_body_id("head")
+        head_offset = torch.zeros(3, device=self.device)
+
+        # Head isn't its own body, compute offset from torso
+        if self.head_id == -1:
+            self.head_id = self.lookup_body_id("torso")
+            head_offset = build_axis(axis=UP_IDX, scale=0.215)
+
         self.root_pos = self.body_positions[:, self.root_id]
-        self.torso_pos = self.body_positions[:, self.torso_id]
-        self.torso_rot = self.body_rotations[:, self.torso_id]
-        head_offset = build_axis(axis=UP_IDX, scale=0.215)
+        self.head_pos = self.body_positions[:, self.head_id]
+        self.head_rot = self.body_rotations[:, self.head_id]
         self.head_offset = torch.tensor(head_offset, device=self.device).unsqueeze(0).repeat(num_envs, 1)
 
         # Finally, set initial pose
@@ -552,7 +510,7 @@ class MSKEnv:
             msk_warp.fk(self.m, self.d)
 
     def lookup_body_id(self, body_name: str) -> int:
-        return self.body_id_lookup[body_name]
+        return self.body_id_lookup[body_name] if body_name in self.body_id_lookup else -1
 
     def scene_settings(self) -> SceneSettings:
         """ Override to provide custom scene settings for viewer/renderer """

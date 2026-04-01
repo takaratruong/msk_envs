@@ -13,9 +13,9 @@ class JoggingEnv(MSKEnv):
                  num_envs: int,
                  env_config: EnvConfig,
                  device: torch.device,
-                 render: bool,
+                 live_render: bool,
                  cuda_graph: bool):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
+        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render, cuda_graph=cuda_graph)
         self.prev_joint_velocities = self.joint_velocities.clone()
         # Randomly chosen each episode: scales energy terms
         self.energy_factor = torch.zeros(self.num_worlds, device=self.reset_tensor.device)

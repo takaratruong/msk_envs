@@ -1,7 +1,6 @@
 import torch
 
-from msk_envs.utils.global_params import FWD_IDX, UP_IDX, SIDE_IDX, build_axis
-from msk_envs.utils.quat import rotate_vec
+from msk_envs.utils.global_params import FWD_IDX, UP_IDX, build_axis, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
 from msk_envs.utils.reward_lib import joint_limit_penalty, actuator_sq_penalty, has_fallen, alive_bonus
 from .env_base import MSKEnv
 from .env_config import EnvConfig
@@ -15,11 +14,12 @@ class ReachTargetEnv(MSKEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            live_render: bool,
             cuda_graph: bool,
+            ignore_vertical: bool = True,
             target_tolerance: float = 0.25,
     ):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
+        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render, cuda_graph=cuda_graph)
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
 
         self.right_hand_id = self.lookup_body_id("hand_r")
@@ -29,6 +29,7 @@ class ReachTargetEnv(MSKEnv):
         self.next_target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
         self.curr_closest_dist = torch.zeros(self.num_worlds, device=self.device)
         self.target_tolerance = target_tolerance
+        self.ignore_vertical = ignore_vertical
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -63,7 +64,8 @@ class ReachTargetEnv(MSKEnv):
 
     def _distance_to_target(self):
         to_target_vec = self.curr_target_pos - self.right_hand_pos
-        to_target_vec[:, UP_IDX] = 0.0  # ignore vertical displacement to target
+        if self.ignore_vertical:  # ignore vertical displacement to target
+            to_target_vec[:, UP_IDX] = 0.0
         dist_to_target = torch.norm(to_target_vec, dim=1)
         return dist_to_target
 
@@ -113,6 +115,7 @@ class ReachTargetEnv(MSKEnv):
         }
 
     def _get_terminated(self):
-        fallen = has_fallen(self.root_pos, self.torso_pos, self.torso_rot, self.head_offset)
+        fallen = has_fallen(self.root_pos, self.torso_pos, self.torso_rot, self.head_offset,
+                            min_root=min(MIN_ROOT_HEIGHT, 0.3), min_head=min(MIN_HEAD_HEIGHT, 0.5))
         terminated = fallen.float()
         return terminated.detach()

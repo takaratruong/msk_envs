@@ -58,7 +58,7 @@ class LanesEnv(MSKEnv):
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
-            self.joint_positions[:, 1:],  # exclude x position
+            self.joint_positions,
             self.joint_velocities,
         ], dim=1)
         return obs.detach().clone()

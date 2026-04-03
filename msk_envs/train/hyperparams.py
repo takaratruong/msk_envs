@@ -5,7 +5,8 @@ from typing_extensions import Annotated
 
 import tyro
 
-from msk_envs.envs.env_config import EnvConfig, EnvConfigNoHands, EnvConfigUpperRight, EnvConfigRegression
+from msk_envs.envs.env_config import EnvConfig, EnvConfigGeneric, EnvConfigUpper, EnvConfigRegression, \
+    EnvConfigUpperNoSpine, EnvConfigLower
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -119,7 +120,7 @@ def pretty_print_base_args(args: BaseArgs):
 
 @dataclass
 class JogConfig(BaseArgs):
-    env_config: EnvConfigNoHands = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfigGeneric = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.JOG,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -137,11 +138,11 @@ class JogConfig(BaseArgs):
 
 @dataclass
 class SprintConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigLower(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        # muscle_multiplier=2.0,
+        muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_run.yaml",
     ))
 
@@ -177,7 +178,7 @@ class SprintRegressionConfig(BaseArgs):
 
 @dataclass
 class RaceWalkConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.RACE_WALK,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -197,7 +198,7 @@ class RaceWalkConfig(BaseArgs):
 
 @dataclass
 class BackPedalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.BACKPEDAL,
         delta_t=1.0 / 50.0,
         max_episode_duration=10.0,
@@ -217,7 +218,7 @@ class BackPedalConfig(BaseArgs):
 
 @dataclass
 class SideShuffleConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.SIDE_SHUFFLE,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -237,7 +238,7 @@ class SideShuffleConfig(BaseArgs):
 
 @dataclass
 class HopConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.HOP,
         delta_t=1.0 / 60.0,
         max_episode_duration=10.0,
@@ -258,7 +259,7 @@ class HopConfig(BaseArgs):
 
 @dataclass
 class VerticalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 30.0,
         max_episode_duration=2.0,
@@ -273,11 +274,11 @@ class VerticalConfig(BaseArgs):
 
 @dataclass
 class PerturbConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigLower(
         env_variant=DerivedEnv.PERTURB,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
+        starting_pose_path = "../msk_models/starting_pose_stand.yaml"
     ))
     lambda_alive: float = 1e-1
     lambda_limit: float = -2e-3
@@ -288,7 +289,7 @@ class PerturbConfig(BaseArgs):
 
 @dataclass
 class DontFallConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.DONT_FALL,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -352,7 +353,7 @@ class ImitateConfig(BaseArgs):
 
 @dataclass
 class StaticSquatConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.STATIC,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -382,7 +383,7 @@ class StaticSquatConfig(BaseArgs):
 
 @dataclass
 class ShuttleRunConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.SHUTTLE_RUN,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -399,7 +400,7 @@ class ShuttleRunConfig(BaseArgs):
 
 @dataclass
 class WaddleConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.WADDLE,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -419,7 +420,7 @@ class WaddleConfig(BaseArgs):
 
 @dataclass
 class RandomTargetConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.RANDOM_TARGET,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -436,7 +437,7 @@ class RandomTargetConfig(BaseArgs):
 
 @dataclass
 class BroadJumpConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHands(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.BROAD_JUMP,
         delta_t=1.0 / 30.0,
         max_episode_duration=3.0,
@@ -450,10 +451,29 @@ class BroadJumpConfig(BaseArgs):
 
 @dataclass
 class UpperReachTarget(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigUpperRight(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigUpper(
         env_variant=DerivedEnv.UPPER_REACH,
         delta_t=1.0 / 30.0,
-        max_episode_duration=2.0,
+        max_episode_duration=5.0,
+        muscle_multiplier=1.0,
+        starting_pose_path="../msk_models/starting_pose_run.yaml",
+        swap_lr=False,
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_target: float = 0.5
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -1e-2
+    lambda_alive: float = 3e-2
+
+
+@dataclass
+class NoSpineReachTarget(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigUpperNoSpine(
+        env_variant=DerivedEnv.UPPER_REACH,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=5.0,
+        muscle_multiplier=1.0,
         starting_pose_path="../msk_models/starting_pose_run.yaml",
         swap_lr=False,
     ))
@@ -485,6 +505,7 @@ Config = Union[
     Annotated[WaddleConfig, tyro.conf.subcommand(name="waddle")],
     Annotated[BroadJumpConfig, tyro.conf.subcommand(name="broadjump")],
     Annotated[UpperReachTarget, tyro.conf.subcommand(name="upperreach")],
+    Annotated[NoSpineReachTarget, tyro.conf.subcommand(name="nospinereach")],
 ]
 
 

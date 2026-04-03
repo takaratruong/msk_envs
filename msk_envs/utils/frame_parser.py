@@ -136,11 +136,9 @@ def parse_kinetic_data(
     # com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
     body_com_positions = msk_warp.body_com_positions(d)[world_id]
     grf = msk_warp.grf(d)[world_id].tolist()
-    # mass = msk_warp.subtree_mass(m)[1]
     gravity = msk_warp.gravity(m)
-    # com = (0, 0, 0)  # todo
-    com = body_com_positions[body_name_to_idx["pelvis"]].tolist()  # todo
-    mass = 75  # todo
+    com = msk_warp.body_subtree_com_positions(d)[world_id, 0].tolist()
+    mass = msk_warp.body_mass(m).sum()
 
     if "talus_l" in body_name_to_idx and "talus_r" in body_name_to_idx:
         foot_pos_l = tuple(body_com_positions[body_name_to_idx["talus_l"]].tolist())
@@ -335,7 +333,7 @@ def add_ext_forces_to_frame(
     body_positions = get_position_from_transform(body_transforms)
     ext_forces = msk_warp.body_user_forces(d)
     for i in range(1, num_bodies):
-        force = ext_forces[idx_world][i][0:3].tolist()
+        force = ext_forces[idx_world][i][3:6].tolist()
         point = body_positions[idx_world][i].tolist()
         arrow = Arrow(
             start=point,

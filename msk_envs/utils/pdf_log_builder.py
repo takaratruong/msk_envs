@@ -1,3 +1,4 @@
+import msk_warp
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -390,8 +391,12 @@ def create_pdf_output(
         muscle_frc_mult = []
         for frame in frame_data:
             muscle_ae.append([(m.activation, m.excitation) for m in frame.muscles])
-            muscle_ftl.append([(m.fiber_length, m.tendon_length, m.optimal_fiber_length, m.tendon_slack_length) for m in
-                               frame.muscles])
+            muscle_ftl.append([(
+                m.fiber_length / m.optimal_fiber_length,
+                # m.tendon_length / m.tendon_slack_length,
+                msk_warp.MIN_NORM_FIBER_LENGTH,
+                msk_warp.MAX_NORM_FIBER_LENGTH,
+            ) for m in frame.muscles])
             muscle_ma.append([m.moment_arm for m in frame.muscles])
             muscle_frc.append([(m.actuation, m.max_isometric_force) for m in frame.muscles])
             muscle_frc_mult.append([
@@ -415,16 +420,16 @@ def create_pdf_output(
         # Fiber/tendon lengths
         enforced_range = []
         for m in frame0.muscles:
-            min_range = min(0.75 * m.optimal_fiber_length, 0.75 * m.tendon_slack_length)
-            max_range = max(1.25 * m.optimal_fiber_length, 1.25 * m.tendon_slack_length)
+            min_range = msk_warp.MIN_NORM_FIBER_LENGTH
+            max_range = msk_warp.MAX_NORM_FIBER_LENGTH
             enforced_range.append((min_range, max_range))
         create_generic_plot(
             muscle_names, times, frame_ind, muscle_ftl,
             "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
             pdf,
-            sublabels=["Fiber", "Tendon", "Optimal Fiber", "Tendon Slack"],
-            alphas=[1.0, 1.0, 0.5, 0.5],
-            linestyles=["solid", "solid", "dashed", "dashed"],
+            sublabels=["Norm Fiber", "Min Fiber", "Max Fiber"],
+            alphas=[1.0, 0.5, 0.5],
+            linestyles=["solid",  "dashed", "dashed"],
             enforced_y_range=enforced_range)
 
         # Moment arms

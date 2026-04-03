@@ -15,9 +15,17 @@ class PerturbEnv(MSKEnv):
             env_config: EnvConfig,
             device: torch.device,
             live_render: bool,
+            requires_visuals: bool,
             cuda_graph: bool,
     ):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render, cuda_graph=cuda_graph)
+        super().__init__(
+            num_envs=num_envs,
+            env_config=env_config,
+            device=device,
+            requires_visuals=requires_visuals,
+            live_render=live_render,
+            cuda_graph=cuda_graph
+        )
 
         # How long perturbations last
         self.perturbation_range = (0.1, 0.3)      # Duration of perturbations
@@ -57,15 +65,13 @@ class PerturbEnv(MSKEnv):
 
             # Sample a new random external force for these worlds
             num_perturb = torch.sum(worlds_start).item()
-            force_dir = torch.zeros((num_perturb, self.num_bodies, 3), device=self.device)
-            force_magnitudes = torch.randn((num_perturb, self.num_bodies), device=self.device) * self.force_std
-            force_directions = torch.randn((num_perturb, self.num_bodies, 3), device=self.device)
-            force_directions = force_directions / torch.norm(force_directions, dim=2, keepdim=True)
-            force_dir += force_directions * force_magnitudes.unsqueeze(2)
-            # Scale forces by body mass
-            body_masses = self.body_mass.unsqueeze(0).repeat(num_perturb, 1)
-            external_forces = force_dir * body_masses.unsqueeze(2)
-            self.body_user_forces[worlds_start, :, 0:3] = external_forces
+            force_dir = torch.zeros((num_perturb, 3), device=self.device)
+            force_magnitudes = torch.randn(num_perturb, device=self.device) * self.force_std
+            force_directions = torch.randn((num_perturb, 3), device=self.device)
+            force_directions = force_directions / torch.norm(force_directions, dim=1, keepdim=True)
+            force_dir += force_directions * force_magnitudes.unsqueeze(1)
+            external_forces = 20 * force_dir
+            self.body_user_forces[worlds_start, self.head_id, 3:6] = external_forces
 
         # Make sure we reset forces for worlds not applying perturbations
         no_perturb_mask = ~self.perturbation_enabled
@@ -93,11 +99,9 @@ class PerturbEnv(MSKEnv):
             self.muscle_fiber_lengths,
             self.muscle_fiber_velocities,
             self.actuator_activations,
-            self.joint_positions[:, 1:],  # exclude x position
+            self.joint_positions,
             self.joint_velocities,
             rel_body_positions.view(self.num_worlds, -1),
-            # self.body_rotations.view(self.num_worlds, -1),
-            # self.body_velocities.view(self.num_worlds, -1),
             self.body_user_forces.view(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
@@ -118,6 +122,6 @@ class PerturbEnv(MSKEnv):
         }
 
     def _get_terminated(self):
-        fallen = has_fallen(self.root_pos, self.torso_pos, self.torso_rot, self.head_offset)
+        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
         terminated = fallen.float()
         return terminated.detach()

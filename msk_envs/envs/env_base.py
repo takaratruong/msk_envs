@@ -256,7 +256,8 @@ class MSKEnv:
                 draw_beams=True,
                 draw_body_mass=False,
                 draw_colliders=False,
-                draw_muscles=True
+                draw_muscles=True,
+                draw_sites=False,
             )
             if self.renderer.viewer_type == msk_warp.RendererType.TILED:
                 self.renderer.setup_tiled_renderer(list(range(min(num_envs, 4))))
@@ -278,7 +279,7 @@ class MSKEnv:
         self.root_pos = self.body_positions[:, self.root_id]
         self.head_pos = self.body_positions[:, self.head_id]
         self.head_rot = self.body_rotations[:, self.head_id]
-        self.head_offset = torch.tensor(head_offset, device=self.device).unsqueeze(0).repeat(num_envs, 1)
+        self.head_offset = head_offset.unsqueeze(0).repeat(num_envs, 1)
 
         # Finally, set initial pose
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)

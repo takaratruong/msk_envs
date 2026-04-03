@@ -33,12 +33,10 @@ class UpperReachTargetEnv(MSKEnv):
         self.right_hand_id = self.lookup_body_id("hand_r")
         self.right_hand_pos = self.body_positions[:, self.right_hand_id]
 
-        self.target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
-        # self.target_pos[:, UP_IDX] = 1.5
-        # self.target_pos[:, SIDE_IDX] = 0.75
-        self.target_pos[:, UP_IDX] = 1.5
-        self.target_pos[:, SIDE_IDX] = 0.
-        self.target_pos[:, FWD_IDX] = -0.75
+        self.curr_target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
+        self.next_target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
+        self.curr_closest_dist = torch.zeros(self.num_worlds, device=self.device)
+        self.target_tolerance = 0.15
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -61,19 +59,56 @@ class UpperReachTargetEnv(MSKEnv):
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
-            self.target_pos.view(self.num_worlds, -1),
+            self.curr_target_pos.view(self.num_worlds, -1),
+            self.next_target_pos.view(self.num_worlds, -1),
+            self.curr_closest_dist.view(self.num_worlds, 1),
         ], dim=1)
         return obs.detach().clone()
 
     def _distance_to_target(self):
-        to_target_vec = self.target_pos - self.right_hand_pos
+        to_target_vec = self.curr_target_pos - self.right_hand_pos
         dist_to_target = torch.norm(to_target_vec, dim=1)
         return dist_to_target
+
+    def _sample_target_around(self, points: torch.Tensor) -> torch.Tensor:
+        rand_dirs = torch.randn((points.shape[0], 3), device=points.device)
+        rand_dirs = rand_dirs / torch.norm(rand_dirs, dim=1, keepdim=True)
+        points_height_one = points.clone()
+        points_height_one[:, UP_IDX] = 1.15
+        new_targets = points_height_one + rand_dirs * 0.25
+        return new_targets
+
+    def _new_targets(self, reset_mask: torch.Tensor, new_env: bool) -> None:
+        if new_env:
+            # If new env, sample two random targets around the root position
+            self.curr_target_pos[reset_mask] = self._sample_target_around(self.root_pos[reset_mask])
+            self.next_target_pos[reset_mask] = self._sample_target_around(self.root_pos[reset_mask])
+        else:
+            # Otherwise, current target gets the next target
+            self.curr_target_pos[reset_mask] = self.next_target_pos[reset_mask]
+            self.next_target_pos[reset_mask] = self._sample_target_around(self.root_pos[reset_mask])
+        return
+
+    def compute_new_targets(self, reset_mask: torch.Tensor, new_env: bool) -> None:
+        self._new_targets(reset_mask, new_env=new_env)
+        self.curr_closest_dist[reset_mask] = self._distance_to_target()[reset_mask]
+        return
+
+    def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
+        super()._upon_reset_post_sim(reset_mask)
+        self.compute_new_targets(reset_mask, new_env=True)
+        return
 
     def _compute_raw_reward_dict(self):
         # Reward for getting closer to target than ever before
         dist_to_target = self._distance_to_target()
-        rew_target = torch.exp(-5.0 * dist_to_target)  # Exponential reward for being close to target
+        rew_target_closer = torch.clamp(self.curr_closest_dist - dist_to_target, min=0.0)
+        self.curr_closest_dist = torch.min(self.curr_closest_dist, dist_to_target)
+
+        # Reset target positions for envs that have reached the target
+        reached_target_mask = dist_to_target < self.target_tolerance
+        if reached_target_mask.any():
+            self.compute_new_targets(reached_target_mask, new_env=False)
 
         rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
@@ -82,7 +117,7 @@ class UpperReachTargetEnv(MSKEnv):
         rew_alive = alive_bonus(terminated)
 
         self.reward_dict = {
-            "rew_target": rew_target.detach(),
+            "rew_target": rew_target_closer.detach(),
             "rew_limit": rew_limit.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_alive": rew_alive.detach(),

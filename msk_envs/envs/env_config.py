@@ -11,7 +11,7 @@ class EnvConfig:
     """ Environment type """
 
     # --- Control and Simulation Frequency ---
-    delta_t: float = 1.0 / 50.0
+    delta_t: float = 1.0 / 30.0
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 10000.0
     """ Simulator/physics step size. Ignored if using adaptive integrator """
@@ -37,7 +37,7 @@ class EnvConfig:
     """ Contact parameters file path (YAML). NOTE: this overrides contact parameters defined in the model file """
 
     # --- Model muscle properties ---
-    muscle_multiplier: float = 2.0
+    muscle_multiplier: float = 1.0
     """ Multiplier to max isometric force """
     muscle_activation_dynamics: msk_warp.ActivationType = msk_warp.ActivationType.MILLARD
     """ Muscle activation dynamics type (DGF, MILLARD) """
@@ -127,10 +127,33 @@ class EnvConfig:
 
 
 @dataclass
-class EnvConfigNoHands(EnvConfig):
+class EnvConfigGeneric(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athlete_lower.osim"
-    muscle_function_path: str = "../msk_models/athlete_lower_body_model_FunctionBasedPathSet.xml"
+    model_path: str = "../msk_models/athlete6.osim"
+    muscle_function_path: str = "../msk_models/athlete6path.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+
+
+@dataclass
+class EnvConfigLower(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    model_path: str = "../msk_models/athlete6_lower.osim"
+    muscle_function_path: str = "../msk_models/athlete6path_lower.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_tom.yaml"
+
+
+@dataclass
+class EnvConfigUpper(EnvConfig):
+    model_path: str = "../msk_models/athlete6_upper.osim"
+    muscle_function_path: str = "../msk_models/athlete6path_upper.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+
+
+@dataclass
+class EnvConfigUpperNoSpine(EnvConfig):
+    model_path: str = "../msk_models/athlete6_upper_no_spine.osim"
+    muscle_function_path: str = "../msk_models/athlete6path_upper.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
 
 

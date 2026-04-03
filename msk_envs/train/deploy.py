@@ -35,8 +35,8 @@ def main():
 
     actions = envs.get_blank_actions()
     #
-    policy = load_policy("/home/marth/Documents/msk_envs/models/regression_2026-03-26_12-11/regression_2026-03-26_12-11_82000.pt")
-    policy.to(device)
+    # policy = load_policy("/home/marth/Documents/msk_envs/models/athlete6_lower_sprint_2026-04-03_09-10/athlete6_lower_sprint_2026-04-03_09-10_12000.pt")
+    # policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,
               n_envs=num_envs,
@@ -58,12 +58,12 @@ def main():
     for _ in tqdm(range(max_episode_length)):
         # actions = torch.randn_like(actions)
         # actions = torch.ones_like(actions) * -1
-        # muscle_states = envs.muscle_fiber_lengths
-        # actions[:, :envs.num_muscles] = dep.step(muscle_states)
-        # actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
+        muscle_states = envs.muscle_fiber_lengths
+        actions[:, :envs.num_muscles] = dep.step(muscle_states)
+        actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
 
-        with torch.no_grad():
-            actions = policy(obs)
+        # with torch.no_grad():
+        #     actions = policy(obs)
 
         # try to step the sim, but if it takes too long, break out of the loop
         finished, obs = sim.step(actions)

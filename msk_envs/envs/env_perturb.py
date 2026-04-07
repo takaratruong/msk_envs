@@ -1,7 +1,7 @@
 import torch
 
 from msk_envs.utils.reward_lib import joint_limit_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen, alive_bonus
+    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen, alive_bonus, derivative_sq_penalty
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -70,8 +70,8 @@ class PerturbEnv(MSKEnv):
             force_directions = torch.randn((num_perturb, 3), device=self.device)
             force_directions = force_directions / torch.norm(force_directions, dim=1, keepdim=True)
             force_dir += force_directions * force_magnitudes.unsqueeze(1)
-            external_forces = 20 * force_dir
-            self.body_user_forces[worlds_start, self.head_id, 3:6] = external_forces
+            # external_forces = 20 * force_dir
+            # self.body_user_forces[worlds_start, self.head_id, 3:6] = external_forces
 
         # Make sure we reset forces for worlds not applying perturbations
         no_perturb_mask = ~self.perturbation_enabled
@@ -84,24 +84,19 @@ class PerturbEnv(MSKEnv):
     def _get_obs(self) -> torch.Tensor:
         """
         Observations space:
-         1. Muscle activations, fiber lengths, fiber velocities, actuations
+         1. Muscle activations, fiber lengths
          2. Actuator activations
          3. Joint positions (q)
          4. Joint velocities (qv)
-         5. Body positions relative to root, rotations, velocities
-         6. External forces applied
+         5. External forces applied
         """
-        root_positions = self.body_positions[:, self.root_id, :]
-        rel_body_positions = self.body_positions - root_positions.unsqueeze(1)
         obs = torch.cat([
             self.time.view(self.num_worlds, 1),
             self.muscle_activations,
             self.muscle_fiber_lengths,
-            self.muscle_fiber_velocities,
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
-            rel_body_positions.view(self.num_worlds, -1),
             self.body_user_forces.view(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
@@ -110,6 +105,7 @@ class PerturbEnv(MSKEnv):
         rew_alive = alive_bonus(self._get_terminated())
         rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_actuator_dot = derivative_sq_penalty(self.actuator_activations_dot, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
         rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
 
@@ -117,6 +113,7 @@ class PerturbEnv(MSKEnv):
             "rew_alive": rew_alive,
             "rew_limit": rew_limit.detach(),
             "rew_actuator": rew_actuator.detach(),
+            "rew_actuator_dot": rew_actuator_dot.detach(),
             "rew_fatigue": rew_fatigue.detach(),
             "rew_metabolic": rew_metabolic.detach(),
         }

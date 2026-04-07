@@ -1,0 +1,120 @@
+calcn_r_capsule1:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+calcn_r_capsule2:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+calcn_r_capsule3:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+calcn_r_capsule4:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+calcn_r_capsule5:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_r_capsule1:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_r_capsule2:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_r_capsule3:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_r_capsule4:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_r_capsule5:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_l_capsule1:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_l_capsule2:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_l_capsule3:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_l_capsule4:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1
+toes_l_capsule5:
+	stiffness: 5e6
+	dissipation: 1.0
+	priority: 1
+	static_friction: 0.1
+	dynamic_friction: 0.1
+	viscous_friction: 0.0
+	transition_velocity: 0.1

@@ -19,3 +19,5 @@ class DerivedEnv(Enum):
     WADDLE = 15
     BROAD_JUMP = 16
     UPPER_REACH = 17
+    UPPER_CURL = 18
+    DONT_FALL_ONE_LEG = 19

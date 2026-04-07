@@ -207,6 +207,7 @@ def parse_joint_moments(
         dof_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[JointMoment]:
+    net_moment = msk_warp.joint_moments(d)
     ufrc_spring = msk_warp.ufrc_spring(d)
     ufrc_damper = msk_warp.ufrc_damper(d)
     ufrc_muscle = msk_warp.ufrc_muscle(d)
@@ -217,6 +218,7 @@ def parse_joint_moments(
     for i in range(msk_warp.get_num_dofs(m)):
         angle = JointMoment(
             name=dof_idx_to_name[i],
+            net_moment=float(net_moment[world_id][i].item()),
             spring=float(ufrc_spring[world_id][i].item()),
             damping=float(ufrc_damper[world_id][i].item()),
             muscle=float(ufrc_muscle[world_id][i].item()),

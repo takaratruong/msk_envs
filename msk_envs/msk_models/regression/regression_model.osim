@@ -11240,331 +11240,276 @@
                     <!--Deactivation time constant, in seconds-->
                     <deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
                 </Thelen2003Muscle>
-                <CoordinateLinearStop name="lumbar_extension_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                <CoordinateLimitForce name="lumbar_extension_linear_stop">
                     <coordinate>lumbar_extension</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.17</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.5235987755982988</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="lumbar_bending_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>9.740282517223996</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-29.999999999999996</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="lumbar_bending_linear_stop">
                     <coordinate>lumbar_bending</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.2770035914491075</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.2770035914491075</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="lumbar_rotation_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>15.871136700000001</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-15.871136700000001</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="lumbar_rotation_linear_stop">
                     <coordinate>lumbar_rotation</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.22407958193619684</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.22407958193619684</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="hip_flexion_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>12.83881432</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-12.83881432</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="hip_flexion_r_linear_stop">
                     <coordinate>hip_flexion_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>1.5097637238651378</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.3893838081896757</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="hip_adduction_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>86.50308943942704</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-22.31004882</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="hip_adduction_r_linear_stop">
                     <coordinate>hip_adduction_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.17958408747455165</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.4031859679075558</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="hip_rotation_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>10.28941028</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-23.100854320000003</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="hip_rotation_r_linear_stop">
                     <coordinate>hip_rotation_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.1630124379033436</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.3900790538140224</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="knee_angle_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>9.3399247</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-22.34988346</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="knee_angle_r_linear_stop">
                     <coordinate>knee_angle_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.0</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-2.4860982301056933</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="ankle_angle_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>0.0</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-142.44293604</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="ankle_angle_r_linear_stop">
                     <coordinate>ankle_angle_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.45850166876605164</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.7669438631158966</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="subtalar_angle_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>26.27021052</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-43.94264648</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="subtalar_angle_r_linear_stop">
                     <coordinate>subtalar_angle_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.2176399432204734</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.33919271009</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="mtp_angle_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>12.4698502</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-19.434310729761496</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="mtp_angle_r_linear_stop">
                     <coordinate>mtp_angle_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>1.134464013796314</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.7853991633</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="hip_flexion_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>64.99999999999999</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-45.00005729019614</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="hip_flexion_l_linear_stop">
                     <coordinate>hip_flexion_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>1.5097637238651378</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.3893838081896757</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="hip_adduction_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>86.50308943942704</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-22.31004882</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="hip_adduction_l_linear_stop">
                     <coordinate>hip_adduction_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.17958408747455165</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.4031859679075558</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="hip_rotation_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>10.28941028</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-23.100854320000003</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="hip_rotation_l_linear_stop">
                     <coordinate>hip_rotation_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.1630124379033436</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.3900790538140224</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="knee_angle_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>9.3399247</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-22.34988346</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="knee_angle_l_linear_stop">
                     <coordinate>knee_angle_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.0</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-2.4860982301056933</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="ankle_angle_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>0.0</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-142.44293604</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="ankle_angle_l_linear_stop">
                     <coordinate>ankle_angle_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.45850166876605164</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.7669438631158966</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="subtalar_angle_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>26.27021052</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-43.94264648</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="subtalar_angle_l_linear_stop">
                     <coordinate>subtalar_angle_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.2176399432204734</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.33919271009</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="mtp_angle_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>12.4698502</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-19.434310729761496</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="mtp_angle_l_linear_stop">
                     <coordinate>mtp_angle_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>1.134464013796314</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.7853991633</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="arm_flex_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>64.99999999999999</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-45.00005729019614</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_flex_r_linear_stop">
                     <coordinate>arm_flex_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>2.79252632679</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-1.30899694</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="arm_add_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>159.9999727042375</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-75.00000005753945</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_add_r_linear_stop">
                     <coordinate>arm_add_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.2619332625289321</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.4307994151884109</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="arm_rot_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>15.007670457000003</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-24.682988307</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_rot_r_linear_stop">
                     <coordinate>arm_rot_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.7558874674374791</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-1.0987189165587006</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="elbow_flex_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>43.309161671</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-62.951956790000004</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="elbow_flex_r_linear_stop">
                     <coordinate>elbow_flex_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>2.618000000082912</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>0.0</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="pro_sup_r_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>150.00035077</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>0.0</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="pro_sup_r_linear_stop">
                     <coordinate>pro_sup_r</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>1.57079633</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>0.0</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="arm_flex_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>90.0000001836389</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>0.0</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_flex_l_linear_stop">
                     <coordinate>arm_flex_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>2.79252632679</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-1.30899694</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="arm_add_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>159.9999727042375</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-75.00000005753945</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_add_l_linear_stop">
                     <coordinate>arm_add_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.2619332625289321</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-0.4307994151884109</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="arm_rot_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>15.007670457000003</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-24.682988307</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_rot_l_linear_stop">
                     <coordinate>arm_rot_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>0.7558874674374791</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>-1.0987189165587006</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="elbow_flex_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>43.309161671</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-62.951956790000004</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="elbow_flex_l_linear_stop">
                     <coordinate>elbow_flex_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>2.618000000082912</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>0.0</q_low>
-                </CoordinateLinearStop>
-                <CoordinateLinearStop name="pro_sup_l_linear_stop">
-                    <!--Coordinate (name) to apply force to.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>150.00035077</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>0.0</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="pro_sup_l_linear_stop">
                     <coordinate>pro_sup_l</coordinate>
-                    <!--Stiffness coefficient (N-m/rad for rotational, N/m for translational)-->
-                    <stiffness>500.0</stiffness>
-                    <!--Damping coefficient (N-m/(rad/s) for rotational, N/(m/s) for translational)-->
-                    <damping>0.1</damping>
-                    <!--High position (rad for rotational, m for translational)-->
-                    <q_high>1.57079633</q_high>
-                    <!--Low position (rad for rotational, m for translational)-->
-                    <q_low>0.0</q_low>
-                </CoordinateLinearStop>
-
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>90.0000001836389</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>0.0</lower_limit>
+                    <damping>0.0017453292519943296</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
                 <SpringGeneralizedForce name="mtp_angle_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_r</coordinate>
@@ -11635,7 +11580,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="lumbar_bending_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11643,7 +11588,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="lumbar_rotation_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11651,7 +11596,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="knee_angle_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->

@@ -156,16 +156,22 @@ class LoggedSim:
             self.frame_data[i].append(frame)
         return
 
-    def check_post_step_log(self):
-        if (self.curr_sim_step % self.num_sim_steps_per_log) == 0:
-            if self.envs.cuda_graph:
-                wp.capture_launch(self.envs.post_graph)
-                wp.capture_launch(self.envs.analytics_graph)
-            else:
-                msk_warp.post(self.envs.m, self.envs.d)
-                msk_warp.compute_muscle_moments(self.envs.m, self.envs.d)
+    def perform_post(self):
+        """ Run post-processing and analytics task graphs """
+        if self.envs.cuda_graph:
+            wp.capture_launch(self.envs.post_graph)
+            wp.capture_launch(self.envs.analytics_graph)
+        else:
+            msk_warp.post(self.envs.m, self.envs.d)
+            msk_warp.compute_muscle_moments(self.envs.m, self.envs.d)
+            msk_warp.compute_net_joint_moments(self.envs.m, self.envs.d)
+        wp.synchronize()
+        return
 
-            wp.synchronize()
+    def check_post_step_log(self):
+        """ Check if we need to log, if so, run post and add to log """
+        if (self.curr_sim_step % self.num_sim_steps_per_log) == 0:
+            self.perform_post()
             self.add_to_log()
         self.curr_sim_step += 1
         return
@@ -179,16 +185,6 @@ class LoggedSim:
 
         if not force_no_log:
             self.check_post_step_log()
-        return
-
-    def perform_post(self):
-        if self.envs.cuda_graph:
-            wp.capture_launch(self.envs.post_graph)
-            wp.capture_launch(self.envs.analytics_graph)
-            wp.synchronize()
-        else:
-            msk_warp.post(self.envs.m, self.envs.d)
-            msk_warp.compute_muscle_moments(self.envs.m, self.envs.d)
         return
 
     def step(self, actions: torch.Tensor):

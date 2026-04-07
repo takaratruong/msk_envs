@@ -347,9 +347,9 @@ def create_pdf_output(
         joint_dof_names = [j.name for j in frame0.joint_moments]
         joint_moments = []
         for frame in frame_data:
-            joint_moments.append([(m.spring, m.muscle, m.actuator, m.limit, m.damping) for m in frame.joint_moments])
+            joint_moments.append([(m.net_moment, m.spring, m.muscle, m.actuator, m.limit, m.damping) for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
-        sublabels = ["Spring", "Muscle", "Actuator", "Limit", "Damping"]
+        sublabels = ["Net", "Spring", "Muscle", "Actuator", "Limit", "Damping"]
 
         def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range

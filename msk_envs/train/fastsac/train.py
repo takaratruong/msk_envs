@@ -452,6 +452,12 @@ def train(
                         "policy_entropy": policy_entropy,
                         "action_std": action_std,
                     }
+
+                    # Log raw reward terms before lambda multiplication
+                    raw_rewards_dict = {}
+                    for reward_name, reward_tensor in info["raw_rewards"].items():
+                        raw_rewards_dict[f"{reward_name}_raw"] = reward_tensor.mean()
+
                     training_metrics.add(current_metrics)
 
                     with torch.no_grad():
@@ -477,7 +483,10 @@ def train(
                     loss_dict["env_rewards"] = rewards.mean().item()
 
                 # Use logging helper
-                logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts={})
+                extra_log_dicts = {
+                    "raw_rewards": raw_rewards_dict,
+                }
+                logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts=extra_log_dicts)
 
             if sac_config.save_interval > 0 and global_step > 0 and global_step % sac_config.save_interval == 0:
                 logger.info(f"Saving model at global step {global_step}")

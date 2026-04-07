@@ -29,7 +29,7 @@ def parse_starting_pose(
         data = yaml.safe_load(f)
     for coord_name, values in data.items():
         if coord_name not in qpos_id_lookup:
-            print(f"Warning: Coordinate '{coord_name}' not found in model's qpos, skipping.")
+            print(f"Warning: Coordinate '{coord_name}' not found in model's coordinates, skipping.")
         else:
             qpos_adr = qpos_id_lookup[coord_name]
             qpos = values["q"]

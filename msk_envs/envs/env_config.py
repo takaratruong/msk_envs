@@ -15,13 +15,13 @@ class EnvConfig:
     """ Control/policy step size """
     delta_t_sim: float = 1.0 / 10000.0
     """ Simulator/physics step size. Ignored if using adaptive integrator """
-    max_episode_duration: float = 12.0
+    max_episode_duration: float = 10.0
     """ Max episode duration in seconds """
     integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_ADAPTIVE
     """ Integrator type (EULER_FIXED, RK4_FIXED, EULER_ADAPTIVE, RK_MERSON_ADAPTIVE) """
     integrator_use_inf_norm: bool = False
     """ For adaptive integrator, whether to use inf norm or L2-norm error calculation """
-    integrator_accuracy: float = 1.0
+    integrator_accuracy: float = 0.1
     """ For adaptive integrator, overall accuracy/tolerance. Lower = more accurate but slower """
 
     # --- Model articulation properties ---
@@ -33,8 +33,10 @@ class EnvConfig:
     """ Whether to enable drag forces """
     use_specified_contact_params: bool = True
     """ Whether to use contact parameters defined in contact_params_path """
-    contact_params_path: str = "../msk_models/contact_params.yaml"
+    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     """ Contact parameters file path (YAML). NOTE: this overrides contact parameters defined in the model file """
+    armature: float = 0.0
+    """ Additional armature to add to joints (decreases realism but increases performance) """
 
     # --- Model muscle properties ---
     muscle_multiplier: float = 1.0
@@ -129,25 +131,31 @@ class EnvConfig:
 @dataclass
 class EnvConfigGeneric(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athlete6.osim"
-    muscle_function_path: str = "../msk_models/athlete6path.xml"
+    model_path: str = "../msk_models/athlete8.osim"
+    muscle_function_path: str = "../msk_models/athlete8paths.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-
+    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
+    armature: float = 0.0
+    integrator_accuracy: float = 1.0
 
 @dataclass
 class EnvConfigLower(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athlete6_lower.osim"
-    muscle_function_path: str = "../msk_models/athlete6path_lower.xml"
+    model_path: str = "../msk_models/athlete8_lower.osim"
+    muscle_function_path: str = "../msk_models/athlete8paths_lower.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_tom.yaml"
+    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
+    armature: float = 0.0
+    integrator_accuracy: float = 1.0
 
 
 @dataclass
 class EnvConfigUpper(EnvConfig):
-    model_path: str = "../msk_models/athlete6_upper.osim"
-    muscle_function_path: str = "../msk_models/athlete6path_upper.xml"
+    model_path: str = "../msk_models/athlete8_upper.osim"
+    muscle_function_path: str = "../msk_models/athlete8paths_upper.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    armature: float = 1e-3
+    # integrator_accuracy: float = 1.0
 
 
 @dataclass
@@ -167,6 +175,8 @@ class EnvConfigUpperRight(EnvConfig):
 @dataclass
 class EnvConfigRegression(EnvConfig):
     """ Environment configuration for no-hands model"""
+    armature: float = 2e-3
+    integrator_accuracy: float = 1.0
     model_path: str = "../msk_models/regression/regression_model.osim"
     muscle_function_path: str = "../msk_models/regression/regression_fn.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"

@@ -5,8 +5,8 @@ from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
 from msk_envs.train.dep.dep import DEP
 from msk_envs.utils.logged_sim import LoggedSim
-# from msk_envs.train.nets.sac_networks import load_policy
-from msk_envs.train.nets.td3_networks import load_policy
+from msk_envs.train.nets.sac_networks import load_policy
+# from msk_envs.train.nets.td3_networks import load_policy
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     env_config.q_noise = 0.0
     env_config.qv_noise = 0.0
     env_config.swap_lr = False
-    env_config.integrator_accuracy = 0.1
+    env_config.integrator_accuracy = 1.0
 
     has_cuda_support = torch.cuda.is_available()
     device = torch.device("cuda" if has_cuda_support else f"cpu")
@@ -35,8 +35,8 @@ def main():
 
     actions = envs.get_blank_actions()
     #
-    # policy = load_policy("/home/marth/Documents/msk_envs/models/athlete6_lower_sprint_2026-04-03_09-10/athlete6_lower_sprint_2026-04-03_09-10_12000.pt")
-    # policy.to(device)
+    policy = load_policy("/home/marth/Documents/msk_envs/models/athlete8_dontfalloneleg_2026-04-07_00-47/athlete8_dontfalloneleg_2026-04-07_00-47_107000.pt")
+    policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,
               n_envs=num_envs,
@@ -52,15 +52,15 @@ def main():
 
     # Build a SimLogger to give us a whole pdf of stuff
     max_episode_length = int(env_config.max_episode_duration / env_config.delta_t)
-    sim = LoggedSim(envs, device)
+    sim = LoggedSim(envs, device, delta_t_log=0.01)
     obs = sim.reset()
 
     for _ in tqdm(range(max_episode_length)):
         # actions = torch.randn_like(actions)
         # actions = torch.ones_like(actions) * -1
-        muscle_states = envs.muscle_fiber_lengths
-        actions[:, :envs.num_muscles] = dep.step(muscle_states)
-        actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
+        # muscle_states = envs.muscle_fiber_lengths
+        # actions[:, :envs.num_muscles] = dep.step(muscle_states)
+        # actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
 
         # with torch.no_grad():
         #     actions = policy(obs)

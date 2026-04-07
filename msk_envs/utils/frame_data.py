@@ -278,6 +278,7 @@ class NamedValue:
 @dataclass
 class JointMoment:
     name: str
+    net_moment: float
     spring: float
     damping: float
     muscle: float
@@ -287,6 +288,7 @@ class JointMoment:
     def to_dict(self):
         return {
             "name": self.name,
+            "net_moment": self.net_moment,
             "spring": self.spring,
             "damping": self.damping,
             "muscle": self.muscle,
@@ -298,6 +300,7 @@ class JointMoment:
     def from_dict(data: dict) -> 'JointMoment':
         return JointMoment(
             name=data["name"],
+            net_moment=data["net_moment"],
             spring=data["spring"],
             damping=data["damping"],
             muscle=data["muscle"],

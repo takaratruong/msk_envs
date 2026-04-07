@@ -19,6 +19,12 @@ def mid_lane_reward(root_position: torch.Tensor, weight: float = 2.5):
     return torch.exp(-weight * dist_from_center.pow(2))
 
 
+def exp_distance(values: torch.Tensor, targets: torch.Tensor, ranges: torch.Tensor, weight: float):
+    diff = values - targets
+    scaled_diff = diff / ranges
+    return torch.exp(-weight * scaled_diff.pow(2))
+
+
 def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: bool = False):
     """Joint limit penalty based on sum of absolute limit torques"""
     if squared:
@@ -63,6 +69,17 @@ def actuator_sq_penalty(actuator_activations, num_actuators):
     return mean_squared_act
 
 
+def derivative_sq_penalty(derivative, num_values):
+    """
+    Penalty based on the squared derivative.
+    """
+    squared_der = torch.pow(derivative, 2)
+    mean_squared_der = torch.sum(squared_der, dim=1) / num_values
+    if num_values == 0:
+        return torch.zeros_like(mean_squared_der)
+    return mean_squared_der
+
+
 def metabolic_penalty(muscle_powers, num_muscles, squared: bool = False):
     """Metabolic penalty based on total muscle power"""
     if squared:
@@ -85,8 +102,11 @@ def root_zero_reward(root_positions, weight: float):
     return reward
 
 
-def match_start_pos_reward(joint_positions, start_positions, weight: float):
+def match_start_pos_reward(joint_positions, start_positions, weight: float, ignore_root: bool):
     """Reward for root being close to start position in all axes"""
+    if ignore_root:  # first 7 values are root
+        joint_positions = joint_positions[..., 7:]
+        start_positions = start_positions[..., 7:]
     dist_from_start = torch.norm(joint_positions - start_positions, dim=1)
     reward = torch.exp(-weight * dist_from_start.pow(2))
     return reward
@@ -118,6 +138,20 @@ def fatigue_penalty(muscle_activations, num_muscles):
     if num_muscles == 0:
         return torch.zeros_like(total_fatigue)
     return total_fatigue / num_muscles
+
+
+def self_collision_penalty(collision_forces, force_bound):
+    clamped_collision_forces = torch.clamp(collision_forces, min=-force_bound, max=force_bound)
+    norm_collision_forces = torch.abs(clamped_collision_forces) / force_bound
+    return norm_collision_forces.sum(dim=1)
+
+
+def head_acc_penalty(head_accelerations):
+    """Penalty based on squared head accelerations"""
+    # acceleration is (angular, linear)
+    acc_ang = head_accelerations[:, :3]
+    acc_lin = head_accelerations[:, 3:]
+    return torch.norm(acc_ang, dim=1), torch.norm(acc_lin, dim=1)
 
 
 def acceleration_sq_penalty(joint_accelerations):

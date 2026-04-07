@@ -147,13 +147,19 @@ class SprintConfig(BaseArgs):
     ))
 
     """Sprint environment specific reward scales"""
-    lambda_vel: float = 0.01
-    lambda_mid_lane: float = 0.01
-    lambda_limit: float = -5e-3
+    lambda_vel: float = 1e-2
+    lambda_mid_lane: float = 1e-2
+    lambda_limit: float = -2e-4
     lambda_damping: float = -1e-3
     lambda_actuator: float = -1e-2
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
+    # lambda_self_collision: float = -1e-2
+    # lambda_head_acc_ang: float = -1e-4
+    # lambda_head_acc_lin: float = -1e-3
+    lambda_self_collision: float = -1e-2
+    lambda_head_acc_ang: float = 0.0
+    lambda_head_acc_lin: float = 0.0
 
 
 @dataclass
@@ -274,33 +280,61 @@ class VerticalConfig(BaseArgs):
 
 @dataclass
 class PerturbConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigLower(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.PERTURB,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        starting_pose_path = "../msk_models/starting_pose_stand.yaml"
+        starting_pose_path="../msk_models/starting_pose_stand.yaml"
     ))
     lambda_alive: float = 1e-1
-    lambda_limit: float = -2e-3
-    lambda_actuator: float = -1e-2
-    lambda_fatigue: float = -2e-2
-    lambda_metabolic: float = -2e-3
+    # lambda_limit: float = -2e-3
+    # lambda_actuator: float = -3e-2
+    # lambda_actuator_dot: float = -1e-3
+    # lambda_fatigue: float = -2e-2
+    # lambda_metabolic: float = -2e-3
+    lambda_limit: float = 0.0
+    lambda_actuator: float = 0.0
+    lambda_actuator_dot: float = 0.0
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
 
 
 @dataclass
 class DontFallConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigLower(
         env_variant=DerivedEnv.DONT_FALL,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         noise_start=False,
+        starting_pose_path = "../msk_models/starting_pose_stand.yaml"
     ))
     lambda_alive: float = 0
     lambda_limit: float = 0
     lambda_actuator: float = 0
     lambda_fatigue: float = 0
     lambda_metabolic: float = 0
-    lambda_root_zero: float = 0
+    lambda_root_zero: float = 1e-1
+    lambda_match_start: float = 1e-1
+
+
+@dataclass
+class DontFallConfigOneLeg(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+        env_variant=DerivedEnv.DONT_FALL_ONE_LEG,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        noise_start=False,
+        starting_pose_path="../msk_models/starting_pose_stand_one_leg.yaml",
+        use_prescribed_starting_activations=False,
+        default_activation = 0.0,
+        swap_lr=False,
+    ))
+    lambda_alive: float = 0
+    lambda_limit: float = -1e-2
+    lambda_actuator: float = 0
+    lambda_fatigue: float = 0
+    lambda_metabolic: float = 0
+    lambda_root_zero: float = 1e-1
     lambda_match_start: float = 1e-1
 
 
@@ -468,6 +502,30 @@ class UpperReachTarget(BaseArgs):
 
 
 @dataclass
+class UpperCurl(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigUpper(
+        env_variant=DerivedEnv.UPPER_CURL,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=5.0,
+        muscle_multiplier=1.0,
+        starting_pose_path="../msk_models/starting_pose_run.yaml",
+        swap_lr=False,
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_target: float = 3e-2
+    lambda_starting: float = 2e-2
+    lambda_limit: float = -2e-3
+    lambda_actuator: float = -3e-2
+    lambda_actuator_dot: float = -1e-3
+    lambda_alive: float = 3e-2
+    # lambda_limit: float = 0
+    # lambda_actuator: float = 0
+    # lambda_actuator_dot: float = 0
+    # lambda_alive: float = 0
+
+
+@dataclass
 class NoSpineReachTarget(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigUpperNoSpine(
         env_variant=DerivedEnv.UPPER_REACH,
@@ -498,6 +556,7 @@ Config = Union[
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
     Annotated[DontFallConfig, tyro.conf.subcommand(name="dontfall")],
+    Annotated[DontFallConfigOneLeg, tyro.conf.subcommand(name="dontfalloneleg")],
     Annotated[StaticSquatConfig, tyro.conf.subcommand(name="static")],
         # Annotated[AnkleFlexConfig, tyro.conf.subcommand(name="ankleflex")],
     Annotated[ShuttleRunConfig, tyro.conf.subcommand(name="shuttlerun")],
@@ -505,6 +564,7 @@ Config = Union[
     Annotated[WaddleConfig, tyro.conf.subcommand(name="waddle")],
     Annotated[BroadJumpConfig, tyro.conf.subcommand(name="broadjump")],
     Annotated[UpperReachTarget, tyro.conf.subcommand(name="upperreach")],
+    Annotated[UpperCurl, tyro.conf.subcommand(name="uppercurl")],
     Annotated[NoSpineReachTarget, tyro.conf.subcommand(name="nospinereach")],
 ]
 

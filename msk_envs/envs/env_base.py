@@ -61,6 +61,10 @@ class MSKEnv:
                 geom_friction[geom_id][2] = params.viscous_friction
                 geom_transition_velocity[geom_id] = params.transition_velocity
 
+        # Armature
+        dof_start = 6 if self.root_free else 0
+        msk_warp.armature(self.m)[dof_start:] = env_config.armature
+
         # Integrator type
         msk_warp.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
         msk_warp.set_integrator_use_inf_norm(self.m, env_config.integrator_use_inf_norm)
@@ -91,6 +95,7 @@ class MSKEnv:
             # Analytics graph: anything else needed for analytics
             with wp.ScopedCapture() as capture:
                 msk_warp.compute_muscle_moments(self.m, self.d)
+                msk_warp.compute_net_joint_moments(self.m, self.d)
             self.analytics_graph = capture.graph
 
             # Forward kinematics graph, useful for motion tracking
@@ -124,6 +129,7 @@ class MSKEnv:
             polynomial_data_path=function_path
         )
         self.m, self.d = load_result.model, load_result.data
+        self.root_free = load_result.root_free
         # Store all convenient lookups
         self.body_id_lookup = load_result.body_id_lookup
         self.dof_id_lookup = load_result.dof_id_lookup
@@ -141,6 +147,7 @@ class MSKEnv:
         self.num_bodies = msk_warp.get_num_bodies(self.m)
         self.num_muscles = msk_warp.get_num_muscles(self.m)
         self.num_actuators = msk_warp.get_num_actuators(self.m)
+        self.num_colliders = msk_warp.get_num_colliders(self.m)
         # [num_envs, num_bodies]
         self.body_mass = msk_warp.body_mass(self.m)
         self.total_mass = self.body_mass.sum()
@@ -157,6 +164,7 @@ class MSKEnv:
         self.muscle_powers = msk_warp.muscle_powers(self.d)
         # [num_envs, num_actuators]
         self.actuator_activations = msk_warp.actuator_activations(self.d)
+        self.actuator_activations_dot = msk_warp.actuator_activations_dot(self.d)
         self.actuator_excitations = msk_warp.actuator_excitations(self.d)
         # [num_envs, num_bodies, 7]
         self.body_transforms = msk_warp.body_transforms(self.d)
@@ -166,6 +174,7 @@ class MSKEnv:
         self.body_rotations = get_rotation_from_transform(self.body_transforms)
         # [num_envs, num_bodies, 6] (ang, lin)
         self.body_velocities = msk_warp.body_velocities(self.d)
+        self.body_accelerations = msk_warp.body_accelerations(self.d)
         # [num_envs, num_bodies, 6] (frc, trq)
         self.body_user_forces = msk_warp.body_user_forces(self.d)
         # [num_envs, num_qpos]
@@ -174,8 +183,9 @@ class MSKEnv:
         self.joint_velocities = msk_warp.joint_velocities(self.d)
         # [num_envs, num_dofs]
         self.ufrc_damper = msk_warp.ufrc_damper(self.d)
-        # [num_envs, num_colliders, 3]
+        # [num_envs, num_colliders]
         self.collider_forces = msk_warp.collider_forces(self.d)
+        self.collider_self_forces = msk_warp.collider_self_forces(self.d)
 
         # [num_envs, 3]
         self.grf = msk_warp.grf(self.d)
@@ -274,7 +284,7 @@ class MSKEnv:
         # Head isn't its own body, compute offset from torso
         if self.head_id == -1:
             self.head_id = self.lookup_body_id("torso")
-            head_offset = build_axis(axis=UP_IDX, scale=0.215)
+            head_offset = torch.tensor(build_axis(axis=UP_IDX, scale=0.215), device=self.device)
 
         self.root_pos = self.body_positions[:, self.root_id]
         self.head_pos = self.body_positions[:, self.head_id]

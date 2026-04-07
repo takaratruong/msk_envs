@@ -18,7 +18,7 @@ class SACConfig:
     alpha_learning_rate: float = 3e-4
     """the learning rate for the alpha"""
 
-    buffer_size: int = 256 * 4
+    buffer_size: int = 256 * 3
     """the replay memory buffer size per environment"""
 
     num_steps: int = 1
@@ -42,7 +42,7 @@ class SACConfig:
     num_updates: int = 8
     """the number of updates to perform per step"""
 
-    target_entropy_ratio: float = 0.5
+    target_entropy_ratio: float = 0.1
     """the ratio of the target entropy to the number of actions"""
 
     num_atoms: int = 501

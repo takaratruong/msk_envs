@@ -5,7 +5,7 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, joint_damping_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, mid_lane_reward, has_fallen
+    actuator_sq_penalty, head_acc_penalty, fatigue_penalty, mid_lane_reward, has_fallen, self_collision_penalty
 from ..utils.scene_settings import SceneSettings
 
 
@@ -60,17 +60,21 @@ class LanesEnv(MSKEnv):
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
+            self.body_positions.reshape(self.num_worlds, -1),
+            self.body_rotations.reshape(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
         rew_mid_lane = mid_lane_reward(self.root_pos)
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
+        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=True)
         rew_damping = joint_damping_penalty(self.ufrc_damper, squared=False)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
         # rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
+        rew_self_collision = self_collision_penalty(self.collider_self_forces, 100.0)
+        rew_head_acc_ang, rew_head_acc_lin = head_acc_penalty(self.body_accelerations[:, self.head_id])
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
@@ -79,28 +83,35 @@ class LanesEnv(MSKEnv):
             "rew_damping": rew_damping.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_fatigue": rew_fatigue.detach(),
+            "rew_self_collision": rew_self_collision.detach(),
+            "rew_head_acc_ang": rew_head_acc_ang.detach(),
+            "rew_head_acc_lin": rew_head_acc_lin.detach(),
             # "rew_metabolic": rew_metabolic.detach(),
         }
+
+    def _get_facing_direction(self, body_id):
+        body_rot = self.body_rotations[:, body_id]
+        body_fwd = rotate_vec(body_rot, self.fwd_axis)
+        body_fwd = body_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
+        body_fwd = body_fwd / torch.norm(body_fwd, dim=1, keepdim=True)
+        body_fwd_dot_target = torch.sum(body_fwd * self.target_facing, dim=1)
+        facing_direction = body_fwd_dot_target >= self.cos_angle_threshold
+        return facing_direction.detach()
 
     def _get_terminated(self):
         # Has fallen
         fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
 
-        # # Any of the *toes* are out of the lanes
+        # Any of the *toes* are out of the lanes
         toes_out = torch.zeros_like(fallen, dtype=torch.bool)
         for body_idx in self.toes_ids:
             body_pos = self.body_positions[:, body_idx]
             toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
 
-        # # Pelvis no longer facing forward (within N degrees)
-        pelvis_rot = self.body_rotations[:, self.root_id]
-        pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
-        pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
-        pelvis_fwd = pelvis_fwd / torch.norm(pelvis_fwd, dim=1, keepdim=True)
-
-        pelvis_fwd_dot_target = torch.sum(pelvis_fwd * self.target_facing, dim=1)
-        facing_direction = pelvis_fwd_dot_target >= self.cos_angle_threshold
-        not_facing_direction = ~facing_direction
+        # Pelvis or head no longer facing forward (within N degrees)
+        pelvis_facing_direction = self._get_facing_direction(self.root_id)
+        head_facing_direction = self._get_facing_direction(self.head_id)
+        not_facing_direction = ~(pelvis_facing_direction & head_facing_direction)
 
         terminated = (fallen | toes_out | not_facing_direction).float()
         return terminated.detach()

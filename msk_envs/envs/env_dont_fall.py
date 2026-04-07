@@ -15,10 +15,18 @@ class DontFallEnv(MSKEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
+            requires_visuals: bool,
             live_render: bool,
             cuda_graph: bool,
     ):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render, cuda_graph=cuda_graph)
+        super().__init__(
+            num_envs=num_envs,
+            env_config=env_config,
+            device=device,
+            requires_visuals=requires_visuals,
+            live_render=live_render,
+            cuda_graph=cuda_graph
+        )
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -35,6 +43,8 @@ class DontFallEnv(MSKEnv):
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
+            self.body_positions.reshape(self.num_worlds, -1),
+            self.body_rotations.reshape(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
@@ -45,7 +55,7 @@ class DontFallEnv(MSKEnv):
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
         rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
         rew_root_zero = root_zero_reward(self.root_pos, weight=5.0)
-        rew_match_start = match_start_pos_reward(self.joint_positions, self.start_pose, weight=1.0)
+        rew_match_start = match_start_pos_reward(self.joint_positions, self.start_pose, weight=1.0, ignore_root=True)
 
         self.reward_dict = {
             "rew_alive": rew_alive,
@@ -58,6 +68,6 @@ class DontFallEnv(MSKEnv):
         }
 
     def _get_terminated(self):
-        fallen = has_fallen(self.root_pos, self.torso_pos, self.torso_rot, self.head_offset)
+        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
         terminated = fallen.float()
         return terminated.detach()

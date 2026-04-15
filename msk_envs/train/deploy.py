@@ -21,7 +21,9 @@ def main():
     env_config.q_noise = 0.0
     env_config.qv_noise = 0.0
     env_config.swap_lr = False
-    env_config.integrator_accuracy = 1.0
+    env_config.integrator_accuracy = 0.1
+    # env_config.integrator_use_inf_norm = True
+
 
     has_cuda_support = torch.cuda.is_available()
     device = torch.device("cuda" if has_cuda_support else f"cpu")
@@ -35,7 +37,7 @@ def main():
 
     actions = envs.get_blank_actions()
     #
-    policy = load_policy("/home/marth/Documents/msk_envs/models/athlete8_dontfalloneleg_2026-04-07_00-47/athlete8_dontfalloneleg_2026-04-07_00-47_107000.pt")
+    policy = load_policy("/home/marth/Documents/msk_envs/models/athlete10_backpedal_2026-04-14_17-07/athlete10_backpedal_2026-04-14_17-07_14000.pt")
     policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,
@@ -57,13 +59,14 @@ def main():
 
     for _ in tqdm(range(max_episode_length)):
         # actions = torch.randn_like(actions)
-        # actions = torch.ones_like(actions) * -1
+        actions[:, :envs.num_muscles] = -1.0
+        # actions[:, envs.num_muscles:] = 0.0
         # muscle_states = envs.muscle_fiber_lengths
         # actions[:, :envs.num_muscles] = dep.step(muscle_states)
         # actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
 
-        # with torch.no_grad():
-        #     actions = policy(obs)
+        with torch.no_grad():
+            actions = policy(obs)
 
         # try to step the sim, but if it takes too long, break out of the loop
         finished, obs = sim.step(actions)

@@ -282,6 +282,7 @@ class JointMoment:
     spring: float
     damping: float
     muscle: float
+    muscle_passive: float
     actuator: float
     limit: float
 
@@ -292,6 +293,7 @@ class JointMoment:
             "spring": self.spring,
             "damping": self.damping,
             "muscle": self.muscle,
+            "muscle_passive": self.muscle_passive,
             "actuator": self.actuator,
             "limit": self.limit,
         }
@@ -304,8 +306,38 @@ class JointMoment:
             spring=data["spring"],
             damping=data["damping"],
             muscle=data["muscle"],
+            muscle_passive=data["muscle_passive"],
             limit=data["limit"],
             actuator=data["actuator"],
+        )
+
+
+@dataclass
+class BodyForces:
+    name: str
+    net_force: tuple
+    gravity: tuple
+    contact: tuple
+    drag: tuple
+    muscle: tuple
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "gravity": self.gravity,
+            "contact": self.contact,
+            "drag": self.drag,
+            "muscle": self.muscle,
+        }
+
+    @staticmethod
+    def from_dict(data: dict) -> 'BodyForces':
+        return BodyForces(
+            name=data["name"],
+            gravity=data["gravity"],
+            contact=data["contact"],
+            drag=data["drag"],
+            muscle=data["muscle"],
         )
 
 
@@ -364,6 +396,7 @@ class FrameData:
     joint_angles: list[NamedValue]
     joint_velocities: list[NamedValue]
     joint_moments: list[JointMoment]
+    body_forces: list[BodyForces]
     muscles: list[MuscleData]
     actuators: list[ActuatorData]
     kinetic_data: KineticData
@@ -380,6 +413,7 @@ class FrameData:
             "joint_angles": [angle.to_dict() for angle in self.joint_angles],
             "joint_velocities": [vel.to_dict() for vel in self.joint_velocities],
             "joint_moments": [moment.to_dict() for moment in self.joint_moments],
+            "body_forces": [obj.to_dict() for obj in self.body_forces],
             "muscles": [muscle.to_dict() for muscle in self.muscles],
             "actuators": [actuator.to_dict() for actuator in self.actuators],
             "kinetic_data": self.kinetic_data.to_dict(),
@@ -398,6 +432,7 @@ class FrameData:
             joint_angles=[NamedValue.from_dict(angle) for angle in data["joint_angles"]],
             joint_velocities=[NamedValue.from_dict(vel) for vel in data["joint_velocities"]],
             joint_moments=[JointMoment.from_dict(moment) for moment in data["joint_moments"]],
+            body_forces=[BodyForces.from_dict(obj) for obj in data["body_forces"]],
             muscles=[MuscleData.from_dict(muscle) for muscle in data["muscles"]],
             actuators=[ActuatorData.from_dict(actuator) for actuator in data["actuators"]],
             kinetic_data=KineticData.from_dict(data["kinetic_data"]),

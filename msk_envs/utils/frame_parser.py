@@ -70,6 +70,37 @@ def parse_muscle_data(
 
     muscle_metadata = msk_warp.muscle_metadata_np(m)
     muscle_length_info = msk_warp.muscle_length_info_np(d)
+    # # sort the muscles based on fiber_passive_force_length_multiplier
+    # import numpy as np
+    # nm = msk_warp.get_num_muscles(m)
+    # muscle_names = [muscle_idx_to_name[i] for i in range(nm)]
+    # passive_flm = [float(muscle_length_info["fiber_passive_force_length_multiplier"][world_id][i].item()) for i in
+    #                range(nm)]
+    #
+    # muscle_names = np.array(muscle_names)
+    # passive_flm = np.array(passive_flm)
+    #
+    # ind_sort = np.argsort(passive_flm)[::-1]
+    # passive_flm = passive_flm[ind_sort]
+    # muscle_names = muscle_names[ind_sort]
+    # print(muscle_names)
+    # print(passive_flm)
+    #
+    # muscle_lengths = [float(muscle_path_lengths[world_id][i].item()) for i in range(nm)]
+    # optimal_fl = [float(muscle_metadata["optimal_fiber_length"][i]) for i in range(nm)]
+    # tsl = [float(muscle_metadata["tendon_slack_length"][i]) for i in range(nm)]
+    # optimal_pennation = [float(muscle_metadata["optimal_pennation_angle"][i]) for i in range(nm)]
+    # default_lengths = []
+    # for i in range(nm):
+    #     default_length = optimal_fl[i] * np.cos(optimal_pennation[i]) + tsl[i]
+    #     default_lengths.append(default_length)
+    # default_lengths = np.array(default_lengths)[ind_sort]
+    # muscle_lengths = np.array(muscle_lengths)[ind_sort]
+    #
+    # print(muscle_lengths / default_lengths)
+    #
+    # quit()
+
     muscle_velocity_info = msk_warp.muscle_velocity_info_np(d)
 
     site_positions = msk_warp.site_positions(d)
@@ -211,6 +242,7 @@ def parse_joint_moments(
     ufrc_spring = msk_warp.ufrc_spring(d)
     ufrc_damper = msk_warp.ufrc_damper(d)
     ufrc_muscle = msk_warp.ufrc_muscle(d)
+    ufrc_muscle_passive = msk_warp.ufrc_muscle_passive(d)
     ufrc_actuator = msk_warp.ufrc_actuator(d)
     ufrc_limit = msk_warp.ufrc_limit(d)
 
@@ -222,11 +254,38 @@ def parse_joint_moments(
             spring=float(ufrc_spring[world_id][i].item()),
             damping=float(ufrc_damper[world_id][i].item()),
             muscle=float(ufrc_muscle[world_id][i].item()),
+            muscle_passive=float(ufrc_muscle_passive[world_id][i].item()),
             actuator=float(ufrc_actuator[world_id][i].item()),
             limit=float(ufrc_limit[world_id][i].item()),
         )
         moments.append(angle)
     return moments
+
+
+def parse_body_forces(
+        m: msk_warp.Model,
+        d: msk_warp.Data,
+        body_idx_to_name: dict[int, str],
+        world_id: int
+) -> list[BodyForces]:
+    body_force = msk_warp.body_force(d)
+    body_force_gravity = msk_warp.body_force_gravity(d)
+    body_force_contact = msk_warp.body_force_contact(d)
+    body_force_muscle = msk_warp.body_force_muscle(d)
+    body_force_drag = msk_warp.body_force_drag(d)
+
+    body_forces = []
+    for i in range(msk_warp.get_num_bodies(m)):
+        angle = BodyForces(
+            name=body_idx_to_name[i],
+            net_force=tuple(body_force[world_id][i].tolist()),
+            gravity=tuple(body_force_gravity[world_id][i].tolist()),
+            contact=tuple(body_force_contact[world_id][i].tolist()),
+            muscle=tuple(body_force_muscle[world_id][i].tolist()),
+            drag=tuple(body_force_drag[world_id][i].tolist()),
+        )
+        body_forces.append(angle)
+    return body_forces
 
 
 def parse_beam_points(
@@ -262,6 +321,7 @@ def parse_frame(
         scene_settings: SceneSettings,
         ref_joint_angles=None,
 ) -> FrameData:
+    body_idx_to_name = {v: k for k, v in body_name_to_idx.items()}
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
     colliders = parse_collider_data(m, d, collider_idx_to_name, world_id)
     muscles = parse_muscle_data(m, d, muscle_idx_to_name, world_id)
@@ -270,6 +330,7 @@ def parse_frame(
     joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, limit_id_lookup, world_id, ref_joint_angles)
     joint_velocities = parse_joint_velocities(m, d, world_id)
     joint_moments = parse_joint_moments(m, d, dof_idx_to_name, world_id)
+    body_forces = parse_body_forces(m, d, body_idx_to_name, world_id)
     beam_points = parse_beam_points(m, d, world_id)
 
     frame_visuals = FrameData(
@@ -280,6 +341,7 @@ def parse_frame(
         joint_angles=joint_angles,
         joint_velocities=joint_velocities,
         joint_moments=joint_moments,
+        body_forces=body_forces,
         muscles=muscles,
         actuators=actuators,
         kinetic_data=kinetic_data,

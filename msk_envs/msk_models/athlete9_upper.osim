@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <OpenSimDocument Version="40600">
 	<Model name="athlete_model">
 		<!--The model's ground reference frame.-->
@@ -234,9 +233,9 @@
 							<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
 							<socket_frame>..</socket_frame>
 							<!--The location of the contact geometry center in the PhysicalFrame.-->
-							<location>-0.025499999999999998 -0.13700000000000001 0.057000000000000002</location>
+							<location>-0.025000000000000001 -0.13 0.057000000000000002</location>
 							<!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
-							<orientation>-0.122 -0.029999999999999999 0.20599999999999999</orientation>
+							<orientation>-0.12 -0.029999999999999999 0.057000000000000002</orientation>
 							<!--The default appearance for this Geometry-->
 							<Appearance>
 								<!--Flag indicating whether the associated Geometry is visible or hidden.-->
@@ -247,15 +246,34 @@
 								<color>0 1 1</color>
 							</Appearance>
 							<!--The radii of the ellipsoid (default: [0, 0, 0]).-->
-							<radii>0.082000000000000003 0.17000000000000001 0.082000000000000003</radii>
+							<radii>0.076999999999999999 0.14499999999999999 0.076999999999999999</radii>
+						</ContactEllipsoid>
+						<ContactEllipsoid name="pectoralis_r_obstacle">
+							<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
+							<socket_frame>..</socket_frame>
+							<!--The location of the contact geometry center in the PhysicalFrame.-->
+							<location>-0.0195 -0.12 0.058500000000000003</location>
+							<!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
+							<orientation>-0.122 -0.029999999999999999 0.25</orientation>
+							<!--The default appearance for this Geometry-->
+							<Appearance>
+								<!--Flag indicating whether the associated Geometry is visible or hidden.-->
+								<visible>false</visible>
+								<!--The opacity used to display the geometry between 0:transparent, 1:opaque.-->
+								<opacity>0.5</opacity>
+								<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+								<color>0 1 1</color>
+							</Appearance>
+							<!--The radii of the ellipsoid (default: [0, 0, 0]).-->
+							<radii>0.074999999999999997 0.14999999999999999 0.076999999999999999</radii>
 						</ContactEllipsoid>
 						<ContactEllipsoid name="thorax_l_obstacle">
 							<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
 							<socket_frame>..</socket_frame>
 							<!--The location of the contact geometry center in the PhysicalFrame.-->
-							<location>-0.025499999999999998 -0.13700000000000001 -0.057000000000000002</location>
+							<location>-0.025000000000000001 -0.13 -0.057000000000000002</location>
 							<!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
-							<orientation>0.122 0.029999999999999999 0.20599999999999999</orientation>
+							<orientation>0.12 0.029999999999999999 0.057000000000000002</orientation>
 							<!--The default appearance for this Geometry-->
 							<Appearance>
 								<!--Flag indicating whether the associated Geometry is visible or hidden.-->
@@ -266,7 +284,26 @@
 								<color>0 1 1</color>
 							</Appearance>
 							<!--The radii of the ellipsoid (default: [0, 0, 0]).-->
-							<radii>0.082000000000000003 0.17000000000000001 0.082000000000000003</radii>
+							<radii>0.076999999999999999 0.14499999999999999 0.076999999999999999</radii>
+						</ContactEllipsoid>
+						<ContactEllipsoid name="pectoralis_l_obstacle">
+							<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
+							<socket_frame>..</socket_frame>
+							<!--The location of the contact geometry center in the PhysicalFrame.-->
+							<location>-0.0195 -0.12 -0.058500000000000003</location>
+							<!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
+							<orientation>0.122 0.029999999999999999 0.25</orientation>
+							<!--The default appearance for this Geometry-->
+							<Appearance>
+								<!--Flag indicating whether the associated Geometry is visible or hidden.-->
+								<visible>false</visible>
+								<!--The opacity used to display the geometry between 0:transparent, 1:opaque.-->
+								<opacity>0.5</opacity>
+								<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+								<color>0 1 1</color>
+							</Appearance>
+							<!--The radii of the ellipsoid (default: [0, 0, 0]).-->
+							<radii>0.074999999999999997 0.14999999999999999 0.076999999999999999</radii>
 						</ContactEllipsoid>
 					</components>
 					<!--The geometry used to display the axes of this Frame.-->
@@ -1499,21 +1536,21 @@
 		<!--List of joints that connect the bodies.-->
 		<JointSet name="jointset">
 			<objects>
-                <WeldJoint name="ground_pelvis">
-                    <socket_parent_frame>ground_offset</socket_parent_frame>
-                    <!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
-                    <socket_child_frame>/bodyset/pelvis/pelvis_frame</socket_child_frame>
-                    <frames>
-                        <PhysicalOffsetFrame name="ground_offset">
-                            <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
-                            <socket_parent>/ground</socket_parent>
-                            <!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-                            <translation>0 1 0</translation>
-                            <!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
-                            <orientation>0 0 0</orientation>
-                        </PhysicalOffsetFrame>
-                    </frames>
-                </WeldJoint>
+				<WeldJoint name="ground_pelvis">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>ground_offset</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>/bodyset/pelvis/pelvis_frame</socket_child_frame>
+					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
+					<!--The spatial transform defining how the child body moves with respectto the parent as a function of the generalized coordinates.-->
+					<frames>
+						<PhysicalOffsetFrame name="ground_offset">
+							<translation>0 1 0</translation>
+							<orientation>0 0 0</orientation>
+							<socket_parent>/ground</socket_parent>
+						</PhysicalOffsetFrame>
+					</frames>
+				</WeldJoint>
 				<CantileverFreeBeamJoint name="lumbar">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>lumbar_spine_parent_frame</socket_parent_frame>
@@ -2671,6 +2708,14 @@
 		<!--Forces in the model (includes Actuators).-->
 		<ForceSet name="forceset">
 			<objects>
+				<SpringGeneralizedForce name="lumbar_bending_spring_force">
+					<!--Name of the coordinate to which this force is applied.-->
+					<coordinate>lumbar_bending</coordinate>
+					<!--Spring stiffness.-->
+					<stiffness>25</stiffness>
+					<!--Damping constant.-->
+					<viscosity>1</viscosity>
+				</SpringGeneralizedForce>
 				<CoordinateLimitForce name="lumbar_bending_limit_force">
 					<!--Coordinate (name) to be limited.-->
 					<coordinate>lumbar_bending</coordinate>
@@ -4757,7 +4802,7 @@
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
 								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
-								<contact_hint>-0.014999999999999999 0.074999999999999997 0.115</contact_hint>
+								<contact_hint>-0.050000000000000003 0.055 0.0785</contact_hint>
 							</Scholz2015GeometryPathObstacle>
 							<Scholz2015GeometryPathPoint name="path_point_1">
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -4842,16 +4887,16 @@
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
 								<PathPoint name="pathpoint">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<socket_parent_frame>/bodyset/lumbar_spine</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.090800000000000006 -0.2175 -0.00156</location>
+									<location>-0.044999999999999998 -0.0070000000000000001 0.016</location>
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
 								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
-								<contact_hint>-0.012999999999999999 0.044999999999999998 0.105</contact_hint>
+								<contact_hint>-0.042000000000000003 0.0089999999999999993 0.085000000000000006</contact_hint>
 							</Scholz2015GeometryPathObstacle>
 							<Scholz2015GeometryPathPoint name="path_point_1">
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -4936,6 +4981,15 @@
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
 								<PathPoint name="pathpoint">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.115 0.077499999999999999 0.065000000000000002</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
 									<location>-0.062700000000000006 -0.25480000000000003 0.0906</location>
@@ -4945,9 +4999,9 @@
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
 								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
-								<contact_hint>-0.016 0.012 0.10299999999999999</contact_hint>
+								<contact_hint>-0.025000000000000001 -0.029999999999999999 0.095000000000000001</contact_hint>
 							</Scholz2015GeometryPathObstacle>
-							<Scholz2015GeometryPathPoint name="path_point_1">
+							<Scholz2015GeometryPathPoint name="path_point_2">
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
 								<PathPoint name="pathpoint">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
@@ -5037,7 +5091,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_r_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.065000000000000002 0.107 0.073999999999999996</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -5131,7 +5185,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_r_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.080000000000000002 0.10000000000000001 0.036999999999999998</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -5225,7 +5279,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_r_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.082000000000000003 0.050000000000000003 0.039</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -5319,7 +5373,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_r_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.071999999999999995 0.075999999999999998 0.058999999999999997</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -6576,6 +6630,121 @@
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
 					<TendonForceLengthCurve name="biceps_brevis_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="rectus_abdominis_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0275 -0.074999999999999997 0.012500000000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.017000000000000001 0.070000000000000007 0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_2">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/lumbar_spine</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.067000000000000004 -0.11 0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_3">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.083000000000000004 -0.22500000000000001 0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_4">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.071999999999999995 -0.17000000000000001 0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>705.89999999999998</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.30295</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.082400000000000001</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>true</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="rectus_abdominis_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="rectus_abdominis_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="rectus_abdominis_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="rectus_abdominis_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -7919,7 +8088,7 @@
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
 								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
-								<contact_hint>-0.014999999999999999 0.074999999999999997 -0.115</contact_hint>
+								<contact_hint>-0.050000000000000003 0.055 -0.0785</contact_hint>
 							</Scholz2015GeometryPathObstacle>
 							<Scholz2015GeometryPathPoint name="path_point_1">
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -8004,16 +8173,16 @@
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
 								<PathPoint name="pathpoint">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<socket_parent_frame>/bodyset/lumbar_spine</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.090800000000000006 -0.2175 0.00156</location>
+									<location>-0.044999999999999998 -0.0070000000000000001 -0.016</location>
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
 								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
-								<contact_hint>-0.012999999999999999 0.044999999999999998 -0.105</contact_hint>
+								<contact_hint>-0.042000000000000003 0.0089999999999999993 -0.085000000000000006</contact_hint>
 							</Scholz2015GeometryPathObstacle>
 							<Scholz2015GeometryPathPoint name="path_point_1">
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -8021,7 +8190,7 @@
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.001 -0.033000000000000002 -0.002</location>
+									<location>0.001 -0.033000000000000002 0.002</location>
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
@@ -8098,6 +8267,15 @@
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
 								<PathPoint name="pathpoint">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.115 0.077499999999999999 -0.065000000000000002</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
 									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
 									<!--The fixed location of the path point expressed in its parent frame.-->
 									<location>-0.062700000000000006 -0.25480000000000003 -0.0906</location>
@@ -8107,9 +8285,9 @@
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
 								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
-								<contact_hint>-0.016 0.012 -0.10299999999999999</contact_hint>
+								<contact_hint>-0.025000000000000001 -0.029999999999999999 -0.095000000000000001</contact_hint>
 							</Scholz2015GeometryPathObstacle>
-							<Scholz2015GeometryPathPoint name="path_point_1">
+							<Scholz2015GeometryPathPoint name="path_point_2">
 								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
 								<PathPoint name="pathpoint">
 									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
@@ -8199,7 +8377,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_l_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.065000000000000002 0.107 -0.073999999999999996</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -8293,7 +8471,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_l_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.080000000000000002 0.10000000000000001 -0.036999999999999998</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -8387,7 +8565,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_l_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.082000000000000003 0.050000000000000003 -0.039</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -8481,7 +8659,7 @@
 							</Scholz2015GeometryPathPoint>
 							<Scholz2015GeometryPathObstacle name="obstacle_0">
 								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
-								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
+								<socket_contact_geometry>/bodyset/thorax/pectoralis_l_obstacle</socket_contact_geometry>
 								<!--The contact hint for the obstacle.-->
 								<contact_hint>0.071999999999999995 0.075999999999999998 -0.058999999999999997</contact_hint>
 							</Scholz2015GeometryPathObstacle>
@@ -9741,173 +9919,288 @@
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
-				<ActivationCoordinateActuator name="lumbar_bending_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>lumbar_bending</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>100</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="lumbar_extension_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>lumbar_extension</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>100</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="lumbar_rotation_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>lumbar_rotation</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>50</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="thorax_bending_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>thorax_bending</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>100</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="thorax_extension_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>thorax_extension</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>100</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="thorax_rotation_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>thorax_rotation</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>50</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="cervical_bending_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>cervical_bending</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>15</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="cervical_extension_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>cervical_extension</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>15</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="cervical_rotation_actuator">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>cervical_rotation</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>7.5</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.035000000000000003</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
+				<Millard2012EquilibriumMuscle name="rectus_abdominis_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0275 -0.074999999999999997 -0.012500000000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.017000000000000001 0.070000000000000007 -0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_2">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/lumbar_spine</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.067000000000000004 -0.11 -0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_3">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.083000000000000004 -0.22500000000000001 -0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_4">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.071999999999999995 -0.17000000000000001 -0.035000000000000003</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>705.89999999999998</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.30295</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.082400000000000001</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>true</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="rectus_abdominis_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="rectus_abdominis_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="rectus_abdominis_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="rectus_abdominis_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+<!--				<ActivationCoordinateActuator name="lumbar_bending_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>lumbar_bending</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>100</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="lumbar_extension_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>lumbar_extension</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>100</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="lumbar_rotation_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>lumbar_rotation</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>50</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="thorax_bending_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>thorax_bending</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>100</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="thorax_extension_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>thorax_extension</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>100</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="thorax_rotation_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>thorax_rotation</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>50</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="cervical_bending_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>cervical_bending</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>15</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="cervical_extension_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>cervical_extension</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>15</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
+<!--				<ActivationCoordinateActuator name="cervical_rotation_actuator">-->
+<!--					&lt;!&ndash;Name of the generalized coordinate to which the actuator applies.&ndash;&gt;-->
+<!--					<coordinate>cervical_rotation</coordinate>-->
+<!--					&lt;!&ndash;The maximum generalized force produced by this actuator.&ndash;&gt;-->
+<!--					<optimal_force>7.5</optimal_force>-->
+<!--					&lt;!&ndash;Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).&ndash;&gt;-->
+<!--					<activation_time_constant>0.035000000000000003</activation_time_constant>-->
+<!--					&lt;!&ndash;Value of activation in the default state (default: 0.5).&ndash;&gt;-->
+<!--					<default_activation>0.5</default_activation>-->
+<!--				</ActivationCoordinateActuator>-->
 			</objects>
 			<groups />
 		</ForceSet>
-        <ContactGeometrySet>
-            <objects>
-                <ContactSphere name="head">
-                    <socket_frame>/bodyset/head</socket_frame>
-                    <location>0.0 0.0375 0.0</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.10</radius>
-                </ContactSphere>
-                <ContactEllipsoid name="pelvis_capsule">
-                    <socket_frame>/bodyset/pelvis</socket_frame>
-                    <location>-0.070699999999999999 0 0</location>
-                    <orientation>0 0 0</orientation>
-                    <radii>0.08 0.06 0.08</radii>
-                </ContactEllipsoid>
+		<ContactGeometrySet>
+			<objects>
+				<ContactSphere name="head">
+					<socket_frame>/bodyset/head</socket_frame>
+					<location>0.0 0.0375 0.0</location>
+					<orientation>0 0 0</orientation>
+					<radius>0.10</radius>
+				</ContactSphere>
+				<ContactEllipsoid name="pelvis_capsule">
+					<socket_frame>/bodyset/pelvis</socket_frame>
+					<location>-0.070699999999999999 0 0</location>
+					<orientation>0 0 0</orientation>
+					<radii>0.08 0.06 0.08</radii>
+				</ContactEllipsoid>
 
-                <ContactEllipsoid name="lumbar_spine_capsule">
-                    <socket_frame>/bodyset/lumbar_spine</socket_frame>
-                    <location>0 -0.087499999999999994 0</location>
-                    <orientation>0 0 0</orientation>
-                    <radii>0.08 0.04 0.08</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="thorax_capsule1">
-                    <socket_frame>/bodyset/thorax</socket_frame>
-                    <location>-0.0591 -0.14860000000000001 0</location>
-                    <orientation>0 0 0</orientation>
-                    <radii>0.08 0.05 0.08</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="thorax_capsule2">
-                    <socket_frame>/bodyset/thorax</socket_frame>
-                    <location>-0.0591 -0.07 0</location>
-                    <orientation>0 0 0</orientation>
-                    <radii>0.08 0.05 0.08</radii>
-                </ContactEllipsoid>
+				<ContactEllipsoid name="lumbar_spine_capsule">
+					<socket_frame>/bodyset/lumbar_spine</socket_frame>
+					<location>0 -0.087499999999999994 0</location>
+					<orientation>0 0 0</orientation>
+					<radii>0.08 0.04 0.08</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="thorax_capsule1">
+					<socket_frame>/bodyset/thorax</socket_frame>
+					<location>-0.0591 -0.14860000000000001 0</location>
+					<orientation>0 0 0</orientation>
+					<radii>0.08 0.05 0.08</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="thorax_capsule2">
+					<socket_frame>/bodyset/thorax</socket_frame>
+					<location>-0.0591 -0.07 0</location>
+					<orientation>0 0 0</orientation>
+					<radii>0.08 0.05 0.08</radii>
+				</ContactEllipsoid>
 
-                <ContactEllipsoid name="humerus_r_capsule">
-                    <socket_frame>/bodyset/humerus_r</socket_frame>
-                    <location>0 -0.14 0</location>
-                    <orientation>1.5707 0 0</orientation>
-                    <radii>0.03 0.12 0.03</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="ulna_r_capsule">
-                    <socket_frame>/bodyset/ulna_r</socket_frame>
-                    <location>-0.015 -0.13 0.03</location>
-                    <orientation>1.45 0 0</orientation>
-                    <radii>0.023 0.1 0.023</radii>
-                </ContactEllipsoid>
+				<ContactEllipsoid name="humerus_r_capsule">
+					<socket_frame>/bodyset/humerus_r</socket_frame>
+					<location>0 -0.14 0</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.03 0.12 0.03</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="ulna_r_capsule">
+					<socket_frame>/bodyset/ulna_r</socket_frame>
+					<location>-0.015 -0.13 0.03</location>
+					<orientation>1.45 0 0</orientation>
+					<radii>0.023 0.1 0.023</radii>
+				</ContactEllipsoid>
 
-                <ContactEllipsoid name="humerus_l_capsule">
-                    <socket_frame>/bodyset/humerus_l</socket_frame>
-                    <location>0 -0.14 0</location>
-                    <orientation>1.5707 0 0</orientation>
-                    <radii>0.03 0.12 0.03</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="ulna_l_capsule">
-                    <socket_frame>/bodyset/ulna_l</socket_frame>
-                    <location>-0.015 -0.13 -0.03</location>
-                    <orientation>1.6914 0 0</orientation>
-                    <radii>0.023 0.1 0.023</radii>
-                </ContactEllipsoid>
+				<ContactEllipsoid name="humerus_l_capsule">
+					<socket_frame>/bodyset/humerus_l</socket_frame>
+					<location>0 -0.14 0</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.03 0.12 0.03</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="ulna_l_capsule">
+					<socket_frame>/bodyset/ulna_l</socket_frame>
+					<location>-0.015 -0.13 -0.03</location>
+					<orientation>1.6914 0 0</orientation>
+					<radii>0.023 0.1 0.023</radii>
+				</ContactEllipsoid>
 
-                <ContactEllipsoid name="hand_r">
-                    <socket_frame>/bodyset/hand_r</socket_frame>
-                    <location>0.01 -0.07 0.0</location>
-                    <orientation>0 0 0.3</orientation>
-                    <radii>0.03 0.07 0.05</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="hand_l">
-                    <socket_frame>/bodyset/hand_l</socket_frame>
-                    <location>0.01 -0.07 0.0</location>
-                    <orientation>0 0 0.3</orientation>
-                    <radii>0.03 0.07 0.05</radii>
-                </ContactEllipsoid>
-            </objects>
-            <groups/>
-        </ContactGeometrySet>
+				<ContactEllipsoid name="hand_r">
+					<socket_frame>/bodyset/hand_r</socket_frame>
+					<location>0.01 -0.07 0.0</location>
+					<orientation>0 0 0.3</orientation>
+					<radii>0.03 0.07 0.05</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="hand_l">
+					<socket_frame>/bodyset/hand_l</socket_frame>
+					<location>0.01 -0.07 0.0</location>
+					<orientation>0 0 0.3</orientation>
+					<radii>0.03 0.07 0.05</radii>
+				</ContactEllipsoid>
+			</objects>
+			<groups/>
+		</ContactGeometrySet>
 	</Model>
 </OpenSimDocument>

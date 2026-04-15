@@ -1,6 +1,6 @@
 pelvis_tx:
   q: 0.0
-  v: 0.0
+  v: 1.0
 pelvis_ty:
   q: 0.94
   v: 0.0
@@ -9,13 +9,13 @@ pelvis_tz:
   v: 0.0
 
 pelvis_quat_w:
-  q: 1.0
+  q: 0.0
   v: 0.0 # ignored (omega is defined by rot_x, rot_y, rot_z)
 pelvis_tilt:
   q: 0.0
   v: 0.0
 pelvis_list:
-  q: 0.0
+  q: 1.0
   v: 0.0
 pelvis_rotation:
   q: 0.0
@@ -58,4 +58,12 @@ knee_angle_l:
   v: 0.0
 ankle_angle_l:
   q: 0.25
+  v: 0.0
+
+
+elbow_flex_r:
+  q: 0.8
+  v: 0.0
+elbow_flex_l:
+  q: 0.8
   v: 0.0

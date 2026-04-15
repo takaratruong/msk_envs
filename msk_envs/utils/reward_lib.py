@@ -4,6 +4,7 @@ from msk_envs.utils.quat import quat_diff_angle, rotate_vec
 
 
 def _get_velocity(body_velocities, body_id: int, linear: bool, idx: int):
+    """ Returns the [idx]-velocity of body [body_id] """
     return body_velocities[:, body_id, idx + 3] if linear else body_velocities[:, body_id, idx]
 
 
@@ -25,7 +26,7 @@ def exp_distance(values: torch.Tensor, targets: torch.Tensor, ranges: torch.Tens
     return torch.exp(-weight * scaled_diff.pow(2))
 
 
-def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: bool = False):
+def joint_penalty(limit_torques: torch.Tensor, squared: bool = False):
     """Joint limit penalty based on sum of absolute limit torques"""
     if squared:
         sq_limit_torque = torch.pow(limit_torques, 2)
@@ -34,22 +35,7 @@ def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: b
         abs_limit_torque = torch.abs(limit_torques)
         limit_torque_sum = torch.sum(abs_limit_torque, dim=1)
 
-    if num_limits == 0:
-        return torch.zeros_like(limit_torque_sum)
-    return limit_torque_sum / num_limits
-
-
-def joint_damping_penalty(ufrc_damper: torch.Tensor, squared: bool = False):
-    """Joint damping penalty based on sum of absolute damping forces"""
-    ufrc_damper_joints = ufrc_damper[:, 6:]
-    nv_joints = ufrc_damper_joints.shape[1]
-    if squared:
-        sq_damping = torch.pow(ufrc_damper_joints, 2)
-        damping_sum = torch.sum(sq_damping, dim=1)
-    else:
-        abs_damping = torch.abs(ufrc_damper_joints)
-        damping_sum = torch.sum(abs_damping, dim=1)
-    return damping_sum / nv_joints
+    return limit_torque_sum
 
 
 def alive_bonus(fallen: torch.Tensor):

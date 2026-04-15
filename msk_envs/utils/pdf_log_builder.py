@@ -347,9 +347,10 @@ def create_pdf_output(
         joint_dof_names = [j.name for j in frame0.joint_moments]
         joint_moments = []
         for frame in frame_data:
-            joint_moments.append([(m.net_moment, m.spring, m.muscle, m.actuator, m.limit, m.damping) for m in frame.joint_moments])
+            joint_moments.append(
+                [(m.spring, m.muscle, m.muscle_passive, m.actuator, m.limit, m.damping) for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
-        sublabels = ["Net", "Spring", "Muscle", "Actuator", "Limit", "Damping"]
+        sublabels = ["Spring", "Muscle", "Muscle Passive", "Actuator", "Limit", "Damping"]
 
         def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
@@ -380,6 +381,41 @@ def create_pdf_output(
         create_joint_moments_plot()
         if interval_plots:
             _create_interval_plots(1.0, times, create_joint_moments_plot)
+
+        # --- BODY FORCES ---
+        # body_names = [b.name for b in frame0.body_forces]
+        # body_forces = []
+        # for frame in frame_data:
+        #     body_forces.append(
+        #         [(b.net_force, b.gravity, b.contact, b.muscle, b.drag) for b in frame.body_forces])
+        # body_forces = np.array(body_forces)
+        # body_forces = body_forces[..., 0] # test
+        # sublabels = ["Net", "Gravity", "Contact", "Muscle", "Drag"]
+        #
+        # def create_body_forces_plot(time_start: float = 0.0, time_end: float = None):
+        #     if time_end is None:
+        #         time_end = times[-1]
+        #     time_mask = (times >= time_start) & (times <= time_end)
+        #     time_selected = times[time_mask]
+        #     frame_ind_selected = frame_ind[time_mask]
+        #     title = f"Body Forces ({time_start:.1f}s to {time_end:.1f}s)"
+        #     lss, lsd = "solid", "dashed"
+        #     create_generic_plot(
+        #         names=body_names,
+        #         times=time_selected,
+        #         frame_ind=frame_ind_selected,
+        #         plot_data=body_forces[time_mask, :],
+        #         fig_title=title,
+        #         y_label="Value (N m)",
+        #         y_fmt=".1f",
+        #         pdf=pdf,
+        #         sublabels=sublabels,
+        #         alphas=[0.5] * (len(sublabels)),
+        #         linestyles=[lss] * (len(sublabels)),
+        #         horizontal_lines=[[0.0]] * len(joint_dof_names),
+        #         omit_zeros=True
+        #     )
+        # create_body_forces_plot()
 
         # --- MUSCLE PLOTS ---
         muscle_names = [m.name for m in frame0.muscles]
@@ -429,7 +465,7 @@ def create_pdf_output(
             pdf,
             sublabels=["Norm Fiber", "Min Fiber", "Max Fiber"],
             alphas=[1.0, 0.5, 0.5],
-            linestyles=["solid",  "dashed", "dashed"],
+            linestyles=["solid", "dashed", "dashed"],
             enforced_y_range=enforced_range)
 
         # Moment arms

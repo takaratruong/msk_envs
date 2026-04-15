@@ -2,7 +2,7 @@ import torch
 
 from msk_envs.utils.global_params import FWD_IDX, UP_IDX, build_axis, SIDE_IDX
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import joint_limit_penalty, actuator_sq_penalty, has_fallen, alive_bonus
+from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, has_fallen, alive_bonus
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -110,7 +110,7 @@ class UpperReachTargetEnv(MSKEnv):
         if reached_target_mask.any():
             self.compute_new_targets(reached_target_mask, new_env=False)
 
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
+        rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
 
         terminated = self._get_terminated()

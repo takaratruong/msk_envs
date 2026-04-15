@@ -4824,9 +4824,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>100</stiffness>
+                    <stiffness>20</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="mtp_angle_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5006,9 +5006,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>100</stiffness>
+                    <stiffness>20</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="mtp_angle_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -20602,7 +20602,6 @@
                     <orientation>0.0 0.0 0.0</orientation>
                     <radius>0.02</radius>
                 </ContactSphere>
-
                 <ContactSphere name="head">
                     <socket_frame>/bodyset/head</socket_frame>
                     <location>0.0 0.0375 0.0</location>
@@ -20662,51 +20661,12 @@
                     <radii>0.08 0.05 0.08</radii>
                 </ContactEllipsoid>
 
-                <ContactEllipsoid name="humerus_r_capsule">
-                    <socket_frame>/bodyset/humerus_r</socket_frame>
-                    <location>0 -0.14 0</location>
-                    <orientation>1.5707 0 0</orientation>
-                    <radii>0.03 0.12 0.03</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="ulna_r_capsule">
-                    <socket_frame>/bodyset/ulna_r</socket_frame>
-                    <location>-0.01 -0.13 0.02</location>
-                    <orientation>1.5 0 0</orientation>
-                    <radii>0.023 0.1 0.023</radii>
-                </ContactEllipsoid>
-
-                <ContactEllipsoid name="humerus_l_capsule">
-                    <socket_frame>/bodyset/humerus_l</socket_frame>
-                    <location>0 -0.14 0</location>
-                    <orientation>1.5707 0 0</orientation>
-                    <radii>0.03 0.12 0.03</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="ulna_l_capsule">
-                    <socket_frame>/bodyset/ulna_l</socket_frame>
-                    <location>-0.01 -0.13 -0.02</location>
-                    <orientation>1.6414 0 0</orientation>
-                    <radii>0.023 0.1 0.023</radii>
-                </ContactEllipsoid>
-
-                <ContactEllipsoid name="hand_r">
-                    <socket_frame>/bodyset/hand_r</socket_frame>
-                    <location>0.01 -0.07 0.0</location>
-                    <orientation>0 0 0.3</orientation>
-                    <radii>0.03 0.07 0.05</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="hand_l">
-                    <socket_frame>/bodyset/hand_l</socket_frame>
-                    <location>0.01 -0.07 0.0</location>
-                    <orientation>0 0 0.3</orientation>
-                    <radii>0.03 0.07 0.05</radii>
-                </ContactEllipsoid>
-
                 <ContactSphere name="talus_r_sphere">
-					<socket_frame>/bodyset/talus_r</socket_frame>
-					<location>-0.03 -0.03 0</location>
-					<orientation>0 1.5707 0</orientation>
-					<radius>0.03</radius>
-				</ContactSphere>
+                    <socket_frame>/bodyset/talus_r</socket_frame>
+                    <location>-0.03 -0.03 0</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.03</radius>
+                </ContactSphere>
                 <ContactEllipsoid name="calcn_r_capsule1">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
                     <location>0.1 0.01 0.035</location>
@@ -20836,8 +20796,46 @@
                     <orientation>-1.1 -1.3 -1.1</orientation>
                     <radii>0.01 0.02 0.01</radii>
                 </ContactEllipsoid>
-            </objects>
 
+                <ContactEllipsoid name="humerus_r_capsule">
+                    <socket_frame>/bodyset/humerus_r</socket_frame>
+                    <location>0 -0.14 0</location>
+                    <orientation>1.5707 0 0</orientation>
+                    <radii>0.03 0.12 0.03</radii>
+                </ContactEllipsoid>
+                <ContactEllipsoid name="ulna_r_capsule">
+                    <socket_frame>/bodyset/ulna_r</socket_frame>
+                    <location>-0.015 -0.13 0.03</location>
+                    <orientation>1.45 0 0</orientation>
+                    <radii>0.023 0.1 0.023</radii>
+                </ContactEllipsoid>
+
+                <ContactEllipsoid name="humerus_l_capsule">
+                    <socket_frame>/bodyset/humerus_l</socket_frame>
+                    <location>0 -0.14 0</location>
+                    <orientation>1.5707 0 0</orientation>
+                    <radii>0.03 0.12 0.03</radii>
+                </ContactEllipsoid>
+                <ContactEllipsoid name="ulna_l_capsule">
+                    <socket_frame>/bodyset/ulna_l</socket_frame>
+                    <location>-0.015 -0.13 -0.03</location>
+                    <orientation>1.6914 0 0</orientation>
+                    <radii>0.023 0.1 0.023</radii>
+                </ContactEllipsoid>
+
+                <ContactEllipsoid name="hand_r">
+                    <socket_frame>/bodyset/hand_r</socket_frame>
+                    <location>0.01 -0.07 0.0</location>
+                    <orientation>0 0 0.3</orientation>
+                    <radii>0.03 0.07 0.05</radii>
+                </ContactEllipsoid>
+                <ContactEllipsoid name="hand_l">
+                    <socket_frame>/bodyset/hand_l</socket_frame>
+                    <location>0.01 -0.07 0.0</location>
+                    <orientation>0 0 0.3</orientation>
+                    <radii>0.03 0.07 0.05</radii>
+                </ContactEllipsoid>
+            </objects>
             <groups/>
         </ContactGeometrySet>
     </Model>

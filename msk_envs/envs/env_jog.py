@@ -4,7 +4,7 @@ from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, \
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, \
     actuator_sq_penalty, metabolic_penalty, fatigue_penalty, acceleration_sq_penalty
 
 
@@ -74,7 +74,7 @@ class JoggingEnv(MSKEnv):
         rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles, squared=True)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
         rew_acc = acceleration_sq_penalty(joint_accelerations)
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=True)
+        rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         # Scale energy terms by energy factor
         rew_metabolic = rew_metabolic * self.energy_factor

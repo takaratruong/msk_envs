@@ -2,7 +2,6 @@
 from msk_envs.envs.env_base import MSKEnv
 from msk_envs.envs.env_reach_target import ReachTargetEnv
 from msk_envs.envs.env_upper_reach import UpperReachTargetEnv
-from msk_envs.envs.env_waddle import WaddleEnv
 from msk_envs.utils.frame_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame, add_target
 from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
@@ -34,7 +33,7 @@ class LoggedSim:
         assert max(self.worlds_to_save) < n_worlds
 
         # Build storage for things to track
-        max_env_steps = int(envs.max_episode_duration / envs.delta_t)
+        max_env_steps = int(envs.max_episode_duration / envs.delta_t) + 1
         self.finished = torch.zeros((n_worlds,), dtype=torch.bool, device=device)
         self.rewards = torch.zeros((n_worlds_to_save, max_env_steps), dtype=torch.float32, device=device)
         self.episode_length = torch.zeros((n_worlds,), dtype=torch.int32, device=device)
@@ -239,8 +238,11 @@ class LoggedSim:
         self.finished[:] = 0
         self.rewards[:] = 0
         self.episode_length[:] = 0
+        self.reward_data = [[] for _ in range(self.n_worlds_to_save)]
         self.frame_data = [[] for _ in range(self.n_worlds_to_save)]
         obs = self.envs.reset()
+
+        self.add_to_log()
         return obs
 
     def get_rewards_mean(self):

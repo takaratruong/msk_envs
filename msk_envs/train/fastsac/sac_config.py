@@ -18,7 +18,7 @@ class SACConfig:
     alpha_learning_rate: float = 3e-4
     """the learning rate for the alpha"""
 
-    buffer_size: int = 256 * 3
+    buffer_size: int = 256 * 4
     """the replay memory buffer size per environment"""
 
     num_steps: int = 1

@@ -1,7 +1,7 @@
 import torch
 
 from msk_envs.utils.global_params import FWD_IDX, UP_IDX, build_axis
-from msk_envs.utils.reward_lib import joint_limit_penalty, actuator_sq_penalty, has_fallen, alive_bonus
+from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, has_fallen, alive_bonus
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 

@@ -1,6 +1,6 @@
 import torch
 
-from msk_envs.utils.reward_lib import joint_limit_penalty, \
+from msk_envs.utils.reward_lib import joint_penalty, \
     actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen, alive_bonus, derivative_sq_penalty
 from .env_base import MSKEnv
 from .env_config import EnvConfig
@@ -71,7 +71,7 @@ class PerturbEnv(MSKEnv):
             force_directions = force_directions / torch.norm(force_directions, dim=1, keepdim=True)
             force_dir += force_directions * force_magnitudes.unsqueeze(1)
             # external_forces = 20 * force_dir
-            # self.body_user_forces[worlds_start, self.head_id, 3:6] = external_forces
+            # self.body_user_forces[worlds_start, self.root_id, 3:6] = external_forces
 
         # Make sure we reset forces for worlds not applying perturbations
         no_perturb_mask = ~self.perturbation_enabled
@@ -103,19 +103,28 @@ class PerturbEnv(MSKEnv):
 
     def _compute_raw_reward_dict(self):
         rew_alive = alive_bonus(self._get_terminated())
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
-        rew_actuator_dot = derivative_sq_penalty(self.actuator_activations_dot, self.num_actuators)
-        rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
-        rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
+        # rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        # rew_actuator_dot = derivative_sq_penalty(self.actuator_activations_dot, self.num_actuators)
+        # rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
+        # rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
+
+        # Joint passive penalty
+        squared_penalties = True
+        rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
+        rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
+        rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
+        rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
 
         self.reward_dict = {
             "rew_alive": rew_alive,
+            "rew_spring": rew_spring.detach(),
+            "rew_damper": rew_damper.detach(),
             "rew_limit": rew_limit.detach(),
-            "rew_actuator": rew_actuator.detach(),
-            "rew_actuator_dot": rew_actuator_dot.detach(),
-            "rew_fatigue": rew_fatigue.detach(),
-            "rew_metabolic": rew_metabolic.detach(),
+            "rew_muscle_passive": rew_muscle_passive.detach(),
+            # "rew_actuator": rew_actuator.detach(),
+            # "rew_actuator_dot": rew_actuator_dot.detach(),
+            # "rew_fatigue": rew_fatigue.detach(),
+            # "rew_metabolic": rew_metabolic.detach(),
         }
 
     def _get_terminated(self):

@@ -4,9 +4,10 @@ from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, joint_damping_penalty, \
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, \
     actuator_sq_penalty, head_acc_penalty, fatigue_penalty, mid_lane_reward, has_fallen, self_collision_penalty
 from ..utils.scene_settings import SceneSettings
+from ..utils.quat import quat_mul, quat_conjugate
 
 
 class LanesEnv(MSKEnv):
@@ -51,7 +52,19 @@ class LanesEnv(MSKEnv):
          3. Actuator activations
          4. Joint positions (q)
          5. Joint velocities (qv)
+         6. Relative body positions and rotations (wrst root), ignore ground
         """
+        # Grab bodies that aren't root or ground
+        bodies_mask = torch.ones(self.num_bodies, dtype=torch.bool, device=self.device)
+        bodies_mask[[self.ground_id, self.root_id]] = False
+        body_positions = self.body_positions[:, bodies_mask, :]
+        body_rotations = self.body_rotations[:, bodies_mask, :]
+
+        # Relative to root
+        relative_body_positions = body_positions - self.root_pos.unsqueeze(1)
+        root_rotation_inv = quat_conjugate(self.root_rot)
+        relative_body_rotations = quat_mul(root_rotation_inv.unsqueeze(1), body_rotations)
+
         time_curr = self.time.view(self.num_worlds, 1) / self.max_episode_duration
         obs = torch.cat([
             time_curr,
@@ -60,27 +73,34 @@ class LanesEnv(MSKEnv):
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
-            self.body_positions.reshape(self.num_worlds, -1),
-            self.body_rotations.reshape(self.num_worlds, -1),
+            relative_body_positions.reshape(self.num_worlds, -1),
+            relative_body_rotations.reshape(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
     def _compute_raw_reward_dict(self):
         rew_vel = velocity_reward(self.body_velocities, self.root_id, FWD_IDX, linear=True)
         rew_mid_lane = mid_lane_reward(self.root_pos)
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=True)
-        rew_damping = joint_damping_penalty(self.ufrc_damper, squared=False)
+
+        # Joint passive penalty
+        squared_penalties = False
+        rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
+        rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
+        rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
+        rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
+
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
-        # rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
-        rew_self_collision = self_collision_penalty(self.collider_self_forces, 100.0)
+        rew_self_collision = self_collision_penalty(self.body_self_collision_forces, 500.0)
         rew_head_acc_ang, rew_head_acc_lin = head_acc_penalty(self.body_accelerations[:, self.head_id])
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
             "rew_mid_lane": rew_mid_lane.detach(),
+            "rew_spring": rew_spring.detach(),
+            "rew_damper": rew_damper.detach(),
             "rew_limit": rew_limit.detach(),
-            "rew_damping": rew_damping.detach(),
+            "rew_muscle_passive": rew_muscle_passive.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_fatigue": rew_fatigue.detach(),
             "rew_self_collision": rew_self_collision.detach(),
@@ -110,8 +130,9 @@ class LanesEnv(MSKEnv):
 
         # Pelvis or head no longer facing forward (within N degrees)
         pelvis_facing_direction = self._get_facing_direction(self.root_id)
-        head_facing_direction = self._get_facing_direction(self.head_id)
-        not_facing_direction = ~(pelvis_facing_direction & head_facing_direction)
+        # head_facing_direction = self._get_facing_direction(self.head_id)
+        # not_facing_direction = ~(pelvis_facing_direction & head_facing_direction)
+        not_facing_direction = ~pelvis_facing_direction
 
         terminated = (fallen | toes_out | not_facing_direction).float()
         return terminated.detach()

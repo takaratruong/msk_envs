@@ -20,6 +20,7 @@ class MSKEnv:
         """ Modify model parameters here. """
         # Muscles activation and fiber dynamic
         msk_warp.set_activation_type(self.m, env_config.muscle_activation_dynamics)
+        msk_warp.set_contraction_type(self.m, env_config.muscle_contraction_dynamics)
         muscle_metadata = msk_warp.muscle_metadata(self.m)
         for mm in muscle_metadata:
             mm.max_isometric_force *= env_config.muscle_multiplier
@@ -30,16 +31,6 @@ class MSKEnv:
             mm.min_activation = env_config.muscle_min_activation
             mm.max_activation = env_config.muscle_max_activation
             mm.v_max = env_config.muscle_v_max
-        # Muscle metabolic properties
-        # if env_config.use_specified_metabolic_params:
-        #     metabolic_params_path = os.path.join(self.curr_path, env_config.metabolic_params_path)
-        #     metabolic_params = parse_muscle_metabolic_params(metabolic_params_path, self.muscle_id_lookup)
-        #     for params in metabolic_params:
-        #         muscle_id = params.muscle_id
-        #         mm = muscle_metadata[muscle_id]
-        #         mm.specific_tension = params.specific_tension
-        #         mm.slow_twitch_ratio = params.slow_twitch_ratio
-        #         mm.density = params.density
 
         # Collider properties
         if env_config.use_specified_contact_params:
@@ -64,6 +55,8 @@ class MSKEnv:
         # Armature
         dof_start = 6 if self.root_free else 0
         msk_warp.armature(self.m)[dof_start:] = env_config.armature
+
+        msk_warp.set_implicit_damping(self.m, env_config.use_implicit_damping)
 
         # Integrator type
         msk_warp.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
@@ -111,10 +104,12 @@ class MSKEnv:
             device: torch.device,
             requires_visuals: bool,
             live_render: bool,
-            cuda_graph: bool
+            cuda_graph: bool,
+            debug: bool = False
     ):
         self.num_worlds = num_envs
         self.device = device
+        self.debug = debug
 
         # Load model
         self.curr_path = os.path.abspath(os.path.dirname(__file__))
@@ -166,9 +161,9 @@ class MSKEnv:
         self.actuator_activations = msk_warp.actuator_activations(self.d)
         self.actuator_activations_dot = msk_warp.actuator_activations_dot(self.d)
         self.actuator_excitations = msk_warp.actuator_excitations(self.d)
-        # [num_envs, num_bodies, 7]
+        # [num_envs, num_bodies, 7], ignore ground
         self.body_transforms = msk_warp.body_transforms(self.d)
-        # [num_envs, num_bodies, 3]
+        # [num_envs, num_bodies, 3], ignore ground
         self.body_positions = msk_warp.body_com_positions(self.d)
         # [num_envs, num_bodies, 4] (w, x, y, z)
         self.body_rotations = get_rotation_from_transform(self.body_transforms)
@@ -182,16 +177,17 @@ class MSKEnv:
         # [num_envs, num_dofs]
         self.joint_velocities = msk_warp.joint_velocities(self.d)
         # [num_envs, num_dofs]
+        self.ufrc_spring = msk_warp.ufrc_spring(self.d)
         self.ufrc_damper = msk_warp.ufrc_damper(self.d)
+        self.ufrc_limit = msk_warp.ufrc_limit(self.d)
+        self.ufrc_muscle_passive = msk_warp.ufrc_muscle_passive(self.d)
         # [num_envs, num_colliders]
         self.collider_forces = msk_warp.collider_forces(self.d)
-        self.collider_self_forces = msk_warp.collider_self_forces(self.d)
+        # self.collider_self_forces = msk_warp.collider_self_forces(self.d)
+        self.body_self_collision_forces = msk_warp.body_self_collisions(self.d)
 
         # [num_envs, 3]
         self.grf = msk_warp.grf(self.d)
-        # [num_envs, num_joint_limits]
-        self.limit_torques = msk_warp.ufrc_limit(self.d)
-        self.num_limits = msk_warp.get_num_limits(self.m)
 
         # [num_envs, num_visuals, 3]
         self.visual_transforms = msk_warp.get_visual_transforms(self.d)
@@ -277,6 +273,7 @@ class MSKEnv:
         self._setup_cuda_graphs()
 
         # Pre-compute useful body IDs and offsets
+        self.ground_id = self.lookup_body_id("ground")
         self.root_id = self.lookup_body_id("pelvis")
         self.head_id = self.lookup_body_id("head")
         head_offset = torch.zeros(3, device=self.device)
@@ -287,6 +284,7 @@ class MSKEnv:
             head_offset = torch.tensor(build_axis(axis=UP_IDX, scale=0.215), device=self.device)
 
         self.root_pos = self.body_positions[:, self.root_id]
+        self.root_rot = self.body_rotations[:, self.root_id]
         self.head_pos = self.body_positions[:, self.head_id]
         self.head_rot = self.body_rotations[:, self.head_id]
         self.head_offset = head_offset.unsqueeze(0).repeat(num_envs, 1)
@@ -340,6 +338,13 @@ class MSKEnv:
 
     def get_time(self) -> torch.Tensor:
         return self.time.detach().clone()
+
+    def get_joint_passive_torques(self, include_passive_muscle: bool = True) -> torch.Tensor:
+        """ Returns the net torques from the passive elements of each joint """
+        passive_joint_torques = torch.abs(self.ufrc_spring) + torch.abs(self.ufrc_damper) + torch.abs(self.ufrc_limit)
+        if include_passive_muscle:
+            passive_joint_torques += torch.abs(self.ufrc_muscle_passive)
+        return passive_joint_torques
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         """ Hook for additional reset behavior in subclasses. Occurs before sim reset """
@@ -452,7 +457,8 @@ class MSKEnv:
     def pre_step(self, actions) -> None:
         self._pre_step()
         self._set_actions(actions)
-        assert not torch.isnan(actions).any(), "Actions contain NaN!"
+        if self.debug:
+            assert not torch.isnan(actions).any(), "Actions contain NaN!"
         return
 
     def launch_step(self):
@@ -492,8 +498,9 @@ class MSKEnv:
             "scaled_rewards": self.get_scaled_reward_dict(),
         }
 
-        assert not torch.isnan(obs).any(), "Observations contain NaN!"
-        assert not torch.isnan(rew).any(), "Rewards contain NaN!"
+        if self.debug:
+            assert not torch.isnan(obs).any(), "Observations contain NaN!"
+            assert not torch.isnan(rew).any(), "Rewards contain NaN!"
 
         if self.render and hasattr(self.renderer, 'meshes') and len(
                 self.renderer.meshes) > 0:

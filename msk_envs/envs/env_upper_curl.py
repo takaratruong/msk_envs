@@ -2,7 +2,7 @@ import torch
 
 from msk_envs.utils.global_params import UP_IDX, build_axis
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import joint_limit_penalty, actuator_sq_penalty, alive_bonus, derivative_sq_penalty, \
+from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, alive_bonus, derivative_sq_penalty, \
     fatigue_penalty, exp_distance
 from .env_base import MSKEnv
 from .env_config import EnvConfig
@@ -32,6 +32,10 @@ class UpperCurlEnv(MSKEnv):
         self.thorax_id = self.lookup_body_id("thorax")
 
         dof_interest = "elbow_flex_r"
+        # dof_interest = "shoulder_flexion_r"
+        # dof_interest = "shoulder_rotation_r"
+        # dof_interest = "scapula_elevation_r"
+        # dof_interest = "thorax_rotation"
         self.dof_interest_id = self.dof_id_lookup[dof_interest]
         self.dof_interest_low, self.dof_interest_high = self.limit_id_lookup[dof_interest]
 
@@ -86,7 +90,8 @@ class UpperCurlEnv(MSKEnv):
 
     def _dist_to_targets(self, dof_value) -> torch.Tensor:
         targets = self._get_targets()
-        dist_to_target = torch.abs(dof_value - targets)
+        dof_interest_range = self.dof_interest_high - self.dof_interest_low
+        dist_to_target = torch.abs(dof_value - targets) / dof_interest_range
         return dist_to_target
 
     def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
@@ -120,8 +125,14 @@ class UpperCurlEnv(MSKEnv):
         targets_starting[:, self.dof_interest_id] = self.joint_positions[:, self.dof_interest_id]
         rew_starting = exp_distance(self.joint_positions, targets_starting, self.joint_ranges, weight=100.0).mean(dim=1)
 
-        # Standard
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
+        # Joint passive penalty
+        squared_penalties = False
+        rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
+        rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
+        rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
+        rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
+
+        # Actuator penalty, if any
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_actuator_dot = derivative_sq_penalty(self.actuator_activations_dot, self.num_actuators)
 
@@ -130,7 +141,10 @@ class UpperCurlEnv(MSKEnv):
 
         self.reward_dict = {
             "rew_target": rew_target.detach(),
+            "rew_spring": rew_spring.detach(),
+            "rew_damper": rew_damper.detach(),
             "rew_limit": rew_limit.detach(),
+            "rew_muscle_passive": rew_muscle_passive.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_actuator_dot": rew_actuator_dot.detach(),
             "rew_starting": rew_starting.detach(),

@@ -11,22 +11,20 @@ def rotate_vec(rot: torch.Tensor, v: torch.Tensor):
     return v + 2.0 * (pure_x_v * scalar + pure_x_pure_x_v)
 
 
-# fixme later
 def quat_mul(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
-    w1, x1, y1, z1 = q1.unbind(-1)
-    w2, x2, y2, z2 = q2.unbind(-1)
+    x1, y1, z1, w1 = q1.unbind(dim=-1)
+    x2, y2, z2, w2 = q2.unbind(dim=-1)
 
-    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
     x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
     y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
     z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
-    return torch.stack((w, x, y, z), dim=-1)
+    w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+
+    return torch.stack((x, y, z, w), dim=-1)
 
 
 def quat_conjugate(q: torch.Tensor) -> torch.Tensor:
-    q_conj = q.clone()
-    q_conj[..., 1:] = -q_conj[..., 1:]
-    return q_conj
+    return torch.cat([-q[..., :3], q[..., 3:]], dim=-1)
 
 
 def quat_normalize(q: torch.Tensor) -> torch.Tensor:

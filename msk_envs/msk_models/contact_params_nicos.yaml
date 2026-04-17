@@ -62,10 +62,10 @@ right_foot_7:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 1
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
 
 left_foot_1:
   stiffness: 1602213.464769315
@@ -119,10 +119,10 @@ left_foot_7:
   stiffness: 1602213.464769315
   dissipation: 0.0725
   priority: 1
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
+  static_friction: 0.95
+  dynamic_friction: 0.3
+  viscous_friction: 0.3
+  transition_velocity: 0.001
 
 calcn_r_sphere:
   stiffness: 5e6

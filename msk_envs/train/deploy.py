@@ -37,7 +37,7 @@ def main():
 
     actions = envs.get_blank_actions()
     #
-    policy = load_policy("/home/marth/Documents/msk_envs/models/athlete10_backpedal_2026-04-14_17-07/athlete10_backpedal_2026-04-14_17-07_14000.pt")
+    policy = load_policy("/home/marth/Documents/msk_envs/models/athlete12_lower_sprint_no_head_ext_obl_fix_2026-04-17_12-23/athlete12_lower_sprint_no_head_ext_obl_fix_2026-04-17_12-23_8000.pt")
     policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,

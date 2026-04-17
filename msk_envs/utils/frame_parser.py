@@ -73,20 +73,14 @@ def parse_muscle_data(
     # # sort the muscles based on fiber_passive_force_length_multiplier
     # import numpy as np
     # nm = msk_warp.get_num_muscles(m)
+    # # Muscle names
     # muscle_names = [muscle_idx_to_name[i] for i in range(nm)]
+    # # Passive multiplier
     # passive_flm = [float(muscle_length_info["fiber_passive_force_length_multiplier"][world_id][i].item()) for i in
     #                range(nm)]
-    #
-    # muscle_names = np.array(muscle_names)
-    # passive_flm = np.array(passive_flm)
-    #
-    # ind_sort = np.argsort(passive_flm)[::-1]
-    # passive_flm = passive_flm[ind_sort]
-    # muscle_names = muscle_names[ind_sort]
-    # print(muscle_names)
-    # print(passive_flm)
-    #
+    # # Muscle path length
     # muscle_lengths = [float(muscle_path_lengths[world_id][i].item()) for i in range(nm)]
+    # # "Optimal/Default" length
     # optimal_fl = [float(muscle_metadata["optimal_fiber_length"][i]) for i in range(nm)]
     # tsl = [float(muscle_metadata["tendon_slack_length"][i]) for i in range(nm)]
     # optimal_pennation = [float(muscle_metadata["optimal_pennation_angle"][i]) for i in range(nm)]
@@ -94,10 +88,21 @@ def parse_muscle_data(
     # for i in range(nm):
     #     default_length = optimal_fl[i] * np.cos(optimal_pennation[i]) + tsl[i]
     #     default_lengths.append(default_length)
-    # default_lengths = np.array(default_lengths)[ind_sort]
-    # muscle_lengths = np.array(muscle_lengths)[ind_sort]
     #
-    # print(muscle_lengths / default_lengths)
+    # muscle_names = np.array(muscle_names)
+    # passive_flm = np.array(passive_flm)
+    # default_lengths = np.array(default_lengths)
+    # muscle_lengths = np.array(muscle_lengths)
+    # multiplier = muscle_lengths / default_lengths
+    #
+    # ind_sort = np.argsort(multiplier)[::-1]
+    # passive_flm = passive_flm[ind_sort]
+    # muscle_names = muscle_names[ind_sort]
+    # default_lengths = default_lengths[ind_sort]
+    # muscle_lengths = muscle_lengths[ind_sort]
+    #
+    # for i in range(len(ind_sort)):
+    #     print(f"{muscle_names[i]}. multiplier: {multiplier[i]}")
     #
     # quit()
 

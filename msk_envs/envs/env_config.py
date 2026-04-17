@@ -74,6 +74,8 @@ class EnvConfig:
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     """ Starting pose file path (YAML) """
+    target_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    """ Target pose file path for reach pose env (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
     q_noise: float = 0.0
@@ -134,8 +136,8 @@ class EnvConfig:
 @dataclass
 class EnvConfigGeneric(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athlete9.osim"
-    muscle_function_path: str = "../msk_models/athlete9paths.xml"
+    model_path: str = "../msk_models/athlete12.osim"
+    muscle_function_path: str = "../msk_models/athlete12paths_minimal.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     armature: float = 1e-3

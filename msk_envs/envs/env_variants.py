@@ -21,3 +21,4 @@ class DerivedEnv(Enum):
     UPPER_REACH = 17
     UPPER_CURL = 18
     DONT_FALL_ONE_LEG = 19
+    REACH_POSE = 20

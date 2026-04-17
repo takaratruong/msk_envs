@@ -100,6 +100,7 @@ def parse_muscle_data(
     # muscle_names = muscle_names[ind_sort]
     # default_lengths = default_lengths[ind_sort]
     # muscle_lengths = muscle_lengths[ind_sort]
+    # multiplier = multiplier[ind_sort]
     #
     # for i in range(len(ind_sort)):
     #     print(f"{muscle_names[i]}. multiplier: {multiplier[i]}")

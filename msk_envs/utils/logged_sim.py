@@ -1,5 +1,6 @@
 """ Provides a wrapper around an MSKEnv to log simulation data """
 from msk_envs.envs.env_base import MSKEnv
+from msk_envs.envs.env_reach_pose import ReachPoseEnv
 from msk_envs.envs.env_reach_target import ReachTargetEnv
 from msk_envs.envs.env_upper_reach import UpperReachTargetEnv
 from msk_envs.utils.frame_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame, add_target
@@ -144,6 +145,16 @@ class LoggedSim:
                 radius = float(self.envs.target_tolerance)
                 add_target(frame, target_pos, radius, active=True)
                 add_target(frame, next_target_pos, radius, active=False)
+
+            # if ReachPoseEnv, add target pose
+            if issubclass(type(self.envs), ReachPoseEnv):
+                ref_visuals_pos, ref_visuals_rot = self.envs.get_reference_visuals()
+                add_reference_visuals(
+                    frame,
+                    ref_visuals_pos,
+                    ref_visuals_rot,
+                )
+                pass
 
             add_ext_forces_to_frame(
                 frame,

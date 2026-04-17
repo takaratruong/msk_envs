@@ -567,6 +567,22 @@ class NoSpineReachTarget(BaseArgs):
     lambda_alive: float = 3e-2
 
 
+@dataclass
+class ReachPoseConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+        env_variant=DerivedEnv.REACH_POSE,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=2.5,
+        muscle_multiplier=1.0,
+        starting_pose_path="../msk_models/starting_pose_stand.yaml",
+        target_pose_path="../msk_models/target_pose_sit.yaml",
+        default_activation=0.01,
+    ))
+
+    lambda_target: float = 0.0
+    lambda_target_global: float = 1e-3
+
+
 Config = Union[
     # Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
@@ -590,6 +606,7 @@ Config = Union[
     Annotated[UpperReachTarget, tyro.conf.subcommand(name="upperreach")],
     Annotated[UpperCurl, tyro.conf.subcommand(name="uppercurl")],
     Annotated[NoSpineReachTarget, tyro.conf.subcommand(name="nospinereach")],
+    Annotated[ReachPoseConfig, tyro.conf.subcommand(name="reachpose")],
 ]
 
 

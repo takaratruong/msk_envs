@@ -65,13 +65,20 @@ class LanesEnv(MSKEnv):
         root_rotation_inv = quat_conjugate(self.root_rot)
         relative_body_rotations = quat_mul(root_rotation_inv.unsqueeze(1), body_rotations)
 
+        # Exclude the x position
+        root_x_qpos_id = self.qpos_id_lookup["pelvis_tx"]
+        joint_positions_without_x = torch.cat((
+            self.joint_positions[:, :root_x_qpos_id],
+            self.joint_positions[:, root_x_qpos_id + 1:]),
+            dim=1)
+
         time_curr = self.time.view(self.num_worlds, 1) / self.max_episode_duration
         obs = torch.cat([
             time_curr,
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
-            self.joint_positions,
+            joint_positions_without_x,
             self.joint_velocities,
             relative_body_positions.reshape(self.num_worlds, -1),
             relative_body_rotations.reshape(self.num_worlds, -1),

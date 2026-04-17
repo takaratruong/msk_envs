@@ -25,7 +25,6 @@ class BaseArgs:
     override_wandb_config: bool = False
 
     seed: int = 1
-    cuda: bool = True
     gpu_id: int = 0
 
     td3_config: TD3Config = field(default_factory=TD3Config)

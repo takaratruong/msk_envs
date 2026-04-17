@@ -38,15 +38,14 @@ def train(
         traj_out_folder: str,
         analytics_out_folder: str,
         exp_name: str,
-        cuda: bool,
+        device: torch.device,
 ):
     global save_requested
 
-    amp_enabled = sac_config.amp and cuda and torch.cuda.is_available()
-    amp_device_type = "cuda" if cuda and torch.cuda.is_available() else "cpu"
+    amp_enabled = sac_config.amp
+    amp_device_type = "cuda"
     amp_dtype = torch.bfloat16 if sac_config.amp_dtype == "bf16" else torch.float16
     scaler = GradScaler(enabled=amp_enabled and amp_dtype == torch.float16)
-    device = torch.device("cuda:0" if cuda else "cpu")
 
     writer = TensorboardSummaryWriter(
         log_dir=f"models/{exp_name}",
@@ -55,7 +54,7 @@ def train(
     logging_helper = LoggingHelper(
         writer,
         log_dir=f"models/{exp_name}",
-        device="cuda" if cuda else "cpu",
+        device=device,
         num_envs=sac_config.num_envs,
         num_steps_per_env=sac_config.logging_interval,
         num_learning_iterations=sac_config.num_learning_iterations,

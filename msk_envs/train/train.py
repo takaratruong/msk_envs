@@ -17,13 +17,13 @@ from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
 
 
-def _build_envs(num_envs, num_eval_envs, env_config, cuda, device):
+def _build_envs(num_envs, num_eval_envs, env_config, build_cuda_graph, device):
     envs = EnvFactory.create_env(
         num_envs=num_envs,
         env_config=env_config,
         live_render=False,
         requires_visuals=False,
-        cuda_graph=cuda,
+        cuda_graph=build_cuda_graph,
         device=device,
     )
     eval_envs = EnvFactory.create_env(
@@ -31,7 +31,7 @@ def _build_envs(num_envs, num_eval_envs, env_config, cuda, device):
         env_config=env_config,
         live_render=False,
         requires_visuals=True,
-        cuda_graph=cuda,
+        cuda_graph=build_cuda_graph,
         device=device,
     )
     return envs, eval_envs
@@ -51,9 +51,11 @@ def main():
     env_config = args.env_config
     td3_config = args.td3_config
     sac_config = args.sac_config
-    if args.cuda:
-        assert torch.cuda.is_available(), "CUDA device not available"
-    device = torch.device(f"cuda:{args.gpu_id}" if args.cuda else "cpu")
+
+    assert torch.cuda.is_available(), "CUDA device not available"
+    device_str = f"cuda:{args.gpu_id}"
+    device = torch.device(device_str)
+    wp.set_device(device_str)
 
     if args.use_wandb:
         init_wandb_run(args)
@@ -64,7 +66,7 @@ def main():
             num_envs=td3_config.num_envs,
             num_eval_envs=td3_config.num_eval_envs,
             env_config=env_config,
-            cuda=args.cuda,
+            build_cuda_graph=True,
             device=device,
         )
         fasttd3.train(
@@ -74,14 +76,14 @@ def main():
             traj_out_folder=traj_out_folder,
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,
-            cuda=args.cuda,
+            device=device,
         )
     elif args.algo == "sac":
         envs, eval_envs = _build_envs(
             num_envs=sac_config.num_envs,
             num_eval_envs=sac_config.num_eval_envs,
             env_config=env_config,
-            cuda=args.cuda,
+            build_cuda_graph=True,
             device=device,
         )
         fastsac.train(
@@ -91,7 +93,7 @@ def main():
             traj_out_folder=traj_out_folder,
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,
-            cuda=args.cuda,
+            device=device,
         )
 
 

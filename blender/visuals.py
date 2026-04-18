@@ -4,7 +4,7 @@ import os
 import bpy
 import mathutils
 
-from util import vec_yup_zup
+from util import vec_yup_zup, quat_xyzw_to_wxyz
 from material import create_bone_material
 
 if not hasattr(bpy.ops.wm, 'obj_import') and not hasattr(bpy.ops.import_scene, 'obj'):
@@ -52,7 +52,7 @@ def update_visual(visual, frame_num, dashboard_src):
     scale = visual["scale"]
     # Rotation y-up to z-up
     quat_data = visual["rot"]
-    rotation = mathutils.Quaternion([quat_data[0], quat_data[1], quat_data[2], quat_data[3]])
+    rotation = mathutils.Quaternion(quat_xyzw_to_wxyz(quat_data))
     q_conv = mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(90.0))
     rotation = q_conv @ rotation
 

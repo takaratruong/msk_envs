@@ -137,6 +137,37 @@ class JogConfig(BaseArgs):
 
 @dataclass
 class SprintConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+        env_variant=DerivedEnv.SPRINT,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run.yaml",
+        noise_start=True,
+        q_noise=0.02,
+        qv_noise=0.1,
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 1e-2
+    lambda_mid_lane: float = 3e-2
+
+    lambda_spring: float = -1e-4
+    lambda_damper: float = -3e-4
+    lambda_limit: float = -1e-3
+    lambda_muscle_passive: float = -1e-4
+    # lambda_muscle_passive: float = 0.0
+
+    lambda_actuator: float = -1e-2
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+    lambda_self_collision: float = -1e-2
+    lambda_head_acc_ang: float = 0.0
+    lambda_head_acc_lin: float = 0.0
+
+
+@dataclass
+class SprintLowerConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigLower(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
@@ -579,14 +610,15 @@ class ReachPoseConfig(BaseArgs):
         default_activation=0.01,
     ))
 
-    lambda_target: float = 0.0
-    lambda_target_global: float = 1e-3
+    lambda_target: float = 1e-2
+    lambda_target_global: float = 3e-3
 
 
 Config = Union[
     # Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
     Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
+    Annotated[SprintLowerConfig, tyro.conf.subcommand(name="sprintlower")],
     Annotated[SprintRegressionConfig, tyro.conf.subcommand(name="sprintregression")],
     Annotated[RaceWalkConfig, tyro.conf.subcommand(name="racewalk")],
     Annotated[BackPedalConfig, tyro.conf.subcommand(name="backpedal")],

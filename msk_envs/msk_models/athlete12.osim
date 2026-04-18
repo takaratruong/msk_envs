@@ -23368,7 +23368,7 @@
                     <socket_frame>/bodyset/pelvis</socket_frame>
                     <location>-0.08 0 0</location>
                     <orientation>0 0 0</orientation>
-                    <radii>0.1 0.06 0.1</radii>
+                    <radii>0.1 0.04 0.1</radii>
                 </ContactEllipsoid>
                 <ContactEllipsoid name="lumbar_spine_capsule">
                     <socket_frame>/bodyset/lumbar_spine</socket_frame>

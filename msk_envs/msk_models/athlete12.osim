@@ -23293,7 +23293,7 @@
                 </ContactSphere>
                 <ContactSphere name="right_foot_7">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.015 -0.02 -0.01</location>
+                    <location>0.015 -0.0282 -0.01</location>
                     <orientation>0.0 0.0 0.0</orientation>
                     <radius>0.02</radius>
                 </ContactSphere>
@@ -23335,7 +23335,7 @@
                 </ContactSphere>
                 <ContactSphere name="left_foot_7">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.015 -0.02 0.01</location>
+                    <location>0.015 -0.0282 0.01</location>
                     <orientation>0.0 0.0 0.0</orientation>
                     <radius>0.02</radius>
                 </ContactSphere>
@@ -23395,23 +23395,11 @@
                     <radius>0.11</radius>
                 </ContactSphere>
 
-                <ContactSphere name="calcn_r_sphere">
-                    <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.015 0.015 0</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.0205</radius>
-                </ContactSphere>
                 <ContactSphere name="talus_r_sphere">
                     <socket_frame>/bodyset/talus_r</socket_frame>
                     <location>0.0 0.0 0.01</location>
                     <orientation>0.0 0.0 0.0</orientation>
                     <radius>0.035</radius>
-                </ContactSphere>
-                <ContactSphere name="calcn_l_sphere">
-                    <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.015 0.015 0</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.0205</radius>
                 </ContactSphere>
                 <ContactSphere name="talus_l_sphere">
                     <socket_frame>/bodyset/talus_l</socket_frame>

@@ -512,6 +512,7 @@ class MSKEnv:
         """ External step call """
         self.pre_step(actions)
         self.launch_step()
+        self.update_metrics()
         return self.rl_step()
 
     def reset(self):
@@ -533,3 +534,11 @@ class MSKEnv:
     def scene_settings(self) -> SceneSettings:
         """ Override to provide custom scene settings for viewer/renderer """
         return SceneSettings()
+
+    def additional_metrics(self) -> dict:
+        """ Additional metrics to log during training """
+        return {}
+
+    def update_metrics(self) -> None:
+        """ Hook to update metrics """
+        return

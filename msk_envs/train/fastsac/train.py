@@ -484,6 +484,7 @@ def train(
                 # Use logging helper
                 extra_log_dicts = {
                     "raw_rewards": raw_rewards_dict,
+                    "additional_metrics": envs.additional_metrics(),
                 }
                 logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts=extra_log_dicts)
 

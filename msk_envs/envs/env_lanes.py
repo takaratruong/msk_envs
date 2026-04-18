@@ -42,6 +42,8 @@ class LanesEnv(MSKEnv):
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
         self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
+
+        self.max_distance_reached = 0.0
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -78,7 +80,8 @@ class LanesEnv(MSKEnv):
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
-            joint_positions_without_x,
+            # joint_positions_without_x,
+            self.joint_positions,
             self.joint_velocities,
             relative_body_positions.reshape(self.num_worlds, -1),
             relative_body_rotations.reshape(self.num_worlds, -1),
@@ -151,3 +154,14 @@ class LanesEnv(MSKEnv):
             meter_markers=True,
             axes=False
         )
+
+    def update_metrics(self) -> None:
+        # Update max distance reached
+        max_forward = self.root_pos[:, FWD_IDX].max()
+        self.max_distance_reached = max(max_forward, self.max_distance_reached)
+        return
+
+    def additional_metrics(self) -> dict:
+        return {
+            "max_distance_reached": self.max_distance_reached,
+        }

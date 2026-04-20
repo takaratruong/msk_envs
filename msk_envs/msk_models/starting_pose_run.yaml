@@ -71,3 +71,23 @@ subtalar_angle_l:
 mtp_angle_l:
   q: 0.0
   v: 0.0
+
+shoulder_flexion_r:
+  q: -0.8
+  v: 0.0
+shoulder_abduction_r:
+  q: 0.2
+  v: 0.0
+elbow_flex_r:
+  q: 2.0
+  v: 0.0
+
+shoulder_flexion_l:
+  q: 0.8
+  v: 0.0
+shoulder_abduction_l:
+  q: 0.2
+  v: 0.0
+elbow_flex_l:
+  q: 2.0
+  v: 0.0

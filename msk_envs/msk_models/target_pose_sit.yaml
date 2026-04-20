@@ -19,17 +19,24 @@ pelvis_rotation:
   v: 0.0
 
 hip_flexion_r:
-  q: 1.5707
+  q: 1.95
   v: 0.0
 hip_flexion_l:
-  q: 1.5707
+  q: 1.95
+  v: 0.0
+
+knee_angle_r:
+  q: 0.8
+  v: 0.0
+knee_angle_l:
+  q: 0.8
   v: 0.0
 
 shoulder_flexion_r:
-  q: 0.5
+  q: 0.3
   v: 0.0
 shoulder_flexion_l:
-  q: 0.5
+  q: 0.3
   v: 0.0
 
 shoulder_abduction_r:

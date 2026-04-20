@@ -379,7 +379,7 @@ class MSKEnv:
             self.actuator_activations[reset_mask, :] = 0.5
 
         # Run forward kinematics to ensure contact with ground
-        if self.enforce_ground_contact and self.root_free:
+        if self.enforce_ground_contact and self.root_free and self.collider_positions.size(1) > 1:
             self.fk()
             collider_heights = self.collider_positions[:, 1:, UP_IDX]
             lowest_collider_height = collider_heights.min(dim=1).values

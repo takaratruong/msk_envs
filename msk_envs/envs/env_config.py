@@ -78,7 +78,7 @@ class EnvConfig:
     """ Target pose file path for reach pose env (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
-    q_noise: float = 0.05
+    q_noise: float = 0.03
     """ std of starting joint position noise"""
     qv_noise: float = 0.1
     """ std of starting joint velocity noise"""

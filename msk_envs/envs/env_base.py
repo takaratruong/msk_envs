@@ -371,7 +371,6 @@ class MSKEnv:
     def _reset_sim(self):
         # Reset time, starting pose, muscle and actuator activations
         reset_mask = self.reset_tensor.squeeze(-1).bool()
-        # Reset time, pose, muscle/actuator state
         if reset_mask.any():
             self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]

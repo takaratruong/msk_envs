@@ -78,12 +78,16 @@ class EnvConfig:
     """ Target pose file path for reach pose env (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
-    q_noise: float = 0.0
+    q_noise: float = 0.1
     """ std of starting joint position noise"""
-    qv_noise: float = 0.0
+    qv_noise: float = 0.1
     """ std of starting joint velocity noise"""
+    noise_root: bool = True
+    """ Whether to add noise to root position/rotation """
     swap_lr: bool = True
     """ Whether to swap left/right sides when adding noise to starting state """
+    enforce_ground_contact: bool = True
+    """ Whether to enforce contact with ground at start (for free body only) """
     motion_name: str = "../motions/pred_sprint_two_step.mot"
     """ motion file name for IMITATE environments (or variants) """
     use_prescribed_starting_activations: bool = False

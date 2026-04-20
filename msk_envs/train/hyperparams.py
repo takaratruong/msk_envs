@@ -144,8 +144,6 @@ class SprintConfig(BaseArgs):
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_run.yaml",
         noise_start=True,
-        q_noise=0.02,
-        qv_noise=0.1,
     ))
 
     """Sprint environment specific reward scales"""
@@ -519,6 +517,7 @@ class RandomTargetConfig(BaseArgs):
     ))
 
     lambda_target_closer: float = 1.0
+    lambda_target_facing: float = 1e-2
 
     lambda_spring: float = -1e-4
     lambda_damper: float = -3e-4

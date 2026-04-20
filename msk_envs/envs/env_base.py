@@ -75,6 +75,11 @@ class MSKEnv:
                 msk_warp.step(self.m, self.d)
             self.step_graph = capture.graph
 
+            # FK graph: forward kinematics (positions only)
+            with wp.ScopedCapture() as capture:
+                msk_warp.fk(self.m, self.d)
+            self.fk_graph = capture.graph
+
             # Reset graph: call after resetting any the worlds
             with wp.ScopedCapture() as capture:
                 msk_warp.reset(self.m, self.d)
@@ -183,6 +188,8 @@ class MSKEnv:
         self.ufrc_muscle_passive = msk_warp.ufrc_muscle_passive(self.d)
         # [num_envs, num_colliders]
         self.collider_forces = msk_warp.collider_forces(self.d)
+        # [num_envs, num_colliders, 3]
+        self.collider_positions = get_position_from_transform(msk_warp.get_collider_transforms(self.d))
         # self.collider_self_forces = msk_warp.collider_self_forces(self.d)
         self.body_self_collision_forces = msk_warp.body_self_collisions(self.d)
 
@@ -227,6 +234,8 @@ class MSKEnv:
         self.noise_start = env_config.noise_start
         self.q_noise = env_config.q_noise
         self.qv_noise = env_config.qv_noise
+        self.noise_root = env_config.noise_root
+        self.enforce_ground_contact = env_config.enforce_ground_contact
         # Pre-compute left-right swap data
         self.swap_lr = env_config.swap_lr
         if self.swap_lr:
@@ -305,9 +314,13 @@ class MSKEnv:
 
         # Noise starting pose
         if self.noise_start:
-            q[7:] += torch.randn_like(q[7:]) * self.q_noise
+            if self.noise_root:
+                q += torch.randn_like(q) * self.q_noise
+            else:
+                q[:, 7:] += torch.randn_like(q[:, 7:]) * self.q_noise
             qv += torch.randn_like(qv) * self.qv_noise
 
+        # Swap left/right sides
         if self.swap_lr:
             # Determine which envs to swap the starting pose
             swap_mask = (torch.rand(self.num_worlds, device=q.device) > 0.5)
@@ -321,6 +334,7 @@ class MSKEnv:
                 qv[swap_mask, rv:rv + nv] = qv_old[swap_mask, lv:lv + nv]
                 qv[swap_mask, lv:lv + nv] = qv_old[swap_mask, rv:rv + nv]
 
+        # Set the new starting pose
         self.start_pose[reset_mask, :] = q[reset_mask, :]
         self.start_velocity[reset_mask, :] = qv[reset_mask, :]
 
@@ -357,12 +371,22 @@ class MSKEnv:
     def _reset_sim(self):
         # Reset time, starting pose, muscle and actuator activations
         reset_mask = self.reset_tensor.squeeze(-1).bool()
+        # Reset time, pose, muscle/actuator state
         if reset_mask.any():
             self.time[reset_mask] = 0.0
             self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
             self.joint_velocities[reset_mask, :] = self.start_velocity[reset_mask, :]
             self.muscle_activations[reset_mask, :] = self.start_activations[reset_mask, :]
             self.actuator_activations[reset_mask, :] = 0.5
+
+        # Run forward kinematics to ensure contact with ground
+        if self.enforce_ground_contact and self.root_free:
+            self.fk()
+            collider_heights = self.collider_positions[:, 1:, UP_IDX]
+            lowest_collider_height = collider_heights.min(dim=1).values
+            adjustment = -lowest_collider_height
+            root_height_q_id = self.qpos_id_lookup["pelvis_ty"] if self.root_free else None
+            self.joint_positions[reset_mask, root_height_q_id] += adjustment[reset_mask]
 
         # Reset sim
         msk_warp.set_reset(self.d, self.reset_tensor)
@@ -525,6 +549,7 @@ class MSKEnv:
         """ Forward kinematics only (only position dependent) """
         if self.cuda_graph:
             wp.capture_launch(self.fk_graph)
+            wp.synchronize()
         else:
             msk_warp.fk(self.m, self.d)
 

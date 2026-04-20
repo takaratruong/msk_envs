@@ -3518,7 +3518,7 @@
 							<orientation>-1.5707963267948966 0 0</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-					<!--The length of the beam.-->
+					<!--The length of the beam (default: 1.0).-->
 					<beam_length>0.17499999999999999</beam_length>
 				</CantileverFreeBeamJoint>
 				<CantileverFreeBeamJoint name="thorax">
@@ -3604,7 +3604,7 @@
 							<orientation>-1.5707963267948966 0.25 0</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-					<!--The length of the beam.-->
+					<!--The length of the beam (default: 1.0).-->
 					<beam_length>0.27500000000000002</beam_length>
 				</CantileverFreeBeamJoint>
 				<CantileverFreeBeamJoint name="cervical">
@@ -3690,7 +3690,7 @@
 							<orientation>-1.5707963267948966 0 0</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-					<!--The length of the beam.-->
+					<!--The length of the beam (default: 1.0).-->
 					<beam_length>0.074999999999999997</beam_length>
 				</CantileverFreeBeamJoint>
 				<WeldJoint name="sternoclavicular_r">
@@ -4329,28 +4329,11 @@
 						</PhysicalOffsetFrame>
 					</frames>
 				</PinJoint>
-				<PinJoint name="radioulnar_r">
+				<WeldJoint name="radioulnar_r">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>radioulnar_r_parent_frame</socket_parent_frame>
 					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
 					<socket_child_frame>radioulnar_r_child_frame</socket_child_frame>
-					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
-					<coordinates>
-						<Coordinate name="pro_sup_r">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 1.5707963267948966</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-					</coordinates>
 					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
 					<frames>
 						<PhysicalOffsetFrame name="radioulnar_r_parent_frame">
@@ -4384,29 +4367,12 @@
 							<orientation>-1.56884 0.056427999999999999 1.5361400000000001</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-				</PinJoint>
-				<PinJoint name="radioulnar_l">
+				</WeldJoint>
+				<WeldJoint name="radioulnar_l">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>radioulnar_l_parent_frame</socket_parent_frame>
 					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
 					<socket_child_frame>radioulnar_l_child_frame</socket_child_frame>
-					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
-					<coordinates>
-						<Coordinate name="pro_sup_l">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 1.5707963267948966</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-					</coordinates>
 					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
 					<frames>
 						<PhysicalOffsetFrame name="radioulnar_l_parent_frame">
@@ -4440,7 +4406,7 @@
 							<orientation>1.56884 -0.056427999999999999 1.5361400000000001</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-				</PinJoint>
+				</WeldJoint>
 				<WeldJoint name="radius_hand_r">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>radius_hand_r_parent_frame</socket_parent_frame>
@@ -5132,7 +5098,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>scapula_abduction_r</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
+					<stiffness>10</stiffness>
 					<!--Damping constant.-->
 					<viscosity>0.01</viscosity>
 				</SpringGeneralizedForce>
@@ -5158,7 +5124,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>scapula_elevation_r</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
+					<stiffness>10</stiffness>
 					<!--Damping constant.-->
 					<viscosity>0.01</viscosity>
 				</SpringGeneralizedForce>
@@ -5184,7 +5150,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>scapula_rotation_r</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
+					<stiffness>10</stiffness>
 					<!--Damping constant.-->
 					<viscosity>0.01</viscosity>
 				</SpringGeneralizedForce>
@@ -5210,7 +5176,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>scapula_abduction_l</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
+					<stiffness>10</stiffness>
 					<!--Damping constant.-->
 					<viscosity>0.01</viscosity>
 				</SpringGeneralizedForce>
@@ -5236,7 +5202,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>scapula_elevation_l</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
+					<stiffness>10</stiffness>
 					<!--Damping constant.-->
 					<viscosity>0.01</viscosity>
 				</SpringGeneralizedForce>
@@ -5262,7 +5228,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>scapula_rotation_l</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
+					<stiffness>10</stiffness>
 					<!--Damping constant.-->
 					<viscosity>0.01</viscosity>
 				</SpringGeneralizedForce>
@@ -5492,58 +5458,6 @@
 					<!--Option to compute the dissipation energy due to damping in the CoordinateLimitForce. If true the dissipation power is automatically integrated to provide energy. Default is false.-->
 					<compute_dissipation_energy>false</compute_dissipation_energy>
 				</CoordinateLimitForce>
-				<SpringGeneralizedForce name="pro_sup_r_spring_force">
-					<!--Name of the coordinate to which this force is applied.-->
-					<coordinate>pro_sup_r</coordinate>
-					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
-					<!--Damping constant.-->
-					<viscosity>0.01</viscosity>
-				</SpringGeneralizedForce>
-				<CoordinateLimitForce name="pro_sup_r_limit_force">
-					<!--Coordinate (name) to be limited.-->
-					<coordinate>pro_sup_r</coordinate>
-					<!--Stiffness of the passive limit force when coordinate exceeds upper limit. Note, rotational stiffness expected in N*m/degree.-->
-					<upper_stiffness>8.7266462599716483</upper_stiffness>
-					<!--The upper limit of the coordinate range of motion (rotations in degrees).-->
-					<upper_limit>90</upper_limit>
-					<!--Stiffness of the passive limit force when coordinate exceeds lower limit. Note, rotational stiffness expected in N*m/degree.-->
-					<lower_stiffness>8.7266462599716483</lower_stiffness>
-					<!--The lower limit of the coordinate range of motion (rotations in degrees).-->
-					<lower_limit>0</lower_limit>
-					<!--Damping factor on the coordinate's speed applied only when limit is exceeded. For translational has units N/(m/s) and rotational has Nm/(degree/s)-->
-					<damping>0.017453292519943295</damping>
-					<!--Transition region width in the units of the coordinate (rotations in degrees). Dictates the transition from zero to constant stiffness as coordinate exceeds its limit.-->
-					<transition>1</transition>
-					<!--Option to compute the dissipation energy due to damping in the CoordinateLimitForce. If true the dissipation power is automatically integrated to provide energy. Default is false.-->
-					<compute_dissipation_energy>false</compute_dissipation_energy>
-				</CoordinateLimitForce>
-				<SpringGeneralizedForce name="pro_sup_l_spring_force">
-					<!--Name of the coordinate to which this force is applied.-->
-					<coordinate>pro_sup_l</coordinate>
-					<!--Spring stiffness.-->
-					<stiffness>0</stiffness>
-					<!--Damping constant.-->
-					<viscosity>0.01</viscosity>
-				</SpringGeneralizedForce>
-				<CoordinateLimitForce name="pro_sup_l_limit_force">
-					<!--Coordinate (name) to be limited.-->
-					<coordinate>pro_sup_l</coordinate>
-					<!--Stiffness of the passive limit force when coordinate exceeds upper limit. Note, rotational stiffness expected in N*m/degree.-->
-					<upper_stiffness>8.7266462599716483</upper_stiffness>
-					<!--The upper limit of the coordinate range of motion (rotations in degrees).-->
-					<upper_limit>90</upper_limit>
-					<!--Stiffness of the passive limit force when coordinate exceeds lower limit. Note, rotational stiffness expected in N*m/degree.-->
-					<lower_stiffness>8.7266462599716483</lower_stiffness>
-					<!--The lower limit of the coordinate range of motion (rotations in degrees).-->
-					<lower_limit>0</lower_limit>
-					<!--Damping factor on the coordinate's speed applied only when limit is exceeded. For translational has units N/(m/s) and rotational has Nm/(degree/s)-->
-					<damping>0.017453292519943295</damping>
-					<!--Transition region width in the units of the coordinate (rotations in degrees). Dictates the transition from zero to constant stiffness as coordinate exceeds its limit.-->
-					<transition>1</transition>
-					<!--Option to compute the dissipation energy due to damping in the CoordinateLimitForce. If true the dissipation power is automatically integrated to provide energy. Default is false.-->
-					<compute_dissipation_energy>false</compute_dissipation_energy>
-				</CoordinateLimitForce>
 				<Millard2012EquilibriumMuscle name="trapezius_clav_r">
 					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
 					<min_control>0.01</min_control>
@@ -5577,7 +5491,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -5671,7 +5585,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -5765,7 +5679,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -5859,7 +5773,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -5953,7 +5867,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6047,7 +5961,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6141,7 +6055,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6235,7 +6149,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6329,7 +6243,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6423,7 +6337,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6511,7 +6425,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6608,7 +6522,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6705,7 +6619,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6802,7 +6716,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6896,7 +6810,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -6990,7 +6904,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7093,7 +7007,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7187,7 +7101,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7281,7 +7195,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7375,7 +7289,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7469,7 +7383,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7557,7 +7471,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7645,7 +7559,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7751,7 +7665,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7857,7 +7771,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -7963,7 +7877,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8069,7 +7983,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8175,7 +8089,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8272,7 +8186,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8369,7 +8283,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8463,7 +8377,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8566,7 +8480,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8660,7 +8574,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8775,7 +8689,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8863,7 +8777,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -8957,7 +8871,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9051,7 +8965,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9145,7 +9059,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9239,7 +9153,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9333,7 +9247,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9427,7 +9341,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9521,7 +9435,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9615,7 +9529,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9709,7 +9623,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9797,7 +9711,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9894,7 +9808,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -9991,7 +9905,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10088,7 +10002,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10182,7 +10096,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10276,7 +10190,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10379,7 +10293,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10473,7 +10387,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10567,7 +10481,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10661,7 +10575,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10755,7 +10669,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10843,7 +10757,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -10931,7 +10845,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11037,7 +10951,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11143,7 +11057,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11249,7 +11163,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11355,7 +11269,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11461,7 +11375,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11558,7 +11472,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11655,7 +11569,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11749,7 +11663,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11852,7 +11766,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -11946,7 +11860,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12061,7 +11975,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12158,7 +12072,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12255,7 +12169,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12343,7 +12257,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12431,7 +12345,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12519,7 +12433,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12607,7 +12521,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12695,7 +12609,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12783,7 +12697,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12871,7 +12785,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -12959,7 +12873,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13047,7 +12961,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13135,7 +13049,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13223,7 +13137,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13311,7 +13225,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13399,7 +13313,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13487,7 +13401,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13542,6 +13456,534 @@
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm1_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0 0 0.02</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.002 0.0070000000000000001 0.053999999999999999</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>197</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.108</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.056122999999999999</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm1_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm1_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm1_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm1_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm2_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_r</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 0.035200000000000002</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.002 0.0070000000000000001 0.053999999999999999</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.108</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.035198</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm2_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm2_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm2_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm2_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm3_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_r</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 0.035200000000000002</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.025999999999999999 0.019 0.055</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.108</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.069467000000000001</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm3_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm3_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm3_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm3_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scalenus_ant_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0050000000000000001 0 0.053999999999999999</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0050000000000000001 -0.034000000000000002 0.02</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>147</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.042000000000000003</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.053421000000000003</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scalenus_ant_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scalenus_ant_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scalenus_ant_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scalenus_ant_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scalenus_med_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.028000000000000001 0.017000000000000001 0.070000000000000007</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0050000000000000001 -0.02 0.02</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>206</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.050000000000000003</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.061508</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scalenus_med_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scalenus_med_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scalenus_med_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scalenus_med_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scalenus_post_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.035000000000000003 -0.0080000000000000002 0.087999999999999995</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0070000000000000001 -0.050999999999999997 0.021000000000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>157</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.062</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.072844999999999993</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scalenus_post_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scalenus_post_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scalenus_post_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scalenus_post_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
 				<Millard2012EquilibriumMuscle name="extobl1_l">
 					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
 					<min_control>0.01</min_control>
@@ -13584,7 +14026,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13681,7 +14123,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13769,7 +14211,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13857,7 +14299,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -13945,7 +14387,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14033,7 +14475,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14121,7 +14563,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14209,7 +14651,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14297,7 +14739,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14385,7 +14827,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14473,7 +14915,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14561,7 +15003,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14649,7 +15091,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14737,7 +15179,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14825,7 +15267,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14913,7 +15355,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -14968,6 +15410,534 @@
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm1_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0 0 -0.02</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.002 0.0070000000000000001 -0.053999999999999999</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>197</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.108</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.056122999999999999</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm1_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm1_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm1_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm1_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm2_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_l</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 -0.035200000000000002</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.002 0.0070000000000000001 -0.053999999999999999</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.108</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.035198</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm2_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm2_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm2_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm2_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm3_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_l</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 -0.035200000000000002</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.025999999999999999 0.019 -0.055</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.108</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.069467000000000001</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm3_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm3_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm3_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm3_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scalenus_ant_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0050000000000000001 0 -0.053999999999999999</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0050000000000000001 -0.034000000000000002 -0.02</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>147</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.042000000000000003</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.053421000000000003</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scalenus_ant_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scalenus_ant_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scalenus_ant_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scalenus_ant_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scalenus_med_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.028000000000000001 0.017000000000000001 -0.070000000000000007</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0050000000000000001 -0.02 -0.02</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>206</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.050000000000000003</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.061508</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scalenus_med_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scalenus_med_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scalenus_med_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scalenus_med_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scalenus_post_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.035000000000000003 -0.0080000000000000002 -0.087999999999999995</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0070000000000000001 -0.050999999999999997 -0.021000000000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>157</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.062</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.072844999999999993</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scalenus_post_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scalenus_post_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scalenus_post_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scalenus_post_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
 				<Millard2012EquilibriumMuscle name="addbrev_r">
 					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
 					<min_control>0.01</min_control>
@@ -15007,7 +15977,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15101,7 +16071,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15195,7 +16165,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15289,7 +16259,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15383,7 +16353,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15477,7 +16447,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15574,7 +16544,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15662,7 +16632,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15786,7 +16756,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -15928,7 +16898,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16070,7 +17040,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16203,7 +17173,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16297,7 +17267,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16391,7 +17361,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16497,7 +17467,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16603,7 +17573,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16709,7 +17679,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16797,7 +17767,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16885,7 +17855,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -16973,7 +17943,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17061,7 +18031,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17149,7 +18119,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17237,7 +18207,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17331,7 +18301,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17437,7 +18407,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17552,7 +18522,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17685,7 +18655,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17782,7 +18752,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17879,7 +18849,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -17985,7 +18955,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18100,7 +19070,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18194,7 +19164,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18288,7 +19258,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18376,7 +19346,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18482,7 +19452,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18588,7 +19558,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18694,7 +19664,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18809,7 +19779,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -18924,7 +19894,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19039,7 +20009,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19133,7 +20103,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19227,7 +20197,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19321,7 +20291,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19415,7 +20385,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19509,7 +20479,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19603,7 +20573,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19700,7 +20670,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19788,7 +20758,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -19912,7 +20882,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20054,7 +21024,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20196,7 +21166,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20329,7 +21299,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20423,7 +21393,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20517,7 +21487,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20623,7 +21593,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20729,7 +21699,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20835,7 +21805,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -20923,7 +21893,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21011,7 +21981,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21099,7 +22069,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21187,7 +22157,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21275,7 +22245,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21363,7 +22333,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21457,7 +22427,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21563,7 +22533,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21678,7 +22648,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21811,7 +22781,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -21908,7 +22878,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22005,7 +22975,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22111,7 +23081,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22226,7 +23196,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22320,7 +23290,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22414,7 +23384,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22502,7 +23472,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22608,7 +23578,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22714,7 +23684,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22820,7 +23790,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -22935,7 +23905,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -23050,7 +24020,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -23165,7 +24135,7 @@
 								</PathPoint>
 							</Scholz2015GeometryPathPoint>
 						</path_elements>
-						<!--The algorithm to use for computing the path. Valid options are: 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
@@ -23220,36 +24190,6 @@
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
-                <ActivationCoordinateActuator name="cervical_bending_actuator">
-                    <!--Name of the generalized coordinate to which the actuator applies.-->
-                    <coordinate>cervical_bending</coordinate>
-                    <!--The maximum generalized force produced by this actuator.-->
-                    <optimal_force>15</optimal_force>
-                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <!--Value of activation in the default state (default: 0.5).-->
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="cervical_extension_actuator">
-                    <!--Name of the generalized coordinate to which the actuator applies.-->
-                    <coordinate>cervical_extension</coordinate>
-                    <!--The maximum generalized force produced by this actuator.-->
-                    <optimal_force>15</optimal_force>
-                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <!--Value of activation in the default state (default: 0.5).-->
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="cervical_rotation_actuator">
-                    <!--Name of the generalized coordinate to which the actuator applies.-->
-                    <coordinate>cervical_rotation</coordinate>
-                    <!--The maximum generalized force produced by this actuator.-->
-                    <optimal_force>7.5</optimal_force>
-                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <!--Value of activation in the default state (default: 0.5).-->
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
 			</objects>
 			<groups />
 		</ForceSet>
@@ -23436,5 +24376,6 @@
             </objects>
             <groups/>
         </ContactGeometrySet>
+
 	</Model>
 </OpenSimDocument>

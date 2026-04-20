@@ -1,7 +1,8 @@
 import torch
 
-from msk_envs.utils.global_params import FWD_IDX, UP_IDX, build_axis, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
+from msk_envs.utils.global_params import FWD_IDX, SIDE_IDX, UP_IDX, build_axis, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
 from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, has_fallen, alive_bonus
+from msk_envs.utils.quat import rotate_vec
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -98,6 +99,18 @@ class ReachTargetEnv(MSKEnv):
         if reached_target_mask.any():
             self.compute_new_targets(reached_target_mask, new_env=False)
 
+        # Reward for facing the target
+        pelvis_rot = self.body_rotations[:, self.root_id]
+        pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
+        pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
+        pelvis_fwd = pelvis_fwd / torch.norm(pelvis_fwd, dim=1, keepdim=True)
+        to_target_vec = self.curr_target_pos - self.root_pos
+        to_target_vec = to_target_vec[:, [FWD_IDX, SIDE_IDX]]
+        to_target_vec = to_target_vec / torch.norm(to_target_vec, dim=1, keepdim=True)
+        facing_target = torch.sum(pelvis_fwd * to_target_vec, dim=1)
+        rew_facing_target = torch.clamp(facing_target, min=0.0)
+
+        # joint penalties
         squared_penalties = False
         rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
         rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
@@ -110,6 +123,7 @@ class ReachTargetEnv(MSKEnv):
 
         self.reward_dict = {
             "rew_target_closer": rew_target_closer.detach(),
+            "rew_target_facing": rew_facing_target.detach(),
             "rew_spring": rew_spring.detach(),
             "rew_damper": rew_damper.detach(),
             "rew_limit": rew_limit.detach(),
@@ -120,7 +134,6 @@ class ReachTargetEnv(MSKEnv):
 
     def _get_terminated(self):
         # Has fallen
-        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset,
-                            min_root=min(MIN_ROOT_HEIGHT, 0.3), min_head=min(MIN_HEAD_HEIGHT, 0.5))
+        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
         terminated = fallen.float()
         return terminated.detach()

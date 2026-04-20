@@ -65,8 +65,8 @@ class ReachTargetEnv(MSKEnv):
         root_rotation_inv = quat_conjugate(self.root_rot)
         relative_body_rotations = quat_mul(root_rotation_inv.unsqueeze(1), body_rotations)
 
-        relative_curr_target_pos = self.curr_target_pos - self.root_pos
-        relative_next_target_pos = self.next_target_pos - self.root_pos
+        relative_curr_target_pos = rotate_vec(root_rotation_inv, self.curr_target_pos - self.root_pos)
+        relative_next_target_pos = rotate_vec(root_rotation_inv, self.next_target_pos - self.root_pos)
 
         obs = torch.cat([
             time_curr,
@@ -117,7 +117,7 @@ class ReachTargetEnv(MSKEnv):
         if reached_target_mask.any():
             self.compute_new_targets(reached_target_mask, new_env=False)
 
-        # Reward for facing the target
+        # Reward for facing the target: pelvis
         pelvis_rot = self.body_rotations[:, self.root_id]
         pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
         pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
@@ -125,8 +125,19 @@ class ReachTargetEnv(MSKEnv):
         to_target_vec = self.curr_target_pos - self.root_pos
         to_target_vec = to_target_vec[:, [FWD_IDX, SIDE_IDX]]
         to_target_vec = to_target_vec / torch.norm(to_target_vec, dim=1, keepdim=True)
-        facing_target = torch.sum(pelvis_fwd * to_target_vec, dim=1)
-        rew_facing_target = torch.clamp(facing_target, min=0.0)
+        pelvis_facing_target = torch.sum(pelvis_fwd * to_target_vec, dim=1)
+
+        # Reward for facing the target: head
+        head_rot = self.body_rotations[:, self.head_id]
+        head_fwd = rotate_vec(head_rot, self.fwd_axis)
+        head_fwd = head_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
+        head_fwd = head_fwd / torch.norm(head_fwd, dim=1, keepdim=True)
+        to_target_vec = self.curr_target_pos - self.head_pos
+        to_target_vec = to_target_vec[:, [FWD_IDX, SIDE_IDX]]
+        to_target_vec = to_target_vec / torch.norm(to_target_vec, dim=1, keepdim=True)
+        head_facing_target = torch.sum(head_fwd * to_target_vec, dim=1)
+
+        rew_facing_target = torch.clamp(pelvis_facing_target, min=0.0) + torch.clamp(head_facing_target, min=0.0)
 
         # joint penalties
         squared_penalties = False

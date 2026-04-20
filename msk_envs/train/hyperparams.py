@@ -514,12 +514,17 @@ class RandomTargetConfig(BaseArgs):
         env_variant=DerivedEnv.RANDOM_TARGET,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        # muscle_multiplier=2.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
+        muscle_multiplier=1.0,
+        starting_pose_path="../msk_models/starting_pose_run.yaml",
     ))
 
     lambda_target_closer: float = 1.0
-    lambda_limit: float = -2e-3
+
+    lambda_spring: float = -1e-4
+    lambda_damper: float = -3e-4
+    lambda_limit: float = -1e-3
+    lambda_muscle_passive: float = -1e-4
+
     lambda_actuator: float = -1e-2
     lambda_alive: float = 3e-2
 
@@ -606,7 +611,7 @@ class ReachPoseConfig(BaseArgs):
         max_episode_duration=2.5,
         muscle_multiplier=1.0,
         starting_pose_path="../msk_models/starting_pose_stand.yaml",
-        target_pose_path="../msk_models/target_pose_sit.yaml",
+        target_pose_path="../msk_models/target_pose_stand_one_leg.yaml",
         default_activation=0.01,
     ))
 

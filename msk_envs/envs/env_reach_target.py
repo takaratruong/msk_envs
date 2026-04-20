@@ -14,12 +14,20 @@ class ReachTargetEnv(MSKEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
+            requires_visuals: bool,
             live_render: bool,
             cuda_graph: bool,
             ignore_vertical: bool = True,
             target_tolerance: float = 0.25,
     ):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render, cuda_graph=cuda_graph)
+        super().__init__(
+            num_envs=num_envs,
+            env_config=env_config,
+            device=device,
+            requires_visuals=requires_visuals,
+            live_render=live_render,
+            cuda_graph=cuda_graph
+        )
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
 
         self.right_hand_id = self.lookup_body_id("hand_r")
@@ -85,23 +93,16 @@ class ReachTargetEnv(MSKEnv):
         rew_target_closer = torch.clamp(self.curr_closest_dist - dist_to_target, min=0.0)
         self.curr_closest_dist = torch.min(self.curr_closest_dist, dist_to_target)
 
-        # Reward for facing the target
-        # pelvis_rot = self.body_rotations[:, self.root_id]
-        # pelvis_fwd = rotate_vec(pelvis_rot, self.fwd_axis)
-        # pelvis_fwd = pelvis_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
-        # pelvis_fwd = pelvis_fwd / torch.norm(pelvis_fwd, dim=1, keepdim=True)
-        # to_target_vec = self.curr_target_pos - self.root_pos
-        # to_target_vec = to_target_vec[:, [FWD_IDX, SIDE_IDX]]
-        # to_target_vec = to_target_vec / torch.norm(to_target_vec, dim=1, keepdim=True)
-        # facing_target = torch.sum(pelvis_fwd * to_target_vec, dim=1)
-        # rew_facing_target = torch.clamp(facing_target, min=0.0)
-
         # Reset target positions for envs that have reached the target
         reached_target_mask = dist_to_target < self.target_tolerance
         if reached_target_mask.any():
             self.compute_new_targets(reached_target_mask, new_env=False)
 
-        rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
+        squared_penalties = False
+        rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
+        rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
+        rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
+        rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
 
         terminated = self._get_terminated()
@@ -109,13 +110,17 @@ class ReachTargetEnv(MSKEnv):
 
         self.reward_dict = {
             "rew_target_closer": rew_target_closer.detach(),
+            "rew_spring": rew_spring.detach(),
+            "rew_damper": rew_damper.detach(),
             "rew_limit": rew_limit.detach(),
+            "rew_muscle_passive": rew_muscle_passive.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_alive": rew_alive.detach(),
         }
 
     def _get_terminated(self):
-        fallen = has_fallen(self.root_pos, self.torso_pos, self.torso_rot, self.head_offset,
+        # Has fallen
+        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset,
                             min_root=min(MIN_ROOT_HEIGHT, 0.3), min_head=min(MIN_HEAD_HEIGHT, 0.5))
         terminated = fallen.float()
         return terminated.detach()

@@ -2,7 +2,7 @@ import torch
 
 from msk_envs.utils.global_params import FWD_IDX, SIDE_IDX, UP_IDX, build_axis, MIN_ROOT_HEIGHT, MIN_HEAD_HEIGHT
 from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, has_fallen, alive_bonus
-from msk_envs.utils.quat import rotate_vec
+from msk_envs.utils.quat import rotate_vec, quat_mul, quat_conjugate
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -54,6 +54,20 @@ class ReachTargetEnv(MSKEnv):
          8. Current closest distance to target reached
         """
         time_curr = self.time.view(self.num_worlds, 1) / self.max_episode_duration
+        # Grab bodies that aren't root or ground
+        bodies_mask = torch.ones(self.num_bodies, dtype=torch.bool, device=self.device)
+        bodies_mask[[self.ground_id, self.root_id]] = False
+        body_positions = self.body_positions[:, bodies_mask, :]
+        body_rotations = self.body_rotations[:, bodies_mask, :]
+
+        # Relative to root
+        relative_body_positions = body_positions - self.root_pos.unsqueeze(1)
+        root_rotation_inv = quat_conjugate(self.root_rot)
+        relative_body_rotations = quat_mul(root_rotation_inv.unsqueeze(1), body_rotations)
+
+        relative_curr_target_pos = self.curr_target_pos - self.root_pos
+        relative_next_target_pos = self.next_target_pos - self.root_pos
+
         obs = torch.cat([
             time_curr,
             self.muscle_activations,
@@ -61,8 +75,12 @@ class ReachTargetEnv(MSKEnv):
             self.actuator_activations,
             self.joint_positions,
             self.joint_velocities,
-            self.curr_target_pos.view(self.num_worlds, -1),
-            self.next_target_pos.view(self.num_worlds, -1),
+            relative_body_positions.reshape(self.num_worlds, -1),
+            relative_body_rotations.reshape(self.num_worlds, -1),
+
+            relative_curr_target_pos.view(self.num_worlds, -1),
+            relative_next_target_pos.view(self.num_worlds, -1),
+
             self.curr_closest_dist.view(self.num_worlds, 1),
         ], dim=1)
         return obs.detach().clone()

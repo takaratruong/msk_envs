@@ -124,6 +124,104 @@ left_foot_7:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
+
+heel_r:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+lateralRearfoot_r:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+lateralMidfoot_r:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+lateralToe_r:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+medialToe_r:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+medialMidfoot_r:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+heel_l:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+lateralRearfoot_l:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+lateralMidfoot_l:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+lateralToe_l:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+medialToe_l:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+medialMidfoot_l:
+  stiffness: 1000000.0
+  dissipation: 2.0
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.5
+  transition_velocity: 0.2
+  priority: 1
+
 calcn_r_sphere:
   stiffness: 5e6
   dissipation: 1.0

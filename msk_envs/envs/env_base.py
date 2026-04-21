@@ -57,6 +57,7 @@ class MSKEnv:
         msk_warp.armature(self.m)[dof_start:] = env_config.armature
 
         msk_warp.set_implicit_damping(self.m, env_config.use_implicit_damping)
+        msk_warp.set_use_linear_stop(self.m, env_config.use_linear_stop)
 
         # Integrator type
         msk_warp.set_integrator_accuracy(self.m, env_config.integrator_accuracy)

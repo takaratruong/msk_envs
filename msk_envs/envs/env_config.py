@@ -38,6 +38,9 @@ class EnvConfig:
     armature: float = 0.0
     """ Additional armature to add to joints (decreases realism but increases performance) """
     use_implicit_damping: bool = False
+    """ Whether to integrate joint damping implicitly """
+    use_linear_stop: bool = False
+    """ Whether to use LinearStop force instead of CoordinateLimitForce """
 
     # --- Model muscle properties ---
     muscle_multiplier: float = 1.0
@@ -140,8 +143,8 @@ class EnvConfig:
 @dataclass
 class EnvConfigGeneric(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athlete16.osim"
-    muscle_function_path: str = "../msk_models/athlete16paths_minimal.xml"
+    model_path: str = "../msk_models/athlete16_reduced.osim"
+    muscle_function_path: str = "../msk_models/athlete16paths_reduced.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     armature: float = 1e-3

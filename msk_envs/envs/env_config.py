@@ -147,14 +147,15 @@ class EnvConfigGeneric(EnvConfig):
     muscle_function_path: str = "../msk_models/athlete16paths_reduced.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
+    armature: float = 2e-3
     integrator_accuracy: float = 1.0
+
 
 @dataclass
 class EnvConfigLower(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athlete16_lower.osim"
-    muscle_function_path: str = "../msk_models/athlete16paths_lower_minimal.xml"
+    model_path: str = "../msk_models/athlete16_lower_reduced.osim"
+    muscle_function_path: str = "../msk_models/athlete16paths_lower_reduced_minimal.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     armature: float = 0.0
@@ -191,5 +192,16 @@ class EnvConfigRegression(EnvConfig):
     integrator_accuracy: float = 1.0
     model_path: str = "../msk_models/regression/regression_model.osim"
     muscle_function_path: str = "../msk_models/regression/regression_fn.xml"
+    starting_pose_path: str = "../msk_models/regression/starting_pose_run.yaml"
+    contact_params_path: str = "../msk_models/regression/contact_params_regression.yaml"
+
+
+@dataclass
+class EnvConfigRegressionWSpine(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    armature: float = 2e-3
+    integrator_accuracy: float = 1.0
+    model_path: str = "../msk_models/regression/regression_model_w_spine.osim"
+    muscle_function_path: str = "../msk_models/regression/regression_fn_spine.xml"
     starting_pose_path: str = "../msk_models/regression/starting_pose_run.yaml"
     contact_params_path: str = "../msk_models/regression/contact_params_regression.yaml"

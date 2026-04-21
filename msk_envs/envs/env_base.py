@@ -128,6 +128,7 @@ class MSKEnv:
             requires_visuals=requires_visuals,
             polynomial_data_path=function_path
         )
+        self.load_result = load_result
         self.m, self.d = load_result.model, load_result.data
         self.root_free = load_result.root_free
         # Store all convenient lookups

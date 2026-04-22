@@ -156,7 +156,7 @@ class EnvConfigLower(EnvConfig):
     """ Environment configuration for no-hands model"""
     # model_path: str = "../msk_models/athlete16_lower_reduced.osim"
     # muscle_function_path: str = "../msk_models/athlete16paths_lower.xml"
-    model_path: str = "../msk_models/athlete16_lower_reduced_nicos.osim"
+    model_path: str = "../msk_models/athlete16_lower_reduced_stronger_plant_nicos.osim"
     muscle_function_path: str = "../msk_models/athlete16paths_lower.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"

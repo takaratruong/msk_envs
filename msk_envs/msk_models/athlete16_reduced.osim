@@ -4435,9 +4435,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_flexion_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="hip_flexion_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4461,9 +4461,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_adduction_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="hip_adduction_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4487,9 +4487,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_rotation_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="hip_rotation_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4513,9 +4513,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>knee_angle_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="knee_angle_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4539,9 +4539,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>ankle_angle_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="ankle_angle_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4565,9 +4565,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>subtalar_angle_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="subtalar_angle_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4591,9 +4591,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25</stiffness>
+                    <stiffness>65</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1</viscosity>
+                    <viscosity>0.4</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="mtp_angle_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4617,9 +4617,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_flexion_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="hip_flexion_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4643,9 +4643,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_adduction_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="hip_adduction_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4669,9 +4669,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_rotation_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="hip_rotation_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4695,9 +4695,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>knee_angle_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="knee_angle_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4721,9 +4721,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>ankle_angle_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="ankle_angle_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4747,9 +4747,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>subtalar_angle_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="subtalar_angle_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4773,9 +4773,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25</stiffness>
+                    <stiffness>65</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1</viscosity>
+                    <viscosity>0.4</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="mtp_angle_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4799,9 +4799,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>lumbar_bending</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="lumbar_bending_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4825,9 +4825,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>lumbar_extension</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="lumbar_extension_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4851,9 +4851,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>lumbar_rotation</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="lumbar_rotation_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4877,9 +4877,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_bending</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="thorax_bending_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4903,9 +4903,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_extension</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="thorax_extension_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4929,9 +4929,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_rotation</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="thorax_rotation_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4955,9 +4955,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>cervical_bending</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="cervical_bending_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -4981,9 +4981,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>cervical_extension</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="cervical_extension_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5007,9 +5007,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>cervical_rotation</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="cervical_rotation_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5033,9 +5033,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_flexion_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="shoulder_flexion_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5059,9 +5059,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_abduction_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="shoulder_abduction_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5085,9 +5085,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_rotation_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="shoulder_rotation_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5111,9 +5111,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_flexion_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="shoulder_flexion_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5137,9 +5137,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_abduction_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="shoulder_abduction_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5163,9 +5163,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_rotation_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="shoulder_rotation_l_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5189,9 +5189,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>elbow_flex_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="elbow_flex_r_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5215,9 +5215,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>elbow_flex_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>0</stiffness>
+                    <stiffness>0.01</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.01</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="elbow_flex_l_limit_force">
                     <!--Coordinate (name) to be limited.-->

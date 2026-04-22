@@ -36,6 +36,7 @@ def train(
         td3_config: TD3Config,
         envs,
         eval_envs,
+        dep_explorer,
         traj_out_folder: str,
         analytics_out_folder: str,
         exp_name: str,
@@ -421,11 +422,11 @@ def train(
         obs_normalizer.load_state_dict(torch_checkpoint["obs_normalizer_state"])
         qnet.load_state_dict(torch_checkpoint["qnet_state_dict"])
         qnet_target.load_state_dict(torch_checkpoint["qnet_target_state_dict"])
-        
+
         # Extract global_step from checkpoint
         if "global_step" in torch_checkpoint:
             global_step = torch_checkpoint["global_step"]
-        
+
         # Load optimizer and scheduler states if available
         if "actor_optimizer_state_dict" in torch_checkpoint:
             actor_optimizer.load_state_dict(torch_checkpoint["actor_optimizer_state_dict"])
@@ -453,6 +454,8 @@ def train(
             with torch.no_grad(), _maybe_amp():
                 norm_obs = normalize_obs(obs)
                 actions = policy(obs=norm_obs, dones=dones)
+                # DEP EXPLORATION
+                actions = dep_explorer.explore(muscle_states=envs.muscle_fiber_lengths, actions=actions)
 
             next_obs, rewards, terminated, truncations, info = envs.step(actions)
             dones = (terminated + truncations).bool()

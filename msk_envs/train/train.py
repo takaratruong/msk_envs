@@ -15,6 +15,7 @@ import msk_envs.train.fastsac.train as fastsac
 from msk_envs.utils.train_utils import set_seed, init_wandb_run
 from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
+from msk_envs.train.dep import DEP, DEPConfig, DEPExplorer
 
 
 def _build_envs(num_envs, num_eval_envs, env_config, build_cuda_graph, device):
@@ -37,6 +38,22 @@ def _build_envs(num_envs, num_eval_envs, env_config, build_cuda_graph, device):
     return envs, eval_envs
 
 
+def create_dep_explorer(
+        dep_config: DEPConfig,
+        num_muscles: int,
+        num_worlds: int,
+        device: torch.device,
+        use_dep: bool
+) -> DEPExplorer:
+    return DEPExplorer(
+        dep_config=dep_config,
+        num_muscles=num_muscles,
+        num_worlds=num_worlds,
+        device=device,
+        use_dep=use_dep,
+    )
+
+
 def main():
     # wp.clear_kernel_cache()  # can't risk caching issues
 
@@ -48,14 +65,15 @@ def main():
     set_seed(args.seed)
     pretty_print_base_args(args)
 
-    env_config = args.env_config
-    td3_config = args.td3_config
-    sac_config = args.sac_config
-
     assert torch.cuda.is_available(), "CUDA device not available"
     device_str = f"cuda:{args.gpu_id}"
     device = torch.device(device_str)
     wp.set_device(device_str)
+
+    env_config = args.env_config
+    td3_config = args.td3_config
+    sac_config = args.sac_config
+    dep_config = args.dep_config
 
     if args.use_wandb:
         init_wandb_run(args)
@@ -69,10 +87,18 @@ def main():
             build_cuda_graph=True,
             device=device,
         )
+        dep_explorer = create_dep_explorer(
+            dep_config=dep_config,
+            num_muscles=envs.num_muscles,
+            num_worlds=envs.num_worlds,
+            device=device,
+            use_dep=args.use_dep,
+        )
         fasttd3.train(
             td3_config=td3_config,
             envs=envs,
             eval_envs=eval_envs,
+            dep_explorer=dep_explorer,
             traj_out_folder=traj_out_folder,
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,

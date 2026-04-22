@@ -6,10 +6,11 @@ from typing_extensions import Annotated
 import tyro
 
 from msk_envs.envs.env_config import EnvConfig, EnvConfigGeneric, EnvConfigUpper, EnvConfigRegression, \
-    EnvConfigUpperNoSpine, EnvConfigLower
+    EnvConfigUpperNoSpine, EnvConfigLower, EnvConfigRegressionWSpine, EnvConfigRegressionNoMotors
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
+from msk_envs.train.dep.dep_config import DEPConfig
 from msk_envs.utils.train_utils import find_latest_checkpoint
 
 
@@ -24,11 +25,14 @@ class BaseArgs:
     resume: bool = False
     override_wandb_config: bool = False
 
+    use_dep: bool = False
+
     seed: int = 1
     gpu_id: int = 0
 
     td3_config: TD3Config = field(default_factory=TD3Config)
     sac_config: SACConfig = field(default_factory=SACConfig)
+    dep_config: DEPConfig = field(default_factory=DEPConfig)
     env_config: EnvConfig = field(default_factory=EnvConfig)
 
     def __post_init__(self):
@@ -172,9 +176,6 @@ class SprintLowerConfig(BaseArgs):
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_run.yaml",
-        noise_start=True,
-        q_noise=0.02,
-        qv_noise=0.1,
     ))
 
     """Sprint environment specific reward scales"""
@@ -398,14 +399,12 @@ class DontFallConfigOneLeg(BaseArgs):
 @dataclass
 class ImitateConfig(BaseArgs):
     """ Default Imitate environment configuration. Tracks a two-step sprinting motion. """
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfig(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.IMITATE,
         delta_t=1.0 / 500.0,
-        use_prescribed_starting_activations=True,
-        starting_activations_path="../msk_models/starting_activations.yaml",
-        use_specified_joint_limits=True,
-        joint_limits_path="../msk_models/joint_limits_sprinting.yaml",
-        motion_name="../motions/pred_sprint_two_step.mot",
+        motion_name="../motions/sprint.mot",
+        noise_start=False,
+        muscle_multiplier=2.0,
     ))
 
     td3_config: TD3Config = field(default_factory=lambda: TD3Config(
@@ -517,7 +516,7 @@ class RandomTargetConfig(BaseArgs):
     ))
 
     lambda_target_closer: float = 1.0
-    lambda_target_facing: float = 1e-2
+    lambda_target_facing: float = 5e-3
 
     lambda_spring: float = -1e-4
     lambda_damper: float = -3e-4

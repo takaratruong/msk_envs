@@ -43,15 +43,10 @@ knee_angle_r:
 ankle_angle_r:
   q: 0.6
   v: 0.0
-subtalar_angle_r:
-  q: 0.0
-  v: 0.0
-mtp_angle_r:
-  q: 0.0
-  v: 0.0
+
 
 hip_flexion_l:
-  q: 0.165239
+  q: 0.165
   v: 0.0
 hip_adduction_l:
   q: 0.0
@@ -60,34 +55,28 @@ hip_rotation_l:
   q: 0.0
   v: 0.0
 knee_angle_l:
-  q: 0.288801
+  q: 0.288
   v: 0.0
 ankle_angle_l:
-  q: 0.01971
-  v: 0.0
-subtalar_angle_l:
-  q: 0.0
-  v: 0.0
-mtp_angle_l:
-  q: 0.0
+  q: 0.02
   v: 0.0
 
 shoulder_flexion_r:
-  q: -0.8
+  q: -0.2
   v: 0.0
 shoulder_abduction_r:
-  q: 0.2
+  q: 0.0
   v: 0.0
 elbow_flex_r:
-  q: 2.0
+  q: 0.5
   v: 0.0
 
 shoulder_flexion_l:
-  q: 0.8
-  v: 0.0
-shoulder_abduction_l:
   q: 0.2
   v: 0.0
+shoulder_abduction_l:
+  q: 0.0
+  v: 0.0
 elbow_flex_l:
-  q: 2.0
+  q: 0.5
   v: 0.0

@@ -130,10 +130,8 @@ class ReachTargetEnv(MSKEnv):
         # Reward for facing the target: head
         head_rot = self.body_rotations[:, self.head_id]
         head_fwd = rotate_vec(head_rot, self.fwd_axis)
-        head_fwd = head_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
         head_fwd = head_fwd / torch.norm(head_fwd, dim=1, keepdim=True)
         to_target_vec = self.curr_target_pos - self.head_pos
-        to_target_vec = to_target_vec[:, [FWD_IDX, SIDE_IDX]]
         to_target_vec = to_target_vec / torch.norm(to_target_vec, dim=1, keepdim=True)
         head_facing_target = torch.sum(head_fwd * to_target_vec, dim=1)
 

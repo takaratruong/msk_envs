@@ -7,7 +7,7 @@ import tyro
 
 from msk_envs.envs.env_config import EnvConfig, EnvConfigGeneric, EnvConfigUpper, EnvConfigRegression, \
     EnvConfigUpperNoSpine, EnvConfigLower, EnvConfigRegressionWSpine, EnvConfigRegressionNoMotors, EnvConfigTall, \
-    EnvConfigTallLower
+    EnvConfigTallLower, EnvConfigTallMotorArms
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -172,6 +172,34 @@ class SprintConfig(BaseArgs):
 @dataclass
 class SprintConfigTall(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigTall(
+        env_variant=DerivedEnv.SPRINT,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run.yaml",
+        noise_start=False,
+    ))
+
+    """Sprint environment specific reward scales"""
+    lambda_vel: float = 1e-2
+    lambda_mid_lane: float = 3e-2
+
+    lambda_spring: float = -1e-4
+    lambda_damper: float = -3e-4
+    lambda_limit: float = -1e-3
+    lambda_muscle_passive: float = -1e-4
+
+    lambda_actuator: float = 0.0
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+    lambda_self_collision: float = -1e-2
+    lambda_head_acc_ang: float = 0.0
+    lambda_head_acc_lin: float = 0.0
+
+
+@dataclass
+class SprintConfigTallMotor(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigTallMotorArms(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -679,6 +707,7 @@ Config = Union[
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
     Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
     Annotated[SprintConfigTall, tyro.conf.subcommand(name="sprinttall")],
+    Annotated[SprintConfigTallMotor, tyro.conf.subcommand(name="sprinttallmotor")],
     Annotated[SprintLowerConfig, tyro.conf.subcommand(name="sprintlower")],
     Annotated[SprintConfigTallLower, tyro.conf.subcommand(name="sprinttalllower")],
     Annotated[SprintRegressionConfig, tyro.conf.subcommand(name="sprintregression")],

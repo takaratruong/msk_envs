@@ -163,6 +163,17 @@ class EnvConfigTall(EnvConfig):
 
 
 @dataclass
+class EnvConfigTallMotorArms(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    model_path: str = "../msk_models/athletetall_motorarms.osim"
+    muscle_function_path: str = "../msk_models/athletetallpaths_motorarms.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
+    armature: float = 1e-3
+    integrator_accuracy: float = 1.0
+
+
+@dataclass
 class EnvConfigLower(EnvConfig):
     """ Environment configuration for no-hands model"""
     # model_path: str = "../msk_models/athlete16_lower_reduced.osim"

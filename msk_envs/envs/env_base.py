@@ -466,6 +466,15 @@ class MSKEnv:
         # Clamp to [-1, 1], then map to [0, 1]
         clamped_action = torch.clamp(raw_action, -1.0, 1.0)
         excitations = (clamped_action + 1.0) / 2.0
+
+        # We don't let the mtp flex (positive). Map to [0, 0.5]
+        if "mtp_angle_r_motor" in self.actuator_id_lookup:
+            mtp_angle_r_motor_id = self.actuator_id_lookup["mtp_angle_r_motor"]
+            excitations[..., mtp_angle_r_motor_id] = excitations[..., mtp_angle_r_motor_id] * 0.5
+        if "mtp_angle_l_motor" in self.actuator_id_lookup:
+            mtp_angle_l_motor_id = self.actuator_id_lookup["mtp_angle_l_motor"]
+            excitations[..., mtp_angle_l_motor_id] = excitations[..., mtp_angle_l_motor_id] * 0.5
+
         self.actuator_excitations.copy_(excitations)
         return
 

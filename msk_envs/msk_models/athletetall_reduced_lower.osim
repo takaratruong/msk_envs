@@ -3263,7 +3263,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3289,7 +3289,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3315,7 +3315,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3341,7 +3341,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3367,7 +3367,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3393,7 +3393,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3419,7 +3419,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3445,7 +3445,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3471,7 +3471,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>50.0</stiffness>
+					<stiffness>200.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -16247,61 +16247,6 @@
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
-
-                <ActivationCoordinateActuator name="lumbar_bending_actuator">
-                    <coordinate>lumbar_bending</coordinate>
-                    <optimal_force>25</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="lumbar_extension_actuator">
-                    <coordinate>lumbar_extension</coordinate>
-                    <optimal_force>25</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="lumbar_rotation_actuator">
-                    <coordinate>lumbar_rotation</coordinate>
-                    <optimal_force>25</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="thorax_bending_actuator">
-                    <coordinate>thorax_bending</coordinate>
-                    <optimal_force>25</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="thorax_extension_actuator">
-                    <coordinate>thorax_extension</coordinate>
-                    <optimal_force>25</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="thorax_rotation_actuator">
-                    <coordinate>thorax_rotation</coordinate>
-                    <optimal_force>25</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="cervical_bending_actuator">
-                    <coordinate>cervical_bending</coordinate>
-                    <optimal_force>15</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="cervical_extension_actuator">
-                    <coordinate>cervical_extension</coordinate>
-                    <optimal_force>15</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
-                <ActivationCoordinateActuator name="cervical_rotation_actuator">
-                    <coordinate>cervical_rotation</coordinate>
-                    <optimal_force>7.5</optimal_force>
-                    <activation_time_constant>0.035000000000000003</activation_time_constant>
-                    <default_activation>0.5</default_activation>
-                </ActivationCoordinateActuator>
 
                 <ActivationCoordinateActuator name="mtp_angle_r_motor">
                     <coordinate>mtp_angle_r</coordinate>

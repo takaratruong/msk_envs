@@ -83,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Draw objects (visual/collider)
         const drawVisuals = drawVisualsCheckbox.checked;
+        const drawBeams = drawBeamsCheckbox.checked;
         const drawSphereColliders = drawSphereCollidersCheckbox.checked;
         const drawCapsuleColliders = drawCapsuleCollidersCheckbox.checked;
 
@@ -97,25 +98,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentObjects.push(object);
                 });
             }
-            if (frame.beam_points) {
-                const color = 0xF1ECE4;
-                const points = [];
-                for (const obj of frame.beam_points) {
-                    points.push(new THREE.Vector3(...obj.pos));
-                    const sphereGeometry = new THREE.SphereGeometry(0.015, 8, 8);
-                    const sphereMaterial = new THREE.MeshStandardMaterial({color: color});
-                    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                    sphere.position.set(...obj.pos);
-                    scene.add(sphere);
-                    currentObjects.push(sphere);
-                }
-                const curve = new THREE.CatmullRomCurve3(points);
-                const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false);
-                const material = new THREE.MeshStandardMaterial({color: color});
-                const tube = new THREE.Mesh(geometry, material);
-                scene.add(tube);
-                currentObjects.push(tube);
+        }
+        if (drawBeams && frame.beam_points) {
+            const color = 0xF1ECE4;
+            const points = [];
+            for (const obj of frame.beam_points) {
+                points.push(new THREE.Vector3(...obj.pos));
+                const sphereGeometry = new THREE.SphereGeometry(0.015, 8, 8);
+                const sphereMaterial = new THREE.MeshStandardMaterial({color: color});
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(...obj.pos);
+                scene.add(sphere);
+                currentObjects.push(sphere);
             }
+            const curve = new THREE.CatmullRomCurve3(points);
+            const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false);
+            const material = new THREE.MeshStandardMaterial({color: color});
+            const tube = new THREE.Mesh(geometry, material);
+            scene.add(tube);
+            currentObjects.push(tube);
         }
 
         for (const obj of frame.colliders) {
@@ -223,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cameras[0].updateProjectionMatrix();
 
     const drawVisualsCheckbox = document.getElementById("drawVisuals");
+    const drawBeamsCheckbox = document.getElementById("drawBeams");
     const drawSphereCollidersCheckbox = document.getElementById("drawSphereColliders");
     const drawCapsuleCollidersCheckbox = document.getElementById("drawCapsuleColliders");
     const drawMusclesCheckbox = document.getElementById("drawMuscles");
@@ -350,6 +352,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     drawVisualsCheckbox.addEventListener("change", () => {
+        loadFrame(currentFrame);
+    });
+    drawBeamsCheckbox.addEventListener("change", () => {
         loadFrame(currentFrame);
     });
     drawSphereCollidersCheckbox.addEventListener("change", () => {

@@ -155,15 +155,11 @@ class SprintConfig(BaseArgs):
     lambda_vel: float = 1e-2
     lambda_mid_lane: float = 3e-2
 
-    # lambda_spring: float = -1e-4
-    # lambda_damper: float = -3e-4
-    # lambda_limit: float = -1e-3
-    # lambda_muscle_passive: float = -1e-4
+    lambda_spring: float = -1e-4
+    lambda_damper: float = -3e-4
+    lambda_limit: float = -1e-3
+    lambda_muscle_passive: float = -1e-4
     # lambda_muscle_passive: float = 0.0
-    lambda_spring: float = 0.0
-    lambda_damper: float = 0.0
-    lambda_limit: float = -1e-4
-    lambda_muscle_passive: float = 0.0
 
     lambda_actuator: float = 0.0
     lambda_fatigue: float = 0.0

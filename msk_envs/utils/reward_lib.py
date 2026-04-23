@@ -38,6 +38,22 @@ def joint_penalty(limit_torques: torch.Tensor, squared: bool = False):
     return limit_torque_sum
 
 
+def ignore_toe_joint_penalty(limit_torques: torch.Tensor, toe_dof_ids: list[int], squared: bool = False):
+    """Joint limit penalty that ignores specified toe joints"""
+    mask = torch.ones(limit_torques.shape[1], dtype=torch.bool, device=limit_torques.device)
+    mask[toe_dof_ids] = False
+    filtered_limit_torques = limit_torques[:, mask]
+
+    if squared:
+        sq_limit_torque = torch.pow(filtered_limit_torques, 2)
+        limit_torque_sum = torch.sum(sq_limit_torque, dim=1)
+    else:
+        abs_limit_torque = torch.abs(filtered_limit_torques)
+        limit_torque_sum = torch.sum(abs_limit_torque, dim=1)
+
+    return limit_torque_sum
+
+
 def alive_bonus(fallen: torch.Tensor):
     """Alive bonus based on whether the agent has fallen"""
     return 1.0 - fallen.float()

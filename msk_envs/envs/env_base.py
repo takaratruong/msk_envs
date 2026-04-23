@@ -557,6 +557,9 @@ class MSKEnv:
     def lookup_body_id(self, body_name: str) -> int:
         return self.body_id_lookup[body_name] if body_name in self.body_id_lookup else -1
 
+    def lookup_dof_id(self, dof_name: str) -> int:
+        return self.dof_id_lookup[dof_name] if dof_name in self.dof_id_lookup else -1
+
     def scene_settings(self) -> SceneSettings:
         """ Override to provide custom scene settings for viewer/renderer """
         return SceneSettings()

@@ -4,7 +4,7 @@ from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, \
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, ignore_toe_joint_penalty, \
     actuator_sq_penalty, head_acc_penalty, fatigue_penalty, mid_lane_reward, has_fallen, self_collision_penalty
 from ..utils.scene_settings import SceneSettings
 from ..utils.quat import quat_mul, quat_conjugate
@@ -41,8 +41,11 @@ class LanesEnv(MSKEnv):
 
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
-        self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
+        self.toes_dof_ids = [self.lookup_dof_id("mtp_angle_l"), self.lookup_dof_id("mtp_angle_r")]
+        assert -1 not in self.toes_ids, "Toes body IDs not found in model"
+        assert -1 not in self.toes_dof_ids, "Toes DOF IDs not found in model"
 
+        self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
         self.max_distance_reached = 0.0
         return
 
@@ -94,10 +97,14 @@ class LanesEnv(MSKEnv):
 
         # Joint passive penalty
         squared_penalties = False
-        rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
-        rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
-        rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
-        rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
+        # rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
+        # rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
+        # rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
+        # rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
+        rew_spring = ignore_toe_joint_penalty(self.ufrc_spring, self.toes_dof_ids, squared=squared_penalties)
+        rew_damper = ignore_toe_joint_penalty(self.ufrc_damper, self.toes_dof_ids, squared=squared_penalties)
+        rew_limit = ignore_toe_joint_penalty(self.ufrc_limit, self.toes_dof_ids, squared=squared_penalties)
+        rew_muscle_passive = ignore_toe_joint_penalty(self.ufrc_muscle_passive, self.toes_dof_ids, squared=squared_penalties)
 
         rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
         rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)

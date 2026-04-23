@@ -1310,6 +1310,144 @@
 					<!--The elements of the inertia tensor (Vec6) as [Ixx Iyy Izz Ixy Ixz Iyz] measured about the mass_center and not the body origin.-->
 					<inertia>0.016166478492149996 0.015633975000000001 0.016166478492149996 0 0 0</inertia>
 				</Body>
+				<Body name="clavicle_r">
+					<!--The geometry used to display the axes of this Frame.-->
+					<FrameGeometry name="frame_geometry">
+						<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+						<socket_frame>..</socket_frame>
+						<!--Scale factors in X, Y, Z directions respectively.-->
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					<!--List of geometry attached to this Frame. Note, the geometry are treated as fixed to the frame and they share the transform of the frame when visualized-->
+					<attached_geometry>
+						<Mesh name="clavicle_r_mesh">
+							<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+							<socket_frame>..</socket_frame>
+							<!--Scale factors in X, Y, Z directions respectively.-->
+							<scale_factors>1 1 1.0745</scale_factors>
+							<!--Default appearance attributes for this Geometry-->
+							<Appearance>
+								<!--All properties of this object have their default values.-->
+							</Appearance>
+							<!--Name of geometry file.-->
+							<mesh_file>clavicle_r.obj</mesh_file>
+						</Mesh>
+					</attached_geometry>
+					<!--The mass of the body (kg)-->
+					<mass>0.1898</mass>
+					<!--The location (Vec3) of the mass center in the body frame.-->
+					<mass_center>-0.0111 0.0064000000000000003 0.058237899999999995</mass_center>
+					<!--The elements of the inertia tensor (Vec6) as [Ixx Iyy Izz Ixy Ixz Iyz] measured about the mass_center and not the body origin.-->
+					<inertia>0.00030794208637499999 0.00030794208637499999 4.8999999999999998e-05 0 0 0</inertia>
+				</Body>
+				<Body name="clavicle_l">
+					<!--The geometry used to display the axes of this Frame.-->
+					<FrameGeometry name="frame_geometry">
+						<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+						<socket_frame>..</socket_frame>
+						<!--Scale factors in X, Y, Z directions respectively.-->
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					<!--List of geometry attached to this Frame. Note, the geometry are treated as fixed to the frame and they share the transform of the frame when visualized-->
+					<attached_geometry>
+						<Mesh name="clavicle_l_mesh">
+							<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+							<socket_frame>..</socket_frame>
+							<!--Scale factors in X, Y, Z directions respectively.-->
+							<scale_factors>1 1 1.0745</scale_factors>
+							<!--Default appearance attributes for this Geometry-->
+							<Appearance>
+								<!--All properties of this object have their default values.-->
+							</Appearance>
+							<!--Name of geometry file.-->
+							<mesh_file>clavicle_l.obj</mesh_file>
+						</Mesh>
+					</attached_geometry>
+					<!--The mass of the body (kg)-->
+					<mass>0.1898</mass>
+					<!--The location (Vec3) of the mass center in the body frame.-->
+					<mass_center>-0.0111 0.0064000000000000003 -0.058237899999999995</mass_center>
+					<!--The elements of the inertia tensor (Vec6) as [Ixx Iyy Izz Ixy Ixz Iyz] measured about the mass_center and not the body origin.-->
+					<inertia>0.00030794208637499999 0.00030794208637499999 4.8999999999999998e-05 0 0 0</inertia>
+				</Body>
+				<Body name="scapula_r">
+					<!--List of components that this component owns and serializes.-->
+					<components>
+						<Station name="acromion_r">
+							<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+							<socket_parent_frame>..</socket_parent_frame>
+							<!--The fixed location of the station expressed in its parent frame.-->
+							<location>0 0 0</location>
+						</Station>
+					</components>
+					<!--The geometry used to display the axes of this Frame.-->
+					<FrameGeometry name="frame_geometry">
+						<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+						<socket_frame>..</socket_frame>
+						<!--Scale factors in X, Y, Z directions respectively.-->
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					<!--List of geometry attached to this Frame. Note, the geometry are treated as fixed to the frame and they share the transform of the frame when visualized-->
+					<attached_geometry>
+						<Mesh name="scapula_r_mesh">
+							<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+							<socket_frame>..</socket_frame>
+							<!--Scale factors in X, Y, Z directions respectively.-->
+							<scale_factors>1 0.99609999999999999 1.0745</scale_factors>
+							<!--Default appearance attributes for this Geometry-->
+							<Appearance>
+								<!--All properties of this object have their default values.-->
+							</Appearance>
+							<!--Name of geometry file.-->
+							<mesh_file>scapula_r.obj</mesh_file>
+						</Mesh>
+					</attached_geometry>
+					<!--The mass of the body (kg)-->
+					<mass>0.70540000000000003</mass>
+					<!--The location (Vec3) of the mass center in the body frame.-->
+					<mass_center>-0.046120000000000001 -0.031775589999999999 -0.049050925000000002</mass_center>
+					<!--The elements of the inertia tensor (Vec6) as [Ixx Iyy Izz Ixy Ixz Iyz] measured about the mass_center and not the body origin.-->
+					<inertia>0.0010703094499999999 0.0010351547249999999 0.0010351547249999999 0 0 0</inertia>
+				</Body>
+				<Body name="scapula_l">
+					<!--List of components that this component owns and serializes.-->
+					<components>
+						<Station name="acromion_l">
+							<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
+							<socket_parent_frame>..</socket_parent_frame>
+							<!--The fixed location of the station expressed in its parent frame.-->
+							<location>0 0 0</location>
+						</Station>
+					</components>
+					<!--The geometry used to display the axes of this Frame.-->
+					<FrameGeometry name="frame_geometry">
+						<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+						<socket_frame>..</socket_frame>
+						<!--Scale factors in X, Y, Z directions respectively.-->
+						<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+					</FrameGeometry>
+					<!--List of geometry attached to this Frame. Note, the geometry are treated as fixed to the frame and they share the transform of the frame when visualized-->
+					<attached_geometry>
+						<Mesh name="scapula_l_mesh">
+							<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+							<socket_frame>..</socket_frame>
+							<!--Scale factors in X, Y, Z directions respectively.-->
+							<scale_factors>1 0.99609999999999999 1.0745</scale_factors>
+							<!--Default appearance attributes for this Geometry-->
+							<Appearance>
+								<!--All properties of this object have their default values.-->
+							</Appearance>
+							<!--Name of geometry file.-->
+							<mesh_file>scapula_l.obj</mesh_file>
+						</Mesh>
+					</attached_geometry>
+					<!--The mass of the body (kg)-->
+					<mass>0.70540000000000003</mass>
+					<!--The location (Vec3) of the mass center in the body frame.-->
+					<mass_center>-0.046120000000000001 -0.031775589999999999 0.049050925000000002</mass_center>
+					<!--The elements of the inertia tensor (Vec6) as [Ixx Iyy Izz Ixy Ixz Iyz] measured about the mass_center and not the body origin.-->
+					<inertia>0.0010703094499999999 0.0010351547249999999 0.0010351547249999999 0 0 0</inertia>
+				</Body>
 			</objects>
 			<groups />
 		</BodySet>
@@ -2620,6 +2758,132 @@
 					<!--The length of the beam (default: 1.0).-->
 					<beam_length>0.074999999999999997</beam_length>
 				</CantileverFreeBeamJoint>
+				<WeldJoint name="sternoclavicular_r">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>sternoclavicular_r_parent_frame</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>sternoclavicular_r_child_frame</socket_child_frame>
+					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
+					<frames>
+						<PhysicalOffsetFrame name="sternoclavicular_r_parent_frame">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/thorax</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0.0063200000000000001 0.0069029730000000006 0.027399749999999997</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="sternoclavicular_r_child_frame">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/clavicle_r</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0 0 0</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</WeldJoint>
+				<WeldJoint name="sternoclavicular_l">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>sternoclavicular_l_parent_frame</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>sternoclavicular_l_child_frame</socket_child_frame>
+					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
+					<frames>
+						<PhysicalOffsetFrame name="sternoclavicular_l_parent_frame">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/thorax</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0.0063200000000000001 0.0069029730000000006 -0.027399749999999997</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+						<PhysicalOffsetFrame name="sternoclavicular_l_child_frame">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/clavicle_l</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0 0 0</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0 0 0</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</WeldJoint>
+				<WeldJoint name="scapulothoracic_r">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>scapulothoracic_r_weld_frame</socket_child_frame>
+					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
+					<frames>
+						<PhysicalOffsetFrame name="scapulothoracic_r_weld_frame">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/scapula_r</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0.065445199999999995 -0.059790205230000004 -0.1569855245</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>-0.29194399999999998 -0.28497099999999997 -0.12239</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</WeldJoint>
+				<WeldJoint name="scapulothoracic_l">
+					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
+					<socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
+					<socket_child_frame>scapulothoracic_l_weld_frame</socket_child_frame>
+					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
+					<frames>
+						<PhysicalOffsetFrame name="scapulothoracic_l_weld_frame">
+							<!--The geometry used to display the axes of this Frame.-->
+							<FrameGeometry name="frame_geometry">
+								<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
+								<socket_frame>..</socket_frame>
+								<!--Scale factors in X, Y, Z directions respectively.-->
+								<scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
+							</FrameGeometry>
+							<!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
+							<socket_parent>/bodyset/scapula_l</socket_parent>
+							<!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
+							<translation>0.065445199999999995 -0.059790205230000004 0.1569855245</translation>
+							<!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
+							<orientation>0.29194399999999998 0.28497099999999997 -0.12239</orientation>
+						</PhysicalOffsetFrame>
+					</frames>
+				</WeldJoint>
 			</objects>
 			<groups />
 		</JointSet>
@@ -2999,7 +3263,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3025,7 +3289,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3051,7 +3315,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3077,7 +3341,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3103,7 +3367,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3129,7 +3393,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3155,7 +3419,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3181,7 +3445,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3207,7 +3471,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>50.0</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -3229,6 +3493,188 @@
 					<!--Option to compute the dissipation energy due to damping in the CoordinateLimitForce. If true the dissipation power is automatically integrated to provide energy. Default is false.-->
 					<compute_dissipation_energy>false</compute_dissipation_energy>
 				</CoordinateLimitForce>
+				<Millard2012EquilibriumMuscle name="trapezius_clav_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.037199999999999997 -0.010757880000000001 0.0026325250000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_r</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.030099999999999998 0.024899999999999999 0.097779499999999991</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>201.59999999999999</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.11764152833376132</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.028183862156269349</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="trapezius_clav_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="trapezius_clav_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="trapezius_clav_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="trapezius_clav_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="levator_scapulae_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0096699999999999998 -0.010160220000000001 0.033416950000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathObstacle name="obstacle_0">
+								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
+								<socket_contact_geometry>/bodyset/thorax/thorax_r_obstacle</socket_contact_geometry>
+								<!--The contact hint for the obstacle.-->
+								<contact_hint>-0.035000000000000003 0.22500000000000001 0.040000000000000001</contact_hint>
+							</Scholz2015GeometryPathObstacle>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.078 -0.0080684099999999998 -0.11056605000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>280</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.15798890853842865</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.019022745641509152</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="levator_scapulae_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="levator_scapulae_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="levator_scapulae_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="levator_scapulae_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
 				<Millard2012EquilibriumMuscle name="rectus_abdominis_r">
 					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
 					<min_control>0.01</min_control>
@@ -3301,7 +3747,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -3341,6 +3787,188 @@
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
 					<TendonForceLengthCurve name="rectus_abdominis_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="trapezius_clav_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.037199999999999997 -0.010757880000000001 -0.0026325250000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_l</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.030099999999999998 0.024899999999999999 -0.097779499999999991</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>201.59999999999999</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.11764152833376132</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.028183862156269349</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="trapezius_clav_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="trapezius_clav_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="trapezius_clav_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="trapezius_clav_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="levator_scapulae_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.0096699999999999998 -0.010160220000000001 -0.033416950000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathObstacle name="obstacle_0">
+								<!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
+								<socket_contact_geometry>/bodyset/thorax/thorax_l_obstacle</socket_contact_geometry>
+								<!--The contact hint for the obstacle.-->
+								<contact_hint>-0.035000000000000003 0.22500000000000001 -0.040000000000000001</contact_hint>
+							</Scholz2015GeometryPathObstacle>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.078 -0.0080684099999999998 0.11056605000000001</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>280</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.15798890853842862</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.019022745641509149</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="levator_scapulae_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="levator_scapulae_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="levator_scapulae_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="levator_scapulae_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -3416,7 +4044,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -3513,7 +4141,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -3610,7 +4238,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -3698,7 +4326,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -3786,7 +4414,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -3874,7 +4502,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -3962,7 +4590,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4050,7 +4678,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4138,7 +4766,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4226,7 +4854,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4314,7 +4942,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4402,7 +5030,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4490,7 +5118,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4578,7 +5206,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4666,7 +5294,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4754,7 +5382,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4842,7 +5470,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4930,7 +5558,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -4970,6 +5598,182 @@
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
 					<TendonForceLengthCurve name="scm1_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm2_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_r</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 0.037822400000000006</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.002 0.0069727000000000001 0.058022999999999998</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.10784215955853532</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.035146558630938206</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm2_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm2_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm2_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm2_r_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm3_r">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_r</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 0.037822400000000006</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.025999999999999999 0.018925899999999999 0.059097500000000004</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.10783297272014906</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.069359565888431438</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm3_r_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm3_r_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm3_r_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm3_r_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -5018,7 +5822,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5106,7 +5910,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5194,7 +5998,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5291,7 +6095,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5388,7 +6192,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5476,7 +6280,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5564,7 +6368,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5652,7 +6456,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5740,7 +6544,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5828,7 +6632,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -5916,7 +6720,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6004,7 +6808,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6092,7 +6896,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6180,7 +6984,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6268,7 +7072,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6356,7 +7160,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6444,7 +7248,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6532,7 +7336,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6620,7 +7424,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.12914999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6708,7 +7512,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6748,6 +7552,182 @@
 					</FiberForceLengthCurve>
 					<!--Tendon-force-length curve.-->
 					<TendonForceLengthCurve name="scm1_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm2_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_l</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 -0.037822400000000006</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.002 0.0069727000000000001 -0.058022999999999998</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.10784215955853532</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.035146558630938206</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm2_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm2_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm2_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm2_l_TendonForceLengthCurve">
+						<!--All properties of this object have their default values.-->
+					</TendonForceLengthCurve>
+				</Millard2012EquilibriumMuscle>
+				<Millard2012EquilibriumMuscle name="scm3_l">
+					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
+					<min_control>0.01</min_control>
+					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
+					<max_control>1</max_control>
+					<!--The path of the actuator which defines length and lengthening speed.-->
+					<Scholz2015GeometryPath name="path">
+						<!--Default appearance attributes for this AbstractGeometryPath.-->
+						<Appearance>
+							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+							<color>1 0 0</color>
+						</Appearance>
+						<!--The list of elements (path points or obstacles) defining the path.-->
+						<path_elements>
+							<Scholz2015GeometryPathPoint name="path_point_0">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/clavicle_l</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>0.0038800000000000002 0.0054200000000000003 -0.037822400000000006</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+							<Scholz2015GeometryPathPoint name="path_point_1">
+								<!--A point fixed to a PhysicalFrame that the path must pass through.-->
+								<PathPoint name="pathpoint">
+									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+									<socket_parent_frame>/bodyset/head</socket_parent_frame>
+									<!--The fixed location of the path point expressed in its parent frame.-->
+									<location>-0.025999999999999999 0.018925899999999999 -0.059097500000000004</location>
+								</PathPoint>
+							</Scholz2015GeometryPathPoint>
+						</path_elements>
+						<!--The algorithm to use for computing the path. Valid options are : 'scholz2015' and 'minimum_length' (default: 'scholz2015').-->
+						<algorithm>minimum_length</algorithm>
+					</Scholz2015GeometryPath>
+					<!--Maximum isometric force that the fibers can generate-->
+					<max_isometric_force>98.5</max_isometric_force>
+					<!--Optimal length of the muscle fibers-->
+					<optimal_fiber_length>0.10783297272014906</optimal_fiber_length>
+					<!--Resting length of the tendon-->
+					<tendon_slack_length>0.069359565888431438</tendon_slack_length>
+					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+					<pennation_angle_at_optimal>0.26179999999999998</pennation_angle_at_optimal>
+					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
+					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
+					<ignore_activation_dynamics>false</ignore_activation_dynamics>
+					<!--The linear damping of the fiber.-->
+					<fiber_damping>0.10000000000000001</fiber_damping>
+					<!--Active-force-length curve.-->
+					<ActiveForceLengthCurve name="scm3_l_ActiveForceLengthCurve">
+						<!--Minimum value of the active-force-length curve-->
+						<minimum_value>0</minimum_value>
+					</ActiveForceLengthCurve>
+					<!--Force-velocity curve.-->
+					<ForceVelocityCurve name="scm3_l_ForceVelocityCurve">
+						<!--Curve slope at the maximum normalized concentric (shortening) velocity (normalized velocity of -1)-->
+						<concentric_slope_at_vmax>0</concentric_slope_at_vmax>
+						<!--Curve slope just before reaching concentric_slope_at_vmax-->
+						<concentric_slope_near_vmax>0.25</concentric_slope_near_vmax>
+						<!--Curve slope at isometric (normalized velocity of 0)-->
+						<isometric_slope>5</isometric_slope>
+						<!--Curve slope at the maximum normalized eccentric (lengthening) velocity (normalized velocity of 1)-->
+						<eccentric_slope_at_vmax>0</eccentric_slope_at_vmax>
+						<!--Curve slope just before reaching eccentric_slope_at_vmax-->
+						<eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
+						<!--Curve value at the maximum normalized eccentric contraction velocity-->
+						<max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
+					</ForceVelocityCurve>
+					<!--Passive-force-length curve.-->
+					<FiberForceLengthCurve name="scm3_l_FiberForceLengthCurve">
+						<!--Fiber strain at zero force-->
+						<strain_at_zero_force>0</strain_at_zero_force>
+						<!--Fiber strain at a tension of 1 normalized force-->
+						<strain_at_one_norm_force>0.69999999999999996</strain_at_one_norm_force>
+						<!--Fiber stiffness at the end of the low-force region-->
+						<stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
+						<!--Fiber stiffness at a tension of 1 normalized force-->
+						<stiffness_at_one_norm_force>2.8571428571428572</stiffness_at_one_norm_force>
+						<!--Fiber curve bend, from linear (0) to maximum bend (1)-->
+						<curviness>0.75</curviness>
+					</FiberForceLengthCurve>
+					<!--Tendon-force-length curve.-->
+					<TendonForceLengthCurve name="scm3_l_TendonForceLengthCurve">
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
@@ -6796,7 +7776,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6884,7 +7864,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -6972,7 +7952,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -7066,7 +8046,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.11478091999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -7254,7 +8234,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.19470502000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -7442,7 +8422,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.20730759000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -7536,7 +8516,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31148325999999998</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -7721,7 +8701,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.26422317000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -8556,7 +9536,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.35401178</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -8662,7 +9642,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.36738206000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -8768,7 +9748,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.38241613000000002</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -8856,7 +9836,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -8944,7 +9924,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -9032,7 +10012,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -9120,7 +10100,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17453293</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -9208,7 +10188,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -9390,7 +10370,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17200156</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -9496,7 +10476,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.27991397000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -9938,7 +10918,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.21552513000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -10159,7 +11139,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.026135419999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -11192,7 +12172,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.11478091999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -11380,7 +12360,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.19470502000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -11568,7 +12548,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.20730759000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -11662,7 +12642,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31148325999999998</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -11847,7 +12827,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.26422317000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -12682,7 +13662,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.35401178</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -12788,7 +13768,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.36738206000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -12894,7 +13874,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.38241613000000002</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -12982,7 +13962,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -13070,7 +14050,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -13158,7 +14138,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.31655591</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -13246,7 +14226,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17453293</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -13334,7 +14314,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -13516,7 +14496,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.17200156</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -13622,7 +14602,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.27991397000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -14064,7 +15044,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.21552513000000001</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -14285,7 +15265,7 @@
 					<!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
 					<pennation_angle_at_optimal>0.026135419999999999</pennation_angle_at_optimal>
 					<!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-					<ignore_tendon_compliance>false</ignore_tendon_compliance>
+					<ignore_tendon_compliance>true</ignore_tendon_compliance>
 					<!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
 					<ignore_activation_dynamics>false</ignore_activation_dynamics>
 					<!--The linear damping of the fiber.-->
@@ -15411,7 +16391,7 @@
 					<radius>0.11</radius>
 				</ContactSphere>
 			</objects>
-			<groups/>
+			<groups />
 		</ContactGeometrySet>
 	</Model>
 </OpenSimDocument>

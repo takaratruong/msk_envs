@@ -18013,13 +18013,13 @@
 				</Millard2012EquilibriumMuscle>
 
                 <ActivationCoordinateActuator name="shoulder_flexion_r_motor">
-                    <optimal_force>75.0</optimal_force>
+                    <optimal_force>100.0</optimal_force>
                     <coordinate>shoulder_flexion_r</coordinate>
                     <activation_time_constant>0.035</activation_time_constant>
                     <default_activation>0.5</default_activation>
                 </ActivationCoordinateActuator>
                 <ActivationCoordinateActuator name="shoulder_flexion_l_motor">
-                    <optimal_force>75.0</optimal_force>
+                    <optimal_force>100.0</optimal_force>
                     <coordinate>shoulder_flexion_l</coordinate>
                     <activation_time_constant>0.035</activation_time_constant>
                     <default_activation>0.5</default_activation>

@@ -1,11 +1,8 @@
 import msk_warp
-from msk_envs.utils.parse_mot import parse_mot
 import torch
-import warp as wp
 
 
 def main():
-    motion_file = "msk_envs/motions/walk.mot"
     model_path = "msk_envs/msk_models/athlete15.osim"
     function_path = "msk_envs/msk_models/athlete15paths_minimal.xml"
     load_result = msk_warp.load_model(
@@ -29,19 +26,16 @@ def main():
         draw_sites=False,
     )
 
-    motion = parse_mot(motion_file, load_result, device,
-                       in_degrees=False)
+    motion = torch.load("corrected_motion.pt")
     motion = torch.tensor(motion, device=device)
     ref_time, ref_frames = motion[:, 0], motion[:, 1:]
     num_frames = len(motion)
 
     joint_positions = msk_warp.joint_positions(d)
-    for i in range(0, num_frames, 50):
-        # Set the joint positions
+    for i in range(num_frames):
         joint_positions[0, :] = ref_frames[i, :]
         msk_warp.fk(m, d)
         renderer.render(m, d)
-
     return
 
 

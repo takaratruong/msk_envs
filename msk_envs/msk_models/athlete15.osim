@@ -4728,7 +4728,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_r</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25</stiffness>
+                    <stiffness>65</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1</viscosity>
                 </SpringGeneralizedForce>
@@ -4910,7 +4910,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_l</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25</stiffness>
+                    <stiffness>65</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1</viscosity>
                 </SpringGeneralizedForce>
@@ -24641,77 +24641,161 @@
         </ForceSet>
         <ContactGeometrySet>
             <objects>
-                <ContactSphere name="heel_r">
-                    <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.012670465763027947 0.0 -0.009408062663105943</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
-                </ContactSphere>
-                <ContactSphere name="lateralRearfoot_r">
-                    <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.07349295892220219 0.0 0.02594508923361074</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
-                </ContactSphere>
-                <ContactSphere name="lateralMidfoot_r">
-                    <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.13271101620324216 0.0 0.04557193874406669</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
-                </ContactSphere>
-                <ContactSphere name="lateralToe_r">
+<!--                <ContactSphere name="heel_r">-->
+<!--                    <socket_frame>/bodyset/calcn_r</socket_frame>-->
+<!--                    <location>0.012670465763027947 0.0 -0.009408062663105943</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="lateralRearfoot_r">-->
+<!--                    <socket_frame>/bodyset/calcn_r</socket_frame>-->
+<!--                    <location>0.07349295892220219 0.0 0.02594508923361074</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="lateralMidfoot_r">-->
+<!--                    <socket_frame>/bodyset/calcn_r</socket_frame>-->
+<!--                    <location>0.13271101620324216 0.0 0.04557193874406669</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="lateralToe_r">-->
+<!--                    <socket_frame>/bodyset/toes_r</socket_frame>-->
+<!--                    <location>0.020396210584827205 0.0 0.05942451396007953</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="medialToe_r">-->
+<!--                    <socket_frame>/bodyset/toes_r</socket_frame>-->
+<!--                    <location>0.06590438027807016 0.0 -0.023078969828319782</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="medialMidfoot_r">-->
+<!--                    <socket_frame>/bodyset/calcn_r</socket_frame>-->
+<!--                    <location>0.1762162283132694 0.0 -0.030544887882054273</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="heel_l">-->
+<!--                    <socket_frame>/bodyset/calcn_l</socket_frame>-->
+<!--                    <location>0.012670465763027947 0.0 0.009408062663105943</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="lateralRearfoot_l">-->
+<!--                    <socket_frame>/bodyset/calcn_l</socket_frame>-->
+<!--                    <location>0.07349295892220219 0.0 -0.02594508923361074</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="lateralMidfoot_l">-->
+<!--                    <socket_frame>/bodyset/calcn_l</socket_frame>-->
+<!--                    <location>0.13271101620324216 0.0 -0.04557193874406669</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="lateralToe_l">-->
+<!--                    <socket_frame>/bodyset/toes_l</socket_frame>-->
+<!--                    <location>0.020396210584827205 0.0 -0.05942451396007953</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="medialToe_l">-->
+<!--                    <socket_frame>/bodyset/toes_l</socket_frame>-->
+<!--                    <location>0.06590438027807016 0.0 0.023078969828319782</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+<!--                <ContactSphere name="medialMidfoot_l">-->
+<!--                    <socket_frame>/bodyset/calcn_l</socket_frame>-->
+<!--                    <location>0.1762162283132694 0.0 0.030544887882054273</location>-->
+<!--                    <orientation>0 0 0</orientation>-->
+<!--                    <radius>0.035</radius>-->
+<!--                </ContactSphere>-->
+                <ContactSphere name="right_foot_1">
                     <socket_frame>/bodyset/toes_r</socket_frame>
-                    <location>0.020396210584827205 0.0 0.05942451396007953</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                    <location>0.08376212993076143 -0.0299 -0.032595527118680766</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="medialToe_r">
+                <ContactSphere name="right_foot_2">
                     <socket_frame>/bodyset/toes_r</socket_frame>
-                    <location>0.06590438027807016 0.0 -0.023078969828319782</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                    <location>0.03523042374770223 -0.0299 1.733688990661108e-08</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="medialMidfoot_r">
+                <ContactSphere name="right_foot_3">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.1762162283132694 0.0 -0.030544887882054273</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                    <location>0.1796272285639648 -0.0282 7.845978405970473e-08</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="heel_l">
-                    <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.012670465763027947 0.0 0.009408062663105943</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                <ContactSphere name="right_foot_4">
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.1796272285639648 -0.0282 -0.02590109526184921</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="lateralRearfoot_l">
-                    <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.07349295892220219 0.0 -0.02594508923361074</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                <ContactSphere name="right_foot_5">
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.08388196130405294 -0.0282 0.051172698168837995</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="lateralMidfoot_l">
-                    <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.13271101620324216 0.0 -0.04557193874406669</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                <ContactSphere name="right_foot_6">
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.14259933421688997 -0.0282 -6.943813800610904e-08</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="lateralToe_l">
+                <ContactSphere name="right_foot_7">
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.015 -0.0282 -0.01</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
+                </ContactSphere>
+                <ContactSphere name="left_foot_1">
                     <socket_frame>/bodyset/toes_l</socket_frame>
-                    <location>0.020396210584827205 0.0 -0.05942451396007953</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                    <location>0.08376212993076143 -0.0299 0.032595527118680766</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="medialToe_l">
+                <ContactSphere name="left_foot_2">
                     <socket_frame>/bodyset/toes_l</socket_frame>
-                    <location>0.06590438027807016 0.0 0.023078969828319782</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                    <location>0.03523042374770223 -0.0299 -1.733688990661108e-08</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
-                <ContactSphere name="medialMidfoot_l">
+                <ContactSphere name="left_foot_3">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.1762162283132694 0.0 0.030544887882054273</location>
-                    <orientation>0 0 0</orientation>
-                    <radius>0.035</radius>
+                    <location>0.1796272285639648 -0.0282 -7.845978405970473e-08</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
+                </ContactSphere>
+                <ContactSphere name="left_foot_4">
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.1796272285639648 -0.0282 0.02590109526184921</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
+                </ContactSphere>
+                <ContactSphere name="left_foot_5">
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.08388196130405294 -0.0282 -0.051172698168837995</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
+                </ContactSphere>
+                <ContactSphere name="left_foot_6">
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.14259933421688997 -0.0282 6.943813800610904e-08</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
+                </ContactSphere>
+                <ContactSphere name="left_foot_7">
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.015 -0.0282 0.01</location>
+                    <orientation>0.0 0.0 0.0</orientation>
+                    <radius>0.02</radius>
                 </ContactSphere>
 
                 <ContactEllipsoid name="femur_r_capsule">

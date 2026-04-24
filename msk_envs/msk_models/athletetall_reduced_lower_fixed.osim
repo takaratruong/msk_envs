@@ -3046,7 +3046,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>lumbar_bending</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3072,7 +3072,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>lumbar_extension</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3098,7 +3098,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>lumbar_rotation</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3124,7 +3124,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_bending</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3150,7 +3150,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_extension</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3176,7 +3176,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_rotation</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3202,7 +3202,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>cervical_bending</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3228,7 +3228,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>cervical_extension</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3254,7 +3254,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>cervical_rotation</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>50.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -3562,7 +3562,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -3660,7 +3660,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -3927,7 +3927,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -4016,7 +4016,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -5088,7 +5088,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -5178,7 +5178,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -5269,7 +5269,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -5367,7 +5367,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -5465,7 +5465,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -5732,7 +5732,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -5821,7 +5821,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -6894,7 +6894,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -6985,7 +6985,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -7076,7 +7076,7 @@
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.17452999999999999</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
-                    <ignore_tendon_compliance>false</ignore_tendon_compliance>
+                    <ignore_tendon_compliance>true</ignore_tendon_compliance>
                     <!--Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.-->
                     <ignore_activation_dynamics>false</ignore_activation_dynamics>
                     <!--The linear damping of the fiber.-->
@@ -15548,88 +15548,101 @@
         <ContactGeometrySet name="contactgeometryset">
             <objects>
                 <ContactSphere name="right_foot_1">
-                    <socket_frame>/bodyset/toes_r</socket_frame>
-                    <location>0.08376212993076143 -0.0299 -0.032595527118680766</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.012670465763027947 0.0 -0.009408062663105943</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_2">
-                    <socket_frame>/bodyset/toes_r</socket_frame>
-                    <location>0.03523042374770223 -0.0299 1.733688990661108e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.07349295892220219 0.0 0.0</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_3">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.1796272285639648 -0.0282 7.845978405970473e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.13271101620324216 0.0 -0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_4">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.1796272285639648 -0.0282 -0.02590109526184921</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.13271101620324216 0.0 0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_5">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.08388196130405294 -0.0282 0.051172698168837995</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.175 0.0 -0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_6">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.14259933421688997 -0.0282 -6.943813800610904e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.175 0.0 0.03</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_7">
-                    <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.015 -0.0282 -0.01</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/toes_r</socket_frame>
+                    <location>0.05 0.0 -0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
+                <ContactSphere name="right_foot_8">
+                    <socket_frame>/bodyset/toes_r</socket_frame>
+                    <location>0.05 0.0 0.03</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
+                </ContactSphere>
+
                 <ContactSphere name="left_foot_1">
-                    <socket_frame>/bodyset/toes_l</socket_frame>
-                    <location>0.08376212993076143 -0.0299 0.032595527118680766</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.012670465763027947 0.0 0.009408062663105943</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_2">
-                    <socket_frame>/bodyset/toes_l</socket_frame>
-                    <location>0.03523042374770223 -0.0299 -1.733688990661108e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.07349295892220219 0.0 -0.0</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_3">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.1796272285639648 -0.0282 -7.845978405970473e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.13271101620324216 0.0 0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_4">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.1796272285639648 -0.0282 0.02590109526184921</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.13271101620324216 0.0 -0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_5">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.08388196130405294 -0.0282 -0.051172698168837995</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.175 0.0 0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_6">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.14259933421688997 -0.0282 6.943813800610904e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.175 0.0 -0.03</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_7">
-                    <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.015 -0.0282 0.01</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/toes_l</socket_frame>
+                    <location>0.05 0.0 0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
+                </ContactSphere>
+                <ContactSphere name="left_foot_8">
+                    <socket_frame>/bodyset/toes_l</socket_frame>
+                    <location>0.05 0.0 -0.03</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactEllipsoid name="femur_r_capsule">
                     <socket_frame>/bodyset/femur_r</socket_frame>

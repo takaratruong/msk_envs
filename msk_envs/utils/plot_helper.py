@@ -144,6 +144,12 @@ class SequencePlot:
         ax.text(x_pos, y_pos, text, fontsize=fontsize)
         return
 
+    def add_overlay(self, idx: int, y_data: list[float]):
+        ax = self.axs[idx]
+        ax2 = ax.twinx()
+        ax2.plot(self.x_data, y_data, color='gray', linestyle='dashed', alpha=0.5)
+        return
+
     def add_hline(self, idx: int, y_value: float, label: str = "", color: str = 'r'):
         ax = self.axs[idx]
         ax.axhline(y=y_value, color=color, linestyle='--', label=label)
@@ -235,7 +241,7 @@ class SequencePlot:
                 # Legend required
                 if self.labels_per_ax[i, j] >= 1:
                     ax = self.get_axes_at(i, j)
-                    fontsize = 6 if self.labels_per_ax[i, j] > 5 else 12
+                    fontsize = 3 if self.labels_per_ax[i, j] > 5 else 12
                     ax.legend(fontsize=fontsize, loc="upper right",
                               frameon=False, prop={'weight': 'bold'})
 

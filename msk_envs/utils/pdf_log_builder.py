@@ -22,7 +22,8 @@ def create_generic_plot(
         linestyles: list[str] = None,
         horizontal_lines: list[list[float]] = None,
         omit_zeros: bool = False,
-        omit_tolerance: float = 1e-4
+        omit_tolerance: float = 1e-4,
+        secondary_overlay_data: np.ndarray = None,
 ):
     n_vertical, n_horizontal = 3, 1
     n_plots = plot_data.shape[1]
@@ -89,6 +90,10 @@ def create_generic_plot(
 
                 if enforced_y_range is not None and enforced_y_range[start_idx] is not None:
                     seq_plot.enforce_y_range(idx_fig, enforced_y_range[start_idx][0], enforced_y_range[start_idx][1])
+
+                # If overlayed data requested
+                if secondary_overlay_data is not None:
+                    seq_plot.add_overlay(idx_fig, secondary_overlay_data[start_idx])
 
         seq_plot.finish(pdf)
 
@@ -385,9 +390,10 @@ def create_pdf_output(
         # --- JOINT PASSIVE MUSCLE FORCE ANALYSIS ---
         joint_passive_muscle = []
         for frame in frame_data:
-            joint_passive_muscle.append([m.muscle_passive_breakdown for m in frame.joint_moments])
-        joint_passive_muscle = np.array(joint_passive_muscle)  # [n_frames, n_dofs, n_muscles]
+            joint_passive_muscle.append([m.muscle_passive_breakdown for m in frame.joint_passive_moments])
+        joint_passive_muscle = np.array(joint_passive_muscle)  # [n_frames, n_qpos, n_muscles]
         muscle_names = [m.name for m in frame0.muscles]
+        qpos_values = np.array([[j.value for j in frame.joint_angles] for frame in frame_data])
 
         def create_joint_passive_muscle_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
@@ -400,7 +406,7 @@ def create_pdf_output(
             title = f"Joint Passive Forces ({time_start:.1f}s to {time_end:.1f}s)"
             lss, lsd = "solid", "dashed"
             create_generic_plot(
-                names=joint_dof_names,
+                names=joint_qpos_names,
                 times=time_selected,
                 frame_ind=frame_ind_selected,
                 plot_data=joint_passive_muscle[time_mask, :],
@@ -411,8 +417,9 @@ def create_pdf_output(
                 sublabels=muscle_names,
                 alphas=[0.5] * (len(muscle_names)),
                 linestyles=[lss] * (len(muscle_names)),
-                horizontal_lines=[[0.0]] * len(joint_dof_names),
-                omit_zeros=True
+                horizontal_lines=[[0.0]] * len(joint_qpos_names),
+                omit_zeros=True,
+                secondary_overlay_data=qpos_values.T,
             )
         create_joint_passive_muscle_plot()
 

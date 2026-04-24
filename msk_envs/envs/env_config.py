@@ -59,6 +59,8 @@ class EnvConfig:
     """ Maximum muscle activation """
     muscle_contraction_dynamics = msk_warp.ContractionType = msk_warp.ContractionType.DGF
     """ Muscle contraction dynamics: which force curves to use (DGF, MILLARD) """
+    muscle_active_force_width_scale: float = 1.0
+    """ For DGF active force length curve, the scaling factor of the width """
     muscle_fiber_damping: float = 0.1
     """ Fiber damping (0.0 = undamped) """
     muscle_v_max: float = 12.0

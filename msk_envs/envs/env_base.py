@@ -30,6 +30,7 @@ class MSKEnv:
             mm.fiber_damping = env_config.muscle_fiber_damping
             mm.min_activation = env_config.muscle_min_activation
             mm.max_activation = env_config.muscle_max_activation
+            mm.active_force_width_scale = env_config.muscle_active_force_width_scale
             mm.v_max = env_config.muscle_v_max
 
         # Collider properties

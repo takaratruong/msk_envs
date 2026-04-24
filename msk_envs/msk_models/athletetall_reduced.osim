@@ -22802,88 +22802,101 @@
         <ContactGeometrySet name="contactgeometryset">
             <objects>
                 <ContactSphere name="right_foot_1">
-                    <socket_frame>/bodyset/toes_r</socket_frame>
-                    <location>0.08376212993076143 -0.0299 -0.032595527118680766</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.012670465763027947 0.0 -0.009408062663105943</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_2">
-                    <socket_frame>/bodyset/toes_r</socket_frame>
-                    <location>0.03523042374770223 -0.0299 1.733688990661108e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_r</socket_frame>
+                    <location>0.07349295892220219 0.0 0.0</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_3">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.1796272285639648 -0.0282 7.845978405970473e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.125 0.0 -0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_4">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.1796272285639648 -0.0282 -0.02590109526184921</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.105 0.0 0.03</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_5">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.08388196130405294 -0.0282 0.051172698168837995</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.175 -0.01 -0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_6">
                     <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.14259933421688997 -0.0282 -6.943813800610904e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.155 -0.01 0.035</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="right_foot_7">
-                    <socket_frame>/bodyset/calcn_r</socket_frame>
-                    <location>0.015 -0.0282 -0.01</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/toes_r</socket_frame>
+                    <location>0.05 -0.0125 -0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
+                <ContactSphere name="right_foot_8">
+                    <socket_frame>/bodyset/toes_r</socket_frame>
+                    <location>0.025 -0.0125 0.04</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
+                </ContactSphere>
+
                 <ContactSphere name="left_foot_1">
-                    <socket_frame>/bodyset/toes_l</socket_frame>
-                    <location>0.08376212993076143 -0.0299 0.032595527118680766</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.012670465763027947 0.0 0.009408062663105943</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_2">
-                    <socket_frame>/bodyset/toes_l</socket_frame>
-                    <location>0.03523042374770223 -0.0299 -1.733688990661108e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/calcn_l</socket_frame>
+                    <location>0.07349295892220219 0.0 -0.0</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_3">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.1796272285639648 -0.0282 -7.845978405970473e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.125 0.0 0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_4">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.1796272285639648 -0.0282 0.02590109526184921</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.105 0.0 -0.03</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_5">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.08388196130405294 -0.0282 -0.051172698168837995</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.175 -0.01 0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_6">
                     <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.14259933421688997 -0.0282 6.943813800610904e-08</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <location>0.155 -0.01 -0.035</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactSphere name="left_foot_7">
-                    <socket_frame>/bodyset/calcn_l</socket_frame>
-                    <location>0.015 -0.0282 0.01</location>
-                    <orientation>0.0 0.0 0.0</orientation>
-                    <radius>0.02</radius>
+                    <socket_frame>/bodyset/toes_l</socket_frame>
+                    <location>0.05 -0.0125 0.02</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
+                </ContactSphere>
+                <ContactSphere name="left_foot_8">
+                    <socket_frame>/bodyset/toes_l</socket_frame>
+                    <location>0.025 -0.0125 -0.04</location>
+                    <orientation>0 0 0</orientation>
+                    <radius>0.025</radius>
                 </ContactSphere>
                 <ContactEllipsoid name="femur_r_capsule">
                     <socket_frame>/bodyset/femur_r</socket_frame>

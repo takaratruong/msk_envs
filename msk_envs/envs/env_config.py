@@ -165,7 +165,7 @@ class EnvConfigTall(EnvConfig):
 @dataclass
 class EnvConfigTallMotorArms(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athletetall_motorarms.osim"
+    model_path: str = "../msk_models/athletetall_reduced_motor_arms.osim"
     muscle_function_path: str = "../msk_models/athletetallpaths_motorarms_full.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"

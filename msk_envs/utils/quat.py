@@ -1,8 +1,10 @@
+"""
+Quaternions are in (x, y, z, w) format
+"""
 import torch
 
 
 def rotate_vec(rot: torch.Tensor, v: torch.Tensor):
-    # (x, y, z, w) format
     pure = rot[..., :3]
     scalar = rot[..., 3:]
 
@@ -19,7 +21,6 @@ def quat_mul(q1: torch.Tensor, q2: torch.Tensor) -> torch.Tensor:
     y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
     z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
     w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
-
     return torch.stack((x, y, z, w), dim=-1)
 
 

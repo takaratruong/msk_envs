@@ -112,10 +112,18 @@ def main():
             build_cuda_graph=True,
             device=device,
         )
+        dep_explorer = create_dep_explorer(
+            dep_config=dep_config,
+            num_muscles=envs.num_muscles,
+            num_worlds=envs.num_worlds,
+            device=device,
+            use_dep=args.use_dep,
+        )
         fastsac.train(
             sac_config=sac_config,
             envs=envs,
             eval_envs=eval_envs,
+            dep_explorer=dep_explorer,
             traj_out_folder=traj_out_folder,
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,

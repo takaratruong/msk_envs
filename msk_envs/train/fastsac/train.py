@@ -35,6 +35,7 @@ def train(
         sac_config: SACConfig,
         envs,
         eval_envs,
+        dep_explorer,
         traj_out_folder: str,
         analytics_out_folder: str,
         exp_name: str,
@@ -392,6 +393,8 @@ def train(
             with torch.no_grad(), _maybe_amp():
                 norm_obs = normalize_obs(obs, update=False)
                 actions = policy(obs=norm_obs, dones=dones)
+                # DEP EXPLORATION
+                actions = dep_explorer.explore(muscle_states=envs.muscle_fiber_lengths, actions=actions)
 
             next_obs, rewards, terminated, truncations, info = envs.step(actions.float())
             dones = (terminated + truncations).bool()

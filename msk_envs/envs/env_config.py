@@ -155,7 +155,7 @@ class EnvConfigGeneric(EnvConfig):
 class EnvConfigTall(EnvConfig):
     """ Environment configuration for no-hands model"""
     model_path: str = "../msk_models/athletetall_reduced.osim"
-    muscle_function_path: str = "../msk_models/athletetallpaths_reduced_minimal.xml"
+    muscle_function_path: str = "../msk_models/athletetallpaths_reduced.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     armature: float = 1e-3

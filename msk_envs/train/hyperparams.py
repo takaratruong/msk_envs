@@ -177,22 +177,23 @@ class SprintConfigTall(BaseArgs):
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_run.yaml",
-        noise_start=False,
+        # noise_start=False,
     ))
 
     """Sprint environment specific reward scales"""
     lambda_vel: float = 1e-2
     lambda_mid_lane: float = 3e-2
 
-    lambda_spring: float = -1e-4
+    lambda_spring: float = 0.0
     lambda_damper: float = -3e-4
     lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
+    lambda_muscle_passive: float = 0.0
 
     lambda_actuator: float = 0.0
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_self_collision: float = -1e-2
+    # lambda_self_collision: float = -1e-2
+    lambda_self_collision: float = 0.0
     lambda_head_acc_ang: float = 0.0
     lambda_head_acc_lin: float = 0.0
 

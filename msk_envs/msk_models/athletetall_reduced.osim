@@ -5001,9 +5001,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_bending</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>2000.0</stiffness>
+                    <stiffness>5000.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>10.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="thorax_bending_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5027,9 +5027,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_extension</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>2000.0</stiffness>
+                    <stiffness>5000.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>10.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="thorax_extension_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5053,9 +5053,9 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>thorax_rotation</coordinate>
                     <!--Spring stiffness.-->
-                    <stiffness>2000.0</stiffness>
+                    <stiffness>5000.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>10.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="thorax_rotation_limit_force">
                     <!--Coordinate (name) to be limited.-->

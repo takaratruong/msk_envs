@@ -25,7 +25,7 @@ lumbar_extension:
   q: -0.2
   v: 0.0
 thorax_extension:
-  q: 0.6
+  q: 0.632
   v: 0.0
 
 hip_flexion_r:
@@ -65,7 +65,7 @@ shoulder_flexion_r:
   q: -0.5
   v: 0.0
 shoulder_abduction_r:
-  q: 0.0
+  q: 0.2
   v: 0.0
 elbow_flex_r:
   q: 0.2
@@ -75,7 +75,7 @@ shoulder_flexion_l:
   q: 0.5
   v: 0.0
 shoulder_abduction_l:
-  q: 0.0
+  q: 0.2
   v: 0.0
 elbow_flex_l:
   q: 1.5

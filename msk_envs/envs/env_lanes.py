@@ -41,9 +41,14 @@ class LanesEnv(MSKEnv):
 
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
-        self.toes_dof_ids = [self.lookup_dof_id("mtp_angle_l"), self.lookup_dof_id("mtp_angle_r")]
+        self.toes_dof_ids = [
+            self.lookup_dof_id("mtp_angle_l"),
+            self.lookup_dof_id("mtp_angle_r"),
+            self.lookup_dof_id("pro_sup_l"),
+            self.lookup_dof_id("pro_sup_r"),
+        ]
         assert -1 not in self.toes_ids, "Toes body IDs not found in model"
-        assert -1 not in self.toes_dof_ids, "Toes DOF IDs not found in model"
+        self.toes_dof_ids = [dof_id for dof_id in self.toes_dof_ids if dof_id != -1]
 
         self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
         self.max_distance_reached = 0.0
@@ -84,7 +89,6 @@ class LanesEnv(MSKEnv):
             self.muscle_fiber_lengths,
             self.actuator_activations,
             joint_positions_without_x,
-            # self.joint_positions,
             self.joint_velocities,
             # relative_body_positions.reshape(self.num_worlds, -1),
             # relative_body_rotations.reshape(self.num_worlds, -1),
@@ -139,7 +143,12 @@ class LanesEnv(MSKEnv):
         # Has fallen
         fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
 
-        # Any of the *toes* are out of the lanes
+        # Any of the bodies are out of the lanes
+        # body_ids = [i for i in range(self.num_bodies) if i != self.ground_id]
+        # body_out = torch.zeros_like(fallen, dtype=torch.bool)
+        # for body_idx in body_ids:
+        #     body_pos = self.body_positions[:, body_idx]
+        #     body_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
         toes_out = torch.zeros_like(fallen, dtype=torch.bool)
         for body_idx in self.toes_ids:
             body_pos = self.body_positions[:, body_idx]

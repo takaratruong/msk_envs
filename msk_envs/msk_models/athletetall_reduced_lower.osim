@@ -8208,7 +8208,7 @@
                         <!--Fiber strain at zero force-->
                         <strain_at_zero_force>-0.1844453874929782</strain_at_zero_force>
                         <!--Fiber strain at a tension of 1 normalized force-->
-                        <strain_at_one_norm_force>0.50595953637679147</strain_at_one_norm_force>
+                        <strain_at_one_norm_force>1.0</strain_at_one_norm_force>
                         <!--Fiber stiffness at the end of the low-force region-->
                         <stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
                         <!--Fiber stiffness at a tension of 1 normalized force-->
@@ -8304,7 +8304,7 @@
                         <!--Fiber strain at zero force-->
                         <strain_at_zero_force>-0.1942012118750841</strain_at_zero_force>
                         <!--Fiber strain at a tension of 1 normalized force-->
-                        <strain_at_one_norm_force>0.50131836301691457</strain_at_one_norm_force>
+                        <strain_at_one_norm_force>1.0</strain_at_one_norm_force>
                         <!--Fiber stiffness at the end of the low-force region-->
                         <stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
                         <!--Fiber stiffness at a tension of 1 normalized force-->
@@ -12414,7 +12414,7 @@
                         <!--Fiber strain at zero force-->
                         <strain_at_zero_force>-0.1844453874929782</strain_at_zero_force>
                         <!--Fiber strain at a tension of 1 normalized force-->
-                        <strain_at_one_norm_force>0.50595953637679147</strain_at_one_norm_force>
+                        <strain_at_one_norm_force>1.0</strain_at_one_norm_force>
                         <!--Fiber stiffness at the end of the low-force region-->
                         <stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
                         <!--Fiber stiffness at a tension of 1 normalized force-->
@@ -12510,7 +12510,7 @@
                         <!--Fiber strain at zero force-->
                         <strain_at_zero_force>-0.1942012118750841</strain_at_zero_force>
                         <!--Fiber strain at a tension of 1 normalized force-->
-                        <strain_at_one_norm_force>0.50131836301691457</strain_at_one_norm_force>
+                        <strain_at_one_norm_force>1.0</strain_at_one_norm_force>
                         <!--Fiber stiffness at the end of the low-force region-->
                         <stiffness_at_low_force>0.20000000000000001</stiffness_at_low_force>
                         <!--Fiber stiffness at a tension of 1 normalized force-->

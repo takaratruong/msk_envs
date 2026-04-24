@@ -34,7 +34,7 @@ class VerticalEnv(MSKEnv):
         rew_max_vertical = self.max_height_achieved.clone()  # Cloned to avoid early reset issues
 
         rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
 
         self.reward_dict = {
             "rew_max_vertical": rew_max_vertical.detach(),

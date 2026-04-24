@@ -63,7 +63,7 @@ class WalkEnv(LanesEnv):
     def _compute_raw_reward_dict(self):
         rew_cot = cost_of_transport(self.muscle_powers, self.body_velocities, self.root_id)
         rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
 
         head_vel = self._head_velocities()
         rew_head = head_acceleration_penalty(head_vel, self.prev_head_v, self.delta_t)

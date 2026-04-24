@@ -5,7 +5,7 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, ignore_toe_joint_penalty, \
-    actuator_sq_penalty, head_acc_penalty, fatigue_penalty, mid_lane_reward, has_fallen, self_collision_penalty
+    actuator_sq_penalty, head_acc_penalty, activation_square_penalty, mid_lane_reward, has_fallen, self_collision_penalty
 from ..utils.scene_settings import SceneSettings
 from ..utils.quat import quat_mul, quat_conjugate
 
@@ -110,8 +110,8 @@ class LanesEnv(MSKEnv):
         rew_limit = ignore_toe_joint_penalty(self.ufrc_limit, self.toes_dof_ids, squared=squared_penalties)
         rew_muscle_passive = ignore_toe_joint_penalty(self.ufrc_muscle_passive, self.toes_dof_ids, squared=squared_penalties)
 
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
-        rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
+        rew_activation_squared = activation_square_penalty(self.muscle_activations)
         rew_self_collision = self_collision_penalty(self.body_self_collision_forces, 500.0)
         rew_head_acc_ang, rew_head_acc_lin = head_acc_penalty(self.body_accelerations[:, self.head_id])
 
@@ -123,7 +123,7 @@ class LanesEnv(MSKEnv):
             "rew_limit": rew_limit.detach(),
             "rew_muscle_passive": rew_muscle_passive.detach(),
             "rew_actuator": rew_actuator.detach(),
-            "rew_fatigue": rew_fatigue.detach(),
+            "rew_fatigue": rew_activation_squared.detach(),
             "rew_self_collision": rew_self_collision.detach(),
             "rew_head_acc_ang": rew_head_acc_ang.detach(),
             "rew_head_acc_lin": rew_head_acc_lin.detach(),

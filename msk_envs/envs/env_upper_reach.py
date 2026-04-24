@@ -111,7 +111,7 @@ class UpperReachTargetEnv(MSKEnv):
             self.compute_new_targets(reached_target_mask, new_env=False)
 
         rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
 
         terminated = self._get_terminated()
         rew_alive = alive_bonus(terminated)

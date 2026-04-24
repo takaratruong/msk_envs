@@ -1,7 +1,7 @@
 import torch
 
 from msk_envs.utils.reward_lib import joint_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen, alive_bonus, root_zero_reward, \
+    actuator_sq_penalty, metabolic_penalty, activation_square_penalty, has_fallen, alive_bonus, root_zero_reward, \
     match_start_pos_reward
 from .env_base import MSKEnv
 from .env_config import EnvConfig
@@ -64,8 +64,8 @@ class DontFallEnv(MSKEnv):
 
     def _compute_raw_reward_dict(self):
         rew_alive = alive_bonus(self._get_terminated())
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
-        rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
+        rew_fatigue = activation_square_penalty(self.muscle_activations)
         rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles)
         rew_root_zero = root_zero_reward(self.root_pos, weight=5.0)
         rew_match_start = match_start_pos_reward(self.joint_positions, self.start_pose, weight=1.0, ignore_root=True)

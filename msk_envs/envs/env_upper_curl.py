@@ -3,7 +3,7 @@ import torch
 from msk_envs.utils.global_params import UP_IDX, build_axis
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, alive_bonus, derivative_sq_penalty, \
-    fatigue_penalty, exp_distance
+    activation_square_penalty, exp_distance
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -133,7 +133,7 @@ class UpperCurlEnv(MSKEnv):
         rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
 
         # Actuator penalty, if any
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
         rew_actuator_dot = derivative_sq_penalty(self.actuator_activations_dot, self.num_actuators)
 
         terminated = self._get_terminated()

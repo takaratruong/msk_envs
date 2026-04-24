@@ -1,7 +1,7 @@
 import torch
 
 from msk_envs.utils.reward_lib import joint_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, has_fallen, alive_bonus, derivative_sq_penalty
+    actuator_sq_penalty, metabolic_penalty, activation_square_penalty, has_fallen, alive_bonus, derivative_sq_penalty
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 

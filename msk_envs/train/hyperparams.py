@@ -104,24 +104,6 @@ def pretty_print_base_args(args: BaseArgs):
     print(line)
 
 
-# @dataclass
-# class WalkConfig(BaseArgs):
-#     env_config: EnvConfig = field(default_factory=lambda: EnvConfigNoHandsWalk(
-#         env_variant=DerivedEnv.WALK,
-#         delta_t=1.0 / 30.0,
-#         max_episode_duration=5.0,
-#
-#         # muscle_multiplier=1.0,
-#     ))
-#
-#     """Walk environment specific reward scales"""
-#     lambda_cot: float = -1e-5
-#     lambda_head: float = -3e-3
-#     lambda_limit: float = -1e-2
-#     lambda_actuator: float = -1e-1
-#     lambda_alive: float = 1e-1
-#
-
 @dataclass
 class JogConfig(BaseArgs):
     env_config: EnvConfigGeneric = field(default_factory=lambda: EnvConfigGeneric(
@@ -141,7 +123,26 @@ class JogConfig(BaseArgs):
 
 
 @dataclass
-class SprintConfig(BaseArgs):
+class LaneConfig(BaseArgs):
+    """ Reusable hyperparams for lane environments """
+    lambda_vel: float = 1e-2
+    lambda_mid_lane: float = 3e-2
+
+    lambda_spring: float = 0.0
+    lambda_damper: float = 0.0
+    lambda_limit: float = -1e-3
+    lambda_muscle_passive: float = -1e-4
+
+    lambda_actuator: float = -3e-4
+    lambda_fatigue: float = -3e-4
+    lambda_metabolic: float = 0.0
+    lambda_self_collision: float = 0.0
+    lambda_head_acc_ang: float = 0.0
+    lambda_head_acc_lin: float = 0.0
+
+
+@dataclass
+class SprintConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
@@ -151,55 +152,20 @@ class SprintConfig(BaseArgs):
         noise_start=True,
     ))
 
-    """Sprint environment specific reward scales"""
-    lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 3e-2
-
-    lambda_spring: float = -1e-4
-    lambda_damper: float = -3e-4
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
-    # lambda_muscle_passive: float = 0.0
-
-    lambda_actuator: float = 0.0
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
-    lambda_self_collision: float = -1e-2
-    lambda_head_acc_ang: float = 0.0
-    lambda_head_acc_lin: float = 0.0
-
 
 @dataclass
-class SprintConfigTall(BaseArgs):
+class SprintConfigTall(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigTall(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_run.yaml",
-        # noise_start=False,
     ))
-
-    """Sprint environment specific reward scales"""
-    lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 3e-2
-
-    lambda_spring: float = 0.0
-    lambda_damper: float = 0.0
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = 0.0
-
-    lambda_actuator: float = 0.0
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
-    # lambda_self_collision: float = -1e-2
-    lambda_self_collision: float = 0.0
-    lambda_head_acc_ang: float = 0.0
-    lambda_head_acc_lin: float = 0.0
 
 
 @dataclass
-class SprintConfigTallMotor(BaseArgs):
+class SprintConfigTallMotor(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigTallMotorArms(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
@@ -209,26 +175,9 @@ class SprintConfigTallMotor(BaseArgs):
         noise_start=False,
     ))
 
-    """Sprint environment specific reward scales"""
-    lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 3e-2
-
-    lambda_spring: float = 0.0
-    lambda_damper: float = 0.0
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = 0.0
-
-    lambda_actuator: float = 0.0
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
-    # lambda_self_collision: float = -1e-2
-    lambda_self_collision: float = 0.0
-    lambda_head_acc_ang: float = 0.0
-    lambda_head_acc_lin: float = 0.0
-
 
 @dataclass
-class SprintLowerConfig(BaseArgs):
+class SprintLowerConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigLower(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
@@ -237,54 +186,20 @@ class SprintLowerConfig(BaseArgs):
         starting_pose_path="../msk_models/starting_pose_run.yaml",
     ))
 
-    """Sprint environment specific reward scales"""
-    lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 3e-2
-
-    lambda_spring: float = -1e-4
-    lambda_damper: float = -3e-4
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
-    # lambda_muscle_passive: float = 0.0
-
-    lambda_actuator: float = -1e-2
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
-    lambda_self_collision: float = -1e-2
-    lambda_head_acc_ang: float = 0.0
-    lambda_head_acc_lin: float = 0.0
-
 
 @dataclass
-class SprintConfigTallLower(BaseArgs):
+class SprintConfigTallLower(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigTallLower(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_run.yaml",
-        noise_start=False,
     ))
-
-    """Sprint environment specific reward scales"""
-    lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 3e-2
-
-    lambda_spring: float = 0.0
-    lambda_damper: float = 0.0
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
-
-    lambda_actuator: float = 0.0
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
-    lambda_self_collision: float = -1e-2
-    lambda_head_acc_ang: float = 0.0
-    lambda_head_acc_lin: float = 0.0
 
 
 @dataclass
-class SprintRegressionConfig(BaseArgs):
+class SprintRegressionConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigRegression(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
@@ -293,21 +208,6 @@ class SprintRegressionConfig(BaseArgs):
         starting_pose_path="../msk_models/regression/starting_pose_run.yaml",
         default_activation=0.01,
     ))
-
-    """Sprint environment specific reward scales"""
-    lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 3e-2
-    lambda_spring: float = -1e-4
-    lambda_damper: float = -3e-4
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
-
-    lambda_actuator: float = -1e-2
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
-    lambda_self_collision: float = 0.0
-    lambda_head_acc_ang: float = 0.0
-    lambda_head_acc_lin: float = 0.0
 
 
 @dataclass

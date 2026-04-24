@@ -143,7 +143,7 @@ class ReachTargetEnv(MSKEnv):
         rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
         rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
         rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
 
         terminated = self._get_terminated()
         rew_alive = alive_bonus(terminated)

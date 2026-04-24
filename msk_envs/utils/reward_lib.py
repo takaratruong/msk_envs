@@ -59,15 +59,13 @@ def alive_bonus(fallen: torch.Tensor):
     return 1.0 - fallen.float()
 
 
-def actuator_sq_penalty(actuator_activations, num_actuators):
+def actuator_sq_penalty(actuator_activations):
     """
     Actuator penalty based on squared activation. Note that 0.5 = no activation, so we shift and scale to [-1, 1] first.
     """
     actuator_act = (actuator_activations - 0.5) * 2.0
     squared_act = torch.pow(actuator_act, 2)
-    mean_squared_act = torch.sum(squared_act, dim=1) / num_actuators
-    if num_actuators == 0:
-        return torch.zeros_like(mean_squared_act)
+    mean_squared_act = torch.sum(squared_act, dim=1)
     return mean_squared_act
 
 
@@ -133,13 +131,11 @@ def head_acceleration_penalty(head_velocities, prev_head_velocities, delta_t):
     return head_acc_mag
 
 
-def fatigue_penalty(muscle_activations, num_muscles):
+def activation_square_penalty(muscle_activations):
     """Fatigue penalty based on squared muscle activations"""
     activations_sq = torch.pow(muscle_activations, 2)
     total_fatigue = torch.sum(activations_sq, dim=1)
-    if num_muscles == 0:
-        return torch.zeros_like(total_fatigue)
-    return total_fatigue / num_muscles
+    return total_fatigue
 
 
 def self_collision_penalty(collision_forces, force_bound):

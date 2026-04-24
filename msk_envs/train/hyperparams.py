@@ -185,7 +185,7 @@ class SprintConfigTall(BaseArgs):
     lambda_mid_lane: float = 3e-2
 
     lambda_spring: float = 0.0
-    lambda_damper: float = -3e-4
+    lambda_damper: float = 0.0
     lambda_limit: float = -1e-3
     lambda_muscle_passive: float = 0.0
 
@@ -213,15 +213,16 @@ class SprintConfigTallMotor(BaseArgs):
     lambda_vel: float = 1e-2
     lambda_mid_lane: float = 3e-2
 
-    lambda_spring: float = -1e-4
-    lambda_damper: float = -3e-4
+    lambda_spring: float = 0.0
+    lambda_damper: float = 0.0
     lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
+    lambda_muscle_passive: float = 0.0
 
     lambda_actuator: float = 0.0
     lambda_fatigue: float = 0.0
     lambda_metabolic: float = 0.0
-    lambda_self_collision: float = -1e-2
+    # lambda_self_collision: float = -1e-2
+    lambda_self_collision: float = 0.0
     lambda_head_acc_ang: float = 0.0
     lambda_head_acc_lin: float = 0.0
 
@@ -269,8 +270,8 @@ class SprintConfigTallLower(BaseArgs):
     lambda_vel: float = 1e-2
     lambda_mid_lane: float = 3e-2
 
-    lambda_spring: float = -1e-4
-    lambda_damper: float = -3e-4
+    lambda_spring: float = 0.0
+    lambda_damper: float = 0.0
     lambda_limit: float = -1e-3
     lambda_muscle_passive: float = -1e-4
 

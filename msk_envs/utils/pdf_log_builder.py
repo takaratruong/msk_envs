@@ -382,6 +382,40 @@ def create_pdf_output(
         if interval_plots:
             _create_interval_plots(1.0, times, create_joint_moments_plot)
 
+        # --- JOINT PASSIVE MUSCLE FORCE ANALYSIS ---
+        joint_passive_muscle = []
+        for frame in frame_data:
+            joint_passive_muscle.append([m.muscle_passive_breakdown for m in frame.joint_moments])
+        joint_passive_muscle = np.array(joint_passive_muscle)  # [n_frames, n_dofs, n_muscles]
+        muscle_names = [m.name for m in frame0.muscles]
+
+        def create_joint_passive_muscle_plot(time_start: float = 0.0, time_end: float = None):
+            # Select time range
+            if time_end is None:
+                time_end = times[-1]
+            time_mask = (times >= time_start) & (times <= time_end)
+            time_selected = times[time_mask]
+            frame_ind_selected = frame_ind[time_mask]
+
+            title = f"Joint Passive Forces ({time_start:.1f}s to {time_end:.1f}s)"
+            lss, lsd = "solid", "dashed"
+            create_generic_plot(
+                names=joint_dof_names,
+                times=time_selected,
+                frame_ind=frame_ind_selected,
+                plot_data=joint_passive_muscle[time_mask, :],
+                fig_title=title,
+                y_label="Value (N m)",
+                y_fmt=".1f",
+                pdf=pdf,
+                sublabels=muscle_names,
+                alphas=[0.5] * (len(muscle_names)),
+                linestyles=[lss] * (len(muscle_names)),
+                horizontal_lines=[[0.0]] * len(joint_dof_names),
+                omit_zeros=True
+            )
+        create_joint_passive_muscle_plot()
+
         # --- BODY FORCES ---
         # body_names = [b.name for b in frame0.body_forces]
         # body_forces = []
@@ -418,7 +452,6 @@ def create_pdf_output(
         # create_body_forces_plot()
 
         # --- MUSCLE PLOTS ---
-        muscle_names = [m.name for m in frame0.muscles]
         # Muscle activations, fiber/tendon lengths, moment arms
         muscle_ae = []
         muscle_ftl = []

@@ -116,6 +116,7 @@ class LoggedSim:
                 d=self.envs.d,
                 body_name_to_idx=self.envs.body_id_lookup,
                 qpos_idx_to_name=self.qpos_idx_to_name,
+                qpos_name_to_idx=self.envs.qpos_id_lookup,
                 dof_idx_to_name=self.dof_idx_to_name,
                 limit_id_lookup=self.envs.limit_id_lookup,
                 muscle_idx_to_name=self.muscle_idx_to_name,

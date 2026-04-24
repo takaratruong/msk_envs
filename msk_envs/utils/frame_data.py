@@ -283,6 +283,7 @@ class JointMoment:
     damping: float
     muscle: float
     muscle_passive: float
+    muscle_passive_breakdown: list[float]
     actuator: float
     limit: float
 
@@ -294,6 +295,7 @@ class JointMoment:
             "damping": self.damping,
             "muscle": self.muscle,
             "muscle_passive": self.muscle_passive,
+            "muscle_passive_breakdown": self.muscle_passive_breakdown,
             "actuator": self.actuator,
             "limit": self.limit,
         }
@@ -307,6 +309,7 @@ class JointMoment:
             damping=data["damping"],
             muscle=data["muscle"],
             muscle_passive=data["muscle_passive"],
+            muscle_passive_breakdown=data["muscle_passive_breakdown"],
             limit=data["limit"],
             actuator=data["actuator"],
         )

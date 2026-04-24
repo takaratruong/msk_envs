@@ -235,7 +235,8 @@ class SequencePlot:
                 # Legend required
                 if self.labels_per_ax[i, j] >= 1:
                     ax = self.get_axes_at(i, j)
-                    ax.legend(fontsize=12, loc="upper right",
+                    fontsize = 6 if self.labels_per_ax[i, j] > 5 else 12
+                    ax.legend(fontsize=fontsize, loc="upper right",
                               frameon=False, prop={'weight': 'bold'})
 
                 pass

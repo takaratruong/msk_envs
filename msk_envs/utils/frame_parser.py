@@ -241,6 +241,7 @@ def parse_joint_velocities(
 def parse_joint_moments(
         m: msk_warp.Model,
         d: msk_warp.Data,
+        qpos_name_to_idx: dict[str, int],
         dof_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[JointMoment]:
@@ -252,15 +253,29 @@ def parse_joint_moments(
     ufrc_actuator = msk_warp.ufrc_actuator(d)
     ufrc_limit = msk_warp.ufrc_limit(d)
 
+    qfrc_muscle_passive_breakdown = msk_warp.qfrc_muscle_passive_breakdown(d)
+
     moments = []
     for i in range(msk_warp.get_num_dofs(m)):
+        dof_name = dof_idx_to_name[i]
+
+        # Build passive muscle breakdown
+        muscle_passive_breakdown = []
+        if dof_name in qpos_name_to_idx:
+            qpos_idx = qpos_name_to_idx[dof_name]
+            for j in range(msk_warp.get_num_muscles(m)):
+                muscle_passive_breakdown.append(
+                    float(qfrc_muscle_passive_breakdown[world_id][qpos_idx][j].item())
+                )
+
         angle = JointMoment(
-            name=dof_idx_to_name[i],
+            name=dof_name,
             net_moment=float(net_moment[world_id][i].item()),
             spring=float(ufrc_spring[world_id][i].item()),
             damping=float(ufrc_damper[world_id][i].item()),
             muscle=float(ufrc_muscle[world_id][i].item()),
             muscle_passive=float(ufrc_muscle_passive[world_id][i].item()),
+            muscle_passive_breakdown=muscle_passive_breakdown,
             actuator=float(ufrc_actuator[world_id][i].item()),
             limit=float(ufrc_limit[world_id][i].item()),
         )
@@ -316,6 +331,7 @@ def parse_frame(
         d: msk_warp.Data,
         body_name_to_idx: dict[str, int],
         qpos_idx_to_name: dict[int, str],
+        qpos_name_to_idx: dict[str, int],
         dof_idx_to_name: dict[int, str],
         limit_id_lookup: dict[str, tuple[float, float]],
         muscle_idx_to_name: dict[int, str],
@@ -335,7 +351,7 @@ def parse_frame(
     kinetic_data = parse_kinetic_data(m, d, body_name_to_idx, world_id)
     joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, limit_id_lookup, world_id, ref_joint_angles)
     joint_velocities = parse_joint_velocities(m, d, world_id)
-    joint_moments = parse_joint_moments(m, d, dof_idx_to_name, world_id)
+    joint_moments = parse_joint_moments(m, d, qpos_name_to_idx, dof_idx_to_name, world_id)
     body_forces = parse_body_forces(m, d, body_idx_to_name, world_id)
     beam_points = parse_beam_points(m, d, world_id)
 

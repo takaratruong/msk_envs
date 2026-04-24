@@ -65,6 +65,11 @@ class MSKEnv:
         # Toggle drag forces
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
 
+
+        # Spring stuff bla bla remove me todo
+        qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
+        qpos_spring_rest[self.qpos_id_lookup["thorax_extension"]] = 0.4
+
         msk_warp.reinitialize_model(self.m, self.d)
         return
 

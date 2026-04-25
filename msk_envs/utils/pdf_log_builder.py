@@ -149,6 +149,8 @@ def create_pdf_output(
             )
         )
         for i, key in enumerate(reward_keys):
+            if np.all(reward_data[:, i] == 0.0):
+                continue
             rewards_plot.add(0, reward_data[:, i], label=key, alpha=0.5)
         rewards_plot.add(0, np.sum(reward_data, axis=1), label="Total")
         rewards_plot.add_hline(0, 0.0)

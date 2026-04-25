@@ -22,10 +22,13 @@ pelvis_rotation:
   v: 0.0
 
 lumbar_extension:
-  q: -0.2
+  q: -0.6414085001079162
   v: 0.0
 thorax_extension:
-  q: 0.632
+  q: 0.6326818538479444
+  v: 0.0
+cervical_extension:
+  q: -0.24870941840919195
   v: 0.0
 
 hip_flexion_r:

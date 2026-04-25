@@ -11,6 +11,7 @@ from msk_envs.utils.contact_params import parse_contact_params
 from msk_envs.utils.scene_settings import SceneSettings
 from msk_envs.utils.transforms import get_position_from_transform, get_rotation_from_transform
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
+from msk_envs.envs.perturber import Perturber
 
 
 class MSKEnv:
@@ -66,10 +67,11 @@ class MSKEnv:
         # Toggle drag forces
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
 
-
         # Spring stuff bla bla remove me todo
         qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
-        qpos_spring_rest[self.qpos_id_lookup["thorax_extension"]] = 0.632
+        qpos_spring_rest[self.qpos_id_lookup["lumbar_extension"]] = -0.6414085001079162
+        qpos_spring_rest[self.qpos_id_lookup["thorax_extension"]] = 0.6326818538479444
+        qpos_spring_rest[self.qpos_id_lookup["cervical_extension"]] = -0.24870941840919195
 
         msk_warp.reinitialize_model(self.m, self.d)
         return
@@ -306,9 +308,20 @@ class MSKEnv:
         self.head_rot = self.body_rotations[:, self.head_id]
         self.head_offset = head_offset.unsqueeze(0).repeat(num_envs, 1)
 
-        # Finally, set initial pose
+        # Set initial pose
         reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
         self.noise_start_pose(reset_ind.ravel())
+
+        # Set up random perturber
+        self.perturber = Perturber(
+            num_envs=num_envs,
+            device=self.device,
+            perturbation_duration=env_config.perturbation_duration,
+            perturbation_frequency=env_config.perturbation_frequency,
+            force_std=env_config.force_std,
+            delta_t=self.delta_t,
+            enabled=env_config.apply_perturbations,
+        )
         return
 
     def noise_start_pose(self, reset_mask: torch.Tensor) -> None:
@@ -496,9 +509,15 @@ class MSKEnv:
     # The following impl of step is kinda jank, but we need this separation for logging
     def pre_step(self, actions) -> None:
         self._pre_step()
+
+        # Set actions
         self._set_actions(actions)
+
         if self.debug:
             assert not torch.isnan(actions).any(), "Actions contain NaN!"
+
+        # Apply perturbations
+        self.perturber.apply(self.root_id, self.body_user_forces)
         return
 
     def launch_step(self):

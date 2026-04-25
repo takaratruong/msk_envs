@@ -102,6 +102,15 @@ class EnvConfig:
     default_activation: float = -1.0
     """ Default activation value when prescribed activations are not used. -1.0 is random. """
 
+    # Perturbations
+    apply_perturbations: bool = False
+    perturbation_duration: tuple = (0.05, 0.5)
+    """ How long each push lasts """
+    perturbation_frequency: tuple = (0.5, 2.0)
+    """ How long to wait between pushes """
+    force_std: float = 300.0
+    """ Standard deviation of perturbation force to apply """
+
     # Rewards for specific env variants: The following need to be set
     reward_lambdas: dict = field(default_factory=dict)
     """ Reward weights """
@@ -157,7 +166,7 @@ class EnvConfigGeneric(EnvConfig):
 class EnvConfigTall(EnvConfig):
     """ Environment configuration for no-hands model"""
     model_path: str = "../msk_models/athletetall_reduced.osim"
-    muscle_function_path: str = "../msk_models/athletetallpaths_reduced.xml"
+    muscle_function_path: str = "../msk_models/athletetall2paths_reduced.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     armature: float = 1e-3

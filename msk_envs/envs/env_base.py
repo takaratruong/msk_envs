@@ -69,9 +69,12 @@ class MSKEnv:
 
         # Spring stuff bla bla remove me todo
         qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
-        qpos_spring_rest[self.qpos_id_lookup["lumbar_extension"]] = -0.6414085001079162
-        qpos_spring_rest[self.qpos_id_lookup["thorax_extension"]] = 0.6326818538479444
-        qpos_spring_rest[self.qpos_id_lookup["cervical_extension"]] = -0.24870941840919195
+        if "lumbar_extension" in self.qpos_id_lookup:
+            qpos_spring_rest[self.qpos_id_lookup["lumbar_extension"]] = -0.6414085001079162
+        if "thorax_extension" in self.qpos_id_lookup:
+            qpos_spring_rest[self.qpos_id_lookup["thorax_extension"]] = 0.6326818538479444
+        if "cervical_extension" in self.qpos_id_lookup:
+            qpos_spring_rest[self.qpos_id_lookup["cervical_extension"]] = -0.24870941840919195
 
         msk_warp.reinitialize_model(self.m, self.d)
         return

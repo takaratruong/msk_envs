@@ -210,9 +210,17 @@ class EnvConfigTallLower(EnvConfig):
 
 @dataclass
 class EnvConfigUpper(EnvConfig):
-    model_path: str = "../msk_models/athlete16_reduced_nicos_motor_arms_upper.osim"
-    muscle_function_path: str = "../msk_models/athlete16paths_motor_arms.xml"
-    use_function_based_path: bool = False
+    model_path: str = "../msk_models/athletetall_reduced_upper.osim"
+    muscle_function_path: str = "../msk_models/athletetall_reducedpaths_upper.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    armature: float = 1e-3
+    integrator_accuracy: float = 0.1
+
+
+@dataclass
+class EnvConfigUpperRegression(EnvConfig):
+    model_path: str = "../msk_models/regression/regression_model_upper.osim"
+    muscle_function_path: str = "../msk_models/regression/regression_fn_upper.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     armature: float = 1e-3
     integrator_accuracy: float = 0.1

@@ -2608,7 +2608,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>0.01</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -2634,7 +2634,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>0.01</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -2660,7 +2660,7 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>lumbar_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>0.01</stiffness>
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
@@ -2686,9 +2686,9 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>5000.0</stiffness>
 					<!--Damping constant.-->
-					<viscosity>1.0</viscosity>
+					<viscosity>10.0</viscosity>
 				</SpringGeneralizedForce>
 				<CoordinateLimitForce name="thorax_bending_limit_force">
 					<!--Coordinate (name) to be limited.-->
@@ -2712,9 +2712,9 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>5000.0</stiffness>
 					<!--Damping constant.-->
-					<viscosity>1.0</viscosity>
+					<viscosity>10.0</viscosity>
 				</SpringGeneralizedForce>
 				<CoordinateLimitForce name="thorax_extension_limit_force">
 					<!--Coordinate (name) to be limited.-->
@@ -2738,9 +2738,9 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>thorax_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>5000.0</stiffness>
 					<!--Damping constant.-->
-					<viscosity>1.0</viscosity>
+					<viscosity>10.0</viscosity>
 				</SpringGeneralizedForce>
 				<CoordinateLimitForce name="thorax_rotation_limit_force">
 					<!--Coordinate (name) to be limited.-->
@@ -2764,9 +2764,9 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_bending</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>1000.0</stiffness>
 					<!--Damping constant.-->
-					<viscosity>1.0</viscosity>
+					<viscosity>10.0</viscosity>
 				</SpringGeneralizedForce>
 				<CoordinateLimitForce name="cervical_bending_limit_force">
 					<!--Coordinate (name) to be limited.-->
@@ -2790,9 +2790,9 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_extension</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>1000.0</stiffness>
 					<!--Damping constant.-->
-					<viscosity>1.0</viscosity>
+					<viscosity>10.0</viscosity>
 				</SpringGeneralizedForce>
 				<CoordinateLimitForce name="cervical_extension_limit_force">
 					<!--Coordinate (name) to be limited.-->
@@ -2816,9 +2816,9 @@
 					<!--Name of the coordinate to which this force is applied.-->
 					<coordinate>cervical_rotation</coordinate>
 					<!--Spring stiffness.-->
-					<stiffness>25.0</stiffness>
+					<stiffness>1000.0</stiffness>
 					<!--Damping constant.-->
-					<viscosity>1.0</viscosity>
+					<viscosity>10.0</viscosity>
 				</SpringGeneralizedForce>
 				<CoordinateLimitForce name="cervical_rotation_limit_force">
 					<!--Coordinate (name) to be limited.-->
@@ -2856,7 +2856,7 @@
 					<!--Stiffness of the passive limit force when coordinate exceeds lower limit. Note, rotational stiffness expected in N*m/degree.-->
 					<lower_stiffness>8.7266462599716483</lower_stiffness>
 					<!--The lower limit of the coordinate range of motion (rotations in degrees).-->
-					<lower_limit>-59.999999999999993</lower_limit>
+					<lower_limit>-75</lower_limit>
 					<!--Damping factor on the coordinate's speed applied only when limit is exceeded. For translational has units N/(m/s) and rotational has Nm/(degree/s)-->
 					<damping>0.017453292519943295</damping>
 					<!--Transition region width in the units of the coordinate (rotations in degrees). Dictates the transition from zero to constant stiffness as coordinate exceeds its limit.-->
@@ -2934,7 +2934,7 @@
 					<!--Stiffness of the passive limit force when coordinate exceeds lower limit. Note, rotational stiffness expected in N*m/degree.-->
 					<lower_stiffness>8.7266462599716483</lower_stiffness>
 					<!--The lower limit of the coordinate range of motion (rotations in degrees).-->
-					<lower_limit>-59.999999999999993</lower_limit>
+					<lower_limit>-75.0</lower_limit>
 					<!--Damping factor on the coordinate's speed applied only when limit is exceeded. For translational has units N/(m/s) and rotational has Nm/(degree/s)-->
 					<damping>0.017453292519943295</damping>
 					<!--Transition region width in the units of the coordinate (rotations in degrees). Dictates the transition from zero to constant stiffness as coordinate exceeds its limit.-->
@@ -8401,7 +8401,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>149.8367899029717</max_isometric_force>
+					<max_isometric_force>599.347159612</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.08940599382153544</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -8841,7 +8841,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>81.714115732417895</max_isometric_force>
+					<max_isometric_force>326.85646293</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.07727647602655463</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -8929,7 +8929,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>87.712709019488202</max_isometric_force>
+					<max_isometric_force>350.850836078</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.055004020166738422</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -9017,7 +9017,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>199.56114805838021</max_isometric_force>
+					<max_isometric_force>798.244592234</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.038020313957924677</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -9369,7 +9369,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>134.805430534821</max_isometric_force>
+					<max_isometric_force>539.221722139</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.11731340631241834</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -9457,7 +9457,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>167.35880585408111</max_isometric_force>
+					<max_isometric_force>669.435223416</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.099431375906108885</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -10355,7 +10355,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>149.8367899029717</max_isometric_force>
+					<max_isometric_force>599.347159612</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.08940599382153544</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -10795,7 +10795,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>81.714115732417895</max_isometric_force>
+					<max_isometric_force>326.85646293</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.077276476026554644</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -10883,7 +10883,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>87.712709019488202</max_isometric_force>
+					<max_isometric_force>350.850836078</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.055004020166738408</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -10971,7 +10971,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>199.56114805838021</max_isometric_force>
+					<max_isometric_force>798.244592234</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.038020313957924677</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -11323,7 +11323,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>134.805430534821</max_isometric_force>
+					<max_isometric_force>539.221722139</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.11731340631241835</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -11411,7 +11411,7 @@
 						<algorithm>minimum_length</algorithm>
 					</Scholz2015GeometryPath>
 					<!--Maximum isometric force that the fibers can generate-->
-					<max_isometric_force>167.35880585408111</max_isometric_force>
+					<max_isometric_force>669.435223416</max_isometric_force>
 					<!--Optimal length of the muscle fibers-->
 					<optimal_fiber_length>0.099431375906108885</optimal_fiber_length>
 					<!--Resting length of the tendon-->
@@ -11993,5 +11993,82 @@
 			</objects>
 			<groups />
 		</ForceSet>
+		<ContactGeometrySet name="contactgeometryset">
+			<objects>
+				<ContactEllipsoid name="pelvis_capsule">
+					<socket_frame>/bodyset/pelvis</socket_frame>
+					<location>-0.08 0 0</location>
+					<orientation>0 0 0</orientation>
+					<radii>0.1 0.03 0.1</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="lumbar_spine_capsule1">
+					<socket_frame>/bodyset/lumbar_spine</socket_frame>
+					<location>0.03 -0.1 -0.03</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.1 0.03 0.1</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="lumbar_spine_capsule2">
+					<socket_frame>/bodyset/lumbar_spine</socket_frame>
+					<location>0.03 -0.1 0.03</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.1 0.03 0.1</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="thorax_capsule1">
+					<socket_frame>/bodyset/thorax</socket_frame>
+					<location>-0.03 -0.12 -0.025</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.11 0.06 0.11</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="thorax_capsule2">
+					<socket_frame>/bodyset/thorax</socket_frame>
+					<location>-0.03 -0.12 0.025</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.11 0.06 0.11</radii>
+				</ContactEllipsoid>
+				<ContactSphere name="head">
+					<socket_frame>/bodyset/head</socket_frame>
+					<location>0.01 0.04 0.0</location>
+					<orientation>0 0 0</orientation>
+					<radius>0.11</radius>
+				</ContactSphere>
+				<ContactEllipsoid name="humerus_r_capsule">
+					<socket_frame>/bodyset/humerus_r</socket_frame>
+					<location>0 -0.17 0</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.03 0.17 0.03</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="humerus_l_capsule">
+					<socket_frame>/bodyset/humerus_l</socket_frame>
+					<location>0 -0.17 0</location>
+					<orientation>1.5707 0 0</orientation>
+					<radii>0.03 0.17 0.03</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="ulna_r_capsule">
+					<socket_frame>/bodyset/ulna_r</socket_frame>
+					<location>-0.015 -0.13 0.03</location>
+					<orientation>1.45 0 0</orientation>
+					<radii>0.023 0.12 0.023</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="ulna_l_capsule">
+					<socket_frame>/bodyset/ulna_l</socket_frame>
+					<location>-0.015 -0.13 -0.03</location>
+					<orientation>1.6914 0 0</orientation>
+					<radii>0.023 0.12 0.023</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="hand_r">
+					<socket_frame>/bodyset/hand_r</socket_frame>
+					<location>0.01 -0.07 0.0</location>
+					<orientation>0 0 0.3</orientation>
+					<radii>0.03 0.07 0.05</radii>
+				</ContactEllipsoid>
+				<ContactEllipsoid name="hand_l">
+					<socket_frame>/bodyset/hand_l</socket_frame>
+					<location>0.01 -0.07 0.0</location>
+					<orientation>0 0 0.3</orientation>
+					<radii>0.03 0.07 0.05</radii>
+				</ContactEllipsoid>
+			</objects>
+			<groups/>
+		</ContactGeometrySet>
 	</Model>
 </OpenSimDocument>

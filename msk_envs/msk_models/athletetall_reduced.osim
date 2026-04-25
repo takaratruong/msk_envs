@@ -5081,7 +5081,7 @@
                     <!--Spring stiffness.-->
                     <stiffness>1000.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>10.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="cervical_bending_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5107,7 +5107,7 @@
                     <!--Spring stiffness.-->
                     <stiffness>1000.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>10.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="cervical_extension_limit_force">
                     <!--Coordinate (name) to be limited.-->
@@ -5133,7 +5133,7 @@
                     <!--Spring stiffness.-->
                     <stiffness>1000.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>10.0</viscosity>
                 </SpringGeneralizedForce>
                 <CoordinateLimitForce name="cervical_rotation_limit_force">
                     <!--Coordinate (name) to be limited.-->

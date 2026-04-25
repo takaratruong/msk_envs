@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const radius = 0.001 * Math.sqrt(length);
             const cylinderLength = 0.2;
             const geometry = new THREE.CylinderGeometry(radius, radius, cylinderLength, 8);
-            const material = new THREE.MeshStandardMaterial({color: 0xff0000});
+            const material = new THREE.MeshStandardMaterial({color: 0x00ff00});
             const cylinder = new THREE.Mesh(geometry, material);
 
             // Position cylinder at the midpoint

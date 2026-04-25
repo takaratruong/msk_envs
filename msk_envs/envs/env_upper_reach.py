@@ -31,7 +31,9 @@ class UpperReachTargetEnv(MSKEnv):
         self.thorax_id = self.lookup_body_id("thorax")
 
         self.right_hand_id = self.lookup_body_id("hand_r")
+        self.left_hand_id = self.lookup_body_id("hand_l")
         self.right_hand_pos = self.body_positions[:, self.right_hand_id]
+        self.left_hand_pos = self.body_positions[:, self.left_hand_id]
 
         self.curr_target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
         self.next_target_pos = torch.zeros((self.num_worlds, 3), device=self.device)
@@ -62,20 +64,24 @@ class UpperReachTargetEnv(MSKEnv):
             self.curr_target_pos.view(self.num_worlds, -1),
             self.next_target_pos.view(self.num_worlds, -1),
             self.curr_closest_dist.view(self.num_worlds, 1),
+            self.left_hand_pos.reshape(self.num_worlds, -1),
+            self.right_hand_pos.reshape(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
     def _distance_to_target(self):
-        to_target_vec = self.curr_target_pos - self.right_hand_pos
-        dist_to_target = torch.norm(to_target_vec, dim=1)
-        return dist_to_target
+        to_target_vec_right = self.curr_target_pos - self.right_hand_pos
+        to_target_vec_left = self.curr_target_pos - self.left_hand_pos
+        dist_to_target_right = torch.norm(to_target_vec_right, dim=1)
+        dist_to_target_left = torch.norm(to_target_vec_left, dim=1)
+        return torch.min(dist_to_target_right, dist_to_target_left)
 
     def _sample_target_around(self, points: torch.Tensor) -> torch.Tensor:
         rand_dirs = torch.randn((points.shape[0], 3), device=points.device)
         rand_dirs = rand_dirs / torch.norm(rand_dirs, dim=1, keepdim=True)
         points_height_one = points.clone()
-        points_height_one[:, UP_IDX] = 1.15
-        new_targets = points_height_one + rand_dirs * 0.25
+        points_height_one[:, UP_IDX] = 1.25
+        new_targets = points_height_one + rand_dirs * 0.5
         return new_targets
 
     def _new_targets(self, reset_mask: torch.Tensor, new_env: bool) -> None:
@@ -143,4 +149,4 @@ class UpperReachTargetEnv(MSKEnv):
         not_thorax_upright = ~thorax_upright
 
         terminated = not_head_upright | not_thorax_upright
-        return terminated.detach()
+        return terminated.detach() * 0

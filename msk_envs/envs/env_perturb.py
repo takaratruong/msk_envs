@@ -28,7 +28,7 @@ class PerturbEnv(MSKEnv):
         )
 
         # How long perturbations last
-        self.perturbation_range = (0.1, 0.3)      # Duration of perturbations
+        self.perturbation_range = (0.1, 0.3)  # Duration of perturbations
         self.perturbation_frequency = (0.25, 1.0)  # How often to wait between perturbations
         # Whether to apply perturbations this step
         self.perturbation_enabled = torch.zeros(num_envs, device=self.device, dtype=torch.bool)
@@ -41,45 +41,6 @@ class PerturbEnv(MSKEnv):
 
     def sample_range(self, range_tuple: tuple) -> torch.Tensor:
         return torch.rand(self.num_worlds, device=self.device) * (range_tuple[1] - range_tuple[0]) + range_tuple[0]
-
-    def _pre_step(self) -> None:
-        # If any world are currently applying perturbations *and* have exceeded their perturbation duration
-        worlds_done = (self.perturbation_enabled & (self.timer >= self.timer_target_duration))
-        if torch.any(worlds_done):
-            # Disable perturbations, reset timer
-            self.perturbation_enabled[worlds_done] = False
-            self.timer[worlds_done] = 0.0
-            # Sample time to wait until next perturbation
-            wait_times = self.sample_range(self.perturbation_frequency)
-            self.timer_target_duration[worlds_done] = wait_times[worlds_done]
-
-        # If any worlds are not currently applying perturbations *and* have exceeded their wait time
-        worlds_start = (~self.perturbation_enabled & (self.timer >= self.timer_target_duration))
-        if torch.any(worlds_start):
-            # Enable perturbations, reset timer
-            self.perturbation_enabled[worlds_start] = True
-            self.timer[worlds_start] = 0.0
-            # Sample perturbation durations
-            perturb_durations = self.sample_range(self.perturbation_range)
-            self.timer_target_duration[worlds_start] = perturb_durations[worlds_start]
-
-            # Sample a new random external force for these worlds
-            num_perturb = torch.sum(worlds_start).item()
-            force_dir = torch.zeros((num_perturb, 3), device=self.device)
-            force_magnitudes = torch.randn(num_perturb, device=self.device) * self.force_std
-            force_directions = torch.randn((num_perturb, 3), device=self.device)
-            force_directions = force_directions / torch.norm(force_directions, dim=1, keepdim=True)
-            force_dir += force_directions * force_magnitudes.unsqueeze(1)
-            # external_forces = 20 * force_dir
-            # self.body_user_forces[worlds_start, self.root_id, 3:6] = external_forces
-
-        # Make sure we reset forces for worlds not applying perturbations
-        no_perturb_mask = ~self.perturbation_enabled
-        self.body_user_forces[no_perturb_mask, :, :] = 0.0
-
-        # Increment timers
-        self.timer += self.delta_t
-        return
 
     def _get_obs(self) -> torch.Tensor:
         """

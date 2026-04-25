@@ -20,6 +20,11 @@ def mid_lane_reward(root_position: torch.Tensor, weight: float = 2.5):
     return torch.exp(-weight * dist_from_center.pow(2))
 
 
+def muscle_activation_penalty(muscle_activations: torch.Tensor, threshold: float = 0.15):
+    above_thresh = muscle_activations > threshold
+    return above_thresh.float().mean(dim=1)
+
+
 def exp_distance(values: torch.Tensor, targets: torch.Tensor, ranges: torch.Tensor, weight: float):
     diff = values - targets
     scaled_diff = diff / ranges

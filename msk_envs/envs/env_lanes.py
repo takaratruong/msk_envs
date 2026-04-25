@@ -5,7 +5,8 @@ from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
 from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, ignore_toe_joint_penalty, \
-    actuator_sq_penalty, head_acc_penalty, activation_square_penalty, mid_lane_reward, has_fallen, self_collision_penalty
+    actuator_sq_penalty, head_acc_penalty, activation_square_penalty, mid_lane_reward, has_fallen, \
+    self_collision_penalty, muscle_activation_penalty
 from ..utils.scene_settings import SceneSettings
 from ..utils.quat import quat_mul, quat_conjugate
 
@@ -90,8 +91,8 @@ class LanesEnv(MSKEnv):
             self.actuator_activations,
             joint_positions_without_x,
             self.joint_velocities,
-            # relative_body_positions.reshape(self.num_worlds, -1),
-            # relative_body_rotations.reshape(self.num_worlds, -1),
+            relative_body_positions.reshape(self.num_worlds, -1),
+            relative_body_rotations.reshape(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
@@ -108,7 +109,9 @@ class LanesEnv(MSKEnv):
         rew_spring = ignore_toe_joint_penalty(self.ufrc_spring, self.toes_dof_ids, squared=squared_penalties)
         rew_damper = ignore_toe_joint_penalty(self.ufrc_damper, self.toes_dof_ids, squared=squared_penalties)
         rew_limit = ignore_toe_joint_penalty(self.ufrc_limit, self.toes_dof_ids, squared=squared_penalties)
-        rew_muscle_passive = ignore_toe_joint_penalty(self.ufrc_muscle_passive, self.toes_dof_ids, squared=squared_penalties)
+        rew_muscle_passive = ignore_toe_joint_penalty(self.ufrc_muscle_passive, self.toes_dof_ids,
+                                                      squared=squared_penalties)
+        rew_muscle_activation = muscle_activation_penalty(self.muscle_activations)
 
         rew_actuator = actuator_sq_penalty(self.actuator_activations)
         rew_activation_squared = activation_square_penalty(self.muscle_activations)
@@ -124,6 +127,7 @@ class LanesEnv(MSKEnv):
             "rew_muscle_passive": rew_muscle_passive.detach(),
             "rew_actuator": rew_actuator.detach(),
             "rew_fatigue": rew_activation_squared.detach(),
+            "rew_muscle_activation": rew_muscle_activation.detach(),
             "rew_self_collision": rew_self_collision.detach(),
             "rew_head_acc_ang": rew_head_acc_ang.detach(),
             "rew_head_acc_lin": rew_head_acc_lin.detach(),

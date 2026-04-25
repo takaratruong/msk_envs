@@ -7,7 +7,7 @@ import tyro
 
 from msk_envs.envs.env_config import EnvConfig, EnvConfigGeneric, EnvConfigUpper, EnvConfigRegression, \
     EnvConfigUpperNoSpine, EnvConfigLower, EnvConfigRegressionWSpine, EnvConfigRegressionNoMotors, EnvConfigTall, \
-    EnvConfigTallLower, EnvConfigTallMotorArms
+    EnvConfigTallLower, EnvConfigTallMotorArms, EnvConfigUpperRegression
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -126,15 +126,16 @@ class JogConfig(BaseArgs):
 class LaneConfig(BaseArgs):
     """ Reusable hyperparams for lane environments """
     lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 3e-2
+    lambda_mid_lane: float = 0.0
 
     lambda_spring: float = 0.0
     lambda_damper: float = 0.0
     lambda_limit: float = -1e-3
     lambda_muscle_passive: float = -1e-4
 
-    lambda_actuator: float = -3e-4
-    lambda_fatigue: float = -3e-4
+    lambda_actuator: float = -1e-3
+    lambda_fatigue: float = -1e-4
+    lambda_muscle_activation: float = 0.0
     lambda_metabolic: float = 0.0
     lambda_self_collision: float = 0.0
     lambda_head_acc_ang: float = 0.0
@@ -535,14 +536,17 @@ class UpperReachTarget(BaseArgs):
         delta_t=1.0 / 30.0,
         max_episode_duration=5.0,
         muscle_multiplier=1.0,
-        starting_pose_path="../msk_models/starting_pose_run.yaml",
+        starting_pose_path="../msk_models/starting_pose_stand.yaml",
         swap_lr=False,
+        use_linear_stop=True,
+        default_activation=0.01,
+        noise_start=False,
     ))
 
     lambda_target: float = 0.5
-    lambda_limit: float = -2e-3
-    lambda_actuator: float = -1e-2
-    lambda_alive: float = 3e-2
+    lambda_limit: float = 0.0
+    lambda_actuator: float = 0.0
+    lambda_alive: float = 0.0
 
 
 @dataclass

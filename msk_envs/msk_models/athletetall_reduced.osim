@@ -22932,25 +22932,25 @@
                     <socket_frame>/bodyset/lumbar_spine</socket_frame>
                     <location>0.03 -0.1 -0.03</location>
                     <orientation>1.5707 0 0</orientation>
-                    <radii>0.1 0.04 0.1</radii>
+                    <radii>0.1 0.03 0.1</radii>
                 </ContactEllipsoid>
                 <ContactEllipsoid name="lumbar_spine_capsule2">
                     <socket_frame>/bodyset/lumbar_spine</socket_frame>
                     <location>0.03 -0.1 0.03</location>
                     <orientation>1.5707 0 0</orientation>
-                    <radii>0.1 0.04 0.1</radii>
+                    <radii>0.1 0.03 0.1</radii>
                 </ContactEllipsoid>
                 <ContactEllipsoid name="thorax_capsule1">
                     <socket_frame>/bodyset/thorax</socket_frame>
                     <location>-0.03 -0.12 -0.025</location>
                     <orientation>1.5707 0 0</orientation>
-                    <radii>0.12 0.06 0.12</radii>
+                    <radii>0.11 0.06 0.11</radii>
                 </ContactEllipsoid>
                 <ContactEllipsoid name="thorax_capsule2">
                     <socket_frame>/bodyset/thorax</socket_frame>
                     <location>-0.03 -0.12 0.025</location>
                     <orientation>1.5707 0 0</orientation>
-                    <radii>0.12 0.06 0.12</radii>
+                    <radii>0.11 0.06 0.11</radii>
                 </ContactEllipsoid>
                 <ContactSphere name="head">
                     <socket_frame>/bodyset/head</socket_frame>

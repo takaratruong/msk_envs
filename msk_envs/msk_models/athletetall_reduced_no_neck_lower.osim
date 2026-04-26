@@ -15236,14 +15236,14 @@
 				</ContactEllipsoid>
 				<ContactEllipsoid name="lumbar_spine_capsule1">
 					<socket_frame>/bodyset/lumbar_spine</socket_frame>
-					<location>0.03 -0.1 -0.03</location>
-					<orientation>1.5707 0 0</orientation>
-					<radii>0.1 0.03 0.1</radii>
+					<location>0.0 -0.1 -0.03</location>
+                    <orientation>1.5707 -0.3 0</orientation>
+                    <radii>0.1 0.03 0.1</radii>
 				</ContactEllipsoid>
 				<ContactEllipsoid name="lumbar_spine_capsule2">
 					<socket_frame>/bodyset/lumbar_spine</socket_frame>
-					<location>0.03 -0.1 0.03</location>
-					<orientation>1.5707 0 0</orientation>
+                    <location>0.0 -0.1 0.03</location>
+                    <orientation>1.5707 -0.3 0</orientation>
 					<radii>0.1 0.03 0.1</radii>
 				</ContactEllipsoid>
 				<ContactEllipsoid name="thorax_capsule1">

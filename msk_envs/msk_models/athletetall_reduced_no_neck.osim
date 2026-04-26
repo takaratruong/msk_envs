@@ -21473,14 +21473,14 @@
                 </ContactEllipsoid>
                 <ContactEllipsoid name="lumbar_spine_capsule1">
                     <socket_frame>/bodyset/lumbar_spine</socket_frame>
-                    <location>0.03 -0.1 -0.03</location>
-                    <orientation>1.5707 0 0</orientation>
+                    <location>0.0 -0.1 -0.03</location>
+                    <orientation>1.5707 -0.3 0</orientation>
                     <radii>0.1 0.03 0.1</radii>
                 </ContactEllipsoid>
                 <ContactEllipsoid name="lumbar_spine_capsule2">
                     <socket_frame>/bodyset/lumbar_spine</socket_frame>
-                    <location>0.03 -0.1 0.03</location>
-                    <orientation>1.5707 0 0</orientation>
+                    <location>0.0 -0.1 0.03</location>
+                    <orientation>1.5707 -0.3 0</orientation>
                     <radii>0.1 0.03 0.1</radii>
                 </ContactEllipsoid>
                 <ContactEllipsoid name="thorax_capsule1">
@@ -21525,18 +21525,18 @@
                     <orientation>1.6914 0 0</orientation>
                     <radii>0.023 0.12 0.023</radii>
                 </ContactEllipsoid>
-                <ContactEllipsoid name="hand_r">
+                <ContactSphere name="hand_r">
                     <socket_frame>/bodyset/hand_r</socket_frame>
-                    <location>0.01 -0.07 0.0</location>
+                    <location>0.01 -0.05 0.0</location>
                     <orientation>0 0 0.3</orientation>
-                    <radii>0.03 0.07 0.05</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="hand_l">
+                    <radius>0.04</radius>
+                </ContactSphere>
+                <ContactSphere name="hand_l">
                     <socket_frame>/bodyset/hand_l</socket_frame>
-                    <location>0.01 -0.07 0.0</location>
+                    <location>0.01 -0.05 0.0</location>
                     <orientation>0 0 0.3</orientation>
-                    <radii>0.03 0.07 0.05</radii>
-                </ContactEllipsoid>
+                    <radius>0.04</radius>
+                </ContactSphere>
             </objects>
             <groups/>
         </ContactGeometrySet>

@@ -43,10 +43,10 @@ def joint_penalty(limit_torques: torch.Tensor, squared: bool = False):
     return limit_torque_sum
 
 
-def ignore_toe_joint_penalty(limit_torques: torch.Tensor, toe_dof_ids: list[int], squared: bool = False):
+def joint_penalty_w_ignore(limit_torques: torch.Tensor, ignore_dof_ids: list[int], squared: bool = False):
     """Joint limit penalty that ignores specified toe joints"""
     mask = torch.ones(limit_torques.shape[1], dtype=torch.bool, device=limit_torques.device)
-    mask[toe_dof_ids] = False
+    mask[ignore_dof_ids] = False
     filtered_limit_torques = limit_torques[:, mask]
 
     if squared:

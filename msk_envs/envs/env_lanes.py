@@ -4,7 +4,7 @@ from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, ignore_toe_joint_penalty, \
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, joint_penalty_w_ignore, \
     actuator_sq_penalty, head_acc_penalty, activation_square_penalty, mid_lane_reward, has_fallen, \
     self_collision_penalty, muscle_activation_penalty
 from ..utils.scene_settings import SceneSettings
@@ -42,14 +42,32 @@ class LanesEnv(MSKEnv):
 
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
-        self.toes_dof_ids = [
+        self.ignore_jnt_ids = [
             self.lookup_dof_id("mtp_angle_l"),
             self.lookup_dof_id("mtp_angle_r"),
             self.lookup_dof_id("pro_sup_l"),
             self.lookup_dof_id("pro_sup_r"),
         ]
         assert -1 not in self.toes_ids, "Toes body IDs not found in model"
-        self.toes_dof_ids = [dof_id for dof_id in self.toes_dof_ids if dof_id != -1]
+        self.ignore_jnt_ids = [dof_id for dof_id in self.ignore_jnt_ids if dof_id != -1]
+
+        self.ignore_passive_ids = self.ignore_jnt_ids + [
+            self.lookup_dof_id("lumbar_extension"),
+            self.lookup_dof_id("lumbar_bending"),
+            self.lookup_dof_id("lumbar_rotation"),
+            self.lookup_dof_id("thorax_extension"),
+            self.lookup_dof_id("thorax_bending"),
+            self.lookup_dof_id("thorax_rotation"),
+            self.lookup_dof_id("shoulder_flexion_r"),
+            self.lookup_dof_id("shoulder_flexion_l"),
+            self.lookup_dof_id("shoulder_abduction_r"),
+            self.lookup_dof_id("shoulder_abduction_l"),
+            self.lookup_dof_id("shoulder_rotation_r"),
+            self.lookup_dof_id("shoulder_rotation_l"),
+            self.lookup_dof_id("elbow_flex_r"),
+            self.lookup_dof_id("elbow_flex_l"),
+        ]
+        self.ignore_passive_ids = list(set([dof_id for dof_id in self.ignore_passive_ids if dof_id != -1]))
 
         self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
         self.max_distance_reached = 0.0
@@ -106,11 +124,13 @@ class LanesEnv(MSKEnv):
         # rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
         # rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
         # rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
-        rew_spring = ignore_toe_joint_penalty(self.ufrc_spring, self.toes_dof_ids, squared=squared_penalties)
-        rew_damper = ignore_toe_joint_penalty(self.ufrc_damper, self.toes_dof_ids, squared=squared_penalties)
-        rew_limit = ignore_toe_joint_penalty(self.ufrc_limit, self.toes_dof_ids, squared=squared_penalties)
-        rew_muscle_passive = ignore_toe_joint_penalty(self.ufrc_muscle_passive, self.toes_dof_ids,
-                                                      squared=squared_penalties)
+        rew_spring = joint_penalty_w_ignore(self.ufrc_spring, self.ignore_jnt_ids, squared=squared_penalties)
+        rew_damper = joint_penalty_w_ignore(self.ufrc_damper, self.ignore_jnt_ids, squared=squared_penalties)
+        rew_limit = joint_penalty_w_ignore(self.ufrc_limit, self.ignore_jnt_ids, squared=squared_penalties)
+        # rew_muscle_passive = joint_penalty_w_ignore(self.ufrc_muscle_passive, self.toes_dof_ids,
+        #                                             squared=squared_penalties)
+        rew_muscle_passive = joint_penalty_w_ignore(self.ufrc_muscle_passive, self.ignore_passive_ids,
+                                                    squared=squared_penalties)
         rew_muscle_activation = muscle_activation_penalty(self.muscle_activations)
 
         rew_actuator = actuator_sq_penalty(self.actuator_activations)

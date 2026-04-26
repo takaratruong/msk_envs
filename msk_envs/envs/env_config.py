@@ -45,14 +45,14 @@ class EnvConfig:
     # --- Model muscle properties ---
     muscle_multiplier: float = 1.0
     """ Multiplier to max isometric force """
-    muscle_activation_dynamics: msk_warp.ActivationType = msk_warp.ActivationType.MILLARD
+    muscle_activation_dynamics: msk_warp.ActivationType = msk_warp.ActivationType.DGF
     """ Muscle activation dynamics type (DGF, MILLARD) """
-    muscle_activation_time_const: float = 0.010
+    muscle_activation_time_const: float = 0.015
     """ Muscle activation time constant. Default 15ms for DGF, 10ms for Millard """
-    muscle_deactivation_time_const: float = 0.040
+    muscle_deactivation_time_const: float = 0.060
     """ Muscle deactivation time constant. Default 60ms for DGF, 40ms for Millard """
     muscle_activation_dynamics_smoothing: float = 10.0
-    """ Muscle activation dynamics smoothing factor """
+    """ Muscle activation dynamics smoothing factor for DGF activation dynamics """
     muscle_min_activation: float = 0.01
     """ Minimum muscle activation. Use non-zero for undamped muscle """
     muscle_max_activation: float = 1.0
@@ -71,10 +71,6 @@ class EnvConfig:
     """ Whether to use function-based path (or geometry path)"""
     muscle_function_path: str = "../msk_models/athlete_model_FunctionBasedPathSet.xml"
     """ Function-based path data file """
-    use_specified_metabolic_params: bool = True
-    """ Whether to use metabolic parameters defined in metabolic_params_path """
-    metabolic_params_path: str = "../msk_models/muscle_metabolic_params.yaml"
-    """ Muscle metabolic parameters file path (YAML) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
@@ -104,12 +100,13 @@ class EnvConfig:
 
     # Perturbations
     apply_perturbations: bool = False
+    """ Whether to apply random push forces in the environment """
     perturbation_duration: tuple = (0.05, 0.5)
     """ How long each push lasts """
     perturbation_frequency: tuple = (0.5, 2.0)
     """ How long to wait between pushes """
     force_std: float = 300.0
-    """ Standard deviation of perturbation force to apply """
+    """ Standard deviation of perturbation force magnitude to apply """
 
     # Rewards for specific env variants: The following need to be set
     reward_lambdas: dict = field(default_factory=dict)

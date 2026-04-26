@@ -520,21 +520,19 @@ ulna_l_capsule:
   dynamic_friction: 0.0
   viscous_friction: 0.0
   transition_velocity: 0.1
-
 hand_r:
   stiffness: 5e6
   dissipation: 1.0
-  priority: 2
-  static_friction: 0.8
-  dynamic_friction: 0.8
+  priority: 3
+  static_friction: 0.1
+  dynamic_friction: 0.0
   viscous_friction: 0.0
   transition_velocity: 0.1
-
 hand_l:
   stiffness: 5e6
   dissipation: 1.0
-  priority: 2
-  static_friction: 0.8
-  dynamic_friction: 0.8
+  priority: 3
+  static_friction: 0.1
+  dynamic_friction: 0.0
   viscous_friction: 0.0
   transition_velocity: 0.1

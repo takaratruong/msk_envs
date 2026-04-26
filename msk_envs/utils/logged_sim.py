@@ -203,6 +203,8 @@ class LoggedSim:
             return True, None
 
         # We're overriding typical env step to allow for logging
+
+        # Start with the pre-step
         self.envs.pre_step(actions)
 
         # We need to report at the correct logging event times

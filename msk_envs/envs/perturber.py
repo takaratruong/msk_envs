@@ -16,8 +16,10 @@ class Perturber:
         self.device = device
         self.enabled = enabled
 
-        self.perturbation_duration = perturbation_duration  # How long perturbations last
-        self.perturbation_frequency = perturbation_frequency  # How often to wait between perturbations
+        # How long perturbations last
+        self.perturbation_duration = perturbation_duration
+        # How often to wait between perturbations
+        self.perturbation_frequency = perturbation_frequency
 
         # Whether to apply perturbations this step
         self.perturbation_enabled = torch.zeros(num_envs, device=self.device, dtype=torch.bool)

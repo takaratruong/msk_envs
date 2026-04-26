@@ -523,7 +523,7 @@ class MSKEnv:
         self.perturber.apply(self.root_id, self.body_user_forces)
         return
 
-    def launch_step(self):
+    def launch_sim_step(self):
         if self.cuda_graph:
             for _ in range(self.sim_steps_per_env_step):
                 msk_warp.increment_next_time(self.m, self.d, self.delta_t_sim)
@@ -573,7 +573,7 @@ class MSKEnv:
     def step(self, actions):
         """ External step call """
         self.pre_step(actions)
-        self.launch_step()
+        self.launch_sim_step()
         self.update_metrics()
         return self.rl_step()
 

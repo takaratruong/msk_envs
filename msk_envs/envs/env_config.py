@@ -165,8 +165,8 @@ class EnvConfigGeneric(EnvConfig):
 @dataclass
 class EnvConfigTall(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athletetall_reduced.osim"
-    muscle_function_path: str = "../msk_models/athletetall2paths_reduced.xml"
+    model_path: str = "../msk_models/athletetall_reduced_no_neck.osim"
+    muscle_function_path: str = "../msk_models/athletetall2paths_reduced_no_traps.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     armature: float = 1e-3
@@ -200,8 +200,8 @@ class EnvConfigLower(EnvConfig):
 @dataclass
 class EnvConfigTallLower(EnvConfig):
     """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athletetall_reduced_lower.osim"
-    muscle_function_path: str = "../msk_models/athletetallpaths_lower.xml"
+    model_path: str = "../msk_models/athletetall_reduced_no_neck_lower.osim"
+    muscle_function_path: str = "../msk_models/athletetall2paths_reduced_no_traps_lower.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
     armature: float = 1e-3

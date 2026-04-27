@@ -7,7 +7,7 @@ import tyro
 
 from msk_envs.envs.env_config import EnvConfig, EnvConfigGeneric, EnvConfigUpper, EnvConfigRegression, \
     EnvConfigUpperNoSpine, EnvConfigLower, EnvConfigRegressionWSpine, EnvConfigRegressionNoMotors, EnvConfigTall, \
-    EnvConfigTallLower, EnvConfigTallMotorArms, EnvConfigUpperRegression
+    EnvConfigTallLower, EnvConfigTallMotorArms, EnvConfigUpperRegression, EnvConfigRegressionNoArms
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -202,6 +202,18 @@ class SprintConfigTallLower(LaneConfig):
 @dataclass
 class SprintRegressionConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigRegression(
+        env_variant=DerivedEnv.SPRINT,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/regression/starting_pose_run.yaml",
+        default_activation=0.01,
+    ))
+
+
+@dataclass
+class SprintRegressionNoArmsConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigRegressionNoArms(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -617,6 +629,7 @@ Config = Union[
     Annotated[SprintLowerConfig, tyro.conf.subcommand(name="sprintlower")],
     Annotated[SprintConfigTallLower, tyro.conf.subcommand(name="sprinttalllower")],
     Annotated[SprintRegressionConfig, tyro.conf.subcommand(name="sprintregression")],
+    Annotated[SprintRegressionNoArmsConfig, tyro.conf.subcommand(name="sprintregressionnoarms")],
     Annotated[RaceWalkConfig, tyro.conf.subcommand(name="racewalk")],
     Annotated[BackPedalConfig, tyro.conf.subcommand(name="backpedal")],
     Annotated[SideShuffleConfig, tyro.conf.subcommand(name="sideshuffle")],

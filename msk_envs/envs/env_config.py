@@ -71,6 +71,8 @@ class EnvConfig:
     """ Whether to use function-based path (or geometry path)"""
     muscle_function_path: str = "../msk_models/athlete_model_FunctionBasedPathSet.xml"
     """ Function-based path data file """
+    disable_muscle_passive_forces: bool = False
+    """ Whether to disable muscle passive forces """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"

@@ -55,6 +55,10 @@ class MSKEnv:
                 mm.strain_at_one_norm_force = 3.0
                 mm.stiffness_at_low_force = 0.0
 
+            if env_config.disable_muscle_passive_forces:
+                mm.strain_at_one_norm_force = 3.0
+                mm.stiffness_at_low_force = 0.0
+
         # Collider properties
         if env_config.use_specified_contact_params:
             geom_stiffness = msk_warp.collider_stiffness(self.m)

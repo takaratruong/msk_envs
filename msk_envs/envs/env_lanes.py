@@ -51,24 +51,6 @@ class LanesEnv(MSKEnv):
         assert -1 not in self.toes_ids, "Toes body IDs not found in model"
         self.ignore_jnt_ids = [dof_id for dof_id in self.ignore_jnt_ids if dof_id != -1]
 
-        self.ignore_passive_ids = self.ignore_jnt_ids + [
-            self.lookup_dof_id("lumbar_extension"),
-            self.lookup_dof_id("lumbar_bending"),
-            self.lookup_dof_id("lumbar_rotation"),
-            self.lookup_dof_id("thorax_extension"),
-            self.lookup_dof_id("thorax_bending"),
-            self.lookup_dof_id("thorax_rotation"),
-            self.lookup_dof_id("shoulder_flexion_r"),
-            self.lookup_dof_id("shoulder_flexion_l"),
-            self.lookup_dof_id("shoulder_abduction_r"),
-            self.lookup_dof_id("shoulder_abduction_l"),
-            self.lookup_dof_id("shoulder_rotation_r"),
-            self.lookup_dof_id("shoulder_rotation_l"),
-            self.lookup_dof_id("elbow_flex_r"),
-            self.lookup_dof_id("elbow_flex_l"),
-        ]
-        self.ignore_passive_ids = list(set([dof_id for dof_id in self.ignore_passive_ids if dof_id != -1]))
-
         self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
         self.max_distance_reached = 0.0
         return
@@ -101,9 +83,9 @@ class LanesEnv(MSKEnv):
             self.joint_positions[:, root_x_qpos_id + 1:]),
             dim=1)
 
-        time_curr = self.time.view(self.num_worlds, 1) / self.max_episode_duration
+        # time_curr = self.time.view(self.num_worlds, 1) / self.max_episode_duration
         obs = torch.cat([
-            time_curr,
+            # time_curr,
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
@@ -129,8 +111,7 @@ class LanesEnv(MSKEnv):
         rew_limit = joint_penalty_w_ignore(self.ufrc_limit, self.ignore_jnt_ids, squared=squared_penalties)
         # rew_muscle_passive = joint_penalty_w_ignore(self.ufrc_muscle_passive, self.toes_dof_ids,
         #                                             squared=squared_penalties)
-        rew_muscle_passive = joint_penalty_w_ignore(self.ufrc_muscle_passive, self.ignore_passive_ids,
-                                                    squared=squared_penalties)
+        rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
         rew_muscle_activation = muscle_activation_penalty(self.muscle_activations)
 
         rew_actuator = actuator_sq_penalty(self.actuator_activations)

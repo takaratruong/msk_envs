@@ -19,11 +19,27 @@ class MSKEnv:
 
     def _setup_model(self, env_config: EnvConfig) -> None:
         """ Modify model parameters here. """
+
+        upper_body_muscles = [
+            "coracobrachialis_r", "deltoideus_ant_r", "deltoideus_med_r", "deltoideus_post_r", "latissimus_sup_r",
+            "latissimus_med_r", "latissimus_inf_r", "pectoralis_major_sup_r", "pectoralis_major_med_r",
+            "pectoralis_major_inf_r", "teres_major_r", "teres_minor_r", "infraspinatus_inf_r", "infraspinatus_sup_r",
+            "subscapularis_sup_r", "subscapularis_med_r", "subscapularis_inf_r", "supraspinatus_post_r",
+            "supraspinatus_ant_r", "triceps_long_r", "biceps_long_r", "biceps_brevis_r", "coracobrachialis_l",
+            "deltoideus_ant_l", "deltoideus_med_l", "deltoideus_post_l", "latissimus_sup_l", "latissimus_med_l",
+            "latissimus_inf_l", "pectoralis_major_sup_l", "pectoralis_major_med_l", "pectoralis_major_inf_l",
+            "teres_major_l", "teres_minor_l", "infraspinatus_inf_l", "infraspinatus_sup_l", "subscapularis_sup_l",
+            "subscapularis_med_l", "subscapularis_inf_l", "supraspinatus_post_l", "supraspinatus_ant_l",
+            "triceps_long_l", "biceps_long_l", "biceps_brevis_l",
+        ]
+        upper_body_muscles_id = [self.lookup_muscle_id(muscle_name) for muscle_name in upper_body_muscles]
+        upper_body_muscles_id = [muscle_id for muscle_id in upper_body_muscles_id if muscle_id != -1]
+
         # Muscles activation and fiber dynamic
         msk_warp.set_activation_type(self.m, env_config.muscle_activation_dynamics)
         msk_warp.set_contraction_type(self.m, env_config.muscle_contraction_dynamics)
         muscle_metadata = msk_warp.muscle_metadata(self.m)
-        for mm in muscle_metadata:
+        for i, mm in enumerate(muscle_metadata):
             mm.max_isometric_force *= env_config.muscle_multiplier
             mm.activation_time_const = env_config.muscle_activation_time_const
             mm.deactivation_time_const = env_config.muscle_deactivation_time_const
@@ -33,6 +49,11 @@ class MSKEnv:
             mm.max_activation = env_config.muscle_max_activation
             mm.active_force_width_scale = env_config.muscle_active_force_width_scale
             mm.v_max = env_config.muscle_v_max
+
+            # "Disable" passive muscle forces for upper body
+            if i in upper_body_muscles_id:
+                mm.strain_at_one_norm_force = 3.0
+                mm.stiffness_at_low_force = 0.0
 
         # Collider properties
         if env_config.use_specified_contact_params:
@@ -596,6 +617,9 @@ class MSKEnv:
 
     def lookup_dof_id(self, dof_name: str) -> int:
         return self.dof_id_lookup[dof_name] if dof_name in self.dof_id_lookup else -1
+
+    def lookup_muscle_id(self, muscle_name: str) -> int:
+        return self.muscle_id_lookup[muscle_name] if muscle_name in self.muscle_id_lookup else -1
 
     def scene_settings(self) -> SceneSettings:
         """ Override to provide custom scene settings for viewer/renderer """

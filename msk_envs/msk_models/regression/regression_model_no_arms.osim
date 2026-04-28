@@ -9316,6 +9316,14 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
+                <SpringGeneralizedForce name="mtp_angle_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>mtp_angle_r</coordinate>
+                    <!--Spring stiffness.-->
+                    <stiffness>65</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.4</viscosity>
+                </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="mtp_angle_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>mtp_angle_l</coordinate>

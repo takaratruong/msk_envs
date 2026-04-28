@@ -11240,7 +11240,7 @@
                     <!--Deactivation time constant, in seconds-->
                     <deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
                 </Thelen2003Muscle>
-                <CoordinateLimitForce name="lumbar_extension_linear_stop">
+                <CoordinateLimitForce name="lumbar_extension_limit_force">
                     <coordinate>lumbar_extension</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>9.740282517223996</upper_limit>
@@ -11250,7 +11250,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="lumbar_bending_linear_stop">
+                <CoordinateLimitForce name="lumbar_bending_limit_force">
                     <coordinate>lumbar_bending</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>15.871136700000001</upper_limit>
@@ -11260,7 +11260,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="lumbar_rotation_linear_stop">
+                <CoordinateLimitForce name="lumbar_rotation_limit_force">
                     <coordinate>lumbar_rotation</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>12.83881432</upper_limit>
@@ -11270,7 +11270,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_flexion_r_linear_stop">
+                <CoordinateLimitForce name="hip_flexion_r_limit_force">
                     <coordinate>hip_flexion_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>86.50308943942704</upper_limit>
@@ -11280,7 +11280,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_adduction_r_linear_stop">
+                <CoordinateLimitForce name="hip_adduction_r_limit_force">
                     <coordinate>hip_adduction_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>10.28941028</upper_limit>
@@ -11290,7 +11290,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_rotation_r_linear_stop">
+                <CoordinateLimitForce name="hip_rotation_r_limit_force">
                     <coordinate>hip_rotation_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>9.3399247</upper_limit>
@@ -11300,7 +11300,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="knee_angle_r_linear_stop">
+                <CoordinateLimitForce name="knee_angle_r_limit_force">
                     <coordinate>knee_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>0.0</upper_limit>
@@ -11310,7 +11310,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="ankle_angle_r_linear_stop">
+                <CoordinateLimitForce name="ankle_angle_r_limit_force">
                     <coordinate>ankle_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>26.27021052</upper_limit>
@@ -11320,7 +11320,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="subtalar_angle_r_linear_stop">
+                <CoordinateLimitForce name="subtalar_angle_r_limit_force">
                     <coordinate>subtalar_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>12.4698502</upper_limit>
@@ -11330,7 +11330,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="mtp_angle_r_linear_stop">
+                <CoordinateLimitForce name="mtp_angle_r_limit_force">
                     <coordinate>mtp_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>64.99999999999999</upper_limit>
@@ -11340,7 +11340,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_flexion_l_linear_stop">
+                <CoordinateLimitForce name="hip_flexion_l_limit_force">
                     <coordinate>hip_flexion_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>86.50308943942704</upper_limit>
@@ -11350,7 +11350,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_adduction_l_linear_stop">
+                <CoordinateLimitForce name="hip_adduction_l_limit_force">
                     <coordinate>hip_adduction_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>10.28941028</upper_limit>
@@ -11360,7 +11360,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_rotation_l_linear_stop">
+                <CoordinateLimitForce name="hip_rotation_l_limit_force">
                     <coordinate>hip_rotation_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>9.3399247</upper_limit>
@@ -11370,7 +11370,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="knee_angle_l_linear_stop">
+                <CoordinateLimitForce name="knee_angle_l_limit_force">
                     <coordinate>knee_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>0.0</upper_limit>
@@ -11380,7 +11380,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="ankle_angle_l_linear_stop">
+                <CoordinateLimitForce name="ankle_angle_l_limit_force">
                     <coordinate>ankle_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>26.27021052</upper_limit>
@@ -11390,7 +11390,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="subtalar_angle_l_linear_stop">
+                <CoordinateLimitForce name="subtalar_angle_l_limit_force">
                     <coordinate>subtalar_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>12.4698502</upper_limit>
@@ -11400,7 +11400,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="mtp_angle_l_linear_stop">
+                <CoordinateLimitForce name="mtp_angle_l_limit_force">
                     <coordinate>mtp_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>64.99999999999999</upper_limit>
@@ -11410,7 +11410,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="arm_flex_r_linear_stop">
+                <CoordinateLimitForce name="arm_flex_r_limit_force">
                     <coordinate>arm_flex_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>159.9999727042375</upper_limit>
@@ -11420,7 +11420,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="arm_add_r_linear_stop">
+                <CoordinateLimitForce name="arm_add_r_limit_force">
                     <coordinate>arm_add_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>15.007670457000003</upper_limit>
@@ -11430,7 +11430,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="arm_rot_r_linear_stop">
+                <CoordinateLimitForce name="arm_rot_r_limit_force">
                     <coordinate>arm_rot_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>43.309161671</upper_limit>
@@ -11440,7 +11440,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="elbow_flex_r_linear_stop">
+                <CoordinateLimitForce name="elbow_flex_r_limit_force">
                     <coordinate>elbow_flex_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>150.00035077</upper_limit>
@@ -11450,7 +11450,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="pro_sup_r_linear_stop">
+                <CoordinateLimitForce name="pro_sup_r_limit_force">
                     <coordinate>pro_sup_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>90.0000001836389</upper_limit>
@@ -11460,7 +11460,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="arm_flex_l_linear_stop">
+                <CoordinateLimitForce name="arm_flex_l_limit_force">
                     <coordinate>arm_flex_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>159.9999727042375</upper_limit>
@@ -11470,7 +11470,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="arm_add_l_linear_stop">
+                <CoordinateLimitForce name="arm_add_l_limit_force">
                     <coordinate>arm_add_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>15.007670457000003</upper_limit>
@@ -11480,7 +11480,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="arm_rot_l_linear_stop">
+                <CoordinateLimitForce name="arm_rot_l_limit_force">
                     <coordinate>arm_rot_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>43.309161671</upper_limit>
@@ -11490,7 +11490,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="elbow_flex_l_linear_stop">
+                <CoordinateLimitForce name="elbow_flex_l_limit_force">
                     <coordinate>elbow_flex_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>150.00035077</upper_limit>
@@ -11500,7 +11500,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="pro_sup_l_linear_stop">
+                <CoordinateLimitForce name="pro_sup_l_limit_force">
                     <coordinate>pro_sup_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>90.0000001836389</upper_limit>

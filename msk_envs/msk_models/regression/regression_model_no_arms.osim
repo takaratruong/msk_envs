@@ -9130,7 +9130,7 @@
                     <!--Deactivation time constant, in seconds-->
                     <deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
                 </Thelen2003Muscle>
-                <CoordinateLimitForce name="lumbar_extension_linear_stop">
+                <CoordinateLimitForce name="lumbar_extension_limit_force">
                     <coordinate>lumbar_extension</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>9.740282517223996</upper_limit>
@@ -9140,7 +9140,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="lumbar_bending_linear_stop">
+                <CoordinateLimitForce name="lumbar_bending_limit_force">
                     <coordinate>lumbar_bending</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>15.871136700000001</upper_limit>
@@ -9150,7 +9150,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="lumbar_rotation_linear_stop">
+                <CoordinateLimitForce name="lumbar_rotation_limit_force">
                     <coordinate>lumbar_rotation</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>12.83881432</upper_limit>
@@ -9160,7 +9160,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_flexion_r_linear_stop">
+                <CoordinateLimitForce name="hip_flexion_r_limit_force">
                     <coordinate>hip_flexion_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>86.50308943942704</upper_limit>
@@ -9170,7 +9170,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_adduction_r_linear_stop">
+                <CoordinateLimitForce name="hip_adduction_r_limit_force">
                     <coordinate>hip_adduction_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>10.28941028</upper_limit>
@@ -9181,24 +9181,16 @@
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
                 <CoordinateLimitForce name="hip_rotation_r_limit_force">
-                    <!--Coordinate (name) to be limited.-->
                     <coordinate>hip_rotation_r</coordinate>
-                    <!--Stiffness of the passive limit force when coordinate exceeds upper limit. Note, rotational stiffness expected in N*m/degree.-->
-                    <upper_stiffness>8.7266462599716483</upper_stiffness>
-                    <!--The upper limit of the coordinate range of motion (rotations in degrees).-->
-                    <upper_limit>40</upper_limit>
-                    <!--Stiffness of the passive limit force when coordinate exceeds lower limit. Note, rotational stiffness expected in N*m/degree.-->
-                    <lower_stiffness>8.7266462599716483</lower_stiffness>
-                    <!--The lower limit of the coordinate range of motion (rotations in degrees).-->
-                    <lower_limit>-40</lower_limit>
-                    <!--Damping factor on the coordinate's speed applied only when limit is exceeded. For translational has units N/(m/s) and rotational has Nm/(degree/s)-->
-                    <damping>0.017453292519943295</damping>
-                    <!--Transition region width in the units of the coordinate (rotations in degrees). Dictates the transition from zero to constant stiffness as coordinate exceeds its limit.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>9.3399247</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-22.34988346</lower_limit>
+                    <damping>0.0017453292519943296</damping>
                     <transition>1</transition>
-                    <!--Option to compute the dissipation energy due to damping in the CoordinateLimitForce. If true the dissipation power is automatically integrated to provide energy. Default is false.-->
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="knee_angle_r_linear_stop">
+                <CoordinateLimitForce name="knee_angle_r_limit_force">
                     <coordinate>knee_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>0.0</upper_limit>
@@ -9208,7 +9200,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="ankle_angle_r_linear_stop">
+                <CoordinateLimitForce name="ankle_angle_r_limit_force">
                     <coordinate>ankle_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>26.27021052</upper_limit>
@@ -9218,7 +9210,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="subtalar_angle_r_linear_stop">
+                <CoordinateLimitForce name="subtalar_angle_r_limit_force">
                     <coordinate>subtalar_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>12.4698502</upper_limit>
@@ -9228,7 +9220,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="mtp_angle_r_linear_stop">
+                <CoordinateLimitForce name="mtp_angle_r_limit_force">
                     <coordinate>mtp_angle_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>64.99999999999999</upper_limit>
@@ -9238,7 +9230,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_flexion_l_linear_stop">
+                <CoordinateLimitForce name="hip_flexion_l_limit_force">
                     <coordinate>hip_flexion_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>86.50308943942704</upper_limit>
@@ -9248,7 +9240,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="hip_adduction_l_linear_stop">
+                <CoordinateLimitForce name="hip_adduction_l_limit_force">
                     <coordinate>hip_adduction_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>10.28941028</upper_limit>
@@ -9259,24 +9251,16 @@
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
                 <CoordinateLimitForce name="hip_rotation_l_limit_force">
-                    <!--Coordinate (name) to be limited.-->
                     <coordinate>hip_rotation_l</coordinate>
-                    <!--Stiffness of the passive limit force when coordinate exceeds upper limit. Note, rotational stiffness expected in N*m/degree.-->
-                    <upper_stiffness>8.7266462599716483</upper_stiffness>
-                    <!--The upper limit of the coordinate range of motion (rotations in degrees).-->
-                    <upper_limit>40</upper_limit>
-                    <!--Stiffness of the passive limit force when coordinate exceeds lower limit. Note, rotational stiffness expected in N*m/degree.-->
-                    <lower_stiffness>8.7266462599716483</lower_stiffness>
-                    <!--The lower limit of the coordinate range of motion (rotations in degrees).-->
-                    <lower_limit>-40</lower_limit>
-                    <!--Damping factor on the coordinate's speed applied only when limit is exceeded. For translational has units N/(m/s) and rotational has Nm/(degree/s)-->
-                    <damping>0.017453292519943295</damping>
-                    <!--Transition region width in the units of the coordinate (rotations in degrees). Dictates the transition from zero to constant stiffness as coordinate exceeds its limit.-->
+                    <upper_stiffness>8.726646259971648</upper_stiffness>
+                    <upper_limit>9.3399247</upper_limit>
+                    <lower_stiffness>8.726646259971648</lower_stiffness>
+                    <lower_limit>-22.34988346</lower_limit>
+                    <damping>0.0017453292519943296</damping>
                     <transition>1</transition>
-                    <!--Option to compute the dissipation energy due to damping in the CoordinateLimitForce. If true the dissipation power is automatically integrated to provide energy. Default is false.-->
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="knee_angle_l_linear_stop">
+                <CoordinateLimitForce name="knee_angle_l_limit_force">
                     <coordinate>knee_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>0.0</upper_limit>
@@ -9286,7 +9270,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="ankle_angle_l_linear_stop">
+                <CoordinateLimitForce name="ankle_angle_l_limit_force">
                     <coordinate>ankle_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>26.27021052</upper_limit>
@@ -9296,7 +9280,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="subtalar_angle_l_linear_stop">
+                <CoordinateLimitForce name="subtalar_angle_l_limit_force">
                     <coordinate>subtalar_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>12.4698502</upper_limit>
@@ -9306,7 +9290,7 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="mtp_angle_l_linear_stop">
+                <CoordinateLimitForce name="mtp_angle_l_limit_force">
                     <coordinate>mtp_angle_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>64.99999999999999</upper_limit>

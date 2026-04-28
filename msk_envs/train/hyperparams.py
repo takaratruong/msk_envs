@@ -6,8 +6,8 @@ from typing_extensions import Annotated
 import tyro
 
 from msk_envs.envs.env_config import EnvConfig, EnvConfigGeneric, EnvConfigUpper, EnvConfigRegression, \
-    EnvConfigUpperNoSpine, EnvConfigLower, EnvConfigRegressionWSpine, EnvConfigRegressionNoMotors, EnvConfigTall, \
-    EnvConfigTallLower, EnvConfigTallMotorArms, EnvConfigUpperRegression, EnvConfigRegressionNoArms, EnvConfigHybrid
+    EnvConfigUpperNoSpine, EnvConfigLower, EnvConfigTall, EnvConfigTallLower, EnvConfigTallMotorArms, \
+    EnvConfigRegressionNoArms, EnvConfigHybrid
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config

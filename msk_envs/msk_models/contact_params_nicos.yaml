@@ -402,23 +402,6 @@ head:
   viscous_friction: 0.0
   transition_velocity: 0.1
 
-tibia_r_capsule:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.8
-  dynamic_friction: 0.8
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-
-tibia_l_capsule:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.8
-  dynamic_friction: 0.8
-  viscous_friction: 0.0
-  transition_velocity: 0.1
 
 femur_r_capsule:
   stiffness: 5e6
@@ -428,8 +411,24 @@ femur_r_capsule:
   dynamic_friction: 0.8
   viscous_friction: 0.0
   transition_velocity: 0.1
-
 femur_l_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 2
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
+tibia_r_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 2
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+tibia_l_capsule:
   stiffness: 5e6
   dissipation: 1.0
   priority: 2

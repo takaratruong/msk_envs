@@ -18331,6 +18331,122 @@
                     <deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
                 </Thelen2003Muscle>
 
+                <Thelen2003Muscle name="ercspn_r">
+                    <!--The path of the actuator which defines length and lengthening speed.-->
+                    <GeometryPath name="path">
+                        <!--Default appearance attributes for this AbstractGeometryPath.-->
+                        <Appearance>
+                            <!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+                            <color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+                        </Appearance>
+                        <!--The set of points defining the path-->
+                        <PathPointSet>
+                            <objects>
+                                <PathPoint name="ercspn_r-P1">
+                                    <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+                                    <socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+                                    <!--The fixed location of the path point expressed in its parent frame.-->
+                                    <location>-0.12353500000000001 0.038737099999999997 0.0380338</location>
+                                </PathPoint>
+                                <PathPoint name="ercspn_r-P2">
+                                    <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+                                    <socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+                                    <!--The fixed location of the path point expressed in its parent frame.-->
+                                    <location>-0.07 -0.25 0.0260191</location>
+                                </PathPoint>
+                            </objects>
+                            <groups/>
+                        </PathPointSet>
+                        <!--The wrap objects that are associated with this path-->
+                        <PathWrapSet>
+                            <objects/>
+                            <groups/>
+                        </PathWrapSet>
+                    </GeometryPath>
+                    <!--Maximum isometric force that the fibers can generate-->
+                    <max_isometric_force>2500</max_isometric_force>
+                    <!--Optimal length of the muscle fibers-->
+                    <optimal_fiber_length>0.131333972603</optimal_fiber_length>
+                    <!--Resting length of the tendon-->
+                    <tendon_slack_length>0.0328335050525</tendon_slack_length>
+                    <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+                    <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+                    <!--tendon strain at maximum isometric muscle force-->
+                    <FmaxTendonStrain>0.033000000000000002</FmaxTendonStrain>
+                    <!--passive muscle strain at maximum isometric muscle force-->
+                    <FmaxMuscleStrain>0.59999999999999998</FmaxMuscleStrain>
+                    <!--shape factor for Gaussian active muscle force-length relationship-->
+                    <KshapeActive>0.5</KshapeActive>
+                    <!--exponential shape factor for passive force-length relationship-->
+                    <KshapePassive>4</KshapePassive>
+                    <!--force-velocity shape factor-->
+                    <Af>0.29999999999999999</Af>
+                    <!--maximum normalized lengthening force-->
+                    <Flen>1.8</Flen>
+                    <!--Activation time constant, in seconds-->
+                    <activation_time_constant>0.01</activation_time_constant>
+                    <!--Deactivation time constant, in seconds-->
+                    <deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
+                </Thelen2003Muscle>
+                <Thelen2003Muscle name="ercspn_l">
+                    <!--The path of the actuator which defines length and lengthening speed.-->
+                    <GeometryPath name="path">
+                        <!--Default appearance attributes for this AbstractGeometryPath.-->
+                        <Appearance>
+                            <!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
+                            <color>0.80000000000000004 0.10000000000000001 0.10000000000000001</color>
+                        </Appearance>
+                        <!--The set of points defining the path-->
+                        <PathPointSet>
+                            <objects>
+                                <PathPoint name="ercspn_l-P1">
+                                    <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+                                    <socket_parent_frame>/bodyset/pelvis</socket_parent_frame>
+                                    <!--The fixed location of the path point expressed in its parent frame.-->
+                                    <location>-0.12353500000000001 0.038737099999999997 -0.0380338</location>
+                                </PathPoint>
+                                <PathPoint name="ercspn_l-P2">
+                                    <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
+                                    <socket_parent_frame>/bodyset/thorax</socket_parent_frame>
+                                    <!--The fixed location of the path point expressed in its parent frame.-->
+                                    <location>-0.07 -0.25 -0.0260191</location>
+                                </PathPoint>
+                            </objects>
+                            <groups/>
+                        </PathPointSet>
+                        <!--The wrap objects that are associated with this path-->
+                        <PathWrapSet>
+                            <objects/>
+                            <groups/>
+                        </PathWrapSet>
+                    </GeometryPath>
+                    <!--Maximum isometric force that the fibers can generate-->
+                    <max_isometric_force>2500</max_isometric_force>
+                    <!--Optimal length of the muscle fibers-->
+                    <optimal_fiber_length>0.131333972603</optimal_fiber_length>
+                    <!--Resting length of the tendon-->
+                    <tendon_slack_length>0.0328335050525</tendon_slack_length>
+                    <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
+                    <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
+                    <!--tendon strain at maximum isometric muscle force-->
+                    <FmaxTendonStrain>0.033000000000000002</FmaxTendonStrain>
+                    <!--passive muscle strain at maximum isometric muscle force-->
+                    <FmaxMuscleStrain>0.59999999999999998</FmaxMuscleStrain>
+                    <!--shape factor for Gaussian active muscle force-length relationship-->
+                    <KshapeActive>0.5</KshapeActive>
+                    <!--exponential shape factor for passive force-length relationship-->
+                    <KshapePassive>4</KshapePassive>
+                    <!--force-velocity shape factor-->
+                    <Af>0.29999999999999999</Af>
+                    <!--maximum normalized lengthening force-->
+                    <Flen>1.8</Flen>
+                    <!--Activation time constant, in seconds-->
+                    <activation_time_constant>0.01</activation_time_constant>
+                    <!--Deactivation time constant, in seconds-->
+                    <deactivation_time_constant>0.040000000000000001</deactivation_time_constant>
+                </Thelen2003Muscle>
+
+
                 <CoordinateLimitForce name="hip_flexion_r_limit_force">
                     <coordinate>hip_flexion_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>

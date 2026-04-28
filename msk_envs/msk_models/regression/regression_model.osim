@@ -11246,7 +11246,7 @@
                     <upper_limit>9.740282517223996</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-29.999999999999996</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11256,7 +11256,7 @@
                     <upper_limit>15.871136700000001</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-15.871136700000001</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11266,7 +11266,7 @@
                     <upper_limit>12.83881432</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-12.83881432</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11276,7 +11276,7 @@
                     <upper_limit>86.50308943942704</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-22.31004882</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11286,7 +11286,7 @@
                     <upper_limit>10.28941028</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-23.100854320000003</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11296,7 +11296,7 @@
                     <upper_limit>9.3399247</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-22.34988346</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11306,7 +11306,7 @@
                     <upper_limit>0.0</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-142.44293604</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11316,7 +11316,7 @@
                     <upper_limit>26.27021052</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-43.94264648</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11326,7 +11326,7 @@
                     <upper_limit>12.4698502</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-19.434310729761496</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11336,7 +11336,7 @@
                     <upper_limit>64.99999999999999</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-45.00005729019614</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11346,7 +11346,7 @@
                     <upper_limit>86.50308943942704</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-22.31004882</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11356,7 +11356,7 @@
                     <upper_limit>10.28941028</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-23.100854320000003</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11366,7 +11366,7 @@
                     <upper_limit>9.3399247</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-22.34988346</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11376,7 +11376,7 @@
                     <upper_limit>0.0</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-142.44293604</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11386,7 +11386,7 @@
                     <upper_limit>26.27021052</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-43.94264648</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11396,7 +11396,7 @@
                     <upper_limit>12.4698502</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-19.434310729761496</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11406,7 +11406,7 @@
                     <upper_limit>64.99999999999999</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-45.00005729019614</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11416,7 +11416,7 @@
                     <upper_limit>159.9999727042375</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-75.00000005753945</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11426,7 +11426,7 @@
                     <upper_limit>15.007670457000003</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-24.682988307</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11436,7 +11436,7 @@
                     <upper_limit>43.309161671</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-62.951956790000004</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11446,7 +11446,7 @@
                     <upper_limit>150.00035077</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>0.0</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11456,7 +11456,7 @@
                     <upper_limit>90.0000001836389</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>0.0</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11466,7 +11466,7 @@
                     <upper_limit>159.9999727042375</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-75.00000005753945</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11476,7 +11476,7 @@
                     <upper_limit>15.007670457000003</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-24.682988307</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11486,7 +11486,7 @@
                     <upper_limit>43.309161671</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>-62.951956790000004</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11496,7 +11496,7 @@
                     <upper_limit>150.00035077</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>0.0</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
@@ -11506,7 +11506,7 @@
                     <upper_limit>90.0000001836389</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
                     <lower_limit>0.0</lower_limit>
-                    <damping>0.0017453292519943296</damping>
+                    <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>

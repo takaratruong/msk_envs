@@ -3185,10 +3185,10 @@
 
                 <CoordinateLimitForce name="lumbar_bending_limit_force">
                     <coordinate>lumbar_bending</coordinate>
-                    <upper_stiffness>8.726646259971648</upper_stiffness>
-                    <upper_limit>15.871136700000001</upper_limit>
-                    <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-15.871136700000001</lower_limit>
+                    <upper_stiffness>8.7266462599716483</upper_stiffness>
+                    <upper_limit>29.999999999999996</upper_limit>
+                    <lower_stiffness>8.7266462599716483</lower_stiffness>
+                    <lower_limit>-29.999999999999996</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -3196,10 +3196,10 @@
 
                 <CoordinateLimitForce name="lumbar_extension_limit_force">
                     <coordinate>lumbar_extension</coordinate>
-                    <upper_stiffness>8.726646259971648</upper_stiffness>
-                    <upper_limit>29.999999999999996</upper_limit>
-                    <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-9.740282517223996</lower_limit>
+                    <upper_stiffness>8.7266462599716483</upper_stiffness>
+                    <upper_limit>28.25</upper_limit>
+                    <lower_stiffness>8.7266462599716483</lower_stiffness>
+                    <lower_limit>-67.75</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -3207,14 +3207,15 @@
 
                 <CoordinateLimitForce name="lumbar_rotation_limit_force">
                     <coordinate>lumbar_rotation</coordinate>
-                    <upper_stiffness>8.726646259971648</upper_stiffness>
-                    <upper_limit>12.83881432</upper_limit>
-                    <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-12.83881432</lower_limit>
+                    <upper_stiffness>8.7266462599716483</upper_stiffness>
+                    <upper_limit>14.999999999999998</upper_limit>
+                    <lower_stiffness>8.7266462599716483</lower_stiffness>
+                    <lower_limit>-14.999999999999998</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
+
 
                 <SpringGeneralizedForce name="thorax_bending_spring_force">
                     <coordinate>thorax_bending</coordinate>

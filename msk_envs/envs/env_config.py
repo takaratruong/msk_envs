@@ -237,6 +237,17 @@ class EnvConfigTallLowerOldJointLimits(EnvConfig):
 
 
 @dataclass
+class EnvConfigTallLowerOldJointLimitsOldUpper(EnvConfig):
+    """ Environment configuration for no-hands model"""
+    model_path: str = "../msk_models/new_model_old_limits_old_upper.osim"
+    muscle_function_path: str = "../msk_models/new_model_old_limits_old_upper_paths.xml"
+    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
+    armature: float = 1e-3
+    integrator_accuracy: float = 1.0
+
+
+@dataclass
 class EnvConfigUpper(EnvConfig):
     model_path: str = "../msk_models/athletetall_reduced_upper.osim"
     muscle_function_path: str = "../msk_models/athletetall_reducedpaths_upper.xml"

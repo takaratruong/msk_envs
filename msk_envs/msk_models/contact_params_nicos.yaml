@@ -74,8 +74,6 @@ right_foot_8:
   dynamic_friction: 0.3
   viscous_friction: 0.3
   transition_velocity: 0.001
-
-
 left_foot_1:
   stiffness: 1602213.464769315
   dissipation: 0.0725
@@ -141,7 +139,7 @@ left_foot_8:
   viscous_friction: 0.3
   transition_velocity: 0.001
 
-
+# DHondt contact model settings
 heel_r:
   stiffness: 1000000.0
   dissipation: 2.0
@@ -239,160 +237,6 @@ medialMidfoot_l:
   transition_velocity: 0.2
   priority: 1
 
-calcn_r_sphere:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-talus_r_sphere:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-calcn_l_sphere:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-talus_l_sphere:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-
-calcn_r_capsule1:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-calcn_r_capsule2:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-calcn_r_capsule3:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-calcn_r_capsule4:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-calcn_r_capsule5:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_r_capsule1:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_r_capsule2:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_r_capsule3:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_r_capsule4:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_r_capsule5:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_l_capsule1:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_l_capsule2:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_l_capsule3:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_l_capsule4:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-toes_l_capsule5:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.1
-  dynamic_friction: 0.1
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-
 head:
   stiffness: 5e6
   dissipation: 1.0
@@ -402,6 +246,14 @@ head:
   viscous_friction: 0.0
   transition_velocity: 0.1
 
+pelvis_capsule:
+  stiffness: 5e6
+  dissipation: 1.0
+  priority: 2
+  static_friction: 0.8
+  dynamic_friction: 0.8
+  viscous_friction: 0.0
+  transition_velocity: 0.1
 
 femur_r_capsule:
   stiffness: 5e6
@@ -419,7 +271,6 @@ femur_l_capsule:
   dynamic_friction: 0.8
   viscous_friction: 0.0
   transition_velocity: 0.1
-
 tibia_r_capsule:
   stiffness: 5e6
   dissipation: 1.0
@@ -429,15 +280,6 @@ tibia_r_capsule:
   viscous_friction: 0.0
   transition_velocity: 0.1
 tibia_l_capsule:
-  stiffness: 5e6
-  dissipation: 1.0
-  priority: 2
-  static_friction: 0.8
-  dynamic_friction: 0.8
-  viscous_friction: 0.0
-  transition_velocity: 0.1
-
-pelvis_capsule:
   stiffness: 5e6
   dissipation: 1.0
   priority: 2

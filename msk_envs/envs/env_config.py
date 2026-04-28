@@ -265,6 +265,6 @@ class EnvConfigRegressionNoArms(EnvConfig):
     armature: float = 1e-3
     integrator_accuracy: float = 1.0
     model_path: str = "../msk_models/regression/regression_model_no_arms.osim"
-    muscle_function_path: str = "../msk_models/regression/regression_fn_noerc.xml"
+    muscle_function_path: str = "../msk_models/regression/regression_fn.xml"
     starting_pose_path: str = "../msk_models/regression/starting_pose_run.yaml"
     contact_params_path: str = "../msk_models/regression/contact_params_regression.yaml"

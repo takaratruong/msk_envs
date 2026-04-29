@@ -8,7 +8,7 @@ import tyro
 from msk_envs.envs.env_config import EnvConfig, EnvConfigGeneric, EnvConfigUpper, EnvConfigRegression, \
     EnvConfigUpperNoSpine, EnvConfigLower, EnvConfigTall, EnvConfigTallLower, EnvConfigTallMotorArms, \
     EnvConfigRegressionNoArms, EnvConfigHybrid, EnvConfigTallLowerOldJointLimits, EnvConfigHybridNoArms, \
-    EnvConfigTallLowerOldJointLimitsOldUpper
+    EnvConfigTallLowerOldJointLimitsOldUpper, EnvConfigHybridMotorArms
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
@@ -249,6 +249,17 @@ class SprintRegressionNoArmsConfig(LaneConfig):
 @dataclass
 class SprintHybridConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.SPRINT,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
+class SprintHybridMotorArmsConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybridMotorArms(
         env_variant=DerivedEnv.SPRINT,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
@@ -674,10 +685,12 @@ Config = Union[
     Annotated[SprintLowerConfig, tyro.conf.subcommand(name="sprintlower")],
     Annotated[SprintConfigTallLower, tyro.conf.subcommand(name="sprinttalllower")],
     Annotated[SprintConfigTallLowerOldJointLimits, tyro.conf.subcommand(name="sprinttallloweroldlimits")],
-    Annotated[SprintConfigTallLowerOldJointLimitsOldUpper, tyro.conf.subcommand(name="sprinttalllowernewoldlimitsoldupper")],
+    Annotated[
+        SprintConfigTallLowerOldJointLimitsOldUpper, tyro.conf.subcommand(name="sprinttalllowernewoldlimitsoldupper")],
     Annotated[SprintRegressionConfig, tyro.conf.subcommand(name="sprintregression")],
     Annotated[SprintRegressionNoArmsConfig, tyro.conf.subcommand(name="sprintregressionnoarms")],
     Annotated[SprintHybridConfig, tyro.conf.subcommand(name="sprinthybrid")],
+    Annotated[SprintHybridMotorArmsConfig, tyro.conf.subcommand(name="sprinthybridmotorarms")],
     Annotated[SprintHybridNoArmsConfig, tyro.conf.subcommand(name="sprinthybridnoarms")],
     Annotated[RaceWalkConfig, tyro.conf.subcommand(name="racewalk")],
     Annotated[BackPedalConfig, tyro.conf.subcommand(name="backpedal")],

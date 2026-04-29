@@ -45,11 +45,11 @@ class EnvConfig:
     # --- Model muscle properties ---
     muscle_multiplier: float = 1.0
     """ Multiplier to max isometric force """
-    muscle_activation_dynamics: msk_warp.ActivationType = msk_warp.ActivationType.DGF
+    muscle_activation_dynamics: msk_warp.ActivationType = msk_warp.ActivationType.MILLARD
     """ Muscle activation dynamics type (DGF, MILLARD) """
-    muscle_activation_time_const: float = 0.015
+    muscle_activation_time_const: float = 0.010
     """ Muscle activation time constant. Default 15ms for DGF, 10ms for Millard """
-    muscle_deactivation_time_const: float = 0.060
+    muscle_deactivation_time_const: float = 0.040
     """ Muscle deactivation time constant. Default 60ms for DGF, 40ms for Millard """
     muscle_activation_dynamics_smoothing: float = 10.0
     """ Muscle activation dynamics smoothing factor for DGF activation dynamics """
@@ -71,6 +71,8 @@ class EnvConfig:
     """ Whether to use function-based path (or geometry path)"""
     muscle_function_path: str = "../msk_models/athlete_model_FunctionBasedPathSet.xml"
     """ Function-based path data file """
+    ignore_short_elastic_tendons: bool = False
+    """ Ignore tendon dynamics for muscles where tendon slack length < optimal fiber length"""
     disable_muscle_passive_forces: bool = False
     """ Whether to disable muscle passive forces """
 

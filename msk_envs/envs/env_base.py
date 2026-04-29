@@ -50,6 +50,10 @@ class MSKEnv:
             mm.active_force_width_scale = env_config.muscle_active_force_width_scale
             mm.v_max = env_config.muscle_v_max
 
+            if env_config.ignore_short_elastic_tendons:
+                mm.ignore_tendon_compliance = (
+                        mm.ignore_tendon_compliance or mm.tendon_slack_length < mm.optimal_fiber_length)
+
             # "Disable" passive muscle forces for upper body
             if i in upper_body_muscles_id:
                 mm.strain_at_one_norm_force = 3.0

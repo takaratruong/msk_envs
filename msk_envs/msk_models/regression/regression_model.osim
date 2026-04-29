@@ -11125,9 +11125,9 @@
                 <CoordinateLimitForce name="arm_add_r_limit_force">
                     <coordinate>arm_add_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>45.0</upper_limit>
+                    <upper_limit>15.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-24.682988307</lower_limit>
+                    <lower_limit>-45.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -11165,9 +11165,9 @@
                 <CoordinateLimitForce name="arm_add_l_limit_force">
                     <coordinate>arm_add_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>45.0</upper_limit>
+                    <upper_limit>15.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-24.682988307</lower_limit>
+                    <lower_limit>-45.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -11302,7 +11302,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="arm_add_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11310,7 +11310,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="arm_rot_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11318,7 +11318,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="arm_flex_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11326,7 +11326,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="arm_add_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11334,7 +11334,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="arm_rot_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11342,7 +11342,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="ankle_angle_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->

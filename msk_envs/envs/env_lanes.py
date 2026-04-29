@@ -91,8 +91,8 @@ class LanesEnv(MSKEnv):
             self.actuator_activations,
             joint_positions_without_x,
             self.joint_velocities,
-            relative_body_positions.reshape(self.num_worlds, -1),
-            relative_body_rotations.reshape(self.num_worlds, -1),
+            # relative_body_positions.reshape(self.num_worlds, -1),
+            # relative_body_rotations.reshape(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 

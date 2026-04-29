@@ -39,7 +39,10 @@ class MSKEnv:
         msk_warp.set_activation_type(self.m, env_config.muscle_activation_dynamics)
         msk_warp.set_contraction_type(self.m, env_config.muscle_contraction_dynamics)
         muscle_metadata = msk_warp.muscle_metadata(self.m)
+        muscle_idx_to_name = {idx: name for name, idx in self.load_result.muscle_id_lookup.items()}
         for i, mm in enumerate(muscle_metadata):
+            muscle_name = muscle_idx_to_name[i]
+
             mm.max_isometric_force *= env_config.muscle_multiplier
             mm.activation_time_const = env_config.muscle_activation_time_const
             mm.deactivation_time_const = env_config.muscle_deactivation_time_const
@@ -62,6 +65,11 @@ class MSKEnv:
             if env_config.disable_muscle_passive_forces:
                 mm.strain_at_one_norm_force = 3.0
                 mm.stiffness_at_low_force = 0.0
+
+            # Custom muscle multiplier
+            if muscle_name in env_config.custom_muscle_multipliers:
+                custom_multiplier = env_config.custom_muscle_multipliers[muscle_name]
+                mm.max_isometric_force *= custom_multiplier
 
         # Collider properties
         if env_config.use_specified_contact_params:

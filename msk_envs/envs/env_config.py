@@ -75,6 +75,7 @@ class EnvConfig:
     """ Ignore tendon dynamics for muscles where tendon slack length < optimal fiber length"""
     disable_muscle_passive_forces: bool = False
     """ Whether to disable muscle passive forces """
+    custom_muscle_multipliers: dict[str, float] = field(default_factory=dict)
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"

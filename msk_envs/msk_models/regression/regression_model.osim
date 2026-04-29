@@ -11115,7 +11115,7 @@
                 <CoordinateLimitForce name="arm_flex_r_limit_force">
                     <coordinate>arm_flex_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>159.9999727042375</upper_limit>
+                    <upper_limit>180</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>-75.00000005753945</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -11125,7 +11125,7 @@
                 <CoordinateLimitForce name="arm_add_r_limit_force">
                     <coordinate>arm_add_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>15.007670457000003</upper_limit>
+                    <upper_limit>45.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>-24.682988307</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -11135,9 +11135,9 @@
                 <CoordinateLimitForce name="arm_rot_r_limit_force">
                     <coordinate>arm_rot_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>15</upper_limit>
+                    <upper_limit>30</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-15</lower_limit>
+                    <lower_limit>-30</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -11155,7 +11155,7 @@
                 <CoordinateLimitForce name="arm_flex_l_limit_force">
                     <coordinate>arm_flex_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>159.9999727042375</upper_limit>
+                    <upper_limit>180</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>-75.00000005753945</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -11165,7 +11165,7 @@
                 <CoordinateLimitForce name="arm_add_l_limit_force">
                     <coordinate>arm_add_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>15.007670457000003</upper_limit>
+                    <upper_limit>45.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>-24.682988307</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -11175,9 +11175,9 @@
                 <CoordinateLimitForce name="arm_rot_l_limit_force">
                     <coordinate>arm_rot_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>15</upper_limit>
+                    <upper_limit>30</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-15</lower_limit>
+                    <lower_limit>-30</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>

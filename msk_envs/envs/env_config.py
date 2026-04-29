@@ -176,8 +176,8 @@ class EnvConfigTall(EnvConfig):
 
 @dataclass
 class EnvConfigHybrid(EnvConfig):
-    model_path: str = "../msk_models/hamner_lower_new_upper.osim"
-    muscle_function_path: str = "../msk_models/hamner_lower_new_upper_fn.xml"
+    model_path: str = "../msk_models/hybrid_model.osim"
+    muscle_function_path: str = "../msk_models/hybrid_model_fn.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     armature: float = 1e-3
     integrator_accuracy: float = 1.0
@@ -185,8 +185,8 @@ class EnvConfigHybrid(EnvConfig):
 
 @dataclass
 class EnvConfigHybridMotorArms(EnvConfig):
-    model_path: str = "../msk_models/hamner_lower_new_upper_motor_arms.osim"
-    muscle_function_path: str = "../msk_models/hamner_lower_new_upper_motor_arms_fn.xml"
+    model_path: str = "../msk_models/hybrid_model_motor_arms.osim"
+    muscle_function_path: str = "../msk_models/hybrid_model_motor_arms_fn.xml"
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
     armature: float = 1e-3
     integrator_accuracy: float = 1.0

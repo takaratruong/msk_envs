@@ -11192,22 +11192,6 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <SpringGeneralizedForce name="mtp_angle_r_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>mtp_angle_r</coordinate>
-                    <!--Spring stiffness.-->
-                    <stiffness>65</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>0.4</viscosity>
-                </SpringGeneralizedForce>
-                <SpringGeneralizedForce name="mtp_angle_l_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>mtp_angle_l</coordinate>
-                    <!--Spring stiffness.-->
-                    <stiffness>65</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>0.4</viscosity>
-                </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="hip_flexion_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_flexion_r</coordinate>
@@ -11296,6 +11280,55 @@
                     <!--Damping constant.-->
                     <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="ankle_angle_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>ankle_angle_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="ankle_angle_l_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>ankle_angle_l</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="subtalar_angle_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>subtalar_angle_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="subtalar_angle_l_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>subtalar_angle_l</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="mtp_angle_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>mtp_angle_r</coordinate>
+                    <!--Spring stiffness.-->
+                    <stiffness>65</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.4</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="mtp_angle_l_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>mtp_angle_l</coordinate>
+                    <!--Spring stiffness.-->
+                    <stiffness>65</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.4</viscosity>
+                </SpringGeneralizedForce>
+
                 <SpringGeneralizedForce name="arm_flex_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>arm_flex_r</coordinate>
@@ -11344,29 +11377,13 @@
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
-                <SpringGeneralizedForce name="ankle_angle_r_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>ankle_angle_r</coordinate>
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
-                </SpringGeneralizedForce>
-                <SpringGeneralizedForce name="ankle_angle_l_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>ankle_angle_l</coordinate>
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
-                </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="elbow_flex_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>elbow_flex_r</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="elbow_flex_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -11374,23 +11391,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
-                </SpringGeneralizedForce>
-                <SpringGeneralizedForce name="subtalar_angle_r_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>subtalar_angle_r</coordinate>
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
-                </SpringGeneralizedForce>
-                <SpringGeneralizedForce name="subtalar_angle_l_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>subtalar_angle_l</coordinate>
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>0.1</viscosity>
+                    <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
 
                 <ActivationCoordinateActuator name="arm_flex_r_motor">

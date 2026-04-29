@@ -309,7 +309,6 @@ def parse_body_forces(
         body_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[BodyForces]:
-    body_force = msk_warp.body_force(d)
     body_force_gravity = msk_warp.body_force_gravity(d)
     body_force_contact = msk_warp.body_force_contact(d)
     body_force_muscle = msk_warp.body_force_muscle(d)
@@ -319,7 +318,6 @@ def parse_body_forces(
     for i in range(msk_warp.get_num_bodies(m)):
         angle = BodyForces(
             name=body_idx_to_name[i],
-            net_force=tuple(body_force[world_id][i].tolist()),
             gravity=tuple(body_force_gravity[world_id][i].tolist()),
             contact=tuple(body_force_contact[world_id][i].tolist()),
             muscle=tuple(body_force_muscle[world_id][i].tolist()),

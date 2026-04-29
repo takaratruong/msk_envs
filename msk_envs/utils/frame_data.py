@@ -337,7 +337,6 @@ class JointMuscleBreakdown:
 @dataclass
 class BodyForces:
     name: str
-    net_force: tuple
     gravity: tuple
     contact: tuple
     drag: tuple

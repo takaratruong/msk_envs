@@ -72,7 +72,7 @@ def create_generic_plot(
 
                     for part in range(data_subset.shape[-1]):
                         alpha = 1.0 if alphas is None else alphas[part]
-                        linestyle = 'solid' if linestyles is None else linestyles[part]
+                        linestyle = None if linestyles is None else linestyles[part]
                         if omit_zeros and np.all(np.abs(data_subset[..., part]) < omit_tolerance):
                             continue
                         seq_plot.add(idx_fig, data_subset[..., part],
@@ -390,14 +390,15 @@ def create_pdf_output(
             _create_interval_plots(1.0, times, create_joint_moments_plot)
 
         # --- JOINT PASSIVE MUSCLE FORCE ANALYSIS ---
-        joint_passive_muscle = []
-        for frame in frame_data:
-            joint_passive_muscle.append([m.muscle_passive_breakdown for m in frame.joint_passive_moments])
-        joint_passive_muscle = np.array(joint_passive_muscle)  # [n_frames, n_qpos, n_muscles]
         muscle_names = [m.name for m in frame0.muscles]
         qpos_values = np.array([[j.value for j in frame.joint_angles] for frame in frame_data])
 
-        def create_joint_passive_muscle_plot(time_start: float = 0.0, time_end: float = None):
+        def create_joint_breakdown_plot(
+                title: str,
+                joint_muscle_forces: np.ndarray,
+                time_start: float = 0.0,
+                time_end: float = None
+        ):
             # Select time range
             if time_end is None:
                 time_end = times[-1]
@@ -405,13 +406,13 @@ def create_pdf_output(
             time_selected = times[time_mask]
             frame_ind_selected = frame_ind[time_mask]
 
-            title = f"Joint Passive Forces ({time_start:.1f}s to {time_end:.1f}s)"
+            title = f"{title} ({time_start:.1f}s to {time_end:.1f}s)"
             lss, lsd = "solid", "dashed"
             create_generic_plot(
                 names=joint_qpos_names,
                 times=time_selected,
                 frame_ind=frame_ind_selected,
-                plot_data=joint_passive_muscle[time_mask, :],
+                plot_data=joint_muscle_forces[time_mask, :],
                 fig_title=title,
                 y_label="Value (N m)",
                 y_fmt=".1f",
@@ -423,7 +424,16 @@ def create_pdf_output(
                 omit_zeros=True,
                 secondary_overlay_data=qpos_values.T,
             )
-        create_joint_passive_muscle_plot()
+
+        joint_passive_muscle, joint_active_muscle = [], []
+        for frame in frame_data:
+            joint_passive_muscle.append([m.passive_breakdown for m in frame.joint_muscle_breakdown])
+            joint_active_muscle.append([m.active_breakdown for m in frame.joint_muscle_breakdown])
+        joint_passive_muscle = np.array(joint_passive_muscle)  # [n_frames, n_qpos, n_muscles]
+        joint_active_muscle = np.array(joint_active_muscle)
+
+        create_joint_breakdown_plot(title="Joint Passive Breakdown", joint_muscle_forces=joint_passive_muscle)
+        create_joint_breakdown_plot(title="Joint Active Breakdown", joint_muscle_forces=joint_active_muscle)
 
         # --- BODY FORCES ---
         # body_names = [b.name for b in frame0.body_forces]

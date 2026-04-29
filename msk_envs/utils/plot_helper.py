@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from dataclasses import dataclass
+from typing import Optional
+from cycler import cycler
 
 
 @dataclass
@@ -58,6 +60,13 @@ class SequencePlot:
         self.y_ranges = np.zeros((cfg.num_horizontal, cfg.num_vertical, 2))
         self.y_ranges[:, :, 0] = np.inf
         self.y_ranges[:, :, 1] = -np.inf
+
+        # Color cycle
+        colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        linestyles = ['-', '--', ':', '-.']
+        combined_cycle = cycler(linestyle=linestyles) * cycler(color=colors)
+        for ax in self.axs:
+            ax.set_prop_cycle(combined_cycle)
         return
 
     def _get_idx(self, ax_idx_x: int, ax_idx_y: int):
@@ -97,11 +106,14 @@ class SequencePlot:
             y_data: np.ndarray,
             label: str,
             alpha: float = 1.0,
-            linestyle: str = "solid",
+            linestyle: Optional[str] = None,
             title: str = None
     ):
         ax = self.axs[idx]
-        ax.plot(self.x_data, y_data, label=label, alpha=alpha, linestyle=linestyle)
+        plot_kwargs = dict(label=label, alpha=alpha)
+        if linestyle is not None:
+            plot_kwargs["linestyle"] = linestyle
+        ax.plot(self.x_data, y_data, **plot_kwargs)
 
         if title is not None:
             ax.set_title(title, fontsize=14, fontweight="bold")
@@ -241,9 +253,13 @@ class SequencePlot:
                 # Legend required
                 if self.labels_per_ax[i, j] >= 1:
                     ax = self.get_axes_at(i, j)
-                    fontsize = 3 if self.labels_per_ax[i, j] > 5 else 12
-                    ax.legend(fontsize=fontsize, loc="upper right",
-                              frameon=False, prop={'weight': 'bold'})
+                    if self.labels_per_ax[i, j] > 12:
+                        fontsize = 4
+                    elif self.labels_per_ax[i, j] > 5:
+                        fontsize = 6
+                    else:
+                        fontsize = 12
+                    ax.legend(loc="upper right", frameon=False, prop={'weight': 'bold', 'size': fontsize})
 
                 pass
             pass

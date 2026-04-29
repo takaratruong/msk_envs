@@ -126,15 +126,16 @@ class MSKEnv:
                 msk_warp.reset(self.m, self.d)
             self.reset_graph = capture.graph
 
-            # Post-step graph: computes things like joint torques. Needed for rewards, observations, etc.
+            # Post-step graph: computes things like muscle passive forces, needed for rewards
             with wp.ScopedCapture() as capture:
-                msk_warp.post(self.m, self.d)
+                msk_warp.compute_muscle_passive_forces(self.m, self.d)
             self.post_graph = capture.graph
 
             # Analytics graph: anything else needed for analytics
             with wp.ScopedCapture() as capture:
                 msk_warp.compute_muscle_moments(self.m, self.d)
                 msk_warp.compute_net_joint_moments(self.m, self.d)
+                msk_warp.compute_muscle_force_breakdown(self.m, self.d)
             self.analytics_graph = capture.graph
 
             # Forward kinematics graph, useful for motion tracking

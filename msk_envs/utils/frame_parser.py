@@ -275,23 +275,29 @@ def parse_joint_passive_moments(
         d: msk_warp.Data,
         qpos_idx_to_name: dict[int, str],
         world_id: int
-) -> list[JointPassiveMoments]:
+) -> list[JointMuscleBreakdown]:
     qfrc_muscle_passive_breakdown = msk_warp.qfrc_muscle_passive_breakdown(d)
+    qfrc_muscle_active_breakdown = msk_warp.qfrc_muscle_active_breakdown(d)
 
     moments = []
     for i in range(msk_warp.get_num_qpos(m)):
         qpos_name = qpos_idx_to_name[i]
 
         # Build passive muscle breakdown
-        muscle_passive_breakdown = []
+        passive_breakdown = []
+        active_breakdown = []
         for j in range(msk_warp.get_num_muscles(m)):
-            muscle_passive_breakdown.append(
+            passive_breakdown.append(
                 float(qfrc_muscle_passive_breakdown[world_id][i][j].item())
             )
+            active_breakdown.append(
+                float(qfrc_muscle_active_breakdown[world_id][i][j].item())
+            )
 
-        pm = JointPassiveMoments(
+        pm = JointMuscleBreakdown(
             name=qpos_name,
-            muscle_passive_breakdown=muscle_passive_breakdown,
+            passive_breakdown=passive_breakdown,
+            active_breakdown=active_breakdown,
         )
         moments.append(pm)
     return moments
@@ -378,7 +384,7 @@ def parse_frame(
         joint_angles=joint_angles,
         joint_velocities=joint_velocities,
         joint_moments=joint_moments,
-        joint_passive_moments=joint_passive_moments,
+        joint_muscle_breakdown=joint_passive_moments,
         body_forces=body_forces,
         muscles=muscles,
         actuators=actuators,

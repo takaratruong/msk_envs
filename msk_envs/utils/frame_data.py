@@ -313,21 +313,24 @@ class JointMoment:
 
 
 @dataclass
-class JointPassiveMoments:
+class JointMuscleBreakdown:
     name: str
-    muscle_passive_breakdown: list[float]
+    passive_breakdown: list[float]
+    active_breakdown: list[float]
 
     def to_dict(self):
         return {
             "name": self.name,
-            "muscle_passive_breakdown": self.muscle_passive_breakdown,
+            "passive_breakdown": self.passive_breakdown,
+            "active_breakdown": self.active_breakdown,
         }
 
     @staticmethod
-    def from_dict(data: dict) -> 'JointPassiveMoments':
-        return JointPassiveMoments(
+    def from_dict(data: dict) -> 'JointMuscleBreakdown':
+        return JointMuscleBreakdown(
             name=data["name"],
-            muscle_passive_breakdown=data["muscle_passive_breakdown"],
+            passive_breakdown=data["passive_breakdown"],
+            active_breakdown=data["active_breakdown"],
         )
 
 
@@ -415,7 +418,7 @@ class FrameData:
     joint_angles: list[NamedValue]
     joint_velocities: list[NamedValue]
     joint_moments: list[JointMoment]
-    joint_passive_moments: list[JointPassiveMoments]
+    joint_muscle_breakdown: list[JointMuscleBreakdown]
     body_forces: list[BodyForces]
     muscles: list[MuscleData]
     actuators: list[ActuatorData]
@@ -433,7 +436,7 @@ class FrameData:
             "joint_angles": [angle.to_dict() for angle in self.joint_angles],
             "joint_velocities": [vel.to_dict() for vel in self.joint_velocities],
             "joint_moments": [moment.to_dict() for moment in self.joint_moments],
-            "joint_passive_moments": [moment.to_dict() for moment in self.joint_passive_moments],
+            "joint_muscle_breakdown": [moment.to_dict() for moment in self.joint_muscle_breakdown],
             "body_forces": [obj.to_dict() for obj in self.body_forces],
             "muscles": [muscle.to_dict() for muscle in self.muscles],
             "actuators": [actuator.to_dict() for actuator in self.actuators],
@@ -453,7 +456,7 @@ class FrameData:
             joint_angles=[NamedValue.from_dict(angle) for angle in data["joint_angles"]],
             joint_velocities=[NamedValue.from_dict(vel) for vel in data["joint_velocities"]],
             joint_moments=[JointMoment.from_dict(moment) for moment in data["joint_moments"]],
-            joint_passive_moments=[JointPassiveMoments.from_dict(moment) for moment in data["joint_passive_moments"]],
+            joint_muscle_breakdown=[JointMuscleBreakdown.from_dict(moment) for moment in data["joint_muscle_breakdown"]],
             body_forces=[BodyForces.from_dict(obj) for obj in data["body_forces"]],
             muscles=[MuscleData.from_dict(muscle) for muscle in data["muscles"]],
             actuators=[ActuatorData.from_dict(actuator) for actuator in data["actuators"]],

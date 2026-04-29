@@ -11115,7 +11115,7 @@
                 <CoordinateLimitForce name="arm_flex_r_limit_force">
                     <coordinate>arm_flex_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>180</upper_limit>
+                    <upper_limit>150</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>-75.00000005753945</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -11155,7 +11155,7 @@
                 <CoordinateLimitForce name="arm_flex_l_limit_force">
                     <coordinate>arm_flex_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>180</upper_limit>
+                    <upper_limit>150</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>-75.00000005753945</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -11333,7 +11333,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>arm_flex_r</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -11341,7 +11341,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>arm_add_r</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -11349,7 +11349,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>arm_rot_r</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -11357,7 +11357,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>arm_flex_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -11365,7 +11365,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>arm_add_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -11373,7 +11373,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>arm_rot_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>0.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>

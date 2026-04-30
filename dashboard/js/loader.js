@@ -4,7 +4,8 @@ import {VTKLoader} from 'three/addons/loaders/VTKLoader.js';
 
 const objLoader = new OBJLoader();
 const vtpLoader = new VTKLoader();
-
+const textureLoader = new THREE.TextureLoader();
+const planeTexture = textureLoader.load('assets/textures/plane.png');
 
 const modelCache = {};
 
@@ -63,23 +64,20 @@ function loadModel(file, opacity, color, callback) {
 function loadCollider(spheres, capsules, geomType, scale, rot, color, callback) {
     const opacity = 0.8;
     if (geomType === 0) {
-        if (rot[3] !== 1.0) {
-            const plane = new THREE.Mesh(
-                new THREE.BoxGeometry(200.0, 0.01, 100.0),
-                new THREE.MeshStandardMaterial({
-                    color: 0x6AEB9D,
-                    wireframe: false,
-                    transparent: true,
-                    opacity: opacity
-                })
-            );
-            const q = new THREE.Quaternion(rot[0], rot[1], rot[2], rot[3]);
-            q.normalize();
+        const plane = new THREE.Mesh(
+            new THREE.BoxGeometry(200.0, 0.01, 100.0),
+            new THREE.MeshStandardMaterial({
+                map: planeTexture,
+                metalness: 0.3,
+                roughness: 0.7,
+                side: THREE.DoubleSide
+            })
+        );
+        const q = new THREE.Quaternion(rot[0], rot[1], rot[2], rot[3]);
+        q.normalize();
 
-            plane.quaternion.copy(q);
-            callback(plane);
-        }
-
+        plane.quaternion.copy(q);
+        callback(plane);
     } else if (geomType === 2 && spheres) {
         // Create a sphere geometry
         const radius = scale[0];

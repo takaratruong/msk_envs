@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
-import {setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers} from "./scene.js";
+import {setupLightsSky, setupAxes, setupLanes, setupNumbers} from "./scene.js";
 import {loadModel, loadCollider, loadTarget} from "./loader.js";
 import {drawMuscleLine, resetMuscles} from "./muscle.js";
 
@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const height = container.clientHeight;
     let cameraViewMode = ViewMode.FULLSCREEN;
     let aspect = (width / 3) / height;
+    let groundRotation = new THREE.Quaternion(0.0, 0.0, 0.0, 1.0);
 
     function updateCameras(com, footL, footR) {
         // backwards compatibility
@@ -432,7 +433,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setupLightsSky(scene);
-    setupGround(scene, new THREE.Vector3(-50, 0, 0));
-    setupGround(scene, new THREE.Vector3(50, 0, 0));
     renderer.setAnimationLoop(animate);
 });

@@ -15680,9 +15680,9 @@
                 <CoordinateLimitForce name="shoulder_abduction_r_limit_force">
                     <coordinate>shoulder_abduction_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>45.0</upper_limit>
+                    <upper_limit>144.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-15.0</lower_limit>
+                    <lower_limit>-30.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15720,9 +15720,9 @@
                 <CoordinateLimitForce name="shoulder_abduction_l_limit_force">
                     <coordinate>shoulder_abduction_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>45.0</upper_limit>
+                    <upper_limit>144.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-15.0</lower_limit>
+                    <lower_limit>-30.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>

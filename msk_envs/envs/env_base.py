@@ -11,6 +11,7 @@ from msk_envs.utils.contact_params import parse_contact_params
 from msk_envs.utils.scene_settings import SceneSettings
 from msk_envs.utils.transforms import get_position_from_transform, get_rotation_from_transform
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
+from msk_envs.utils.quat import quat_normalize
 from msk_envs.envs.perturber import Perturber
 
 
@@ -111,6 +112,10 @@ class MSKEnv:
             qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_r"]] = 0.261799
         if "shoulder_abduction_l" in self.qpos_id_lookup:
             qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_l"]] = 0.261799
+
+        # Rotating contact plane
+        geom_transforms = msk_warp.geom_transforms(self.m)
+        geom_transforms[0, 3:7] = quat_normalize(torch.tensor(env_config.ground_rotation, dtype=torch.float))
 
         msk_warp.reinitialize_model(self.m, self.d)
         return

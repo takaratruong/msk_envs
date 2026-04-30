@@ -113,6 +113,9 @@ class EnvConfig:
     force_std: float = 300.0
     """ Standard deviation of perturbation force magnitude to apply """
 
+    # Ground rotation (quaternion)
+    ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)
+
     # Rewards for specific env variants: The following need to be set
     reward_lambdas: dict = field(default_factory=dict)
     """ Reward weights """

@@ -105,15 +105,6 @@ class MSKEnv:
         # Toggle drag forces
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
 
-        # Spring stuff bla bla remove me todo
-        qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
-        if "lumbar_extension" in self.qpos_id_lookup:
-            qpos_spring_rest[self.qpos_id_lookup["lumbar_extension"]] = -0.6414085001079162
-        if "thorax_extension" in self.qpos_id_lookup:
-            qpos_spring_rest[self.qpos_id_lookup["thorax_extension"]] = 0.6326818538479444
-        if "cervical_extension" in self.qpos_id_lookup:
-            qpos_spring_rest[self.qpos_id_lookup["cervical_extension"]] = -0.24870941840919195
-
         msk_warp.reinitialize_model(self.m, self.d)
         return
 
@@ -291,7 +282,7 @@ class MSKEnv:
         # Pre-compute left-right swap data
         self.swap_lr = env_config.swap_lr
         if self.swap_lr:
-            self.swap_lr_data = get_swap_left_right_data(self.m, self.body_id_lookup)
+            self.swap_lr_data = get_swap_left_right_data(self.qpos_id_lookup, self.dof_id_lookup)
         else:
             self.swap_lr_data = []
 
@@ -351,8 +342,8 @@ class MSKEnv:
         self.head_offset = head_offset.unsqueeze(0).repeat(num_envs, 1)
 
         # Set initial pose
-        reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
-        self.noise_start_pose(reset_ind.ravel())
+        # reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
+        # self.noise_start_pose(reset_ind.ravel())
 
         # Set up random perturber
         self.perturber = Perturber(
@@ -385,17 +376,17 @@ class MSKEnv:
 
         # Swap left/right sides
         if self.swap_lr:
-            # Determine which envs to swap the starting pose
+            # Randomly choose to swap left and right
             swap_mask = (torch.rand(self.num_worlds, device=q.device) > 0.5)
             q_old, qv_old = q.clone(), qv.clone()
             for swap_pair in self.swap_lr_data:
-                rq, lq, nq = swap_pair.start_qpos_r, swap_pair.start_qpos_l, swap_pair.num_qpos
-                q[swap_mask, rq:rq + nq] = q_old[swap_mask, lq:lq + nq]
-                q[swap_mask, lq:lq + nq] = q_old[swap_mask, rq:rq + nq]
+                rq, lq = swap_pair.qpos_r, swap_pair.qpos_l
+                q[swap_mask, rq] = q_old[swap_mask, lq]
+                q[swap_mask, lq] = q_old[swap_mask, rq]
 
-                rv, lv, nv = swap_pair.start_dof_r, swap_pair.start_dof_l, swap_pair.num_dof
-                qv[swap_mask, rv:rv + nv] = qv_old[swap_mask, lv:lv + nv]
-                qv[swap_mask, lv:lv + nv] = qv_old[swap_mask, rv:rv + nv]
+                rdq, ldq = swap_pair.dof_r, swap_pair.dof_l
+                qv[swap_mask, rdq] = qv_old[swap_mask, ldq]
+                qv[swap_mask, ldq] = qv_old[swap_mask, rdq]
 
         # Set the new starting pose
         self.start_pose[reset_mask, :] = q[reset_mask, :]

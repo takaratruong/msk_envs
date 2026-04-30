@@ -822,9 +822,9 @@
                             <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
                             <socket_frame>..</socket_frame>
                             <!--The location of the contact geometry center in the PhysicalFrame.-->
-                            <location>0.0060000000000000001 -0.26500000000000001 -0.02</location>
+                            <location>-0.016500000000000001 -0.23000000000000001 -0.016500000000000001</location>
                             <!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
-                            <orientation>2.234 1.3 -0.69999999999999996</orientation>
+                            <orientation>-2.9900000000000002 1.3999999999999999 -1.75</orientation>
                             <!--The default appearance for this Geometry-->
                             <Appearance>
                                 <!--Flag indicating whether the associated Geometry is visible or hidden.-->
@@ -835,15 +835,15 @@
                                 <color>0 1 1</color>
                             </Appearance>
                             <!--The radii of the ellipsoid (default: [0, 0, 0]).-->
-                            <radii>0.029999999999999999 0.10000000000000001 0.029999999999999999</radii>
+                            <radii>0.044999999999999998 0.10000000000000001 0.029999999999999999</radii>
                         </ContactEllipsoid>
                         <ContactEllipsoid name="biceps_r_obstacle">
                             <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
                             <socket_frame>..</socket_frame>
                             <!--The location of the contact geometry center in the PhysicalFrame.-->
-                            <location>0.012999999999999999 -0.222 0.0060000000000000001</location>
+                            <location>0.017999999999999999 -0.20000000000000001 0.01</location>
                             <!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
-                            <orientation>0.65000000000000002 1.1100000000000001 0.97499999999999998</orientation>
+                            <orientation>0.13500000000000001 1.23 1.45</orientation>
                             <!--The default appearance for this Geometry-->
                             <Appearance>
                                 <!--Flag indicating whether the associated Geometry is visible or hidden.-->
@@ -854,7 +854,7 @@
                                 <color>0 1 1</color>
                             </Appearance>
                             <!--The radii of the ellipsoid (default: [0, 0, 0]).-->
-                            <radii>0.029999999999999999 0.085000000000000006 0.029999999999999999</radii>
+                            <radii>0.044999999999999998 0.085000000000000006 0.029999999999999999</radii>
                         </ContactEllipsoid>
                     </components>
                     <!--The geometry used to display the axes of this Frame.-->
@@ -893,9 +893,9 @@
                             <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
                             <socket_frame>..</socket_frame>
                             <!--The location of the contact geometry center in the PhysicalFrame.-->
-                            <location>0.0060000000000000001 -0.26500000000000001 0.02</location>
+                            <location>-0.016500000000000001 -0.23000000000000001 0.016500000000000001</location>
                             <!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
-                            <orientation>-2.234 -1.3 -0.69999999999999996</orientation>
+                            <orientation>2.9900000000000002 -1.3999999999999999 -1.75</orientation>
                             <!--The default appearance for this Geometry-->
                             <Appearance>
                                 <!--Flag indicating whether the associated Geometry is visible or hidden.-->
@@ -906,15 +906,15 @@
                                 <color>0 1 1</color>
                             </Appearance>
                             <!--The radii of the ellipsoid (default: [0, 0, 0]).-->
-                            <radii>0.029999999999999999 0.10000000000000001 0.029999999999999999</radii>
+                            <radii>0.044999999999999998 0.10000000000000001 0.029999999999999999</radii>
                         </ContactEllipsoid>
                         <ContactEllipsoid name="biceps_l_obstacle">
                             <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this contact geometry is attached.).-->
                             <socket_frame>..</socket_frame>
                             <!--The location of the contact geometry center in the PhysicalFrame.-->
-                            <location>0.012999999999999999 -0.222 -0.0060000000000000001</location>
+                            <location>0.017999999999999999 -0.20000000000000001 -0.01</location>
                             <!--The orientation of the contact geometry in the PhysicalFrame in body-fixed XYZ Euler angles.-->
-                            <orientation>-0.65000000000000002 -1.1100000000000001 0.97499999999999998</orientation>
+                            <orientation>-0.13500000000000001 -1.23 1.45</orientation>
                             <!--The default appearance for this Geometry-->
                             <Appearance>
                                 <!--Flag indicating whether the associated Geometry is visible or hidden.-->
@@ -925,7 +925,7 @@
                                 <color>0 1 1</color>
                             </Appearance>
                             <!--The radii of the ellipsoid (default: [0, 0, 0]).-->
-                            <radii>0.029999999999999999 0.085000000000000006 0.029999999999999999</radii>
+                            <radii>0.044999999999999998 0.085000000000000006 0.029999999999999999</radii>
                         </ContactEllipsoid>
                     </components>
                     <!--The geometry used to display the axes of this Frame.-->
@@ -12848,7 +12848,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/radius_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.00089999999999999998 -0.046969999999999991 -0.0094999999999999998</location>
+                                    <location>0.012 -0.046969999999999991 0.002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -12942,7 +12942,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/radius_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.00020000000000000001 -0.047290249999999992 -0.0099000000000000008</location>
+                                    <location>0.012 -0.046969999999999991 0.002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -14991,7 +14991,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/radius_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.00089999999999999998 -0.046969999999999991 0.0094999999999999998</location>
+                                    <location>0.012 -0.046969999999999991 -0.002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -15085,7 +15085,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/radius_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.00020000000000000001 -0.047290249999999992 0.0099000000000000008</location>
+                                    <location>0.012 -0.046969999999999991 -0.002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -15691,7 +15691,7 @@
                 <CoordinateLimitForce name="shoulder_abduction_r_limit_force">
                     <coordinate>shoulder_abduction_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>144.0</upper_limit>
+                    <upper_limit>45.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>0.0</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -15701,7 +15701,7 @@
                 <CoordinateLimitForce name="shoulder_abduction_l_limit_force">
                     <coordinate>shoulder_abduction_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>144.0</upper_limit>
+                    <upper_limit>45.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
                     <lower_limit>0.0</lower_limit>
                     <damping>0.017453292519943295</damping>
@@ -15735,7 +15735,7 @@
                     <upper_stiffness>3.49066</upper_stiffness>
                     <upper_limit>150</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>25.0</lower_limit>
+                    <lower_limit>5.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15745,7 +15745,7 @@
                     <upper_stiffness>3.49066</upper_stiffness>
                     <upper_limit>150</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>25.0</lower_limit>
+                    <lower_limit>5.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>

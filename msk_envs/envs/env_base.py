@@ -105,6 +105,13 @@ class MSKEnv:
         # Toggle drag forces
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
 
+        # Spring stuff bla bla remove me todo
+        qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
+        if "shoulder_abduction_r" in self.qpos_id_lookup:
+            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_r"]] = 0.261799
+        if "shoulder_abduction_l" in self.qpos_id_lookup:
+            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_l"]] = 0.261799
+
         msk_warp.reinitialize_model(self.m, self.d)
         return
 

@@ -10992,7 +10992,7 @@
                         <algorithm>minimum_length</algorithm>
                     </Scholz2015GeometryPath>
                     <!--Maximum isometric force that the fibers can generate-->
-                    <max_isometric_force>707.70000000000005</max_isometric_force>
+                    <max_isometric_force>1324.4000000000001</max_isometric_force>
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.10544003100885369</optimal_fiber_length>
                     <!--Resting length of the tendon-->
@@ -11089,7 +11089,7 @@
                         <algorithm>minimum_length</algorithm>
                     </Scholz2015GeometryPath>
                     <!--Maximum isometric force that the fibers can generate-->
-                    <max_isometric_force>2597.8000000000002</max_isometric_force>
+                    <max_isometric_force>1324.4000000000001</max_isometric_force>
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.084942802166955544</optimal_fiber_length>
                     <!--Resting length of the tendon-->
@@ -13135,7 +13135,7 @@
                         <algorithm>minimum_length</algorithm>
                     </Scholz2015GeometryPath>
                     <!--Maximum isometric force that the fibers can generate-->
-                    <max_isometric_force>707.70000000000005</max_isometric_force>
+                    <max_isometric_force>1324.4000000000001</max_isometric_force>
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.10544003100885369</optimal_fiber_length>
                     <!--Resting length of the tendon-->
@@ -13232,7 +13232,7 @@
                         <algorithm>minimum_length</algorithm>
                     </Scholz2015GeometryPath>
                     <!--Maximum isometric force that the fibers can generate-->
-                    <max_isometric_force>2597.8000000000002</max_isometric_force>
+                    <max_isometric_force>1324.4000000000001</max_isometric_force>
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.084942802166955544</optimal_fiber_length>
                     <!--Resting length of the tendon-->
@@ -15677,36 +15677,6 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
-                <CoordinateLimitForce name="shoulder_abduction_r_limit_force">
-                    <coordinate>shoulder_abduction_r</coordinate>
-                    <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>144.0</upper_limit>
-                    <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-30.0</lower_limit>
-                    <damping>0.017453292519943295</damping>
-                    <transition>1</transition>
-                    <compute_dissipation_energy>false</compute_dissipation_energy>
-                </CoordinateLimitForce>
-                <CoordinateLimitForce name="shoulder_rotation_r_limit_force">
-                    <coordinate>shoulder_rotation_r</coordinate>
-                    <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>30</upper_limit>
-                    <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-30</lower_limit>
-                    <damping>0.017453292519943295</damping>
-                    <transition>1</transition>
-                    <compute_dissipation_energy>false</compute_dissipation_energy>
-                </CoordinateLimitForce>
-                <CoordinateLimitForce name="elbow_flex_r_limit_force">
-                    <coordinate>elbow_flex_r</coordinate>
-                    <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>150.00035077</upper_limit>
-                    <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>0.0</lower_limit>
-                    <damping>0.017453292519943295</damping>
-                    <transition>1</transition>
-                    <compute_dissipation_energy>false</compute_dissipation_energy>
-                </CoordinateLimitForce>
                 <CoordinateLimitForce name="shoulder_flexion_l_limit_force">
                     <coordinate>shoulder_flexion_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
@@ -15717,12 +15687,34 @@
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
+
+                <CoordinateLimitForce name="shoulder_abduction_r_limit_force">
+                    <coordinate>shoulder_abduction_r</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>144.0</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>0.0</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
                 <CoordinateLimitForce name="shoulder_abduction_l_limit_force">
                     <coordinate>shoulder_abduction_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
                     <upper_limit>144.0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-30.0</lower_limit>
+                    <lower_limit>0.0</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+
+                <CoordinateLimitForce name="shoulder_rotation_r_limit_force">
+                    <coordinate>shoulder_rotation_r</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>15</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>-15</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15730,9 +15722,20 @@
                 <CoordinateLimitForce name="shoulder_rotation_l_limit_force">
                     <coordinate>shoulder_rotation_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>30</upper_limit>
+                    <upper_limit>15</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-30</lower_limit>
+                    <lower_limit>-15</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+
+                <CoordinateLimitForce name="elbow_flex_r_limit_force">
+                    <coordinate>elbow_flex_r</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>150</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>25.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15740,13 +15743,14 @@
                 <CoordinateLimitForce name="elbow_flex_l_limit_force">
                     <coordinate>elbow_flex_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>150.00035077</upper_limit>
+                    <upper_limit>150</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>0.0</lower_limit>
+                    <lower_limit>25.0</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
                 </CoordinateLimitForce>
+
                 <SpringGeneralizedForce name="hip_flexion_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>hip_flexion_r</coordinate>
@@ -15892,22 +15896,6 @@
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
-                <SpringGeneralizedForce name="shoulder_abduction_r_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>shoulder_abduction_r</coordinate>
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>5.0</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
-                </SpringGeneralizedForce>
-                <SpringGeneralizedForce name="shoulder_rotation_r_spring_force">
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <coordinate>shoulder_rotation_r</coordinate>
-                    <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>5.0</stiffness>
-                    <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
-                </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="shoulder_flexion_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_flexion_l</coordinate>
@@ -15916,11 +15904,27 @@
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="shoulder_abduction_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>shoulder_abduction_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>25.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>1.0</viscosity>
+                </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="shoulder_abduction_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_abduction_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>5.0</stiffness>
+                    <stiffness>25.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>1.0</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="shoulder_rotation_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>shoulder_rotation_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
@@ -15928,10 +15932,11 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_rotation_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>5.0</stiffness>
+                    <stiffness>25.0</stiffness>
                     <!--Damping constant.-->
                     <viscosity>1.0</viscosity>
                 </SpringGeneralizedForce>
+
                 <SpringGeneralizedForce name="elbow_flex_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>elbow_flex_r</coordinate>
@@ -16187,7 +16192,7 @@
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/torso</socket_frame>
                     <!--Location of geometry center in the body frame-->
-                    <location>0.01 0.17 0.0</location>
+                    <location>-0.02 0.17 0.0</location>
                     <!--Orientation of geometry in the body frame-->
                     <orientation>0 0 0</orientation>
                     <radius>0.11</radius>

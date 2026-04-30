@@ -58,7 +58,7 @@ shoulder_abduction_r:
   q: 0.2
   v: 0.0
 elbow_flex_r:
-  q: 0.2
+  q: 0.5
   v: 0.0
 
 shoulder_flexion_l:

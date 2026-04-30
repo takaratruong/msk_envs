@@ -16117,43 +16117,8 @@
                     <!--Radius of the sphere (default: 0).-->
                     <radius>0.02</radius>
                 </ContactSphere>
-                <ContactEllipsoid name="right_femur_col_capsule">
-                    <!--Body name to connect the contact geometry to-->
-                    <socket_frame>/bodyset/femur_r</socket_frame>
-                    <!--Location of geometry center in the body frame-->
-                    <location>0.0 -0.225 0.01</location>
-                    <!--Orientation of geometry in the body frame-->
-                    <orientation>1.5707 0.1 0</orientation>
-                    <radii>0.06 0.16 0.06</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="right_tibia_col_capsule">
-                    <!--Body name to connect the contact geometry to-->
-                    <socket_frame>/bodyset/tibia_r</socket_frame>
-                    <!--Location of geometry center in the body frame-->
-                    <location>0.0 -0.245 0.0</location>
-                    <!--Orientation of geometry in the body frame-->
-                    <orientation>1.5707 0 0</orientation>
-                    <radii>0.05 0.18 0.05</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="left_femur_col_capsule">
-                    <!--Body name to connect the contact geometry to-->
-                    <socket_frame>/bodyset/femur_l</socket_frame>
-                    <!--Location of geometry center in the body frame-->
-                    <location>0.0 -0.225 0.0</location>
-                    <!--Orientation of geometry in the body frame-->
-                    <orientation>1.5707 0.1 0</orientation>
-                    <radii>0.06 0.16 0.06</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="left_tibia_col_capsule">
-                    <!--Body name to connect the contact geometry to-->
-                    <socket_frame>/bodyset/tibia_l</socket_frame>
-                    <!--Location of geometry center in the body frame-->
-                    <location>0.0 -0.245 0.0</location>
-                    <!--Orientation of geometry in the body frame-->
-                    <orientation>1.5707 0 0</orientation>
-                    <radii>0.05 0.18 0.05</radii>
-                </ContactEllipsoid>
-                <ContactEllipsoid name="pelvis_col_capsule">
+
+                <ContactEllipsoid name="pelvis_capsule">
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/pelvis</socket_frame>
                     <!--Location of geometry center in the body frame-->
@@ -16162,7 +16127,45 @@
                     <orientation>0 0 0</orientation>
                     <radii>0.065 0.06 0.065</radii>
                 </ContactEllipsoid>
-                <ContactEllipsoid name="torso_col_1_1_capsule">
+
+                <ContactEllipsoid name="femur_r_capsule">
+                    <!--Body name to connect the contact geometry to-->
+                    <socket_frame>/bodyset/femur_r</socket_frame>
+                    <!--Location of geometry center in the body frame-->
+                    <location>0.0 -0.225 0.01</location>
+                    <!--Orientation of geometry in the body frame-->
+                    <orientation>1.5707 0.1 0</orientation>
+                    <radii>0.06 0.16 0.06</radii>
+                </ContactEllipsoid>
+                <ContactEllipsoid name="femur_l_capsule">
+                    <!--Body name to connect the contact geometry to-->
+                    <socket_frame>/bodyset/femur_l</socket_frame>
+                    <!--Location of geometry center in the body frame-->
+                    <location>0.0 -0.225 0.0</location>
+                    <!--Orientation of geometry in the body frame-->
+                    <orientation>1.5707 0.1 0</orientation>
+                    <radii>0.06 0.16 0.06</radii>
+                </ContactEllipsoid>
+                <ContactEllipsoid name="tibia_r_capsule">
+                    <!--Body name to connect the contact geometry to-->
+                    <socket_frame>/bodyset/tibia_r</socket_frame>
+                    <!--Location of geometry center in the body frame-->
+                    <location>0.0 -0.245 0.0</location>
+                    <!--Orientation of geometry in the body frame-->
+                    <orientation>1.5707 0 0</orientation>
+                    <radii>0.05 0.18 0.05</radii>
+                </ContactEllipsoid>
+                <ContactEllipsoid name="tibia_l_capsule">
+                    <!--Body name to connect the contact geometry to-->
+                    <socket_frame>/bodyset/tibia_l</socket_frame>
+                    <!--Location of geometry center in the body frame-->
+                    <location>0.0 -0.245 0.0</location>
+                    <!--Orientation of geometry in the body frame-->
+                    <orientation>1.5707 0 0</orientation>
+                    <radii>0.05 0.18 0.05</radii>
+                </ContactEllipsoid>
+
+                <ContactEllipsoid name="lumbar_spine_capsule">
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/torso</socket_frame>
                     <!--Location of geometry center in the body frame-->
@@ -16171,7 +16174,7 @@
                     <orientation>1.5707 0.1 0.0</orientation>
                     <radii>0.09 0.135 0.09</radii>
                 </ContactEllipsoid>
-                <ContactEllipsoid name="torso_col_1_3_capsule">
+                <ContactEllipsoid name="lumbar_spine_capsule1">
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/torso</socket_frame>
                     <!--Location of geometry center in the body frame-->
@@ -16180,7 +16183,7 @@
                     <orientation>1.5707 0.1 0</orientation>
                     <radii>0.09 0.135 0.09</radii>
                 </ContactEllipsoid>
-                <ContactSphere name="head_col">
+                <ContactSphere name="head">
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/torso</socket_frame>
                     <!--Location of geometry center in the body frame-->
@@ -16189,7 +16192,8 @@
                     <orientation>0 0 0</orientation>
                     <radius>0.11</radius>
                 </ContactSphere>
-                <ContactEllipsoid name="right_humerus_col_capsule">
+
+                <ContactEllipsoid name="humerus_r_capsule">
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/humerus_r</socket_frame>
                     <!--Location of geometry center in the body frame-->
@@ -16198,17 +16202,7 @@
                     <orientation>1.5707 0 0</orientation>
                     <radii>0.035 0.15 0.035</radii>
                 </ContactEllipsoid>
-                <ContactEllipsoid name="right_forearm_col_capsule">
-                    <!--Body name to connect the contact geometry to-->
-                    <socket_frame>/bodyset/ulna_r</socket_frame>
-                    <!--Location of geometry center in the body frame-->
-                    <location>-0.01 -0.18 0.02</location>
-                    <!--Orientation of geometry in the body frame-->
-                    <orientation>1.5707 0 0</orientation>
-                    <radii>0.025 0.15 0.025</radii>
-                </ContactEllipsoid>
-
-                <ContactEllipsoid name="left_humerus_col_capsule">
+                <ContactEllipsoid name="humerus_l_capsule">
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/humerus_l</socket_frame>
                     <!--Location of geometry center in the body frame-->
@@ -16217,7 +16211,16 @@
                     <orientation>1.5707 0 0</orientation>
                     <radii>0.035 0.15 0.035</radii>
                 </ContactEllipsoid>
-                <ContactEllipsoid name="left_forearm_col_capsule">
+                <ContactEllipsoid name="ulna_r_capsule">
+                    <!--Body name to connect the contact geometry to-->
+                    <socket_frame>/bodyset/ulna_r</socket_frame>
+                    <!--Location of geometry center in the body frame-->
+                    <location>-0.01 -0.18 0.02</location>
+                    <!--Orientation of geometry in the body frame-->
+                    <orientation>1.5707 0 0</orientation>
+                    <radii>0.025 0.15 0.025</radii>
+                </ContactEllipsoid>
+                <ContactEllipsoid name="ulna_l_capsule">
                     <!--Body name to connect the contact geometry to-->
                     <socket_frame>/bodyset/ulna_l</socket_frame>
                     <!--Location of geometry center in the body frame-->

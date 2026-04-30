@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (footL === undefined) footL = [com[0], com[1] - 1.0, com[2]];
         if (footR === undefined) footR = [com[0], com[1] - 1.0, com[2]];
 
-        com[1] = 1.0; // fix for now
+        // com[1] = 1.0; // fix for now
         if (autoFollow1) {
             cameras[0].position.set(com[0], com[1] + 0.5, com[2] + 2.25);
             controls[0].target.set(com[0], com[1], com[2]);

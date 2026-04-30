@@ -258,6 +258,28 @@ class SprintHybridConfig(LaneConfig):
 
 
 @dataclass
+class BackpedalHybridConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.BACKPEDAL,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_backpedal_hybrid.yaml",
+    ))
+
+
+@dataclass
+class SideShuffleHybridConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.SIDE_SHUFFLE,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_sideshuffle_hybrid.yaml",
+    ))
+
+
+@dataclass
 class SprintHybridMotorArmsConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybridMotorArms(
         env_variant=DerivedEnv.SPRINT,
@@ -694,7 +716,9 @@ Config = Union[
     Annotated[SprintHybridNoArmsConfig, tyro.conf.subcommand(name="sprinthybridnoarms")],
     Annotated[RaceWalkConfig, tyro.conf.subcommand(name="racewalk")],
     Annotated[BackPedalConfig, tyro.conf.subcommand(name="backpedal")],
+    Annotated[BackpedalHybridConfig, tyro.conf.subcommand(name="backpedalhybrid")],
     Annotated[SideShuffleConfig, tyro.conf.subcommand(name="sideshuffle")],
+    Annotated[SideShuffleHybridConfig, tyro.conf.subcommand(name="sideshufflehybrid")],
     Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],

@@ -11,6 +11,7 @@ class HopEnv(LanesEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
+            requires_visuals: bool,
             live_render: bool,
             cuda_graph: bool
     ):
@@ -18,12 +19,13 @@ class HopEnv(LanesEnv):
             num_envs=num_envs,
             env_config=env_config,
             device=device,
+            requires_visuals=requires_visuals,
             live_render=live_render,
             cuda_graph=cuda_graph,
             target_dir=build_axis(FWD_IDX, 1.0),
         )
-        self.left_knee_qpos_idx = self.dof_id_lookup["knee_angle_l"][0]
-        self.left_knee_min_angle = -torch.deg2rad(torch.tensor(100.0, device=self.device))
+        self.left_knee_qpos_idx = self.qpos_id_lookup["knee_angle_l"]
+        self.left_knee_min_angle = -torch.deg2rad(torch.tensor(50.0, device=self.device))
         return
 
     def _get_terminated(self):
@@ -33,7 +35,7 @@ class HopEnv(LanesEnv):
         # Check if left toe is too low
         left_toe_pos = self.body_positions[:, self.toes_ids[0], :]
         left_toe_height = left_toe_pos[:, UP_IDX]
-        left_toe_on_ground = (left_toe_height < 0.3)
+        left_toe_on_ground = (left_toe_height < 0.2)
 
         # Check if left knee is extended too much
         left_knee_angle = self.joint_positions[:, self.left_knee_qpos_idx]

@@ -380,8 +380,26 @@ class HopConfig(BaseArgs):
         env_variant=DerivedEnv.HOP,
         delta_t=1.0 / 60.0,
         max_episode_duration=10.0,
-        # muscle_multiplier=2.0,
         starting_pose_path="../msk_models/no_hands/starting_pose_left_leg_up.yaml",
+        swap_lr=False,
+    ))
+
+    lambda_vel: float = 0.01
+    lambda_mid_lane: float = 0.01
+    lambda_limit: float = -0.005
+    lambda_actuator: float = -1e-2
+    lambda_fatigue: float = 0.0
+    lambda_metabolic: float = 0.0
+
+
+@dataclass
+class HopHybridConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.HOP,
+        delta_t=1.0 / 60.0,
+        max_episode_duration=10.0,
+        # muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_hop.yaml",
         swap_lr=False,
     ))
 
@@ -720,6 +738,7 @@ Config = Union[
     Annotated[SideShuffleConfig, tyro.conf.subcommand(name="sideshuffle")],
     Annotated[SideShuffleHybridConfig, tyro.conf.subcommand(name="sideshufflehybrid")],
     Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
+    Annotated[HopHybridConfig, tyro.conf.subcommand(name="hophybrid")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],

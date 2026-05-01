@@ -1,12 +1,13 @@
 """
 Open this in blender scripting and edit the path to your JSON file below.
 """
-import bpy
 import gzip
 import json
 import os
 import sys
 from pathlib import Path
+
+import bpy
 
 cdir = os.path.dirname(bpy.data.filepath)
 if not cdir in sys.path:
@@ -15,7 +16,8 @@ if not cdir in sys.path:
 from camera import setup_camera, update_camera
 from muscle import update_muscle
 from options import setup_renderer
-from scene import reset_scene, hide_objects, setup_floor, setup_meter_markers, create_wr_line, update_wr_line
+from scene import reset_scene, hide_objects
+from track import setup_track
 from visuals import update_visual, clear_visual_cache
 from colliders import update_collider, clear_collider_cache
 from targets import update_target, clear_target_cache
@@ -49,18 +51,7 @@ def main():
     camera = setup_camera()
     hide_objects()
 
-    setup_floor(plane_texture_path, size=100, location=(-50, 0, 0))
-    setup_floor(plane_texture_path, size=100, location=(50, 0, 0))
-
-    frame0 = stacked_frames[0]
-    if "scene_settings" in frame0:
-        scene_settings = frame0["scene_settings"]
-        if scene_settings["meter_markers"]:
-            setup_meter_markers()
-        wr_line = None
-    else:
-        setup_meter_markers()
-        wr_line = create_wr_line()
+    setup_track()
 
     # Create frames
     for frame_index, frame_data in enumerate(stacked_frames):
@@ -70,8 +61,6 @@ def main():
 
         cam_pos = frame_data["cam_pos"]
         update_camera(camera, cam_pos, frame_num)
-
-        update_wr_line(wr_line, time, frame_num)
 
         for visual in frame_data["visuals"]:
             update_visual(visual, frame_num, dashboard_src)

@@ -161,6 +161,6 @@ class ReachTargetEnv(MSKEnv):
 
     def _get_terminated(self):
         # Has fallen
-        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
+        fallen = has_fallen(root_pos=self.root_pos, ground_rotation=self.ground_rotation)
         terminated = fallen.float()
         return terminated.detach()

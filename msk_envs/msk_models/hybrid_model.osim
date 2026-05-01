@@ -15670,9 +15670,9 @@
                 <CoordinateLimitForce name="shoulder_flexion_r_limit_force">
                     <coordinate>shoulder_flexion_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>150</upper_limit>
+                    <upper_limit>180</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-75.00000005753945</lower_limit>
+                    <lower_limit>-90</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15680,9 +15680,9 @@
                 <CoordinateLimitForce name="shoulder_flexion_l_limit_force">
                     <coordinate>shoulder_flexion_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>150</upper_limit>
+                    <upper_limit>180</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-75.00000005753945</lower_limit>
+                    <lower_limit>-90</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15712,9 +15712,9 @@
                 <CoordinateLimitForce name="shoulder_rotation_r_limit_force">
                     <coordinate>shoulder_rotation_r</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>15</upper_limit>
+                    <upper_limit>0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-15</lower_limit>
+                    <lower_limit>-25</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15722,9 +15722,9 @@
                 <CoordinateLimitForce name="shoulder_rotation_l_limit_force">
                     <coordinate>shoulder_rotation_l</coordinate>
                     <upper_stiffness>3.49066</upper_stiffness>
-                    <upper_limit>15</upper_limit>
+                    <upper_limit>0</upper_limit>
                     <lower_stiffness>3.49066</lower_stiffness>
-                    <lower_limit>-15</lower_limit>
+                    <lower_limit>-25</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15892,49 +15892,49 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_flexion_r</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>5.0</stiffness>
+                    <stiffness>1.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="shoulder_flexion_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_flexion_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>5.0</stiffness>
+                    <stiffness>1.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="shoulder_abduction_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_abduction_r</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="shoulder_abduction_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_abduction_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="shoulder_rotation_r_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_rotation_r</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="shoulder_rotation_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
                     <coordinate>shoulder_rotation_l</coordinate>
                     <!--Name of the coordinate to which this force is applied.-->
-                    <stiffness>25.0</stiffness>
+                    <stiffness>5.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.1</viscosity>
                 </SpringGeneralizedForce>
 
                 <SpringGeneralizedForce name="elbow_flex_r_spring_force">
@@ -15943,7 +15943,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.01</viscosity>
                 </SpringGeneralizedForce>
                 <SpringGeneralizedForce name="elbow_flex_l_spring_force">
                     <!--Name of the coordinate to which this force is applied.-->
@@ -15951,7 +15951,7 @@
                     <!--Name of the coordinate to which this force is applied.-->
                     <stiffness>0.0</stiffness>
                     <!--Damping constant.-->
-                    <viscosity>1.0</viscosity>
+                    <viscosity>0.01</viscosity>
                 </SpringGeneralizedForce>
 
                 <ActivationCoordinateActuator name="mtp_angle_r_motor">

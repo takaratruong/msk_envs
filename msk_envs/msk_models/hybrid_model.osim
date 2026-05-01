@@ -15532,7 +15532,7 @@
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>86.50308943942704</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-30</lower_limit>
+                    <lower_limit>-22.31004882</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15540,9 +15540,9 @@
                 <CoordinateLimitForce name="hip_adduction_r_limit_force">
                     <coordinate>hip_adduction_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
-                    <upper_limit>30</upper_limit>
+                    <upper_limit>10.28941028</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-51</lower_limit>
+                    <lower_limit>-23.100854320000003</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15550,9 +15550,9 @@
                 <CoordinateLimitForce name="hip_rotation_r_limit_force">
                     <coordinate>hip_rotation_r</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
-                    <upper_limit>40</upper_limit>
+                    <upper_limit>9.3399247</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-40</lower_limit>
+                    <lower_limit>-22.34988346</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15602,7 +15602,7 @@
                     <upper_stiffness>8.726646259971648</upper_stiffness>
                     <upper_limit>86.50308943942704</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-30</lower_limit>
+                    <lower_limit>-22.31004882</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15610,9 +15610,9 @@
                 <CoordinateLimitForce name="hip_adduction_l_limit_force">
                     <coordinate>hip_adduction_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
-                    <upper_limit>30</upper_limit>
+                    <upper_limit>10.28941028</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-51</lower_limit>
+                    <lower_limit>-23.100854320000003</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>
@@ -15620,9 +15620,9 @@
                 <CoordinateLimitForce name="hip_rotation_l_limit_force">
                     <coordinate>hip_rotation_l</coordinate>
                     <upper_stiffness>8.726646259971648</upper_stiffness>
-                    <upper_limit>40</upper_limit>
+                    <upper_limit>9.3399247</upper_limit>
                     <lower_stiffness>8.726646259971648</lower_stiffness>
-                    <lower_limit>-40</lower_limit>
+                    <lower_limit>-22.34988346</lower_limit>
                     <damping>0.017453292519943295</damping>
                     <transition>1</transition>
                     <compute_dissipation_energy>false</compute_dissipation_energy>

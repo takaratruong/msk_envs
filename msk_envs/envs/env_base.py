@@ -33,8 +33,6 @@ class MSKEnv:
             "subscapularis_med_l", "subscapularis_inf_l", "supraspinatus_post_l", "supraspinatus_ant_l",
             "triceps_long_l", "biceps_long_l", "biceps_brevis_l",
         ]
-        upper_body_muscles_id = [self.lookup_muscle_id(muscle_name) for muscle_name in upper_body_muscles]
-        upper_body_muscles_id = [muscle_id for muscle_id in upper_body_muscles_id if muscle_id != -1]
 
         # Muscles activation and fiber dynamic
         msk_warp.set_activation_type(self.m, env_config.muscle_activation_dynamics)
@@ -65,13 +63,30 @@ class MSKEnv:
                         mm.ignore_tendon_compliance or mm.tendon_slack_length < mm.optimal_fiber_length)
 
             # "Disable" passive muscle forces for upper body
-            if i in upper_body_muscles_id:
+            if muscle_name in upper_body_muscles:
                 mm.strain_at_one_norm_force = 3.0
                 mm.stiffness_at_low_force = 0.0
 
             if env_config.disable_muscle_passive_forces:
                 mm.strain_at_one_norm_force = 3.0
                 mm.stiffness_at_low_force = 0.0
+
+            # MuJoCo type muscles
+            if env_config.use_mujoco_muscles:
+                # msk_warp.set_contraction_type(self.m, msk_warp.ContractionType.MUJOCO)
+                mm.ignore_tendon_compliance = True  # rigid tendon
+
+                # We set pennation angle to 0, so this requires updating:
+                #  the optimal fiber length
+                #  the max isometric force
+                # cos_pennation = math.cos(mm.optimal_pennation_angle)
+                # mm.max_isometric_force = mm.max_isometric_force * cos_pennation
+                # mm.optimal_fiber_length = mm.optimal_fiber_length * cos_pennation
+                #
+                # mm.optimal_pennation_angle = 0.0  # fixed pennation angle
+                # mm.fiber_damping = 0.0  # no fiber damping
+                mm.min_norm_fiber_length = 0.0  # no such thing as a min/max fiber length
+                mm.max_norm_fiber_length = 10.0
 
         # Collider properties
         if env_config.use_specified_contact_params:
@@ -115,7 +130,11 @@ class MSKEnv:
 
         # Rotating contact plane
         geom_transforms = msk_warp.geom_transforms(self.m)
-        geom_transforms[0, 3:7] = quat_normalize(torch.tensor(env_config.ground_rotation, dtype=torch.float))
+        self.ground_rotation = torch.tensor(env_config.ground_rotation, dtype=torch.float, device=self.device)
+        self.ground_rotation = quat_normalize(self.ground_rotation)
+        geom_transforms[0, 3:7] = self.ground_rotation
+
+        msk_warp.set_gravity(self.m, env_config.gravity)
 
         msk_warp.reinitialize_model(self.m, self.d)
         return

@@ -76,6 +76,9 @@ class EnvConfig:
     disable_muscle_passive_forces: bool = False
     """ Whether to disable muscle passive forces """
     custom_muscle_multipliers: dict[str, float] = field(default_factory=dict)
+    """ Custom muscle force multiplier (overrides muscle_multiplier) """
+    use_mujoco_muscles: bool = False
+    """ Use MuJoCo muscle type (fixed length tendons, no pennation) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
@@ -113,8 +116,11 @@ class EnvConfig:
     force_std: float = 300.0
     """ Standard deviation of perturbation force magnitude to apply """
 
-    # Ground rotation (quaternion)
+    # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)
+    """ Ground rotation quaternion (x,y,z,w) """
+    gravity: float = -9.80665
+    """ Gravity """
 
     # Rewards for specific env variants: The following need to be set
     reward_lambdas: dict = field(default_factory=dict)

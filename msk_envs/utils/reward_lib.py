@@ -222,16 +222,28 @@ def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight
     return reward
 
 
-def has_fallen(root_pos, head_pos, head_rot, head_offset, min_root=MIN_ROOT_HEIGHT, min_head=MIN_HEAD_HEIGHT):
-    # Root falls below threshold
-    root_height = root_pos[:, UP_IDX]
-    pelvis_fallen = (root_height < min_root)
+def compute_ground_vertical(position: torch.Tensor, ground_rotation: torch.Tensor) -> torch.Tensor:
+    """ At the given positions, find the ground height at that given (x, z) """
+    ground_normal = torch.zeros_like(position)
+    ground_normal[:, UP_IDX] = 1.0
+    ground_normal = rotate_vec(rot=ground_rotation[torch.newaxis, :], v=ground_normal)
 
-    # Head falls below threshold
-    actual_head_pos = head_pos + rotate_vec(head_rot, head_offset)
-    head_fallen = (actual_head_pos[:, UP_IDX] < min_head)
+    # zero out the vertical of the position
+    pos_horizontal = position.clone()
+    pos_horizontal[:, UP_IDX] = 0.0
 
-    fallen = pelvis_fallen | head_fallen
+    # use plane eqn passing through origin: dot(normal, point_on_plane) = 0
+    dot_product = torch.sum(ground_normal * pos_horizontal, dim=-1)
+    normal_up = ground_normal[:, UP_IDX]
+    ground_vertical = -dot_product / (normal_up + 1e-8)
+    return ground_vertical
+
+
+def has_fallen(root_pos: torch.Tensor, ground_rotation: torch.Tensor, min_root=MIN_ROOT_HEIGHT):
+    # Find height of root wrst ground
+    ground_vertical = compute_ground_vertical(root_pos, ground_rotation)
+    root_height = root_pos[:, UP_IDX] - ground_vertical
+    fallen = (root_height < min_root)
     return fallen.detach()
 
 

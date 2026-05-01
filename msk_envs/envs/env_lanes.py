@@ -146,7 +146,7 @@ class LanesEnv(MSKEnv):
 
     def _get_terminated(self):
         # Has fallen
-        fallen = has_fallen(self.root_pos, self.head_pos, self.head_rot, self.head_offset)
+        fallen = has_fallen(root_pos=self.root_pos, ground_rotation=self.ground_rotation)
 
         # Any of the bodies are out of the lanes
         # body_ids = [i for i in range(self.num_bodies) if i != self.ground_id]

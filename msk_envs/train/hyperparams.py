@@ -603,23 +603,23 @@ class WaddleConfig(BaseArgs):
 
 @dataclass
 class RandomTargetConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.RANDOM_TARGET,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        muscle_multiplier=1.0,
-        starting_pose_path="../msk_models/starting_pose_run.yaml",
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
     ))
 
     lambda_target_closer: float = 1.0
     lambda_target_facing: float = 5e-3
 
-    lambda_spring: float = -1e-4
-    lambda_damper: float = -3e-4
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
+    lambda_spring: float = 0.0
+    lambda_damper: float = 0.0
+    lambda_limit: float = -3e-4
+    lambda_muscle_passive: float = 0.0
 
-    lambda_actuator: float = -1e-2
+    lambda_actuator: float = 0.0
     lambda_alive: float = 3e-2
 
 

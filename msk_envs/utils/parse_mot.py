@@ -1,8 +1,9 @@
-import torch
-import numpy as np
 import re
-from scipy.spatial.transform import Rotation as R
+
 import msk_warp
+import numpy as np
+import torch
+from scipy.spatial.transform import Rotation as R
 
 
 def swap_cols(data, i, j):
@@ -29,26 +30,7 @@ def get_raw_data(lines, col_names):
     return data
 
 
-def reorder_translation(data, col_names):
-    """ Move pelvis_tx, pelvis_ty, pelvis_tz to be directly time col """
-    pelvis_tx_idx = col_names.index("pelvis_tx")
-    pelvis_ty_idx = col_names.index("pelvis_ty")
-    pelvis_tz_idx = col_names.index("pelvis_tz")
-    # Swap data
-    swap_cols(data, pelvis_tx_idx, 1)
-    swap_cols(data, pelvis_ty_idx, 2)
-    swap_cols(data, pelvis_tz_idx, 3)
-    # Swap col_names
-    col_names[1], col_names[pelvis_tx_idx] = (
-        col_names[pelvis_tx_idx], col_names[1])
-    col_names[2], col_names[pelvis_ty_idx] = (
-        col_names[pelvis_ty_idx], col_names[2])
-    col_names[3], col_names[pelvis_tz_idx] = (
-        col_names[pelvis_tz_idx], col_names[3])
-    return data, col_names
-
-
-def rot_to_quat(data, col_names):
+def rot_to_quat(data, col_names, in_degrees):
     """ convert [pelvis_tilt, pelvis_list, pelvis_rotation] to quaternion """
     pelvis_tilt_idx = col_names.index("pelvis_tilt")
     pelvis_list_idx = col_names.index("pelvis_list")
@@ -63,13 +45,11 @@ def rot_to_quat(data, col_names):
                              data[pelvis_list_idx, i],
                              data[pelvis_rotation_idx, i]
                          ],
-                         degrees=True)
+                         degrees=in_degrees)
         q = r.as_quat(canonical=True)
         q = q / np.linalg.norm(q)
         pelvis_quats.append(q)
-
     pelvis_quats = np.array(pelvis_quats)
-    pelvis_quats = pelvis_quats[:, [3, 0, 1, 2]]  # xyzw to wxyz
 
     # Remove old columns
     data = np.delete(data, pelvis_rot_idxs, axis=0)
@@ -79,23 +59,23 @@ def rot_to_quat(data, col_names):
     for i in range(4):
         data = np.insert(data, pelvis_tilt_idx + i, pelvis_quats[:, i], axis=0)
     # add new col names
-    col_names.insert(pelvis_tilt_idx, "pelvis_rot_w")
-    col_names.insert(pelvis_tilt_idx + 1, "pelvis_rot_x")
-    col_names.insert(pelvis_tilt_idx + 2, "pelvis_rot_y")
-    col_names.insert(pelvis_tilt_idx + 3, "pelvis_rot_z")
+    col_names.insert(pelvis_tilt_idx, "pelvis_tilt")
+    col_names.insert(pelvis_tilt_idx + 1, "pelvis_list")
+    col_names.insert(pelvis_tilt_idx + 2, "pelvis_rotation")
+    col_names.insert(pelvis_tilt_idx + 3, "pelvis_quat_w")
     return data, col_names
 
 
-def reorder_joint_values(data, col_names, dof_id_lookup):
+def reorder_joint_values(data, col_names, qpos_id_lookup):
     """ based on the model's joint order, reorder the motion joint values """
     new_data = np.zeros_like(data)
     new_col_names = []
 
     to_replace = {}
     for i, col in enumerate(col_names):
-        if col in dof_id_lookup:
-            qpos_idx, dof_idx = dof_id_lookup[col]
-            j = qpos_idx + 1  # + 1 for time col
+        if col in qpos_id_lookup:
+            qpos_id = qpos_id_lookup[col]
+            j = qpos_id + 1  # + 1 for time col
             to_replace[j] = i
 
     # copy in columns of data
@@ -116,7 +96,64 @@ def joints_to_radians(data):
     return data
 
 
-def parse_mot(motion_file: str, model_file: str):
+def build_motion(data, col_names, qpos_id_lookup: dict[str, int]):
+    num_qpos = max(qpos_id_lookup.values()) + 1
+    num_frames = data.shape[1]
+
+    motion = np.zeros((num_frames, num_qpos + 1))
+    # Copy time
+    motion[:, 0] = data[0, :]
+
+    # Copy dof data
+    for i, dof in enumerate(col_names):
+        if dof not in qpos_id_lookup:
+            print(f"{dof} not in qpos_id_lookup")
+            continue
+        if "lumbar" in dof:
+            continue
+
+        qpos_id = qpos_id_lookup[dof]
+        motion[:, qpos_id + 1] = data[i, :]
+    return motion
+
+
+def correct_mot(
+        motion,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
+        device: torch.device,
+):
+    motion = torch.tensor(motion, device=device)
+    ref_time, ref_frames = motion[:, 0], motion[:, 1:]
+    num_frames = len(motion)
+
+    # Corrected motion handles joint limits
+    corrected_motion = torch.zeros_like(motion)
+    corrected_motion[:, 0] = ref_time
+
+    joint_positions = msk_warp.joint_positions(d)
+    for i in range(num_frames):
+        # Set the joint positions
+        joint_positions[0, :] = ref_frames[i, :]
+
+        # Reset to fix limits
+        d.world_reset.fill_(1.0)
+        msk_warp.fix_limits(m, d)
+        d.world_reset.fill_(0.0)
+        msk_warp.fk(m, d)
+
+        # Copy new joint positions
+        corrected_motion[i, 1:] = joint_positions[0, :]
+
+    return corrected_motion
+
+
+def parse_mot(
+        motion_file: str,
+        load_result: msk_warp.ModelLoadResult,
+        device: torch.device,
+        in_degrees: bool = True
+):
     with open(motion_file, "r") as f:
         lines = f.readlines()
 
@@ -127,39 +164,22 @@ def parse_mot(motion_file: str, model_file: str):
     # time should be the first column
     assert col_names.index("time") == 0
 
-    # reorganize to be [time, pelvis_translation, pelvis_rot, ...]
-    data, col_names = reorder_translation(data, col_names)
-    data, col_names = rot_to_quat(data, col_names)
-
-
-    # Grab the joint columns that correspond to our model, reorder them
-    load_result = msk_warp.load_model(model_file, 1)
-    dof_id_lookup = load_result.dof_id_lookup
-
-    data, col_names = reorder_joint_values(data, col_names, dof_id_lookup)
+    # convert euler to quaternion
+    data, col_names = rot_to_quat(data, col_names, in_degrees)
 
     # Deg to rad
-    data = joints_to_radians(data)
+    if in_degrees:
+        data = joints_to_radians(data)
 
     # Make time start at 0
     data[0, :] = data[0, :] - data[0, 0]
 
-    return data, col_names
+    # Now we build the motion
+    motion = build_motion(data, col_names, load_result.qpos_id_lookup)
 
+    # Correct the motion to fit in joint limits
+    print("Correcting motion...")
+    # corrected_motion = correct_mot(motion, load_result.model, load_result.data, device)
+    corrected_motion = torch.tensor(motion, device=device)
 
-def main(motion_file: str = "msk_envs/motions/reference_stride.mot",
-         model_file: str = "msk_envs/msk_models/model.osim"):
-    data, col_names = parse_mot(motion_file, model_file)
-    torch.save(torch.tensor(data), motion_file.replace(".mot", ".pt"))
-    print(col_names)
-    return
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--motion", default="msk_envs/motions/reference_stride.mot")
-    parser.add_argument("--model", default="msk_envs/msk_models/model.osim")
-    args = parser.parse_args()
-    main(args.motion, args.model)
+    return corrected_motion

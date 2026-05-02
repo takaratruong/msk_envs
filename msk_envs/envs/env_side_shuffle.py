@@ -12,16 +12,19 @@ class SideShuffleEnv(LanesEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            requires_visuals: bool,
+            live_render: bool,
             cuda_graph: bool
     ):
         super().__init__(
             num_envs=num_envs,
             env_config=env_config,
             device=device,
-            render=render,
+            requires_visuals=requires_visuals,
+            live_render=live_render,
             cuda_graph=cuda_graph,
-            target_dir=build_axis(SIDE_IDX, 1.0)
+            target_dir=build_axis(SIDE_IDX, 1.0),
+            angle_tolerance=60.0,
         )
         return
 

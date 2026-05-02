@@ -35,18 +35,18 @@ def train(
         sac_config: SACConfig,
         envs,
         eval_envs,
+        dep_explorer,
         traj_out_folder: str,
         analytics_out_folder: str,
         exp_name: str,
-        cuda: bool,
+        device: torch.device,
 ):
     global save_requested
 
-    amp_enabled = sac_config.amp and cuda and torch.cuda.is_available()
-    amp_device_type = "cuda" if cuda and torch.cuda.is_available() else "cpu"
+    amp_enabled = sac_config.amp
+    amp_device_type = "cuda"
     amp_dtype = torch.bfloat16 if sac_config.amp_dtype == "bf16" else torch.float16
     scaler = GradScaler(enabled=amp_enabled and amp_dtype == torch.float16)
-    device = torch.device("cuda:0" if cuda else "cpu")
 
     writer = TensorboardSummaryWriter(
         log_dir=f"models/{exp_name}",
@@ -55,7 +55,7 @@ def train(
     logging_helper = LoggingHelper(
         writer,
         log_dir=f"models/{exp_name}",
-        device="cuda" if cuda else "cpu",
+        device=device,
         num_envs=sac_config.num_envs,
         num_steps_per_env=sac_config.logging_interval,
         num_learning_iterations=sac_config.num_learning_iterations,
@@ -393,6 +393,8 @@ def train(
             with torch.no_grad(), _maybe_amp():
                 norm_obs = normalize_obs(obs, update=False)
                 actions = policy(obs=norm_obs, dones=dones)
+                # DEP EXPLORATION
+                actions = dep_explorer.explore(muscle_states=envs.muscle_fiber_lengths, actions=actions)
 
             next_obs, rewards, terminated, truncations, info = envs.step(actions.float())
             dones = (terminated + truncations).bool()
@@ -452,6 +454,12 @@ def train(
                         "policy_entropy": policy_entropy,
                         "action_std": action_std,
                     }
+
+                    # Log raw reward terms before lambda multiplication
+                    raw_rewards_dict = {}
+                    for reward_name, reward_tensor in info["raw_rewards"].items():
+                        raw_rewards_dict[f"{reward_name}_raw"] = reward_tensor.mean()
+
                     training_metrics.add(current_metrics)
 
                     with torch.no_grad():
@@ -477,7 +485,11 @@ def train(
                     loss_dict["env_rewards"] = rewards.mean().item()
 
                 # Use logging helper
-                logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts={})
+                extra_log_dicts = {
+                    "raw_rewards": raw_rewards_dict,
+                    "additional_metrics": envs.additional_metrics(),
+                }
+                logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts=extra_log_dicts)
 
             if sac_config.save_interval > 0 and global_step > 0 and global_step % sac_config.save_interval == 0:
                 logger.info(f"Saving model at global step {global_step}")

@@ -8,14 +8,18 @@ from .env_vertical import VerticalEnv
 from .env_walk import WalkEnv
 from .env_perturb import PerturbEnv
 from .env_dont_fall import DontFallEnv
+from .env_dont_fall_one_leg import DontFallEnvOneLeg
 from .env_imitate import ImitateEnv
 from .env_static import StaticEnv
 from .env_ankle_flex import AnkleFlexEnv
 from .env_race_walk import RaceWalkEnv
-from.env_shuttle_run import ShuttleRunEnv
-from.env_random_target import RandomTargetEnv
-from.env_waddle import WaddleEnv
-from.env_broad_jump import BroadJumpEnv
+from .env_shuttle_run import ShuttleRunEnv
+from .env_random_target import RandomTargetEnv
+from .env_waddle import WaddleEnv
+from .env_broad_jump import BroadJumpEnv
+from .env_upper_reach import UpperReachTargetEnv
+from .env_upper_curl import UpperCurlEnv
+from .env_reach_pose import ReachPoseEnv
 
 # factory
 class EnvFactory:
@@ -41,6 +45,8 @@ class EnvFactory:
             return PerturbEnv(**kwargs)
         elif env_variant == DerivedEnv.DONT_FALL:
             return DontFallEnv(**kwargs)
+        elif env_variant == DerivedEnv.DONT_FALL_ONE_LEG:
+            return DontFallEnvOneLeg(**kwargs)
         elif env_variant == DerivedEnv.IMITATE:
             return ImitateEnv(**kwargs)
         elif env_variant == DerivedEnv.STATIC:
@@ -57,5 +63,11 @@ class EnvFactory:
             return WaddleEnv(**kwargs)
         elif env_variant == DerivedEnv.BROAD_JUMP:
             return BroadJumpEnv(**kwargs)
+        elif env_variant == DerivedEnv.UPPER_REACH:
+            return UpperReachTargetEnv(**kwargs)
+        elif env_variant == DerivedEnv.UPPER_CURL:
+            return UpperCurlEnv(**kwargs)
+        elif env_variant == DerivedEnv.REACH_POSE:
+            return ReachPoseEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

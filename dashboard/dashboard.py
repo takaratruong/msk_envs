@@ -250,6 +250,9 @@ with ui.row().classes('w-full z-50 bg-white').style(
                 <div class="control-row">
                     <label for="drawVisuals">Draw visuals</label>
                     <input type="checkbox" id="drawVisuals" checked>
+                    
+                    <label for="drawBeams">Draw beams</label>
+                    <input type="checkbox" id="drawBeams" checked>
 
                     <label for="drawCapsuleColliders">Draw capsule colliders</label>
                     <input type="checkbox" id="drawCapsuleColliders">
@@ -268,7 +271,7 @@ with ui.row().classes('w-full z-50 bg-white').style(
                 </div>
             </div>
         </div>
-    """, sanitize=False).classes('w-full')
+    """).classes('w-full')
 
     # Control panel
     with ui.column().classes("items-center w-full"):

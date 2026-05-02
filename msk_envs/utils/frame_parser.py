@@ -2,23 +2,25 @@ import msk_warp
 import torch
 
 from msk_envs.utils.frame_data import *
+from msk_envs.utils.transforms import get_position_from_transform, get_rotation_from_transform
 
 
 def parse_visual_data(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
-        visual_load_results: list[msk_warp.types.MeshLoadResult],
+        m: msk_warp.Model,
+        d: msk_warp.Data,
+        visual_load_results: list[msk_warp.MeshLoadResult],
         world_id: int
 ) -> list[VisualData]:
-    visual_positions = msk_warp.get_visual_positions(d)
-    visual_rotations = msk_warp.get_visual_rotations(d)
+    visual_transforms = msk_warp.get_visual_transforms(d)
+    visuals_positions = get_position_from_transform(visual_transforms)
+    visual_rotations = get_rotation_from_transform(visual_transforms)
 
     visuals = []
     for i in range(msk_warp.get_num_visuals(m)):
         visual_load = visual_load_results[i]
         visual_data = VisualData(
             mesh_file=visual_load.file,
-            pos=visual_positions[world_id][i].tolist(),
+            pos=visuals_positions[world_id][i].tolist(),
             rot=visual_rotations[world_id][i].tolist(),
             scale=visual_load.scale,
         )
@@ -27,15 +29,16 @@ def parse_visual_data(
 
 
 def parse_collider_data(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         collider_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[ColliderData]:
     collider_types = msk_warp.get_collider_types(m)
     collider_scales = msk_warp.get_collider_sizes(m)
-    collider_positions = msk_warp.get_collider_positions(d)
-    collider_rotations = msk_warp.get_collider_rotations(d)
+    collider_transforms = msk_warp.get_collider_transforms(d)
+    collider_positions = get_position_from_transform(collider_transforms)
+    collider_rotations = get_rotation_from_transform(collider_transforms)
     collider_forces = msk_warp.collider_forces(d)
 
     colliders = []
@@ -53,8 +56,8 @@ def parse_collider_data(
 
 
 def parse_muscle_data(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         muscle_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[MuscleData]:
@@ -67,6 +70,43 @@ def parse_muscle_data(
 
     muscle_metadata = msk_warp.muscle_metadata_np(m)
     muscle_length_info = msk_warp.muscle_length_info_np(d)
+    # # sort the muscles based on fiber_passive_force_length_multiplier
+    # import numpy as np
+    # nm = msk_warp.get_num_muscles(m)
+    # # Muscle names
+    # muscle_names = [muscle_idx_to_name[i] for i in range(nm)]
+    # # Passive multiplier
+    # passive_flm = [float(muscle_length_info["fiber_passive_force_length_multiplier"][world_id][i].item()) for i in
+    #                range(nm)]
+    # # Muscle path length
+    # muscle_lengths = [float(muscle_path_lengths[world_id][i].item()) for i in range(nm)]
+    # # "Optimal/Default" length
+    # optimal_fl = [float(muscle_metadata["optimal_fiber_length"][i]) for i in range(nm)]
+    # tsl = [float(muscle_metadata["tendon_slack_length"][i]) for i in range(nm)]
+    # optimal_pennation = [float(muscle_metadata["optimal_pennation_angle"][i]) for i in range(nm)]
+    # default_lengths = []
+    # for i in range(nm):
+    #     default_length = optimal_fl[i] * np.cos(optimal_pennation[i]) + tsl[i]
+    #     default_lengths.append(default_length)
+    #
+    # muscle_names = np.array(muscle_names)
+    # passive_flm = np.array(passive_flm)
+    # default_lengths = np.array(default_lengths)
+    # muscle_lengths = np.array(muscle_lengths)
+    # multiplier = muscle_lengths / default_lengths
+    #
+    # ind_sort = np.argsort(multiplier)[::-1]
+    # passive_flm = passive_flm[ind_sort]
+    # muscle_names = muscle_names[ind_sort]
+    # default_lengths = default_lengths[ind_sort]
+    # muscle_lengths = muscle_lengths[ind_sort]
+    # multiplier = multiplier[ind_sort]
+    #
+    # for i in range(len(ind_sort)):
+    #     print(f"{muscle_names[i]}. multiplier: {multiplier[i]}")
+    #
+    # quit()
+
     muscle_velocity_info = msk_warp.muscle_velocity_info_np(d)
 
     site_positions = msk_warp.site_positions(d)
@@ -103,8 +143,8 @@ def parse_muscle_data(
 
 
 def parse_actuator_data(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         actuation_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[ActuatorData]:
@@ -125,20 +165,29 @@ def parse_actuator_data(
 
 
 def parse_kinetic_data(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         body_name_to_idx: dict[str, int],
         world_id: int
 ) -> KineticData:
-    com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
+    # com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
     body_com_positions = msk_warp.body_com_positions(d)[world_id]
     grf = msk_warp.grf(d)[world_id].tolist()
-    mass = msk_warp.subtree_mass(m)[1]
     gravity = msk_warp.gravity(m)
+    com = msk_warp.body_subtree_com_positions(d)[world_id, 0].tolist()
+    mass = msk_warp.body_mass(m).sum()
+
+    if "talus_l" in body_name_to_idx and "talus_r" in body_name_to_idx:
+        foot_pos_l = tuple(body_com_positions[body_name_to_idx["talus_l"]].tolist())
+        foot_pos_r = tuple(body_com_positions[body_name_to_idx["talus_r"]].tolist())
+    else:
+        foot_pos_l = (0, 0, 0)
+        foot_pos_r = (0, 0, 0)
+
     kinetic_data = KineticData(
         com=tuple(com),
-        foot_pos_l=tuple(body_com_positions[body_name_to_idx["talus_l"]].tolist()),
-        foot_pos_r=tuple(body_com_positions[body_name_to_idx["talus_r"]].tolist()),
+        foot_pos_l=foot_pos_l,
+        foot_pos_r=foot_pos_r,
         grf=tuple(grf),
         total_mass=float(mass),
         gravity=gravity,
@@ -152,29 +201,25 @@ def find_index_1d(tensor, x):
 
 
 def parse_joint_angles(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         qpos_idx_to_name: dict[int, str],
+        limit_id_lookup: dict[str, tuple[float, float]],
         world_id: int,
         ref_joint_angles: torch.Tensor | None
 ) -> list[NamedValue]:
     joint_angles = msk_warp.joint_positions(d)
-    joint_limit_ranges = msk_warp.joint_limit_ranges(m)
-    joint_limit_qadr = list(msk_warp.joint_limit_qadr(m))
+    # joint_limit_ranges = msk_warp.joint_limit_ranges(m)
+    # joint_limit_qadr = list(msk_warp.joint_limit_qadr(m))
     angles = []
 
     for i in range(msk_warp.get_num_qpos(m)):
+        qpos_name = qpos_idx_to_name[i]
         reference = None if ref_joint_angles is None else float(ref_joint_angles[world_id][i].item())
-        limits = None
-        limit_id = find_index_1d(torch.tensor(joint_limit_qadr), i)
-        if limit_id is not None:
-            limits = (
-                float(joint_limit_ranges[limit_id, 0]),
-                float(joint_limit_ranges[limit_id, 1]),
-            )
+        limits = limit_id_lookup[qpos_name]
 
         angle = NamedValue(
-            name=qpos_idx_to_name[i],
+            name=qpos_name,
             value=float(joint_angles[world_id][i].item()),
             reference=reference,
             limits=limits,
@@ -184,8 +229,8 @@ def parse_joint_angles(
 
 
 def parse_joint_velocities(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         world_id: int
 ) -> list[NamedValue]:
     joint_velocities = msk_warp.joint_velocities(d)
@@ -194,62 +239,140 @@ def parse_joint_velocities(
 
 
 def parse_joint_moments(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         dof_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[JointMoment]:
-    joint_moments = msk_warp.joint_moments(d)
-    qfrc_spring = msk_warp.qfrc_spring(d)
-    qfrc_damper = msk_warp.qfrc_damper(d)
-    qfrc_drag = msk_warp.qfrc_drag(d)
-    qfrc_bias = msk_warp.qfrc_bias(d)
-    qfrc_muscle = msk_warp.qfrc_muscle(d)
-    qfrc_actuator = msk_warp.qfrc_actuator(d)
-    qfrc_limit = msk_warp.qfrc_limit(d)
-    qfrc_contact = msk_warp.qfrc_contact(d)
+    net_moment = msk_warp.joint_moments(d)
+    ufrc_spring = msk_warp.ufrc_spring(d)
+    ufrc_damper = msk_warp.ufrc_damper(d)
+    ufrc_muscle = msk_warp.ufrc_muscle(d)
+    ufrc_muscle_passive = msk_warp.ufrc_muscle_passive(d)
+    ufrc_actuator = msk_warp.ufrc_actuator(d)
+    ufrc_limit = msk_warp.ufrc_limit(d)
 
     moments = []
     for i in range(msk_warp.get_num_dofs(m)):
+        dof_name = dof_idx_to_name[i]
+
         angle = JointMoment(
-            name=dof_idx_to_name[i],
-            value=float(joint_moments[world_id][i].item()),
-            spring=float(qfrc_spring[world_id][i].item()),
-            damping=float(qfrc_damper[world_id][i].item()),
-            drag=float(qfrc_drag[world_id][i].item()),
-            bias=float(qfrc_bias[world_id][i].item()),
-            muscle=float(qfrc_muscle[world_id][i].item()),
-            actuator=float(qfrc_actuator[world_id][i].item()),
-            limit=float(qfrc_limit[world_id][i].item()),
-            contact=float(qfrc_contact[world_id][i].item()),
+            name=dof_name,
+            net_moment=float(net_moment[world_id][i].item()),
+            spring=float(ufrc_spring[world_id][i].item()),
+            damping=float(ufrc_damper[world_id][i].item()),
+            muscle=float(ufrc_muscle[world_id][i].item()),
+            muscle_passive=float(ufrc_muscle_passive[world_id][i].item()),
+            actuator=float(ufrc_actuator[world_id][i].item()),
+            limit=float(ufrc_limit[world_id][i].item()),
         )
         moments.append(angle)
     return moments
 
 
+def parse_joint_passive_moments(
+        m: msk_warp.Model,
+        d: msk_warp.Data,
+        qpos_idx_to_name: dict[int, str],
+        world_id: int
+) -> list[JointMuscleBreakdown]:
+    qfrc_muscle_passive_breakdown = msk_warp.qfrc_muscle_passive_breakdown(d)
+    qfrc_muscle_active_breakdown = msk_warp.qfrc_muscle_active_breakdown(d)
+
+    moments = []
+    for i in range(msk_warp.get_num_qpos(m)):
+        qpos_name = qpos_idx_to_name[i]
+
+        # Build passive muscle breakdown
+        passive_breakdown = []
+        active_breakdown = []
+        for j in range(msk_warp.get_num_muscles(m)):
+            passive_breakdown.append(
+                float(qfrc_muscle_passive_breakdown[world_id][i][j].item())
+            )
+            active_breakdown.append(
+                float(qfrc_muscle_active_breakdown[world_id][i][j].item())
+            )
+
+        pm = JointMuscleBreakdown(
+            name=qpos_name,
+            passive_breakdown=passive_breakdown,
+            active_breakdown=active_breakdown,
+        )
+        moments.append(pm)
+    return moments
+
+
+def parse_body_forces(
+        m: msk_warp.Model,
+        d: msk_warp.Data,
+        body_idx_to_name: dict[int, str],
+        world_id: int
+) -> list[BodyForces]:
+    body_force_gravity = msk_warp.body_force_gravity(d)
+    body_force_contact = msk_warp.body_force_contact(d)
+    body_force_muscle = msk_warp.body_force_muscle(d)
+    body_force_drag = msk_warp.body_force_drag(d)
+
+    body_forces = []
+    for i in range(msk_warp.get_num_bodies(m)):
+        angle = BodyForces(
+            name=body_idx_to_name[i],
+            gravity=tuple(body_force_gravity[world_id][i].tolist()),
+            contact=tuple(body_force_contact[world_id][i].tolist()),
+            muscle=tuple(body_force_muscle[world_id][i].tolist()),
+            drag=tuple(body_force_drag[world_id][i].tolist()),
+        )
+        body_forces.append(angle)
+    return body_forces
+
+
+def parse_beam_points(
+        m: msk_warp.Model,
+        d: msk_warp.Data,
+        world_id: int
+) -> list[PointData]:
+    points = []
+    beam_point_pos = msk_warp.get_beam_visual_positions(d)[world_id]
+    beam_point_pos = beam_point_pos.reshape(-1, 3)
+    for i in range(beam_point_pos.shape[0]):
+        point = PointData(
+            name=f"beam_point_{i}",
+            pos=beam_point_pos[i].tolist(),
+        )
+        points.append(point)
+    return points
+
+
 def parse_frame(
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         body_name_to_idx: dict[str, int],
         qpos_idx_to_name: dict[int, str],
+        qpos_name_to_idx: dict[str, int],
         dof_idx_to_name: dict[int, str],
+        limit_id_lookup: dict[str, tuple[float, float]],
         muscle_idx_to_name: dict[int, str],
         actuation_idx_to_name: dict[int, str],
         collider_idx_to_name: dict[int, str],
-        visual_load_results: list[msk_warp.types.MeshLoadResult],
+        visual_load_results: list[msk_warp.MeshLoadResult],
         world_id: int,
         frame_time: float,
         scene_settings: SceneSettings,
         ref_joint_angles=None,
 ) -> FrameData:
+    body_idx_to_name = {v: k for k, v in body_name_to_idx.items()}
     visuals = parse_visual_data(m, d, visual_load_results, world_id)
     colliders = parse_collider_data(m, d, collider_idx_to_name, world_id)
     muscles = parse_muscle_data(m, d, muscle_idx_to_name, world_id)
     actuators = parse_actuator_data(m, d, actuation_idx_to_name, world_id)
     kinetic_data = parse_kinetic_data(m, d, body_name_to_idx, world_id)
-    joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, world_id, ref_joint_angles)
+    joint_angles = parse_joint_angles(m, d, qpos_idx_to_name, limit_id_lookup, world_id, ref_joint_angles)
     joint_velocities = parse_joint_velocities(m, d, world_id)
     joint_moments = parse_joint_moments(m, d, dof_idx_to_name, world_id)
+    joint_passive_moments = parse_joint_passive_moments(m, d, qpos_idx_to_name, world_id)
+    body_forces = parse_body_forces(m, d, body_idx_to_name, world_id)
+    beam_points = parse_beam_points(m, d, world_id)
 
     frame_visuals = FrameData(
         time=frame_time,
@@ -259,9 +382,12 @@ def parse_frame(
         joint_angles=joint_angles,
         joint_velocities=joint_velocities,
         joint_moments=joint_moments,
+        joint_muscle_breakdown=joint_passive_moments,
+        body_forces=body_forces,
         muscles=muscles,
         actuators=actuators,
         kinetic_data=kinetic_data,
+        beam_points=beam_points,
         arrows=[],
         targets=[],
     )
@@ -304,15 +430,16 @@ def add_target(
 
 def add_ext_forces_to_frame(
         frame: FrameData,
-        m: msk_warp.types.Model,
-        d: msk_warp.types.Data,
+        m: msk_warp.Model,
+        d: msk_warp.Data,
         idx_world: int
 ):
     num_bodies = msk_warp.get_num_bodies(m)
-    body_positions = msk_warp.body_positions(d)
+    body_transforms = msk_warp.body_transforms(d)
+    body_positions = get_position_from_transform(body_transforms)
     ext_forces = msk_warp.body_user_forces(d)
     for i in range(1, num_bodies):
-        force = ext_forces[idx_world][i][0:3].tolist()
+        force = ext_forces[idx_world][i][3:6].tolist()
         point = body_positions[idx_world][i].tolist()
         arrow = Arrow(
             start=point,

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import {FontLoader} from 'three/addons/loaders/FontLoader.js';
+import {TextGeometry} from 'three/addons/geometries/TextGeometry.js';
+
 const textureLoader = new THREE.TextureLoader();
 const planeTexture = textureLoader.load('assets/textures/plane.png');
 
@@ -41,7 +42,7 @@ function setupAxes(scene, currentObjects) {
 
     function createAxis(color, rotationAxis, rotationAngle) {
         const geometry = new THREE.CylinderGeometry(axisRadius, axisRadius, axisLength, 12);
-        const material = new THREE.MeshBasicMaterial({ color });
+        const material = new THREE.MeshBasicMaterial({color});
         const axis = new THREE.Mesh(geometry, material);
         axis.position.y = axisLength / 2;
         if (rotationAxis) {
@@ -60,28 +61,13 @@ function setupAxes(scene, currentObjects) {
     currentObjects.push(axesHelper);
 }
 
-function setupGround(scene, position) {
-    const groundGeometry = new THREE.PlaneGeometry(100, 100);
-    const groundMaterial = new THREE.MeshStandardMaterial({
-        map: planeTexture,
-        metalness: 0.3,
-        roughness: 0.7,
-        side: THREE.DoubleSide
-    });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.position.set(position.x, position.y, position.z);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
-}
-
 function setupLanes(scene, currentObjects) {
     // Lane 1
     const laneWidth = 100;     // Length of the lane
     const laneThickness = 0.05; // Thickness of the line (height of the plane)
 
     const laneGeometry1 = new THREE.PlaneGeometry(laneWidth, laneThickness);
-    const laneMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+    const laneMaterial1 = new THREE.MeshBasicMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
 
     const lane1 = new THREE.Mesh(laneGeometry1, laneMaterial1);
     lane1.position.set(50, 0.01, -0.7);
@@ -92,7 +78,7 @@ function setupLanes(scene, currentObjects) {
 
     // Lane 2
     const laneGeometry2 = new THREE.PlaneGeometry(laneWidth, laneThickness);
-    const laneMaterial2 = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+    const laneMaterial2 = new THREE.MeshBasicMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
 
     const lane2 = new THREE.Mesh(laneGeometry2, laneMaterial2);
     lane2.position.set(50, 0.01, 0.7);
@@ -119,7 +105,7 @@ function setupNumbers(scene, currentObjects) {
             });
 
             textGeo.computeBoundingBox();
-            const textMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const textMat = new THREE.MeshStandardMaterial({color: 0xffffff});
             const text = new THREE.Mesh(textGeo, textMat);
 
             text.position.set(x, 0.05, -1.5);
@@ -134,5 +120,4 @@ function setupNumbers(scene, currentObjects) {
 }
 
 
-
-export { setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers };
+export {setupLightsSky, setupAxes, setupLanes, setupNumbers};

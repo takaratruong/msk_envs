@@ -4,8 +4,8 @@ from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_limit_penalty, \
-    actuator_sq_penalty, metabolic_penalty, fatigue_penalty, acceleration_sq_penalty
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, \
+    actuator_sq_penalty, metabolic_penalty, activation_square_penalty, acceleration_sq_penalty
 
 
 class JoggingEnv(MSKEnv):
@@ -13,9 +13,9 @@ class JoggingEnv(MSKEnv):
                  num_envs: int,
                  env_config: EnvConfig,
                  device: torch.device,
-                 render: bool,
+                 live_render: bool,
                  cuda_graph: bool):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
+        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render, cuda_graph=cuda_graph)
         self.prev_joint_velocities = self.joint_velocities.clone()
         # Randomly chosen each episode: scales energy terms
         self.energy_factor = torch.zeros(self.num_worlds, device=self.reset_tensor.device)
@@ -72,10 +72,10 @@ class JoggingEnv(MSKEnv):
 
         # "Marathon contribution"
         rew_metabolic = metabolic_penalty(self.muscle_powers, self.num_muscles, squared=True)
-        rew_fatigue = fatigue_penalty(self.muscle_activations, self.num_muscles)
+        rew_fatigue = activation_square_penalty(self.muscle_activations)
         rew_acc = acceleration_sq_penalty(joint_accelerations)
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=True)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
         # Scale energy terms by energy factor
         rew_metabolic = rew_metabolic * self.energy_factor
         rew_fatigue = rew_fatigue * self.energy_factor

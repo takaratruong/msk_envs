@@ -4,7 +4,7 @@ import bpy
 import mathutils
 
 from material import create_collider_material
-from util import vec_yup_zup
+from util import vec_yup_zup, quat_xyzw_to_wxyz
 
 collider_material = create_collider_material()
 
@@ -43,7 +43,7 @@ def update_collider(collider, frame_num, dashboard_src):
     scale = collider["scale"]
     # Rotation y-up to z-up
     quat_data = collider["rot"]
-    rotation = mathutils.Quaternion([quat_data[0], quat_data[1], quat_data[2], quat_data[3]])
+    rotation = mathutils.Quaternion(quat_xyzw_to_wxyz(quat_data))
     q_conv = mathutils.Quaternion((1.0, 0.0, 0.0), math.radians(90.0))
     rotation = q_conv @ rotation
 

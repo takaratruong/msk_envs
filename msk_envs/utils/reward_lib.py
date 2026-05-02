@@ -4,6 +4,7 @@ from msk_envs.utils.quat import quat_diff_angle, rotate_vec
 
 
 def _get_velocity(body_velocities, body_id: int, linear: bool, idx: int):
+    """ Returns the [idx]-velocity of body [body_id] """
     return body_velocities[:, body_id, idx + 3] if linear else body_velocities[:, body_id, idx]
 
 
@@ -19,7 +20,18 @@ def mid_lane_reward(root_position: torch.Tensor, weight: float = 2.5):
     return torch.exp(-weight * dist_from_center.pow(2))
 
 
-def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: bool = False):
+def muscle_activation_penalty(muscle_activations: torch.Tensor, threshold: float = 0.15):
+    above_thresh = muscle_activations > threshold
+    return above_thresh.float().mean(dim=1)
+
+
+def exp_distance(values: torch.Tensor, targets: torch.Tensor, ranges: torch.Tensor, weight: float):
+    diff = values - targets
+    scaled_diff = diff / ranges
+    return torch.exp(-weight * scaled_diff.pow(2))
+
+
+def joint_penalty(limit_torques: torch.Tensor, squared: bool = False):
     """Joint limit penalty based on sum of absolute limit torques"""
     if squared:
         sq_limit_torque = torch.pow(limit_torques, 2)
@@ -28,22 +40,23 @@ def joint_limit_penalty(limit_torques: torch.Tensor, num_limits: int, squared: b
         abs_limit_torque = torch.abs(limit_torques)
         limit_torque_sum = torch.sum(abs_limit_torque, dim=1)
 
-    if num_limits == 0:
-        return torch.zeros_like(limit_torque_sum)
-    return limit_torque_sum / num_limits
+    return limit_torque_sum
 
 
-def joint_damping_penalty(qfrc_damper: torch.Tensor, squared: bool = False):
-    """Joint damping penalty based on sum of absolute damping forces"""
-    qfrc_damper_joints = qfrc_damper[:, 6:]
-    nv_joints = qfrc_damper_joints.shape[1]
+def joint_penalty_w_ignore(limit_torques: torch.Tensor, ignore_dof_ids: list[int], squared: bool = False):
+    """Joint limit penalty that ignores specified toe joints"""
+    mask = torch.ones(limit_torques.shape[1], dtype=torch.bool, device=limit_torques.device)
+    mask[ignore_dof_ids] = False
+    filtered_limit_torques = limit_torques[:, mask]
+
     if squared:
-        sq_damping = torch.pow(qfrc_damper_joints, 2)
-        damping_sum = torch.sum(sq_damping, dim=1)
+        sq_limit_torque = torch.pow(filtered_limit_torques, 2)
+        limit_torque_sum = torch.sum(sq_limit_torque, dim=1)
     else:
-        abs_damping = torch.abs(qfrc_damper_joints)
-        damping_sum = torch.sum(abs_damping, dim=1)
-    return damping_sum / nv_joints
+        abs_limit_torque = torch.abs(filtered_limit_torques)
+        limit_torque_sum = torch.sum(abs_limit_torque, dim=1)
+
+    return limit_torque_sum
 
 
 def alive_bonus(fallen: torch.Tensor):
@@ -51,16 +64,25 @@ def alive_bonus(fallen: torch.Tensor):
     return 1.0 - fallen.float()
 
 
-def actuator_sq_penalty(actuator_activations, num_actuators):
+def actuator_sq_penalty(actuator_activations):
     """
     Actuator penalty based on squared activation. Note that 0.5 = no activation, so we shift and scale to [-1, 1] first.
     """
     actuator_act = (actuator_activations - 0.5) * 2.0
     squared_act = torch.pow(actuator_act, 2)
-    mean_squared_act = torch.sum(squared_act, dim=1) / num_actuators
-    if num_actuators == 0:
-        return torch.zeros_like(mean_squared_act)
+    mean_squared_act = torch.sum(squared_act, dim=1)
     return mean_squared_act
+
+
+def derivative_sq_penalty(derivative, num_values):
+    """
+    Penalty based on the squared derivative.
+    """
+    squared_der = torch.pow(derivative, 2)
+    mean_squared_der = torch.sum(squared_der, dim=1) / num_values
+    if num_values == 0:
+        return torch.zeros_like(mean_squared_der)
+    return mean_squared_der
 
 
 def metabolic_penalty(muscle_powers, num_muscles, squared: bool = False):
@@ -85,8 +107,11 @@ def root_zero_reward(root_positions, weight: float):
     return reward
 
 
-def match_start_pos_reward(joint_positions, start_positions, weight: float):
+def match_start_pos_reward(joint_positions, start_positions, weight: float, ignore_root: bool):
     """Reward for root being close to start position in all axes"""
+    if ignore_root:  # first 7 values are root
+        joint_positions = joint_positions[..., 7:]
+        start_positions = start_positions[..., 7:]
     dist_from_start = torch.norm(joint_positions - start_positions, dim=1)
     reward = torch.exp(-weight * dist_from_start.pow(2))
     return reward
@@ -111,13 +136,25 @@ def head_acceleration_penalty(head_velocities, prev_head_velocities, delta_t):
     return head_acc_mag
 
 
-def fatigue_penalty(muscle_activations, num_muscles):
+def activation_square_penalty(muscle_activations):
     """Fatigue penalty based on squared muscle activations"""
     activations_sq = torch.pow(muscle_activations, 2)
     total_fatigue = torch.sum(activations_sq, dim=1)
-    if num_muscles == 0:
-        return torch.zeros_like(total_fatigue)
-    return total_fatigue / num_muscles
+    return total_fatigue
+
+
+def self_collision_penalty(collision_forces, force_bound):
+    clamped_collision_forces = torch.clamp(collision_forces, min=-force_bound, max=force_bound)
+    norm_collision_forces = torch.abs(clamped_collision_forces) / force_bound
+    return norm_collision_forces.sum(dim=1)
+
+
+def head_acc_penalty(head_accelerations):
+    """Penalty based on squared head accelerations"""
+    # acceleration is (angular, linear)
+    acc_ang = head_accelerations[:, :3]
+    acc_lin = head_accelerations[:, 3:]
+    return torch.norm(acc_ang, dim=1), torch.norm(acc_lin, dim=1)
 
 
 def acceleration_sq_penalty(joint_accelerations):
@@ -185,16 +222,28 @@ def body_rot_track_reward(body_rotations, target_body_rotations, body_id, weight
     return reward
 
 
-def has_fallen(root_pos, torso_pos, torso_rot, head_offset, min_root=MIN_ROOT_HEIGHT, min_head=MIN_HEAD_HEIGHT):
-    # Root falls below threshold
-    root_height = root_pos[:, UP_IDX]
-    pelvis_fallen = (root_height < min_root)
+def compute_ground_vertical(position: torch.Tensor, ground_rotation: torch.Tensor) -> torch.Tensor:
+    """ At the given positions, find the ground height at that given (x, z) """
+    ground_normal = torch.zeros_like(position)
+    ground_normal[:, UP_IDX] = 1.0
+    ground_normal = rotate_vec(rot=ground_rotation[torch.newaxis, :], v=ground_normal)
 
-    # Head falls below threshold
-    head_pos = torso_pos + rotate_vec(torso_rot, head_offset)
-    head_fallen = (head_pos[:, UP_IDX] < min_head)
+    # zero out the vertical of the position
+    pos_horizontal = position.clone()
+    pos_horizontal[:, UP_IDX] = 0.0
 
-    fallen = pelvis_fallen | head_fallen
+    # use plane eqn passing through origin: dot(normal, point_on_plane) = 0
+    dot_product = torch.sum(ground_normal * pos_horizontal, dim=-1)
+    normal_up = ground_normal[:, UP_IDX]
+    ground_vertical = -dot_product / (normal_up + 1e-8)
+    return ground_vertical
+
+
+def has_fallen(root_pos: torch.Tensor, ground_rotation: torch.Tensor, min_root=MIN_ROOT_HEIGHT):
+    # Find height of root wrst ground
+    ground_vertical = compute_ground_vertical(root_pos, ground_rotation)
+    root_height = root_pos[:, UP_IDX] - ground_vertical
+    fallen = (root_height < min_root)
     return fallen.detach()
 
 

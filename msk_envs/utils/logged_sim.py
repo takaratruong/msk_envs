@@ -1,6 +1,8 @@
 """ Provides a wrapper around an MSKEnv to log simulation data """
 from msk_envs.envs.env_base import MSKEnv
+from msk_envs.envs.env_reach_pose import ReachPoseEnv
 from msk_envs.envs.env_reach_target import ReachTargetEnv
+from msk_envs.envs.env_upper_reach import UpperReachTargetEnv
 from msk_envs.utils.frame_parser import parse_frame, add_reference_visuals, add_ext_forces_to_frame, add_target
 from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
@@ -32,7 +34,7 @@ class LoggedSim:
         assert max(self.worlds_to_save) < n_worlds
 
         # Build storage for things to track
-        max_env_steps = int(envs.max_episode_duration / envs.delta_t)
+        max_env_steps = int(envs.max_episode_duration / envs.delta_t) + 1
         self.finished = torch.zeros((n_worlds,), dtype=torch.bool, device=device)
         self.rewards = torch.zeros((n_worlds_to_save, max_env_steps), dtype=torch.float32, device=device)
         self.episode_length = torch.zeros((n_worlds,), dtype=torch.int32, device=device)
@@ -56,11 +58,9 @@ class LoggedSim:
         # Build lookups helpers: qpos idx to name
         self.body_idx_to_name = {v: k for k, v in self.envs.body_id_lookup.items()}
         # qpos idx to name
-        qpos_idx_to_name = {v[0]: k for k, v in self.envs.dof_id_lookup.items()}
-        self.qpos_idx_to_name = qpos_idx_to_name
+        self.qpos_idx_to_name = {v: k for k, v in self.envs.qpos_id_lookup.items()}
         # dof idx to name
-        dof_idx_to_name = {v[1]: k for k, v in self.envs.dof_id_lookup.items()}
-        self.dof_idx_to_name = dof_idx_to_name
+        self.dof_idx_to_name = {v: k for k, v in self.envs.dof_id_lookup.items()}
         # muscle idx to name
         self.muscle_idx_to_name = {v: k for k, v in self.envs.muscle_id_lookup.items()}
         # actuator idx to name
@@ -116,7 +116,9 @@ class LoggedSim:
                 d=self.envs.d,
                 body_name_to_idx=self.envs.body_id_lookup,
                 qpos_idx_to_name=self.qpos_idx_to_name,
+                qpos_name_to_idx=self.envs.qpos_id_lookup,
                 dof_idx_to_name=self.dof_idx_to_name,
+                limit_id_lookup=self.envs.limit_id_lookup,
                 muscle_idx_to_name=self.muscle_idx_to_name,
                 actuation_idx_to_name=self.actuator_idx_to_name,
                 collider_idx_to_name=self.collider_idx_to_name,
@@ -138,12 +140,22 @@ class LoggedSim:
                 )
 
             # if ReachTarget env or inheriting from it, add target position to frame
-            if isinstance(self.envs, ReachTargetEnv) or issubclass(type(self.envs), ReachTargetEnv):
+            if issubclass(type(self.envs), ReachTargetEnv) or issubclass(type(self.envs), UpperReachTargetEnv):
                 target_pos = self.envs.curr_target_pos[idx_world].cpu().numpy().tolist()
                 next_target_pos = self.envs.next_target_pos[idx_world].cpu().numpy().tolist()
                 radius = float(self.envs.target_tolerance)
                 add_target(frame, target_pos, radius, active=True)
                 add_target(frame, next_target_pos, radius, active=False)
+
+            # if ReachPoseEnv, add target pose
+            if issubclass(type(self.envs), ReachPoseEnv):
+                ref_visuals_pos, ref_visuals_rot = self.envs.get_reference_visuals()
+                add_reference_visuals(
+                    frame,
+                    ref_visuals_pos,
+                    ref_visuals_rot,
+                )
+                pass
 
             add_ext_forces_to_frame(
                 frame,
@@ -155,14 +167,22 @@ class LoggedSim:
             self.frame_data[i].append(frame)
         return
 
-    def check_post_step_log(self):
-        if (self.curr_sim_step % self.num_sim_steps_per_log) == 0:
-            if self.envs.cuda_graph:
-                wp.capture_launch(self.envs.post_graph)
-            else:
-                msk_warp.post(self.envs.m, self.envs.d)
+    def perform_post(self):
+        """ Run post-processing and analytics task graphs """
+        if self.envs.cuda_graph:
+            wp.capture_launch(self.envs.post_graph)
+            wp.capture_launch(self.envs.analytics_graph)
+        else:
+            msk_warp.post(self.envs.m, self.envs.d)
+            msk_warp.compute_muscle_moments(self.envs.m, self.envs.d)
+            msk_warp.compute_net_joint_moments(self.envs.m, self.envs.d)
+        wp.synchronize()
+        return
 
-            wp.synchronize()
+    def check_post_step_log(self):
+        """ Check if we need to log, if so, run post and add to log """
+        if (self.curr_sim_step % self.num_sim_steps_per_log) == 0:
+            self.perform_post()
             self.add_to_log()
         self.curr_sim_step += 1
         return
@@ -178,19 +198,13 @@ class LoggedSim:
             self.check_post_step_log()
         return
 
-    def perform_post(self):
-        if self.envs.cuda_graph:
-            wp.capture_launch(self.envs.post_graph)
-            wp.synchronize()
-        else:
-            msk_warp.post(self.envs.m, self.envs.d)
-        return
-
     def step(self, actions: torch.Tensor):
         if self.finished.all():
             return True, None
 
         # We're overriding typical env step to allow for logging
+
+        # Start with the pre-step
         self.envs.pre_step(actions)
 
         # We need to report at the correct logging event times
@@ -238,8 +252,11 @@ class LoggedSim:
         self.finished[:] = 0
         self.rewards[:] = 0
         self.episode_length[:] = 0
+        self.reward_data = [[] for _ in range(self.n_worlds_to_save)]
         self.frame_data = [[] for _ in range(self.n_worlds_to_save)]
         obs = self.envs.reset()
+
+        self.add_to_log()
         return obs
 
     def get_rewards_mean(self):

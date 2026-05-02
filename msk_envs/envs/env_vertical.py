@@ -4,7 +4,7 @@ from msk_envs.utils.global_params import UP_IDX
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import max_vertical_reward, joint_limit_penalty, \
+from msk_envs.utils.reward_lib import max_vertical_reward, joint_penalty, \
     actuator_sq_penalty
 
 
@@ -13,9 +13,9 @@ class VerticalEnv(MSKEnv):
                  num_envs: int,
                  env_config: EnvConfig,
                  device: torch.device,
-                 render: bool,
+                 live_render: bool,
                  cuda_graph: bool):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render,
+        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render,
                          cuda_graph=cuda_graph)
 
         # Track maximum height achieved during episode for each environment
@@ -33,8 +33,8 @@ class VerticalEnv(MSKEnv):
         self.max_height_achieved = torch.max(self.max_height_achieved, current_max_height)
         rew_max_vertical = self.max_height_achieved.clone()  # Cloned to avoid early reset issues
 
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
 
         self.reward_dict = {
             "rew_max_vertical": rew_max_vertical.detach(),

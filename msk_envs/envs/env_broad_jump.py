@@ -1,7 +1,7 @@
 import torch
 
 from msk_envs.utils.global_params import FWD_IDX, UP_IDX, build_axis
-from msk_envs.utils.reward_lib import joint_limit_penalty, actuator_sq_penalty, has_fallen, alive_bonus
+from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, has_fallen, alive_bonus
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 
@@ -14,10 +14,10 @@ class BroadJumpEnv(MSKEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            live_render: bool,
             cuda_graph: bool,
     ):
-        super().__init__(num_envs=num_envs, env_config=env_config, device=device, render=render, cuda_graph=cuda_graph)
+        super().__init__(num_envs=num_envs, env_config=env_config, device=device, live_render=live_render, cuda_graph=cuda_graph)
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.root_pos = self.body_positions[:, self.root_id]
         return

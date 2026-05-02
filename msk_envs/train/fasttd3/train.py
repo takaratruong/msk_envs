@@ -36,18 +36,18 @@ def train(
         td3_config: TD3Config,
         envs,
         eval_envs,
+        dep_explorer,
         traj_out_folder: str,
         analytics_out_folder: str,
         exp_name: str,
-        cuda: bool,
+        device: torch.device,
 ):
     global save_requested
 
-    amp_enabled = td3_config.amp and cuda and torch.cuda.is_available()
-    amp_device_type = "cuda" if cuda and torch.cuda.is_available() else "cpu"
+    amp_enabled = td3_config.amp
+    amp_device_type = "cuda"
     amp_dtype = torch.bfloat16 if td3_config.amp_dtype == "bf16" else torch.float16
     scaler = GradScaler(enabled=amp_enabled and amp_dtype == torch.float16)
-    device = torch.device("cuda:0" if cuda else "cpu")
 
     writer = TensorboardSummaryWriter(
         log_dir=f"models/{exp_name}",
@@ -56,7 +56,7 @@ def train(
     logging_helper = LoggingHelper(
         writer,
         log_dir=f"models/{exp_name}",
-        device="cuda" if cuda else "cpu",
+        device=device,
         num_envs=td3_config.num_envs,
         num_steps_per_env=td3_config.logging_interval,
         num_learning_iterations=td3_config.num_learning_iterations,
@@ -422,11 +422,11 @@ def train(
         obs_normalizer.load_state_dict(torch_checkpoint["obs_normalizer_state"])
         qnet.load_state_dict(torch_checkpoint["qnet_state_dict"])
         qnet_target.load_state_dict(torch_checkpoint["qnet_target_state_dict"])
-        
+
         # Extract global_step from checkpoint
         if "global_step" in torch_checkpoint:
             global_step = torch_checkpoint["global_step"]
-        
+
         # Load optimizer and scheduler states if available
         if "actor_optimizer_state_dict" in torch_checkpoint:
             actor_optimizer.load_state_dict(torch_checkpoint["actor_optimizer_state_dict"])
@@ -454,6 +454,8 @@ def train(
             with torch.no_grad(), _maybe_amp():
                 norm_obs = normalize_obs(obs)
                 actions = policy(obs=norm_obs, dones=dones)
+                # DEP EXPLORATION
+                actions = dep_explorer.explore(muscle_states=envs.muscle_fiber_lengths, actions=actions)
 
             next_obs, rewards, terminated, truncations, info = envs.step(actions)
             dones = (terminated + truncations).bool()
@@ -543,6 +545,7 @@ def train(
                 # Use logging helper
                 extra_log_dicts = {
                     "raw_rewards": raw_rewards_dict,
+                    "additional_metrics": envs.additional_metrics(),
                 }
                 logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts=extra_log_dicts)
 

@@ -1,7 +1,7 @@
 import torch
 
 from msk_envs.utils.global_params import FWD_IDX, build_axis
-from msk_envs.utils.reward_lib import joint_limit_penalty, actuator_sq_penalty, velocity_reward, alive_bonus, \
+from msk_envs.utils.reward_lib import joint_penalty, actuator_sq_penalty, velocity_reward, alive_bonus, \
     cost_of_transport, head_acceleration_penalty
 from .env_config import EnvConfig
 from .env_lanes import LanesEnv
@@ -13,14 +13,14 @@ class WalkEnv(LanesEnv):
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
-            render: bool,
+            live_render: bool,
             cuda_graph: bool
     ):
         super().__init__(
             num_envs=num_envs,
             env_config=env_config,
             device=device,
-            render=render,
+            live_render=live_render,
             cuda_graph=cuda_graph,
             target_dir=build_axis(FWD_IDX, 1.0)
         )
@@ -62,8 +62,8 @@ class WalkEnv(LanesEnv):
 
     def _compute_raw_reward_dict(self):
         rew_cot = cost_of_transport(self.muscle_powers, self.body_velocities, self.root_id)
-        rew_limit = joint_limit_penalty(self.limit_torques, self.num_limits, squared=False)
-        rew_actuator = actuator_sq_penalty(self.actuator_activations, self.num_actuators)
+        rew_limit = joint_penalty(self.get_joint_passive_torques(), squared=True)
+        rew_actuator = actuator_sq_penalty(self.actuator_activations)
 
         head_vel = self._head_velocities()
         rew_head = head_acceleration_penalty(head_vel, self.prev_head_v, self.delta_t)

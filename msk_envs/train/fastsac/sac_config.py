@@ -3,10 +3,10 @@ from dataclasses import dataclass
 
 @dataclass
 class SACConfig:
-    num_envs: int = 32768
+    num_envs: int = 4096
     """number of parallel environments"""
 
-    num_learning_iterations: int = 25000
+    num_learning_iterations: int = 150000
     """total timesteps of the experiments"""
 
     critic_learning_rate: float = 3e-4
@@ -18,7 +18,7 @@ class SACConfig:
     alpha_learning_rate: float = 3e-4
     """the learning rate for the alpha"""
 
-    buffer_size: int = 128
+    buffer_size: int = 256 * 4
     """the replay memory buffer size per environment"""
 
     num_steps: int = 1
@@ -42,10 +42,10 @@ class SACConfig:
     num_updates: int = 8
     """the number of updates to perform per step"""
 
-    target_entropy_ratio: float = 0.0
+    target_entropy_ratio: float = 0.1
     """the ratio of the target entropy to the number of actions"""
 
-    num_atoms: int = 101
+    num_atoms: int = 501
     """the number of atoms"""
 
     v_min: float = -20.0
@@ -99,7 +99,7 @@ class SACConfig:
     weight_decay: float = 0.001
     """the weight decay of the optimizer"""
 
-    save_interval: int = 500
+    save_interval: int = 1000
     """the interval to save the model"""
 
     logging_interval: int = 100
@@ -110,7 +110,7 @@ class SACConfig:
 
     """ Evaluation """
     num_eval_envs: int = 1
-    eval_freq: int = 500
+    eval_freq: int = 1000
 
     @staticmethod
     def pretty_print(sac_config):

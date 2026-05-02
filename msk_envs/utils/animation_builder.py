@@ -1,5 +1,6 @@
 import gzip
 import json
+import numpy as np
 
 from msk_envs.utils.frame_parser import FrameData
 
@@ -12,6 +13,23 @@ def track_com(frame_data: list[FrameData]):
     com_positions = []
     for frame in frame_data:
         com_positions.append(frame.kinetic_data.com)
+    return com_positions
+
+
+def track_com_smooth_window(frame_data: list['FrameData'], window_size: int = 10):
+    com_positions = []
+    num_frames = len(frame_data)
+    half_window = window_size // 2
+    for i in range(num_frames):
+        start_idx = max(0, i - half_window)
+        end_idx = min(num_frames, i + half_window + 1)
+        window_coms = [
+            np.array(frame_data[j].kinetic_data.com)
+            for j in range(start_idx, end_idx)
+        ]
+        avg_pos = sum(window_coms) / len(window_coms)
+
+        com_positions.append(avg_pos.tolist())
     return com_positions
 
 
@@ -30,13 +48,15 @@ def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: 
     n_frames = len(frame_data)
 
     # Where the camera(s) should look
-    cam_positions = track_com(frame_data)
+    # cam_positions = track_com(frame_data)
+    cam_positions = track_com_smooth_window(frame_data)
     foot_l_pos, foot_r_pos = track_feet(frame_data)
 
     # Get all visuals, colliders, muscles
     stacked_frames = []
     for i in range(n_frames):
         visuals = [obj.to_anim_dict() for obj in frame_data[i].visuals]
+        beam_points = [point.to_dict() for point in frame_data[i].beam_points]
         colliders = [obj.to_anim_dict() for obj in frame_data[i].colliders]
         muscles = [muscle.to_anim_dict() for muscle in frame_data[i].muscles]
         arrows = [arrow.to_dict() for arrow in frame_data[i].arrows]
@@ -47,6 +67,7 @@ def create_animation_json(frame_data: list[FrameData], out_file: str, use_gzip: 
             "scene_settings": scene_settings,
             "time": time,
             "visuals": visuals,
+            "beam_points": beam_points,
             "colliders": colliders,
             "muscles": muscles,
             "arrows": arrows,

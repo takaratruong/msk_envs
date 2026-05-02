@@ -1,3 +1,4 @@
+import msk_warp
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -21,6 +22,8 @@ def create_generic_plot(
         linestyles: list[str] = None,
         horizontal_lines: list[list[float]] = None,
         omit_zeros: bool = False,
+        omit_tolerance: float = 1e-4,
+        secondary_overlay_data: np.ndarray = None,
 ):
     n_vertical, n_horizontal = 3, 1
     n_plots = plot_data.shape[1]
@@ -69,8 +72,8 @@ def create_generic_plot(
 
                     for part in range(data_subset.shape[-1]):
                         alpha = 1.0 if alphas is None else alphas[part]
-                        linestyle = 'solid' if linestyles is None else linestyles[part]
-                        if omit_zeros and np.all(data_subset[..., part] == 0.0):
+                        linestyle = None if linestyles is None else linestyles[part]
+                        if omit_zeros and np.all(np.abs(data_subset[..., part]) < omit_tolerance):
                             continue
                         seq_plot.add(idx_fig, data_subset[..., part],
                                      label=label[part],
@@ -82,15 +85,20 @@ def create_generic_plot(
                 idx_entry = start_idx + i
                 if horizontal_lines and horizontal_lines[idx_entry] is not None:
                     for hline in horizontal_lines[idx_entry]:
-                        seq_plot.add_hline(idx_fig, hline)
+                        if np.isfinite(hline):  # we use -inf, inf for limits that are not defined
+                            seq_plot.add_hline(idx_fig, hline)
 
                 if enforced_y_range is not None and enforced_y_range[start_idx] is not None:
                     seq_plot.enforce_y_range(idx_fig, enforced_y_range[start_idx][0], enforced_y_range[start_idx][1])
 
+                # If overlayed data requested
+                if secondary_overlay_data is not None:
+                    seq_plot.add_overlay(idx_fig, secondary_overlay_data[start_idx])
+
         seq_plot.finish(pdf)
 
 
-def create_interval_plots(interval_duration: float, times: np.ndarray, fn):
+def _create_interval_plots(interval_duration: float, times: np.ndarray, fn):
     time_current, final_time = 0.0, times[-1]
     if final_time - time_current > interval_duration:  # only if longer than interval
         while time_current < final_time:
@@ -99,7 +107,12 @@ def create_interval_plots(interval_duration: float, times: np.ndarray, fn):
     return
 
 
-def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict], out_file: str):
+def create_pdf_output(
+        frame_data: list[FrameData],
+        logged_reward_data: list[dict],
+        out_file: str,
+        interval_plots: bool = False
+):
     """ Create a pdf with all the relevant plots """
     n_frames = len(frame_data)
     times = np.array([frame.time for frame in frame_data])
@@ -136,6 +149,8 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
             )
         )
         for i, key in enumerate(reward_keys):
+            if np.all(reward_data[:, i] == 0.0):
+                continue
             rewards_plot.add(0, reward_data[:, i], label=key, alpha=0.5)
         rewards_plot.add(0, np.sum(reward_data, axis=1), label="Total")
         rewards_plot.add_hline(0, 0.0)
@@ -193,6 +208,7 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
         contact_threshold = 0.1  # 10% body weight
         in_contact = False
         contact_start = 0.0
+        dt = times[1] - times[0]
         for i in range(n_frames):
             # grf_magnitude = np.linalg.norm(grf_data[i, :])
             grf_magnitude = np.abs(grf_bw_data[i, UP_IDX])  # vertical component only
@@ -202,7 +218,7 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
             elif in_contact and grf_magnitude < contact_threshold:  # end of contact
                 in_contact = False
                 contact_end = times[i]
-                contact_intervals.append((contact_start, contact_end))
+                contact_intervals.append((contact_start - dt, contact_end + dt))
 
         contact_intervals = np.array(contact_intervals)
         if contact_intervals.size > 0:
@@ -331,17 +347,17 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
 
         # Joint angles plot for entire duration, and 1 second intervals
         create_joint_angles_plot()
-        create_interval_plots(1.0, times, create_joint_angles_plot)
+        if interval_plots:
+            _create_interval_plots(1.0, times, create_joint_angles_plot)
 
         # --- JOINT MOMENTS ---
         joint_dof_names = [j.name for j in frame0.joint_moments]
         joint_moments = []
         for frame in frame_data:
-            joint_moments.append([
-                (m.spring, m.drag, m.muscle, m.actuator, m.limit, m.contact)
-                for m in frame.joint_moments])
+            joint_moments.append(
+                [(m.spring, m.muscle, m.muscle_passive, m.actuator, m.limit, m.damping) for m in frame.joint_moments])
         joint_moments = np.array(joint_moments)
-        sublabels = ["Spring", "Drag", "Muscle", "Actuator", "Limit", "Contact"]
+        sublabels = ["Spring", "Muscle", "Muscle Passive", "Actuator", "Limit", "Damping"]
 
         def create_joint_moments_plot(time_start: float = 0.0, time_end: float = None):
             # Select time range
@@ -370,10 +386,91 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
 
         # Joint moments plot for entire duration, and 1 second intervals
         create_joint_moments_plot()
-        create_interval_plots(1.0, times, create_joint_moments_plot)
+        if interval_plots:
+            _create_interval_plots(1.0, times, create_joint_moments_plot)
+
+        # --- JOINT PASSIVE MUSCLE FORCE ANALYSIS ---
+        muscle_names = [m.name for m in frame0.muscles]
+        qpos_values = np.array([[j.value for j in frame.joint_angles] for frame in frame_data])
+
+        def create_joint_breakdown_plot(
+                title: str,
+                joint_muscle_forces: np.ndarray,
+                time_start: float = 0.0,
+                time_end: float = None
+        ):
+            # Select time range
+            if time_end is None:
+                time_end = times[-1]
+            time_mask = (times >= time_start) & (times <= time_end)
+            time_selected = times[time_mask]
+            frame_ind_selected = frame_ind[time_mask]
+
+            title = f"{title} ({time_start:.1f}s to {time_end:.1f}s)"
+            lss, lsd = "solid", "dashed"
+            create_generic_plot(
+                names=joint_qpos_names,
+                times=time_selected,
+                frame_ind=frame_ind_selected,
+                plot_data=joint_muscle_forces[time_mask, :],
+                fig_title=title,
+                y_label="Value (N m)",
+                y_fmt=".1f",
+                pdf=pdf,
+                sublabels=muscle_names,
+                alphas=[0.5] * (len(muscle_names)),
+                linestyles=[lss] * (len(muscle_names)),
+                horizontal_lines=[[0.0]] * len(joint_qpos_names),
+                omit_zeros=True,
+                secondary_overlay_data=qpos_values.T,
+            )
+
+        joint_passive_muscle, joint_active_muscle = [], []
+        for frame in frame_data:
+            joint_passive_muscle.append([m.passive_breakdown for m in frame.joint_muscle_breakdown])
+            joint_active_muscle.append([m.active_breakdown for m in frame.joint_muscle_breakdown])
+        joint_passive_muscle = np.array(joint_passive_muscle)  # [n_frames, n_qpos, n_muscles]
+        joint_active_muscle = np.array(joint_active_muscle)
+
+        create_joint_breakdown_plot(title="Joint Passive Breakdown", joint_muscle_forces=joint_passive_muscle)
+        create_joint_breakdown_plot(title="Joint Active Breakdown", joint_muscle_forces=joint_active_muscle)
+
+        # --- BODY FORCES ---
+        # body_names = [b.name for b in frame0.body_forces]
+        # body_forces = []
+        # for frame in frame_data:
+        #     body_forces.append(
+        #         [(b.net_force, b.gravity, b.contact, b.muscle, b.drag) for b in frame.body_forces])
+        # body_forces = np.array(body_forces)
+        # body_forces = body_forces[..., 0] # test
+        # sublabels = ["Net", "Gravity", "Contact", "Muscle", "Drag"]
+        #
+        # def create_body_forces_plot(time_start: float = 0.0, time_end: float = None):
+        #     if time_end is None:
+        #         time_end = times[-1]
+        #     time_mask = (times >= time_start) & (times <= time_end)
+        #     time_selected = times[time_mask]
+        #     frame_ind_selected = frame_ind[time_mask]
+        #     title = f"Body Forces ({time_start:.1f}s to {time_end:.1f}s)"
+        #     lss, lsd = "solid", "dashed"
+        #     create_generic_plot(
+        #         names=body_names,
+        #         times=time_selected,
+        #         frame_ind=frame_ind_selected,
+        #         plot_data=body_forces[time_mask, :],
+        #         fig_title=title,
+        #         y_label="Value (N m)",
+        #         y_fmt=".1f",
+        #         pdf=pdf,
+        #         sublabels=sublabels,
+        #         alphas=[0.5] * (len(sublabels)),
+        #         linestyles=[lss] * (len(sublabels)),
+        #         horizontal_lines=[[0.0]] * len(joint_dof_names),
+        #         omit_zeros=True
+        #     )
+        # create_body_forces_plot()
 
         # --- MUSCLE PLOTS ---
-        muscle_names = [m.name for m in frame0.muscles]
         # Muscle activations, fiber/tendon lengths, moment arms
         muscle_ae = []
         muscle_ftl = []
@@ -382,8 +479,12 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
         muscle_frc_mult = []
         for frame in frame_data:
             muscle_ae.append([(m.activation, m.excitation) for m in frame.muscles])
-            muscle_ftl.append([(m.fiber_length, m.tendon_length, m.optimal_fiber_length, m.tendon_slack_length) for m in
-                               frame.muscles])
+            muscle_ftl.append([(
+                m.fiber_length / m.optimal_fiber_length,
+                # m.tendon_length / m.tendon_slack_length,
+                msk_warp.MIN_NORM_FIBER_LENGTH,
+                msk_warp.MAX_NORM_FIBER_LENGTH,
+            ) for m in frame.muscles])
             muscle_ma.append([m.moment_arm for m in frame.muscles])
             muscle_frc.append([(m.actuation, m.max_isometric_force) for m in frame.muscles])
             muscle_frc_mult.append([
@@ -407,24 +508,24 @@ def create_pdf_output(frame_data: list[FrameData], logged_reward_data: list[dict
         # Fiber/tendon lengths
         enforced_range = []
         for m in frame0.muscles:
-            min_range = min(0.75 * m.optimal_fiber_length, 0.75 * m.tendon_slack_length)
-            max_range = max(1.25 * m.optimal_fiber_length, 1.25 * m.tendon_slack_length)
+            min_range = msk_warp.MIN_NORM_FIBER_LENGTH
+            max_range = msk_warp.MAX_NORM_FIBER_LENGTH
             enforced_range.append((min_range, max_range))
         create_generic_plot(
             muscle_names, times, frame_ind, muscle_ftl,
             "Muscle Fiber/Tendon Length", "Length (m)", ".3f",
             pdf,
-            sublabels=["Fiber", "Tendon", "Optimal Fiber", "Tendon Slack"],
-            alphas=[1.0, 1.0, 0.5, 0.5],
-            linestyles=["solid", "solid", "dashed", "dashed"],
+            sublabels=["Norm Fiber", "Min Fiber", "Max Fiber"],
+            alphas=[1.0, 0.5, 0.5],
+            linestyles=["solid", "dashed", "dashed"],
             enforced_y_range=enforced_range)
 
         # Moment arms
         enforced_range = [(-0.1, 0.1)] * len(muscle_names)
         create_generic_plot(muscle_names, times, frame_ind, muscle_ma,
                             "Muscle Moment Arms", "Moment Arm (m)", ".2f",
-                            pdf, sublabels=joint_dof_names, omit_zeros=True, horizontal_lines=zero_lines,
-                            enforced_y_range=enforced_range)
+                            pdf, sublabels=joint_qpos_names, omit_zeros=True, omit_tolerance=1e-3,
+                            horizontal_lines=zero_lines, enforced_y_range=enforced_range)
 
         # Muscle actuation
         enforced_range = [(0.0, 2.0 * m.max_isometric_force) for m in frame0.muscles]

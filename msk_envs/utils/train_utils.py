@@ -291,7 +291,7 @@ class LoggingHelper:
             num_envs: int,
             num_steps_per_env: int,
             num_learning_iterations: int,
-            device: str = "cpu",
+            device: torch.device,
             prefix: str = "",
             title: str = "Training Log",
             is_main_process: bool = True,
@@ -311,7 +311,7 @@ class LoggingHelper:
             Number of steps per environment between each call to `post_epoch_logging`.
         num_learning_iterations : int
             Number of total learning iterations.
-        device : str, optional
+        device : torch.device, optional
             Device to use for tensors, by default "cpu"
         prefix : str, optional
             Prefix to add to all the logging keys.
@@ -324,7 +324,7 @@ class LoggingHelper:
         """
         self.writer: SummaryWriter = writer
         self.log_dir: str = str(log_dir)
-        self.device: str = device
+        self.device: torch.device = device
         self.tot_timesteps: int = 0
         self.tot_time: float = 0.0
         self.collection_time: float = 0.0

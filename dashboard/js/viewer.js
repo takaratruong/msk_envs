@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
-import {setupLightsSky, setupAxes, setupGround, setupLanes, setupNumbers} from "./scene.js";
+import {setupLightsSky, setupAxes, setupLanes, setupNumbers} from "./scene.js";
 import {loadModel, loadCollider, loadTarget} from "./loader.js";
 import {drawMuscleLine, resetMuscles} from "./muscle.js";
 
@@ -21,13 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const height = container.clientHeight;
     let cameraViewMode = ViewMode.FULLSCREEN;
     let aspect = (width / 3) / height;
+    let groundRotation = new THREE.Quaternion(0.0, 0.0, 0.0, 1.0);
 
     function updateCameras(com, footL, footR) {
         // backwards compatibility
         if (footL === undefined) footL = [com[0], com[1] - 1.0, com[2]];
         if (footR === undefined) footR = [com[0], com[1] - 1.0, com[2]];
 
-        com[1] = 1.0; // fix for now
+        // com[1] = 1.0; // fix for now
         if (autoFollow1) {
             cameras[0].position.set(com[0], com[1] + 0.5, com[2] + 2.25);
             controls[0].target.set(com[0], com[1], com[2]);
@@ -83,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Draw objects (visual/collider)
         const drawVisuals = drawVisualsCheckbox.checked;
+        const drawBeams = drawBeamsCheckbox.checked;
         const drawSphereColliders = drawSphereCollidersCheckbox.checked;
         const drawCapsuleColliders = drawCapsuleCollidersCheckbox.checked;
 
@@ -92,11 +94,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 loadModel(obj.mesh_file, obj.opacity, color, object => {
                     object.scale.set(...obj.scale);
                     object.position.set(...obj.pos);
-                    object.quaternion.set(obj.rot[1], obj.rot[2], obj.rot[3], obj.rot[0]);
+                    object.quaternion.set(obj.rot[0], obj.rot[1], obj.rot[2], obj.rot[3]);
                     scene.add(object);
                     currentObjects.push(object);
                 });
             }
+        }
+        if (drawBeams && frame.beam_points) {
+            const color = 0xF1ECE4;
+            const points = [];
+            for (const obj of frame.beam_points) {
+                points.push(new THREE.Vector3(...obj.pos));
+                const sphereGeometry = new THREE.SphereGeometry(0.015, 8, 8);
+                const sphereMaterial = new THREE.MeshStandardMaterial({color: color});
+                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                sphere.position.set(...obj.pos);
+                scene.add(sphere);
+                currentObjects.push(sphere);
+            }
+            const curve = new THREE.CatmullRomCurve3(points);
+            const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false);
+            const material = new THREE.MeshStandardMaterial({color: color});
+            const tube = new THREE.Mesh(geometry, material);
+            scene.add(tube);
+            currentObjects.push(tube);
         }
 
         for (const obj of frame.colliders) {
@@ -155,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const radius = 0.001 * Math.sqrt(length);
             const cylinderLength = 0.2;
             const geometry = new THREE.CylinderGeometry(radius, radius, cylinderLength, 8);
-            const material = new THREE.MeshStandardMaterial({color: 0xff0000});
+            const material = new THREE.MeshStandardMaterial({color: 0x00ff00});
             const cylinder = new THREE.Mesh(geometry, material);
 
             // Position cylinder at the midpoint
@@ -204,6 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cameras[0].updateProjectionMatrix();
 
     const drawVisualsCheckbox = document.getElementById("drawVisuals");
+    const drawBeamsCheckbox = document.getElementById("drawBeams");
     const drawSphereCollidersCheckbox = document.getElementById("drawSphereColliders");
     const drawCapsuleCollidersCheckbox = document.getElementById("drawCapsuleColliders");
     const drawMusclesCheckbox = document.getElementById("drawMuscles");
@@ -333,6 +355,9 @@ document.addEventListener("DOMContentLoaded", () => {
     drawVisualsCheckbox.addEventListener("change", () => {
         loadFrame(currentFrame);
     });
+    drawBeamsCheckbox.addEventListener("change", () => {
+        loadFrame(currentFrame);
+    });
     drawSphereCollidersCheckbox.addEventListener("change", () => {
         loadFrame(currentFrame);
     });
@@ -408,7 +433,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setupLightsSky(scene);
-    setupGround(scene, new THREE.Vector3(-50, 0, 0));
-    setupGround(scene, new THREE.Vector3(50, 0, 0));
     renderer.setAnimationLoop(animate);
 });

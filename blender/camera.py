@@ -26,6 +26,8 @@ def update_camera(camera, camera_pos, frame_idx):
 
     camera_pos[2] = 1
     camera.location = [camera_pos[0] + 1.0, camera_pos[1] - 7.5, camera_pos[2] + 1.0]
+    # front view
+    # camera.location = [camera_pos[0] + 7.5, camera_pos[1], camera_pos[2] + 1.0]
     look_at_target = [camera_pos[0], camera_pos[1], camera_pos[2]]
     point_camera_at_target(camera, look_at_target)
 

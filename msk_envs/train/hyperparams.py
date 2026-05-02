@@ -413,19 +413,12 @@ class HopConfig(BaseArgs):
 class HopHybridConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.HOP,
-        delta_t=1.0 / 60.0,
+        delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        # muscle_multiplier=2.0,
+        muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_hop.yaml",
         swap_lr=False,
     ))
-
-    lambda_vel: float = 0.01
-    lambda_mid_lane: float = 0.01
-    lambda_limit: float = -0.005
-    lambda_actuator: float = -1e-2
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
 
 
 @dataclass

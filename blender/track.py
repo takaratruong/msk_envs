@@ -1,6 +1,7 @@
 import bpy
 import math
 
+
 def setup_track():
     # ==========================================
     # --- IAAF Track Dimensions (in meters) ---
@@ -10,7 +11,7 @@ def setup_track():
     lane_width = 1.22
     num_lanes = 8
     line_width = 0.05
-    line_z = 0.005 # INCREASED: Prevents Cycles raytracing shadow acne
+    line_z = 0.005  # INCREASED: Prevents Cycles raytracing shadow acne
     segments_per_curve = 128
     chute_length = 30.0
 
@@ -40,6 +41,7 @@ def setup_track():
     def get_track_ring_data(r_in, r_out, z_elev):
         verts = []
         faces = []
+
         def get_semi_circle(center_x, radius, is_right_side):
             pts = []
             start_angle = -math.pi / 2 if is_right_side else math.pi / 2
@@ -124,13 +126,13 @@ def setup_track():
     t_verts, t_faces = get_track_ring_data(inner_radius, r_track_out, 0.0)
     c_off = len(t_verts)
     t_verts.extend([
-        (-straight_length/2 - chute_length, -inner_radius, 0.0),
-        (-straight_length/2, -inner_radius, 0.0),
-        (-straight_length/2, -r_track_out, 0.0),
-        (-straight_length/2 - chute_length, -r_track_out, 0.0)
+        (-straight_length / 2 - chute_length, -inner_radius, 0.0),
+        (-straight_length / 2, -inner_radius, 0.0),
+        (-straight_length / 2, -r_track_out, 0.0),
+        (-straight_length / 2 - chute_length, -r_track_out, 0.0)
     ])
     # FIX: Chute Winding Counter-Clockwise
-    t_faces.append((c_off, c_off+3, c_off+2, c_off+1))
+    t_faces.append((c_off, c_off + 3, c_off + 2, c_off + 1))
 
     track_mesh = bpy.data.meshes.new("Track_Base_Mesh")
     track_mesh.from_pydata(shift_verts(t_verts), [], t_faces)
@@ -144,16 +146,16 @@ def setup_track():
     offset = 0
     for i in range(num_lanes + 1):
         center_radius = inner_radius + (i * lane_width)
-        v, f = get_track_ring_data(center_radius - (line_width/2), center_radius + (line_width/2), line_z)
+        v, f = get_track_ring_data(center_radius - (line_width / 2), center_radius + (line_width / 2), line_z)
         cy = -center_radius
         c_v_off = len(v)
         v.extend([
-            (-straight_length/2 - chute_length, cy - line_width/2, line_z),
-            (-straight_length/2, cy - line_width/2, line_z),
-            (-straight_length/2, cy + line_width/2, line_z),
-            (-straight_length/2 - chute_length, cy + line_width/2, line_z)
+            (-straight_length / 2 - chute_length, cy - line_width / 2, line_z),
+            (-straight_length / 2, cy - line_width / 2, line_z),
+            (-straight_length / 2, cy + line_width / 2, line_z),
+            (-straight_length / 2 - chute_length, cy + line_width / 2, line_z)
         ])
-        f.append((c_v_off, c_v_off+1, c_v_off+2, c_v_off+3))
+        f.append((c_v_off, c_v_off + 1, c_v_off + 2, c_v_off + 3))
         for face in f: l_faces.append(tuple(idx + offset for idx in face))
         l_verts.extend(v)
         offset += len(v)
@@ -168,8 +170,8 @@ def setup_track():
     start_x = finish_x - 100
 
     def create_horizontal_line(name, x_pos):
-        verts = [(x_pos - line_width, -inner_radius, line_z * 2),(x_pos + line_width, -inner_radius, line_z * 2),
-                 (x_pos + line_width, -r_track_out, line_z * 2),(x_pos - line_width, -r_track_out, line_z * 2)]
+        verts = [(x_pos - line_width, -inner_radius, line_z * 2), (x_pos + line_width, -inner_radius, line_z * 2),
+                 (x_pos + line_width, -r_track_out, line_z * 2), (x_pos - line_width, -r_track_out, line_z * 2)]
         mesh = bpy.data.meshes.new(f"{name}_Mesh")
         # FIX: Winding Counter-Clockwise
         mesh.from_pydata(shift_verts(verts), [], [(0, 3, 2, 1)])
@@ -180,15 +182,64 @@ def setup_track():
     create_horizontal_line("Finish_Line", finish_x)
     create_horizontal_line("100m_Start_Line", start_x)
 
+    # 4.5 Generate 5m Notches on BOTH sides of ALL lane lines
+    def create_lane_notch(x_pos, y_center, length=0.35, width=0.025, mode="both"):
+        verts = []
+        faces = []
+        idx = 0
+
+        # TOP side
+        if mode in ("both", "top"):
+            verts.extend([
+                (x_pos - width / 2, y_center + width / 2, line_z * 2),
+                (x_pos + width / 2, y_center + width / 2, line_z * 2),
+                (x_pos + width / 2, y_center + width / 2 + length, line_z * 2),
+                (x_pos - width / 2, y_center + width / 2 + length, line_z * 2),
+            ])
+            faces.append((idx, idx + 3, idx + 2, idx + 1))
+            idx += 4
+
+        # BOTTOM side
+        if mode in ("both", "bottom"):
+            verts.extend([
+                (x_pos - width / 2, y_center - width / 2, line_z * 2),
+                (x_pos + width / 2, y_center - width / 2, line_z * 2),
+                (x_pos + width / 2, y_center - width / 2 - length, line_z * 2),
+                (x_pos - width / 2, y_center - width / 2 - length, line_z * 2),
+            ])
+            faces.append((idx, idx + 1, idx + 2, idx + 3))
+
+        mesh = bpy.data.meshes.new("Notch_Mesh")
+        mesh.from_pydata(shift_verts(verts), [], faces)
+
+        obj = bpy.data.objects.new("5m_Notch", mesh)
+        track_col.objects.link(obj)
+        obj.data.materials.append(mat_white)
+
+    # Create notches every 5m for all lane boundaries
+    for i in range(5, 100, 5):
+        x = start_x + i
+
+        for lane_idx in range(num_lanes + 1):
+            y = -(inner_radius + lane_idx * lane_width)
+            if lane_idx == 0:
+                create_lane_notch(x, y, mode="bottom")  # only into track
+            elif lane_idx == num_lanes:
+                create_lane_notch(x, y, mode="top")  # only into track
+            else:
+                create_lane_notch(x, y, mode="both")
+
     # 5. Generate Infield Turf
     turf_verts = []
     # FIX: Sweeping Counter-Clockwise
     for i in range(segments_per_curve):
         angle = -math.pi / 2 + math.pi * (i / segments_per_curve)
-        turf_verts.append((straight_length / 2 + inner_radius * math.cos(angle), inner_radius * math.sin(angle), grass_z))
+        turf_verts.append(
+            (straight_length / 2 + inner_radius * math.cos(angle), inner_radius * math.sin(angle), grass_z))
     for i in range(segments_per_curve):
         angle = math.pi / 2 + math.pi * (i / segments_per_curve)
-        turf_verts.append((-straight_length / 2 + inner_radius * math.cos(angle), inner_radius * math.sin(angle), grass_z))
+        turf_verts.append(
+            (-straight_length / 2 + inner_radius * math.cos(angle), inner_radius * math.sin(angle), grass_z))
     turf_mesh = bpy.data.meshes.new("Turf_Mesh")
     turf_mesh.from_pydata(shift_verts(turf_verts), [], [list(range(len(turf_verts)))])
     turf_obj = bpy.data.objects.new("4_Infield_Turf", turf_mesh)
@@ -216,11 +267,11 @@ def setup_track():
     def get_stadium_path(radius):
         pts = []
         for i in range(segments_per_curve + 1):
-            angle = -math.pi/2 + (math.pi * i / segments_per_curve)
-            pts.append((straight_length/2 + radius * math.cos(angle), radius * math.sin(angle)))
+            angle = -math.pi / 2 + (math.pi * i / segments_per_curve)
+            pts.append((straight_length / 2 + radius * math.cos(angle), radius * math.sin(angle)))
         for i in range(segments_per_curve + 1):
-            angle = math.pi/2 + (math.pi * i / segments_per_curve)
-            pts.append((-straight_length/2 + radius * math.cos(angle), radius * math.sin(angle)))
+            angle = math.pi / 2 + (math.pi * i / segments_per_curve)
+            pts.append((-straight_length / 2 + radius * math.cos(angle), radius * math.sin(angle)))
         return pts
 
     # Outer Grass Buffer
@@ -232,8 +283,8 @@ def setup_track():
     n = len(in_path)
     for i in range(n - 1):
         # FIX: Winding Counter-Clockwise
-        g_faces.append((i, i+n, i+1+n, i+1))
-    g_faces.append((n-1, 2*n-1, n, 0))
+        g_faces.append((i, i + n, i + 1 + n, i + 1))
+    g_faces.append((n - 1, 2 * n - 1, n, 0))
 
     grass_mesh = bpy.data.meshes.new("Outer_Grass_Mesh")
     grass_mesh.from_pydata(shift_verts(g_verts), [], g_faces)

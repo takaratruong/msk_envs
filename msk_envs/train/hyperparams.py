@@ -124,6 +124,23 @@ class JogConfig(BaseArgs):
 
 
 @dataclass
+class WalkConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+        env_variant=DerivedEnv.WALK,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=5.0,
+        muscle_multiplier=1.0,
+        starting_pose_path="../msk_models/starting_pose_run.yaml",
+        noise_start=True,
+    ))
+
+    lambda_vel: float = 0.1
+    lambda_fatigue: float = -3e-4
+    lambda_limit: float = -3e-4
+    lambda_actuator: float = -1e-2
+
+
+@dataclass
 class LaneConfig(BaseArgs):
     """ Reusable hyperparams for lane environments """
     lambda_vel: float = 1e-2
@@ -131,11 +148,11 @@ class LaneConfig(BaseArgs):
 
     lambda_spring: float = 0.0
     lambda_damper: float = 0.0
-    lambda_limit: float = -1e-3
-    lambda_muscle_passive: float = -1e-4
+    lambda_limit: float = -3e-4
+    lambda_muscle_passive: float = 0.0
 
-    lambda_actuator: float = -1e-3
-    lambda_fatigue: float = -1e-4
+    lambda_actuator: float = 0.0
+    lambda_fatigue: float = 0.0
     lambda_muscle_activation: float = 0.0
     lambda_metabolic: float = 0.0
     lambda_self_collision: float = 0.0
@@ -717,7 +734,7 @@ class ReachPoseConfig(BaseArgs):
 
 
 Config = Union[
-    # Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
+    Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
     Annotated[JogConfig, tyro.conf.subcommand(name="jog")],
     Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
     Annotated[SprintConfigTall, tyro.conf.subcommand(name="sprinttall")],

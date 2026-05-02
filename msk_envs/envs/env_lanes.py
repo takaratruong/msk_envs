@@ -169,12 +169,19 @@ class LanesEnv(MSKEnv):
         return terminated.detach()
 
     def scene_settings(self) -> SceneSettings:
-        return SceneSettings(
-            lanes=True,
-            lane_width=0.6,
-            meter_markers=True,
-            axes=False
-        )
+        if self.ground_rotation[3] == 1:  # Flat ground
+            return SceneSettings(
+                lanes=True,
+                lane_width=0.6,
+                meter_markers=True,
+                axes=False
+            )
+        else:
+            return SceneSettings(
+                lanes=False,
+                meter_markers=False,
+                axes=False
+            )
 
     def update_metrics(self) -> None:
         # Update max distance reached

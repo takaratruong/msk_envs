@@ -135,7 +135,7 @@ class LanesEnv(MSKEnv):
             # "rew_metabolic": rew_metabolic.detach(),
         }
 
-    def _get_facing_direction(self, body_id):
+    def _is_body_facing_direction(self, body_id):
         body_rot = self.body_rotations[:, body_id]
         body_fwd = rotate_vec(body_rot, self.fwd_axis)
         body_fwd = body_fwd[:, [FWD_IDX, SIDE_IDX]]  # Only care about x/z components
@@ -159,8 +159,8 @@ class LanesEnv(MSKEnv):
             body_pos = self.body_positions[:, body_idx]
             toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
 
-        # Pelvis or head no longer facing forward (within N degrees)
-        pelvis_facing_direction = self._get_facing_direction(self.root_id)
+        # Pelvis or head no longer facing target direction (within N degrees)
+        pelvis_facing_direction = self._is_body_facing_direction(self.root_id)
         # head_facing_direction = self._get_facing_direction(self.head_id)
         # not_facing_direction = ~(pelvis_facing_direction & head_facing_direction)
         not_facing_direction = ~pelvis_facing_direction

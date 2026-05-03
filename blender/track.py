@@ -425,11 +425,13 @@ def setup_track():
         p_links = mat_poster.node_tree.links
         p_bsdf = p_nodes.get("Principled BSDF")
 
+        p_bsdf.inputs['Roughness'].default_value = 1.0
+
         # --- Create and Link Image Texture Node (Where users add their image!) ---
         tex_image = p_nodes.new(type="ShaderNodeTexImage")
 
         # USER_ACTION: This is the slot where you can load your custom image texture!
-        # Set tex_image.image = bpy.data.images.load("YOUR/IMAGE/PATH.jpg") from script, or link in UI.
+        tex_image.image = bpy.data.images.load("siggraph.png")
 
         # Link image texture to base color
         p_links.new(tex_image.outputs['Color'], p_bsdf.inputs['Base Color'])
@@ -448,8 +450,7 @@ def setup_track():
         def shift_single_vert(v, straight_len, lane_w):
             lane_4_yc_orig = -(36.5 + (3.5 * lane_w))
             shift_y = -lane_4_yc_orig + 2.5
-            base_x_position = (straight_len / 2) - half_w
-            shift_x = (straight_len / 2) - half_w + 65
+            shift_x = (straight_len / 2) - half_w + 62.5
 
             return (v[0] + shift_x, v[1] + shift_y, v[2])
 
@@ -513,20 +514,10 @@ def setup_track():
         return obj_ad
 
     mat_ad_frame, mat_poster_surface = create_poster_material()
-
-    poster_nodes = mat_poster_surface.node_tree.nodes
-    # Find the Image Texture node we created in the function
-    image_node = [n for n in poster_nodes if n.type == 'TEX_IMAGE'][0]
-    # Load your specific image
-    # Note: The "//" tells Blender to look in the exact same folder where your .blend file is saved
-    image_node.image = bpy.data.images.load("//siggraph.png")
-
     # 2. Generate the geometry and put it in the " markers_col " for better logical grouping,
     # or a new col entirely. For now, track_col for logical geometry grouping.
     ad_obj = create_poster_ad_geometry(track_col, mat_ad_frame, mat_poster_surface,
                                        finish_x, straight_length, inner_radius, lane_width)
-
-    print("Stadium generated fully optimized for Cycles Raytracing!")
 
 
 setup_track()

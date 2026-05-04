@@ -319,21 +319,14 @@ class SprintHybridNoArmsConfig(LaneConfig):
 
 
 @dataclass
-class RaceWalkConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+class RaceWalkConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.RACE_WALK,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        # muscle_multiplier=2.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
     ))
-
-    lambda_vel: float = 0.01
-    lambda_mid_lane: float = 0.01
-    lambda_limit: float = -5e-3
-    lambda_actuator: float = -1e-2
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
 
 
 @dataclass

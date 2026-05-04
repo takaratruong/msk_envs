@@ -7,23 +7,25 @@ from .env_reach_target import ReachTargetEnv
 
 class ShuttleRunEnv(ReachTargetEnv):
     """ Env where the agent must run between two targets repeatedly """
+
     def __init__(
             self,
             num_envs: int,
             env_config: EnvConfig,
             device: torch.device,
+            requires_visuals: bool,
             live_render: bool,
-            cuda_graph: bool
+            cuda_graph: bool,
     ):
         super().__init__(
             num_envs=num_envs,
             env_config=env_config,
             device=device,
+            requires_visuals=requires_visuals,
             live_render=live_render,
-            cuda_graph=cuda_graph,
-            ignore_vertical=False,
+            cuda_graph=cuda_graph
         )
-        self.target_1 = torch.tensor(build_axis(FWD_IDX, 5.0), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1)
+        self.target_1 = (torch.tensor(build_axis(FWD_IDX, 5.0), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1))
         self.target_2 = torch.tensor(build_axis(FWD_IDX, -5.0), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1)
         self.target_1[:, UP_IDX] = self.target_tolerance / 2.0
         self.target_2[:, UP_IDX] = self.target_tolerance / 2.0
@@ -43,5 +45,3 @@ class ShuttleRunEnv(ReachTargetEnv):
         self.curr_target_pos[reset_mask] = self.next_target_pos[reset_mask]
         self.next_target_pos[reset_mask] = curr_targets_reset
         return
-
-

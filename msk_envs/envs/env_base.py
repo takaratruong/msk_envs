@@ -18,6 +18,54 @@ from msk_envs.envs.perturber import Perturber
 class MSKEnv:
     """ Superclass for MSK environments """
 
+    def _modify_colliders(self, env_config: EnvConfig) -> None:
+        colliders = self.load_result.colliders
+
+        # Rotated contact plane
+        self.ground_rotation = torch.tensor(env_config.ground_rotation, dtype=torch.float, device=self.device)
+        self.ground_rotation = quat_normalize(self.ground_rotation)
+        for collider in colliders:
+            if collider == msk_warp.GROUND_COLLIDER:
+                collider.transform = wp.transform(wp.vec3(), wp.quat(self.ground_rotation))
+
+        # Try adding a collider
+        # starting_block1 = msk_warp.UserGeomData(
+        #     name="starting_block1",
+        #     body_name=msk_warp.GROUND,
+        #     geom_type=msk_warp.GeomType.CAPSULE,
+        #     transform=wp.transform(wp.vec3(-0.3, 0.0, 0.1), wp.quat_identity(dtype=float)),
+        #     size=wp.vec3(0.1, 0.05, 0.1),
+        # )
+        # starting_block2 = msk_warp.UserGeomData(
+        #     name="starting_block2",
+        #     body_name=msk_warp.GROUND,
+        #     geom_type=msk_warp.GeomType.CAPSULE,
+        #     transform=wp.transform(wp.vec3(-0.73, 0.0, -0.1), wp.quat_identity(dtype=float)),
+        #     size=wp.vec3(0.1, 0.05, 0.1),
+        # )
+        # colliders.append(msk_warp.convert_user_collider(starting_block1))
+        # colliders.append(msk_warp.convert_user_collider(starting_block2))
+
+        # Set collider contact properties
+        if env_config.use_specified_contact_params:
+            contact_params_path = os.path.join(self.curr_path, env_config.contact_params_path)
+            contact_params = parse_contact_params(contact_params_path)
+            for params in contact_params:
+                if params.geom_name not in self.load_result.collider_id_lookup:
+                    print(f"Warning: geometry '{params.geom_name}' not found in geom_id_lookup, skipping.")
+                    continue
+                geom_id = self.load_result.collider_id_lookup[params.geom_name]
+                colliders[geom_id].stiffness = params.stiffness
+                colliders[geom_id].dissipation = params.dissipation
+                colliders[geom_id].priority = params.priority
+                colliders[geom_id].friction[0] = params.static_friction
+                colliders[geom_id].friction[1] = params.dynamic_friction
+                colliders[geom_id].friction[2] = params.viscous_friction
+                colliders[geom_id].transition_velocity = params.transition_velocity
+
+        msk_warp.update_colliders(self.load_result)
+        return
+
     def _setup_model(self, env_config: EnvConfig) -> None:
         """ Modify model parameters here. """
 
@@ -79,34 +127,14 @@ class MSKEnv:
                 # We set pennation angle to 0, so this requires updating:
                 #  the optimal fiber length
                 #  the max isometric force
-                # cos_pennation = math.cos(mm.optimal_pennation_angle)
-                # mm.max_isometric_force = mm.max_isometric_force * cos_pennation
-                # mm.optimal_fiber_length = mm.optimal_fiber_length * cos_pennation
-                #
-                # mm.optimal_pennation_angle = 0.0  # fixed pennation angle
+                cos_pennation = math.cos(mm.optimal_pennation_angle)
+                mm.max_isometric_force = mm.max_isometric_force * cos_pennation
+                mm.optimal_fiber_length = mm.optimal_fiber_length * cos_pennation
+                mm.optimal_pennation_angle = 0.0  # fixed pennation angle
+
                 # mm.fiber_damping = 0.0  # no fiber damping
-                mm.min_norm_fiber_length = 0.0  # no such thing as a min/max fiber length
-                mm.max_norm_fiber_length = 10.0
-
-        # Collider properties
-        if env_config.use_specified_contact_params:
-            geom_stiffness = msk_warp.collider_stiffness(self.m)
-            geom_dissipation = msk_warp.collider_dissipation(self.m)
-            geom_priority = msk_warp.collider_priority(self.m)
-            geom_friction = msk_warp.collider_friction(self.m)
-            geom_transition_velocity = msk_warp.collider_transition_velocity(self.m)
-
-            contact_params_path = os.path.join(self.curr_path, env_config.contact_params_path)
-            contact_params = parse_contact_params(contact_params_path, self.collider_id_lookup)
-            for params in contact_params:
-                geom_id = params.geom_id
-                geom_stiffness[geom_id] = params.stiffness
-                geom_dissipation[geom_id] = params.dissipation
-                geom_priority[geom_id] = params.priority
-                geom_friction[geom_id][0] = params.static_friction
-                geom_friction[geom_id][1] = params.dynamic_friction
-                geom_friction[geom_id][2] = params.viscous_friction
-                geom_transition_velocity[geom_id] = params.transition_velocity
+                # mm.min_norm_fiber_length = 0.0  # no such thing as a min/max fiber length
+                # mm.max_norm_fiber_length = 10.0
 
         # Armature
         dof_start = 6 if self.root_free else 0
@@ -120,19 +148,6 @@ class MSKEnv:
         msk_warp.set_integrator_use_inf_norm(self.m, env_config.integrator_use_inf_norm)
         # Toggle drag forces
         msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
-
-        # Spring stuff bla bla remove me todo
-        qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
-        if "shoulder_abduction_r" in self.qpos_id_lookup:
-            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_r"]] = 0.261799
-        if "shoulder_abduction_l" in self.qpos_id_lookup:
-            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_l"]] = 0.261799
-
-        # Rotating contact plane
-        geom_transforms = msk_warp.geom_transforms(self.m)
-        self.ground_rotation = torch.tensor(env_config.ground_rotation, dtype=torch.float, device=self.device)
-        self.ground_rotation = quat_normalize(self.ground_rotation)
-        geom_transforms[0, 3:7] = self.ground_rotation
 
         msk_warp.set_gravity(self.m, env_config.gravity)
 
@@ -204,6 +219,9 @@ class MSKEnv:
         self.load_result = load_result
         self.m, self.d = load_result.model, load_result.data
         self.root_free = load_result.root_free
+        self._modify_colliders(env_config)
+        self._setup_model(env_config)
+
         # Store all convenient lookups
         self.body_id_lookup = load_result.body_id_lookup
         self.dof_id_lookup = load_result.dof_id_lookup
@@ -213,7 +231,13 @@ class MSKEnv:
         self.actuator_id_lookup = load_result.actuator_id_lookup
         self.collider_id_lookup = load_result.collider_id_lookup
         self.visuals = load_result.mesh_load_results
-        self._setup_model(env_config)
+
+        # Spring stuff bla bla remove me todo
+        qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
+        if "shoulder_abduction_r" in self.qpos_id_lookup:
+            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_r"]] = 0.261799
+        if "shoulder_abduction_l" in self.qpos_id_lookup:
+            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_l"]] = 0.261799
 
         # Model properties
         self.num_qpos = msk_warp.get_num_qpos(self.m)
@@ -464,13 +488,18 @@ class MSKEnv:
             self.actuator_activations[reset_mask, :] = 0.5
 
         # Run forward kinematics to ensure contact with ground
-        if self.enforce_ground_contact and self.root_free and self.collider_positions.size(1) > 1:
+        if self.enforce_ground_contact and self.root_free:
             self.fk()
-            collider_heights = self.collider_positions[:, 1:, UP_IDX]
-            lowest_collider_height = collider_heights.min(dim=1).values
-            adjustment = -lowest_collider_height
-            root_height_q_id = self.qpos_id_lookup["pelvis_ty"] if self.root_free else None
-            self.joint_positions[reset_mask, root_height_q_id] += adjustment[reset_mask]
+            collider_body_id = msk_warp.geom_bodyid(self.m)
+            non_ground_collider_ids = torch.where(collider_body_id != self.ground_id)[0]
+
+            # Need at least one non-root collider
+            if non_ground_collider_ids.size(0) > 1:
+                collider_heights = self.collider_positions[:, non_ground_collider_ids, UP_IDX]
+                lowest_collider_height = collider_heights.min(dim=1).values
+                adjustment = -lowest_collider_height
+                root_height_q_id = self.qpos_id_lookup["pelvis_ty"] if self.root_free else None
+                self.joint_positions[reset_mask, root_height_q_id] += adjustment[reset_mask]
 
         # Reset sim
         msk_warp.set_reset(self.d, self.reset_tensor)

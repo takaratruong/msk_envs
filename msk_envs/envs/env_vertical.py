@@ -30,6 +30,7 @@ class VerticalEnv(MSKEnv):
 
         self.jump_height = 1.6
         self.max_velocity = 5.0
+        self.max_height_reached = 0.0
         return
 
     def _compute_raw_reward_dict(self):
@@ -81,3 +82,13 @@ class VerticalEnv(MSKEnv):
         fallen = has_fallen(root_pos=self.root_pos, ground_rotation=self.ground_rotation, min_root=0.3)
         terminated = fallen.float()
         return terminated.detach()
+
+    def update_metrics(self) -> None:
+        max_hand_height = self.body_positions[:, self.hand_id, UP_IDX].max()
+        self.max_height_reached = max(max_hand_height, self.max_height_reached)
+        return
+
+    def additional_metrics(self) -> dict:
+        return {
+            "max_height_reached": self.max_height_reached,
+        }

@@ -60,20 +60,13 @@ right_foot_6:
   transition_velocity: 0.001
 right_foot_7:
   stiffness: 1602213.464769315
-  dissipation: 0.0725
+  dissipation: 1.0
   priority: 1
-  static_friction: 0.95
-  dynamic_friction: 0.3
-  viscous_friction: 0.3
-  transition_velocity: 0.001
-right_foot_8:
-  stiffness: 1602213.464769315
-  dissipation: 0.0725
-  priority: 1
-  static_friction: 0.95
-  dynamic_friction: 0.3
-  viscous_friction: 0.3
-  transition_velocity: 0.001
+  static_friction: 0.1
+  dynamic_friction: 0.0
+  viscous_friction: 0.0
+  transition_velocity: 0.1
+
 left_foot_1:
   stiffness: 1602213.464769315
   dissipation: 0.0725
@@ -124,20 +117,12 @@ left_foot_6:
   transition_velocity: 0.001
 left_foot_7:
   stiffness: 1602213.464769315
-  dissipation: 0.0725
+  dissipation: 1.0
   priority: 1
-  static_friction: 0.95
-  dynamic_friction: 0.3
-  viscous_friction: 0.3
-  transition_velocity: 0.001
-left_foot_8:
-  stiffness: 1602213.464769315
-  dissipation: 0.0725
-  priority: 1
-  static_friction: 0.95
-  dynamic_friction: 0.3
-  viscous_friction: 0.3
-  transition_velocity: 0.001
+  static_friction: 0.1
+  dynamic_friction: 0.0
+  viscous_friction: 0.0
+  transition_velocity: 0.1
 
 # DHondt contact model settings
 heel_r:

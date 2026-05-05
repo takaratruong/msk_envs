@@ -1,8 +1,8 @@
 pelvis_tx:
   q: 0.0
-  v: 0.0
+  v: 2.0
 pelvis_ty:
-  q: 0.775
+  q: 0.91
   v: 0.0
 pelvis_tz:
   q: 0.0
@@ -12,55 +12,76 @@ pelvis_quat_w:
   q: 1.0
   v: 0.0 # ignored (omega is defined by rot_x, rot_y, rot_z)
 pelvis_tilt:
-  q: 0.0
+  q: 0.1
   v: 0.0
 pelvis_list:
   q: 0.0
   v: 0.0
 pelvis_rotation:
-  q: -0.5
-  v: 0.0
-
-torso_extension:
-  q: -0.5
+  q: 0.0
   v: 0.0
 
 hip_flexion_r:
-  q: 1.8
+  q: 0.0
+  v: 0.0
+hip_adduction_r:
+  q: -0.815
+  v: 0.0
+hip_rotation_r:
+  q: -1.85
   v: 0.0
 knee_angle_r:
-  q: -1.5
+  q: -0.52
   v: 0.0
 ankle_angle_r:
-  q: 0.6
+  q: 0.2
   v: 0.0
 
 hip_flexion_l:
-  q: 0.4
+  q: 0.45
+  v: 0.0
+hip_adduction_l:
+  q: -0.261
+  v: 0.0
+hip_rotation_l:
+  q: -0.261
   v: 0.0
 knee_angle_l:
-  q: -0.5
+  q: -0.9
   v: 0.0
 ankle_angle_l:
-  q: 0.4
+  q: 0.2
+  v: 0.0
+
+torso_bending:
+  q: 0.28
+  v: 0.0
+torso_rotation:
+  q: 0.5
   v: 0.0
 
 shoulder_flexion_r:
-  q: -0.5
+  q: 0.0
   v: 0.0
 shoulder_abduction_r:
-  q: 0.2
+  q: 1.35
+  v: 0.0
+shoulder_rotation_r:
+  q: 0.7
   v: 0.0
 elbow_flex_r:
-  q: 0.5
+  q: 2.61
   v: 0.0
 
 shoulder_flexion_l:
-  q: 0.5
+  q: 0.89
   v: 0.0
 shoulder_abduction_l:
-  q: 0.2
+  q: 1.15
+  v: 0.0
+shoulder_rotation_l:
+  q: 1.43
   v: 0.0
 elbow_flex_l:
-  q: 1.5
+  q: 0.0
   v: 0.0

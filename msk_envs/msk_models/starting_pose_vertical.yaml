@@ -22,7 +22,7 @@ pelvis_rotation:
   v: 0.0
 
 torso_extension:
-  q: -0.2
+  q: -0.3
   v: 0.0
 
 hip_flexion_r:

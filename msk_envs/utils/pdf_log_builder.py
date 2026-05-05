@@ -205,7 +205,7 @@ def create_pdf_output(
 
         # Find the intervals in which there is contact
         contact_intervals = []
-        contact_threshold = 0.1  # 10% body weight
+        contact_threshold = 0.01  # 1% body weight
         in_contact = False
         contact_start = 0.0
         dt = times[1] - times[0]

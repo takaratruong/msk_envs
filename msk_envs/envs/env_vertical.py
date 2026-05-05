@@ -28,7 +28,7 @@ class VerticalEnv(MSKEnv):
         self.hand_id = self.body_id_lookup["hand_r"]
         self.up_axis = torch.tensor(build_axis(UP_IDX, 1.0), device=self.device).unsqueeze(0)
 
-        self.jump_height = 1.6
+        self.jump_height = 2.5
         self.max_velocity = 5.0
         self.max_height_reached = 0.0
         return

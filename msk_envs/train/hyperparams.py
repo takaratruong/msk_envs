@@ -419,7 +419,7 @@ class VerticalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 30.0,
-        max_episode_duration=2.0,
+        max_episode_duration=1.0,
         starting_pose_path="../msk_models/starting_pose_vertical.yaml",
         default_activation=0.01,
     ))

@@ -16026,7 +16026,7 @@
                     <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
                     <socket_frame>/bodyset/calcn_r</socket_frame>
                     <!--Location of geometry center in the PhysicalFrame.-->
-                    <location>0.070000000000000007 -0.028199999999999999 0.044900000000000002</location>
+                    <location>0.070000000000000007 -0.01 0.044900000000000002</location>
                     <!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
                     <orientation>0 0 0</orientation>
                     <!--Radius of the sphere (default: 0).-->
@@ -16036,7 +16036,7 @@
                     <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
                     <socket_frame>/bodyset/calcn_r</socket_frame>
                     <!--Location of geometry center in the PhysicalFrame.-->
-                    <location>0.11899999999999999 -0.028199999999999999 -6.0926480487458203e-08</location>
+                    <location>0.11899999999999999 -0.01 -6.0926480487458203e-08</location>
                     <!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
                     <orientation>0 0 0</orientation>
                     <!--Radius of the sphere (default: 0).-->
@@ -16046,7 +16046,7 @@
                     <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
                     <socket_frame>/bodyset/calcn_r</socket_frame>
                     <!--Location of geometry center in the PhysicalFrame.-->
-                    <location>0 -0.028199999999999999 0</location>
+                    <location>0 0.0 0</location>
                     <!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
                     <orientation>0 0 0</orientation>
                     <!--Radius of the sphere (default: 0).-->
@@ -16096,7 +16096,7 @@
                     <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
                     <socket_frame>/bodyset/calcn_l</socket_frame>
                     <!--Location of geometry center in the PhysicalFrame.-->
-                    <location>0.070000000000000007 -0.028199999999999999 -0.044900000000000002</location>
+                    <location>0.070000000000000007 -0.01 -0.044900000000000002</location>
                     <!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
                     <orientation>0 0 0</orientation>
                     <!--Radius of the sphere (default: 0).-->
@@ -16106,7 +16106,7 @@
                     <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
                     <socket_frame>/bodyset/calcn_l</socket_frame>
                     <!--Location of geometry center in the PhysicalFrame.-->
-                    <location>0.11899999999999999 -0.028199999999999999 6.0926480487458203e-08</location>
+                    <location>0.11899999999999999 -0.01 6.0926480487458203e-08</location>
                     <!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
                     <orientation>0 0 0</orientation>
                     <!--Radius of the sphere (default: 0).-->
@@ -16116,7 +16116,7 @@
                     <!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
                     <socket_frame>/bodyset/calcn_l</socket_frame>
                     <!--Location of geometry center in the PhysicalFrame.-->
-                    <location>0 -0.028199999999999999 0</location>
+                    <location>0 0.0 0</location>
                     <!--Orientation of geometry in the PhysicalFrame (body-fixed XYZ Euler angles).-->
                     <orientation>0 0 0</orientation>
                     <!--Radius of the sphere (default: 0).-->

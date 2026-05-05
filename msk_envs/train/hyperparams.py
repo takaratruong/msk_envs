@@ -421,6 +421,7 @@ class VerticalConfig(BaseArgs):
         delta_t=1.0 / 30.0,
         max_episode_duration=2.0,
         starting_pose_path="../msk_models/starting_pose_vertical.yaml",
+        default_activation=0.01,
     ))
 
     """Vertical jump environment specific reward scales"""

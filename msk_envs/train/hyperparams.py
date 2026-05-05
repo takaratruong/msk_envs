@@ -144,7 +144,7 @@ class WalkConfig(BaseArgs):
 class LaneConfig(BaseArgs):
     """ Reusable hyperparams for lane environments """
     lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 0.0
+    lambda_mid_lane: float = 1e-2
 
     lambda_spring: float = 0.0
     lambda_damper: float = 0.0
@@ -416,17 +416,17 @@ class HopHybridConfig(LaneConfig):
 
 @dataclass
 class VerticalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 30.0,
         max_episode_duration=2.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
+        starting_pose_path="../msk_models/starting_pose_vertical.yaml",
     ))
 
     """Vertical jump environment specific reward scales"""
-    lambda_max_vertical: float = 1.0
-    lambda_limit: float = -0.2
-    lambda_actuator: float = -5.0
+    lambda_jump: float = 1e-1
+    lambda_limit: float = -3e-4
+    lambda_alive: float = 1e-2
 
 
 @dataclass

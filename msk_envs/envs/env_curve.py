@@ -83,6 +83,7 @@ class CurvedTrackEnv(MSKEnv):
 
         rew_mid_lane = torch.exp(-2.5 * lane_deviation.pow(2))
         rew_limit = joint_penalty(self.ufrc_limit, squared=False)
+        self._get_curve_progress()
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
@@ -122,8 +123,7 @@ class CurvedTrackEnv(MSKEnv):
         # so initial vector is (0, -R) -> angle = -pi/2
         start_angle = -torch.pi / 2
         angle_progress = angle - start_angle
-        angle_progress = torch.remainder(angle_progress, 2 * torch.pi)  # wrap
-
+        angle_progress = (angle_progress + torch.pi) % (2 * torch.pi) - torch.pi
         # Convert to distance along arc: s = R * theta
         arc_length = self.target_radius * angle_progress
         return arc_length

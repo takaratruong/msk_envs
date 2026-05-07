@@ -18,6 +18,10 @@ from msk_envs.envs.perturber import Perturber
 class MSKEnv:
     """ Superclass for MSK environments """
 
+    def _add_colliders(self, env_config: EnvConfig) -> None:
+        """ Hook for envs to add colliders """
+        return
+
     def _modify_colliders(self, env_config: EnvConfig) -> None:
         colliders = self.load_result.colliders
 
@@ -28,23 +32,6 @@ class MSKEnv:
             if collider == msk_warp.GROUND_COLLIDER:
                 collider.transform = wp.transform(wp.vec3(), wp.quat(self.ground_rotation))
 
-        # Try adding a collider
-        # starting_block1 = msk_warp.UserGeomData(
-        #     name="starting_block1",
-        #     body_name=msk_warp.GROUND,
-        #     geom_type=msk_warp.GeomType.CAPSULE,
-        #     transform=wp.transform(wp.vec3(-0.3, 0.0, 0.1), wp.quat_identity(dtype=float)),
-        #     size=wp.vec3(0.1, 0.05, 0.1),
-        # )
-        # starting_block2 = msk_warp.UserGeomData(
-        #     name="starting_block2",
-        #     body_name=msk_warp.GROUND,
-        #     geom_type=msk_warp.GeomType.CAPSULE,
-        #     transform=wp.transform(wp.vec3(-0.73, 0.0, -0.1), wp.quat_identity(dtype=float)),
-        #     size=wp.vec3(0.1, 0.05, 0.1),
-        # )
-        # colliders.append(msk_warp.convert_user_collider(starting_block1))
-        # colliders.append(msk_warp.convert_user_collider(starting_block2))
 
         # Set collider contact properties
         if env_config.use_specified_contact_params:
@@ -219,6 +206,7 @@ class MSKEnv:
         self.load_result = load_result
         self.m, self.d = load_result.model, load_result.data
         self.root_free = load_result.root_free
+        self._add_colliders(env_config)
         self._modify_colliders(env_config)
         self._setup_model(env_config)
 

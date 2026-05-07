@@ -22,3 +22,6 @@ class DerivedEnv(Enum):
     UPPER_CURL = 18
     DONT_FALL_ONE_LEG = 19
     REACH_POSE = 20
+    VERTICAL_SPARSE = 21
+    SPRINT_CURVE = 22
+    HURDLES = 23

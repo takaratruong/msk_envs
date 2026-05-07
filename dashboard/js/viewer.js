@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
-import {setupLightsSky, setupAxes, setupLanes, setupNumbers} from "./scene.js";
+import {setupLightsSky, setupAxes, setupLanes, setupCurve, setupNumbers} from "./scene.js";
 import {loadModel, loadCollider, loadTarget} from "./loader.js";
 import {drawMuscleLine, resetMuscles} from "./muscle.js";
 
@@ -377,12 +377,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const settings = frames[0].scene_settings;
             if (settings.meter_markers) setupNumbers(scene, staticObjects);
             if (settings.lanes) setupLanes(scene, staticObjects);
+            if (settings.curve) setupCurve(scene, staticObjects);
             if (settings.axes) setupAxes(scene, staticObjects);
         } else {
             setupNumbers(scene, staticObjects);
             setupLanes(scene, staticObjects);
             setupAxes(scene, staticObjects);
+            setupCurve(scene, staticObjects);
         }
+        setupCurve(scene, staticObjects);
     }
 
     function animate() {

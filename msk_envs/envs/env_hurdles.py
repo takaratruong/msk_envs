@@ -23,7 +23,7 @@ class HurdlesEnv(LanesEnv):
         hurdle_positions = [13.72 + i * 9.14 for i in range(10)]
         hurdle_heights = [0.2 + i * (1.067 - 0.2) / 9 for i in range(10)]
         hurdle_width = 0.7
-        hurdle_thickness = 0.02
+        hurdle_thickness = 0.035
         for i, (hurdle_position, hurdle_height) in enumerate(zip(hurdle_positions, hurdle_heights)):
             hurdle_top = msk_warp.UserGeomData(
                 name=f"hurdle_top_{hurdle_position}",

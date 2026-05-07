@@ -30,7 +30,8 @@ class HurdlesEnv(LanesEnv):
                 body_name=msk_warp.GROUND,
                 geom_type=msk_warp.GeomType.CAPSULE,
                 transform=wp.transform(wp.vec3(hurdle_position, hurdle_height, 0.0), wp.quat_identity(dtype=float)),
-                size=wp.vec3(hurdle_thickness, hurdle_width, hurdle_thickness),
+                size=wp.vec3(hurdle_thickness * 2.0, hurdle_width, hurdle_thickness * 2.0),
+                priority=9,
             )
             hurdle_side1 = msk_warp.UserGeomData(
                 name=f"hurdle_side1_{hurdle_position}",
@@ -41,6 +42,7 @@ class HurdlesEnv(LanesEnv):
                     wp.quat(0.707, 0.0, 0.0, 0.707)
                 ),
                 size=wp.vec3(hurdle_thickness, hurdle_height / 2.0, hurdle_thickness),
+                priority=9,
             )
             hurdle_side2 = msk_warp.UserGeomData(
                 name=f"hurdle_side2_{hurdle_position}",
@@ -51,6 +53,7 @@ class HurdlesEnv(LanesEnv):
                     wp.quat(0.707, 0.0, 0.0, 0.707)
                 ),
                 size=wp.vec3(hurdle_thickness, hurdle_height / 2.0, hurdle_thickness),
+                priority=9,
             )
             colliders.append(msk_warp.convert_user_collider(hurdle_top))
             colliders.append(msk_warp.convert_user_collider(hurdle_side1))

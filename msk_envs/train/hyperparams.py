@@ -415,13 +415,53 @@ class HopHybridConfig(LaneConfig):
 
 
 @dataclass
+class SprintCurveConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.SPRINT_CURVE,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
+class HurdlesConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.HURDLES,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
 class VerticalConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 30.0,
+        max_episode_duration=2.0,
+        starting_pose_path="../msk_models/starting_pose_vertical.yaml",
+        default_activation=0.01,
+    ))
+
+    """Vertical jump environment specific reward scales"""
+    lambda_jump: float = 1e-1
+    lambda_limit: float = -3e-4
+    lambda_alive: float = 1e-2
+
+
+@dataclass
+class VerticalSparseConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.VERTICAL_SPARSE,
+        delta_t=1.0 / 30.0,
         max_episode_duration=1.0,
         starting_pose_path="../msk_models/starting_pose_vertical.yaml",
         default_activation=0.01,
+        noise_start=False,
+        enforce_ground_contact=False,
     ))
 
     """Vertical jump environment specific reward scales"""
@@ -750,6 +790,7 @@ Config = Union[
     Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
     Annotated[HopHybridConfig, tyro.conf.subcommand(name="hophybrid")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
+    Annotated[VerticalSparseConfig, tyro.conf.subcommand(name="verticalsparse")],
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
     Annotated[DontFallConfig, tyro.conf.subcommand(name="dontfall")],
@@ -764,6 +805,8 @@ Config = Union[
     Annotated[UpperCurl, tyro.conf.subcommand(name="uppercurl")],
     Annotated[NoSpineReachTarget, tyro.conf.subcommand(name="nospinereach")],
     Annotated[ReachPoseConfig, tyro.conf.subcommand(name="reachpose")],
+    Annotated[SprintCurveConfig, tyro.conf.subcommand(name="sprintcurve")],
+    Annotated[HurdlesConfig, tyro.conf.subcommand(name="hurdles")],
 ]
 
 

@@ -28,6 +28,7 @@ class CurvedTrackEnv(MSKEnv):
             live_render=live_render,
             cuda_graph=cuda_graph
         )
+        self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
 
         # Olympic Track Specs
         self.lane_width = 1.22
@@ -57,9 +58,16 @@ class CurvedTrackEnv(MSKEnv):
         ], dim=1)
         return obs.detach().clone()
 
-    def _get_curved_metrics(self):
-        """Calculates relative position and target direction for a curve"""
-        # Vector from track center to agent
+    def _get_lane_deviation(self, body_pos) -> torch.Tensor:
+        """ Calculates the deviation from center of lane for a body """
+        rel_pos = body_pos - self.curve_center
+        pos_2d = rel_pos[:, [FWD_IDX, SIDE_IDX]]
+        dist_from_center = torch.norm(pos_2d, dim=1, keepdim=True)
+        lane_deviation = (dist_from_center.squeeze(1) - self.target_radius)
+        return lane_deviation
+
+    def _get_target_dir(self):
+        """ Returns the tangent of the track at the agent's root pos"""
         rel_pos = self.root_pos - self.curve_center
         pos_2d = rel_pos[:, [FWD_IDX, SIDE_IDX]]  # ignore height
         dist_from_center = torch.norm(pos_2d, dim=1, keepdim=True)
@@ -67,16 +75,14 @@ class CurvedTrackEnv(MSKEnv):
 
         # Tangent of track:
         target_dir = torch.stack([-radial_vec[:, 1], radial_vec[:, 0]], dim=1)
-
-        lane_deviation = (dist_from_center.squeeze(1) - self.target_radius)
-
-        return target_dir, lane_deviation
+        return target_dir
 
     def _compute_raw_reward_dict(self):
-        target_dir, lane_deviation = self._get_curved_metrics()
+        target_dir = self._get_target_dir()
+        lane_deviation = self._get_lane_deviation(self.root_pos)
 
         # Velocity Reward: project actual 2D velocity onto the tangent target
-        #  oops, +3 since needs to be linear, need to make that easier
+        #  oops, +3 since needs to be linear, todo need to make that easier not to mess up
         root_vel_2d = self.body_velocities[:, self.root_id, [FWD_IDX + 3, SIDE_IDX + 3]]
         vel_along_curve = torch.sum(root_vel_2d * target_dir, dim=1)
         rew_vel = vel_along_curve
@@ -92,7 +98,7 @@ class CurvedTrackEnv(MSKEnv):
         }
 
     def _is_body_facing_direction(self, body_id):
-        target_dir, _ = self._get_curved_metrics()
+        target_dir = self._get_target_dir()
         body_rot = self.body_rotations[:, body_id]
         body_fwd = rotate_vec(body_rot, self.fwd_axis)
         body_fwd_2d = body_fwd[:, [FWD_IDX, SIDE_IDX]]
@@ -102,14 +108,16 @@ class CurvedTrackEnv(MSKEnv):
 
     def _get_terminated(self):
         fallen = has_fallen(root_pos=self.root_pos, ground_rotation=self.ground_rotation)
-        # Termination if toes leave the lane width
-        _, lane_deviation = self._get_curved_metrics()
 
-        # Lane width is 1.22m, so 0.61m from center is the limit
-        out_of_lane = (torch.abs(lane_deviation) > (self.lane_width / 2))
+        # Termination if toes leave the lane width
+        toes_out = torch.zeros_like(fallen, dtype=torch.bool)
+        for body_idx in self.toes_ids:
+            body_pos = self.body_positions[:, body_idx]
+            lane_deviation = self._get_lane_deviation(body_pos)
+            toes_out |= (torch.abs(lane_deviation) > (self.lane_width / 2))
 
         not_facing = ~self._is_body_facing_direction(self.root_id)
-        return (fallen | out_of_lane | not_facing).float().detach()
+        return (fallen | toes_out | not_facing).float().detach()
 
     def _get_curve_progress(self):
         rel_pos = self.root_pos - self.curve_center

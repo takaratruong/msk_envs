@@ -25,17 +25,21 @@ class VerticalEnv(MSKEnv):
             live_render=live_render,
             cuda_graph=cuda_graph
         )
-        self.hand_id = self.body_id_lookup["hand_r"]
+        self.hand_r_id = self.body_id_lookup["hand_r"]
+        self.hand_l_id = self.body_id_lookup["hand_l"]
+
         self.up_axis = torch.tensor(build_axis(UP_IDX, 1.0), device=self.device).unsqueeze(0)
 
-        self.jump_height = 2.5
+        self.jump_height = 3.05 # NBA rim height
         self.max_velocity = 5.0
         self.max_height_reached = 0.0
         return
 
     def _compute_raw_reward_dict(self):
         # Based on humenv
-        hand_height = self.body_positions[:, self.hand_id, UP_IDX]
+        hand_r_height = self.body_positions[:, self.hand_r_id, UP_IDX]
+        hand_l_height = self.body_positions[:, self.hand_l_id, UP_IDX]
+        hand_height = (hand_r_height + hand_l_height) / 2.0
         chest_upright = rotate_vec(self.body_rotations[:, self.head_id], self.up_axis)[:, UP_IDX]
         center_of_mass_velocity = velocity_reward(self.body_velocities, self.root_id, UP_IDX, linear=True)
 
@@ -84,7 +88,10 @@ class VerticalEnv(MSKEnv):
         return terminated.detach()
 
     def update_metrics(self) -> None:
-        max_hand_height = self.body_positions[:, self.hand_id, UP_IDX].max()
+        hand_r_height = self.body_positions[:, self.hand_r_id, UP_IDX]
+        hand_l_height = self.body_positions[:, self.hand_l_id, UP_IDX]
+        hand_height = (hand_r_height + hand_l_height) / 2.0
+        max_hand_height = hand_height.max()
         self.max_height_reached = max(max_hand_height, self.max_height_reached)
         return
 

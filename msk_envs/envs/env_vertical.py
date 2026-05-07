@@ -30,7 +30,7 @@ class VerticalEnv(MSKEnv):
 
         self.up_axis = torch.tensor(build_axis(UP_IDX, 1.0), device=self.device).unsqueeze(0)
 
-        self.jump_height = 3.05 # NBA rim height
+        self.jump_height = 3.05  # NBA rim height
         self.max_velocity = 5.0
         self.max_height_reached = 0.0
         return
@@ -39,8 +39,8 @@ class VerticalEnv(MSKEnv):
         # Based on humenv
         hand_r_height = self.body_positions[:, self.hand_r_id, UP_IDX]
         hand_l_height = self.body_positions[:, self.hand_l_id, UP_IDX]
-        hand_height = (hand_r_height + hand_l_height) / 2.0
-        chest_upright = rotate_vec(self.body_rotations[:, self.head_id], self.up_axis)[:, UP_IDX]
+        # hand_height = (hand_r_height + hand_l_height) / 2.0
+        hand_height = hand_r_height
         center_of_mass_velocity = velocity_reward(self.body_velocities, self.root_id, UP_IDX, linear=True)
 
         jumping = tolerance(
@@ -49,12 +49,6 @@ class VerticalEnv(MSKEnv):
             margin=self.jump_height,
             value_at_margin=0.01,
         )
-        upright = tolerance(
-            chest_upright,
-            bounds=(0.9, torch.inf),
-            margin=1.9,
-            value_at_margin=0.0,
-        )
         up_velocity = tolerance(
             center_of_mass_velocity,
             bounds=(self.max_velocity, torch.inf),
@@ -62,7 +56,10 @@ class VerticalEnv(MSKEnv):
             value_at_margin=0.0,
         )
 
-        rew_jump = jumping * upright * up_velocity
+        rew_jump = jumping * up_velocity
+        times_up = self.time > 1.0  # Only reward for first second (one jump)
+        rew_jump[times_up] = 0.0
+
         rew_limit = joint_penalty(self.ufrc_limit, squared=False)
         rew_alive = torch.ones_like(rew_limit)
 
@@ -74,6 +71,7 @@ class VerticalEnv(MSKEnv):
 
     def _get_obs(self) -> torch.Tensor:
         obs = torch.cat([
+            self.time.view(self.num_worlds, 1),
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
@@ -90,7 +88,8 @@ class VerticalEnv(MSKEnv):
     def update_metrics(self) -> None:
         hand_r_height = self.body_positions[:, self.hand_r_id, UP_IDX]
         hand_l_height = self.body_positions[:, self.hand_l_id, UP_IDX]
-        hand_height = (hand_r_height + hand_l_height) / 2.0
+        # hand_height = (hand_r_height + hand_l_height) / 2.0
+        hand_height = hand_r_height
         max_hand_height = hand_height.max()
         self.max_height_reached = max(max_hand_height, self.max_height_reached)
         return

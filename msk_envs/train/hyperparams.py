@@ -457,7 +457,7 @@ class VerticalSparseConfig(BaseArgs):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.VERTICAL_SPARSE,
         delta_t=1.0 / 30.0,
-        max_episode_duration=1.0,
+        max_episode_duration=1.5,
         starting_pose_path="../msk_models/starting_pose_vertical.yaml",
         default_activation=0.01,
         noise_start=False,

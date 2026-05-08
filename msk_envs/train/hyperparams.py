@@ -297,6 +297,17 @@ class SideShuffleHybridConfig(LaneConfig):
 
 
 @dataclass
+class CariocaConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.CARIOCA,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_sideshuffle_hybrid.yaml",
+    ))
+
+
+@dataclass
 class SprintHybridMotorArmsConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybridMotorArms(
         env_variant=DerivedEnv.SPRINT,
@@ -807,6 +818,7 @@ Config = Union[
     Annotated[ReachPoseConfig, tyro.conf.subcommand(name="reachpose")],
     Annotated[SprintCurveConfig, tyro.conf.subcommand(name="sprintcurve")],
     Annotated[HurdlesConfig, tyro.conf.subcommand(name="hurdles")],
+    Annotated[CariocaConfig, tyro.conf.subcommand(name="carioca")],
 ]
 
 

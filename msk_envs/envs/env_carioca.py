@@ -57,7 +57,7 @@ class CariocaEnv(LanesEnv):
         # How close to side-by-side counts as a reset (m)
         self.reset_threshold = 0.05
         # Steps allowed per phase before termination
-        self.max_phase_steps = 30
+        self.max_phase_steps = 15
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         self.phase[reset_mask] = 0

@@ -86,6 +86,15 @@ class CariocaEnv(LanesEnv):
         self.cross_timer = torch.where(completed, torch.zeros_like(self.cross_timer), self.cross_timer + 1)
         return
 
+    def _get_obs(self) -> torch.Tensor:
+        lanes_obs = super()._get_obs()
+        obs = torch.cat([
+            lanes_obs,
+            self.cross_state.view(self.num_worlds, -1),
+            self.cross_timer.view(self.num_worlds, -1),
+        ], dim=1)
+        return obs.detach().clone()
+
     def _get_terminated(self):
         # Base lane terminations
         terminated_lanes = super()._get_terminated().bool()

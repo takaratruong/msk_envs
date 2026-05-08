@@ -42,8 +42,7 @@ class CariocaEnv(LanesEnv):
         )
 
         # Current desired crossing mode
-        # +1 -> right foot should cross in front
-        # -1 -> right foot should cross behind
+        # (+1, -1) -> right foot should cross in (front, behind)
         self.cross_state = torch.ones(self.num_worlds, dtype=torch.long, device=self.device)
 
         # Counts how long we've stayed in same phase
@@ -59,25 +58,31 @@ class CariocaEnv(LanesEnv):
         self.cross_state = torch.where(reset_mask, random_phases, self.cross_state)
         self.cross_timer = torch.where(reset_mask, 0, self.cross_timer)
 
-    def _update_carioca_state(self):
-        """ Detect successful crossing transitions and alternate desired crossing direction. """
+    def _get_cross_delta(self):
+        """
+        Positive delta: right foot is in FRONT of left foot relative to facing direction (z)
+        Negative delta: right foot is BEHIND left foot
+        """
         left_toe_pos = self.body_positions[:, self.toes_ids[0], :]
         right_toe_pos = self.body_positions[:, self.toes_ids[1], :]
+        left_cross = left_toe_pos[:, SIDE_IDX]
+        right_cross = right_toe_pos[:, SIDE_IDX]
+        return right_cross - left_cross
 
-        left_x = left_toe_pos[:, FWD_IDX]
-        right_x = right_toe_pos[:, FWD_IDX]
+    def _update_carioca_state(self):
+        """ Detect successful crossing transitions and alternate desired crossing direction. """
+        delta = self._get_cross_delta()
 
-        delta_x = right_x - left_x
-        front_crossed = delta_x > self.cross_threshold
-        behind_crossed = delta_x < -self.cross_threshold
+        front_crossed = delta > self.cross_threshold
+        behind_crossed = delta < -self.cross_threshold
 
         completed_front = ((self.cross_state == self.CROSS_FRONT) & front_crossed)
         completed_behind = ((self.cross_state == self.CROSS_BEHIND) & behind_crossed)
         completed = completed_front | completed_behind
 
-        # Flip crossing direction once completed
+        # Flip desired crossing direction
         self.cross_state = torch.where(completed, -self.cross_state, self.cross_state)
-        # Reset timer when phase succeeds
+        # Reset timer on successful transition
         self.cross_timer = torch.where(completed, torch.zeros_like(self.cross_timer), self.cross_timer + 1)
         return
 
@@ -85,25 +90,17 @@ class CariocaEnv(LanesEnv):
         # Base lane terminations
         terminated_lanes = super()._get_terminated().bool()
 
-        left_toe_pos = self.body_positions[:, self.toes_ids[0], :]
-        right_toe_pos = self.body_positions[:, self.toes_ids[1], :]
-
-        left_x = left_toe_pos[:, FWD_IDX]
-        right_x = right_toe_pos[:, FWD_IDX]
-        delta_x = right_x - left_x
-
-        # Current crossing conditions
-        front_crossed = delta_x > self.cross_threshold
-        behind_crossed = delta_x < -self.cross_threshold
+        delta = self._get_cross_delta()
+        front_crossed = delta > self.cross_threshold
+        behind_crossed = delta < -self.cross_threshold
 
         expected_front = (self.cross_state == self.CROSS_FRONT)
         expected_behind = (self.cross_state == self.CROSS_BEHIND)
 
-        # Wrong crossing direction or failed to switch after some time
+        # Wrong crossing direction
         wrong_cross = ((expected_front & behind_crossed) | (expected_behind & front_crossed))
-        stuck_phase = (self.cross_timer > self.max_phase_steps)
+        # Failed to alternate for too long
+        stuck_phase = (self.cross_timer >= self.max_phase_steps)
 
         terminated = (terminated_lanes | wrong_cross | stuck_phase).bool()
-
-        self._update_carioca_state()
         return terminated.detach()

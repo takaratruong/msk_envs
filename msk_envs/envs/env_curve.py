@@ -50,6 +50,7 @@ class CurvedTrackEnv(MSKEnv):
 
     def _get_obs(self) -> torch.Tensor:
         obs = torch.cat([
+            self._get_angle_progress().view(self.num_worlds, 1),
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
@@ -119,11 +120,9 @@ class CurvedTrackEnv(MSKEnv):
         not_facing = ~self._is_body_facing_direction(self.root_id)
         return (fallen | toes_out | not_facing).float().detach()
 
-    def _get_curve_progress(self):
+    def _get_angle_progress(self):
         rel_pos = self.root_pos - self.curve_center
         pos_2d = rel_pos[:, [FWD_IDX, SIDE_IDX]]
-
-        # Angle in XZ plane
         angle = torch.atan2(pos_2d[:, 1], pos_2d[:, 0])  # z, x
 
         # Reference angle at start position:
@@ -132,8 +131,10 @@ class CurvedTrackEnv(MSKEnv):
         start_angle = -torch.pi / 2
         angle_progress = angle - start_angle
         angle_progress = (angle_progress + torch.pi) % (2 * torch.pi) - torch.pi
-        # Convert to distance along arc: s = R * theta
-        arc_length = self.target_radius * angle_progress
+        return angle_progress
+
+    def _get_curve_progress(self):
+        arc_length = self.target_radius * self._get_angle_progress()
         return arc_length
 
     def update_metrics(self) -> None:

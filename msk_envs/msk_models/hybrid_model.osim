@@ -10994,9 +10994,9 @@
                     <!--Maximum isometric force that the fibers can generate-->
                     <max_isometric_force>1324.4000000000001</max_isometric_force>
                     <!--Optimal length of the muscle fibers-->
-                    <optimal_fiber_length>0.112114150074</optimal_fiber_length>
+                    <optimal_fiber_length>0.123325565081</optimal_fiber_length>
                     <!--Resting length of the tendon-->
-                    <tendon_slack_length>0.1204396808850</tendon_slack_length>
+                    <tendon_slack_length>0.109270928694</tendon_slack_length>
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.087266460000000004</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->
@@ -13137,9 +13137,9 @@
                     <!--Maximum isometric force that the fibers can generate-->
                     <max_isometric_force>1324.4000000000001</max_isometric_force>
                     <!--Optimal length of the muscle fibers-->
-                    <optimal_fiber_length>0.112114150074</optimal_fiber_length>
+                    <optimal_fiber_length>0.123325565081</optimal_fiber_length>
                     <!--Resting length of the tendon-->
-                    <tendon_slack_length>0.1204396808850</tendon_slack_length>
+                    <tendon_slack_length>0.109270928694</tendon_slack_length>
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.087266460000000004</pennation_angle_at_optimal>
                     <!--Compute muscle dynamics ignoring tendon compliance. Tendon is assumed to be rigid.-->

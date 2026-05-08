@@ -23,7 +23,8 @@ class ShuttleRunEnv(ReachTargetEnv):
             device=device,
             requires_visuals=requires_visuals,
             live_render=live_render,
-            cuda_graph=cuda_graph
+            cuda_graph=cuda_graph,
+            ignore_vertical=False
         )
         self.target_1 = (torch.tensor(build_axis(FWD_IDX, 5.0), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1))
         self.target_2 = torch.tensor(build_axis(FWD_IDX, -5.0), device=self.device).unsqueeze(0).repeat(self.num_worlds, 1)

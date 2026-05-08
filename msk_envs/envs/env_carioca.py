@@ -8,18 +8,21 @@ from .env_lanes import LanesEnv
 class CariocaEnv(LanesEnv):
     """
     Carioca / grapevine drill environment.
-
-    The agent must:
-    - Face sideways
-    - Move laterally down the lane
-    - Alternate crossing the trailing leg
-      in FRONT and BEHIND the lead leg
-    - Avoid staying in the same crossing state too long
+    The agent must move laterally and alternate crossing one foot
+    in front of and behind the other, with a deliberate reset
+    (feet side-by-side) between each crossing.
+    Phase cycle (0 -> 1 -> 2 -> 3 -> 0 -> ...):
+      0  CROSS_FRONT   – trailing foot crosses in front
+      1  RESET_1       – feet return to side-by-side
+      2  CROSS_BEHIND  – trailing foot crosses behind
+      3  RESET_2       – feet return to side-by-side again
     """
 
-    # Crossing states
-    CROSS_FRONT = 1
-    CROSS_BEHIND = -1
+    CROSS_FRONT = 0
+    RESET_1 = 1
+    CROSS_BEHIND = 2
+    RESET_2 = 3
+    NUM_PHASES = 4
 
     def __init__(
             self,
@@ -28,7 +31,7 @@ class CariocaEnv(LanesEnv):
             device: torch.device,
             requires_visuals: bool,
             live_render: bool,
-            cuda_graph: bool
+            cuda_graph: bool,
     ):
         super().__init__(
             num_envs=num_envs,
@@ -41,74 +44,90 @@ class CariocaEnv(LanesEnv):
             angle_tolerance=30.0,
         )
 
-        # Current desired crossing mode
-        # (+1, -1) -> right foot should cross in (front, behind)
-        self.cross_state = torch.ones(self.num_worlds, dtype=torch.long, device=self.device)
+        # Current phase index per world (0-3)
+        self.cross_phase = torch.zeros(self.num_worlds, dtype=torch.long, device=self.device)
 
-        # Counts how long we've stayed in same phase
+        # Steps spent in the current phase without completing it
         self.cross_timer = torch.zeros(self.num_worlds, dtype=torch.long, device=self.device)
 
-        # Rules
-        self.max_phase_steps = 30
+        # How far the trailing foot must cross past the lead foot (m)
         self.cross_threshold = 0.05
-        return
+        # How close to side-by-side counts as a reset (m)
+        self.reset_threshold = 0.03
+        # Steps allowed per phase before termination
+        self.max_phase_steps = 30
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
-        self.cross_state[reset_mask] = 1
+        self.cross_phase[reset_mask] = 0
         self.cross_timer[reset_mask] = 0
 
-    def _get_cross_delta(self):
+    def _get_cross_delta(self) -> torch.Tensor:
         """
-        Positive delta: right foot is in FRONT of left foot relative to facing direction (z)
-        Negative delta: right foot is BEHIND left foot
+        Signed offset along the direction of travel: right_toe − left_toe.
+          > 0  → right foot is ahead of left (crossed in front)
+          < 0  → right foot is behind left (crossed behind)
         """
         left_toe_pos = self.body_positions[:, self.toes_ids[0], :]
         right_toe_pos = self.body_positions[:, self.toes_ids[1], :]
-        left_toe_side = left_toe_pos[:, SIDE_IDX]
-        right_toe_side = right_toe_pos[:, SIDE_IDX]
-        return right_toe_side - left_toe_side
+        return right_toe_pos[:, FWD_IDX] - left_toe_pos[:, FWD_IDX]
 
-    def _update_carioca_state(self):
-        """ Detect successful crossing transitions and alternate desired crossing direction. """
+    def _update_carioca_state(self) -> None:
+        """
+        Advance the phase when the completion condition for the current
+        phase is satisfied. The timer resets on every successful transition
+        and increments otherwise, driving termination if a phase stalls.
+        """
         delta = self._get_cross_delta()
 
-        front_crossed = delta > self.cross_threshold
-        behind_crossed = delta < -self.cross_threshold
+        # Per-phase completion conditions
+        phase_done = torch.stack([
+            delta > self.cross_threshold,  # 0: CROSS_FRONT  – left past right
+            delta.abs() < self.reset_threshold,  # 1: RESET_1      – side by side
+            delta < -self.cross_threshold,  # 2: CROSS_BEHIND – right past left
+            delta.abs() < self.reset_threshold,  # 3: RESET_2      – side by side
+        ], dim=1)  # (num_worlds, 4)
 
-        completed_front = ((self.cross_state == self.CROSS_FRONT) & front_crossed)
-        completed_behind = ((self.cross_state == self.CROSS_BEHIND) & behind_crossed)
-        completed = completed_front | completed_behind
+        # Look up whether the current phase's condition is met
+        completed = phase_done.gather(
+            dim=1,
+            index=self.cross_phase.unsqueeze(1)
+        ).squeeze(1)  # (num_worlds,)
 
-        # Flip desired crossing direction
-        self.cross_state = torch.where(completed, -self.cross_state, self.cross_state)
-        # Reset timer on successful transition
-        self.cross_timer = torch.where(completed, torch.zeros_like(self.cross_timer), self.cross_timer + 1)
-        return
+        # Cycle to the next phase on completion
+        self.cross_phase = torch.where(
+            completed,
+            (self.cross_phase + 1) % self.NUM_PHASES,
+            self.cross_phase,
+        )
+        self.cross_timer = torch.where(
+            completed,
+            torch.zeros_like(self.cross_timer),
+            self.cross_timer + 1,
+        )
 
     def _get_obs(self) -> torch.Tensor:
         lanes_obs = super()._get_obs()
+
+        # One-hot encode the current phase: shape (num_worlds, NUM_PHASES)
+        phase_one_hot = torch.zeros(
+            self.num_worlds, self.NUM_PHASES,
+            dtype=torch.float32, device=self.device
+        )
+        phase_one_hot.scatter_(1, self.cross_phase.unsqueeze(1), 1.0)
+
         obs = torch.cat([
             lanes_obs,
-            self.cross_state.view(self.num_worlds, -1),
-            self.cross_timer.view(self.num_worlds, -1),
+            phase_one_hot,
+            self.cross_timer.float().view(self.num_worlds, 1),
         ], dim=1)
         return obs.detach().clone()
 
-    def _get_terminated(self):
-        # Base lane terminations
+    def _get_terminated(self) -> torch.Tensor:
         terminated_lanes = super()._get_terminated().bool()
 
-        delta = self._get_cross_delta()
-        front_crossed = delta > self.cross_threshold
-        behind_crossed = delta < -self.cross_threshold
-
-        expected_front = (self.cross_state == self.CROSS_FRONT)
-        expected_behind = (self.cross_state == self.CROSS_BEHIND)
-
-        # Wrong crossing direction
-        wrong_cross = ((expected_front & behind_crossed) | (expected_behind & front_crossed))
-        # Failed to alternate for too long
+        # Stalling in any single phase triggers termination
         stuck_phase = (self.cross_timer >= self.max_phase_steps)
 
-        terminated = (terminated_lanes | wrong_cross | stuck_phase).bool()
-        return terminated.detach()
+        self._update_carioca_state()
+
+        return (terminated_lanes | stuck_phase).bool().detach()

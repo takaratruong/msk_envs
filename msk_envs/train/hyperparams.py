@@ -303,7 +303,9 @@ class CariocaConfig(LaneConfig):
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
-        starting_pose_path="../msk_models/starting_pose_sideshuffle_hybrid.yaml",
+        starting_pose_path="../msk_models/starting_pose_carioca_hybrid.yaml",
+        noise_start=False,
+        swap_lr=False,
     ))
 
 
@@ -455,6 +457,7 @@ class VerticalConfig(BaseArgs):
         max_episode_duration=2.0,
         starting_pose_path="../msk_models/starting_pose_vertical.yaml",
         default_activation=0.01,
+        noise_start=False,
     ))
 
     """Vertical jump environment specific reward scales"""

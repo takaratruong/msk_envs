@@ -54,9 +54,8 @@ class CariocaEnv(LanesEnv):
         return
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
-        random_phases = torch.randint(0, 2, self.cross_state.shape, device=self.device) * 2 - 1
-        self.cross_state = torch.where(reset_mask, random_phases, self.cross_state)
-        self.cross_timer = torch.where(reset_mask, 0, self.cross_timer)
+        self.cross_state[reset_mask] = 1
+        self.cross_timer[reset_mask] = 0
 
     def _get_cross_delta(self):
         """
@@ -65,9 +64,9 @@ class CariocaEnv(LanesEnv):
         """
         left_toe_pos = self.body_positions[:, self.toes_ids[0], :]
         right_toe_pos = self.body_positions[:, self.toes_ids[1], :]
-        left_cross = left_toe_pos[:, SIDE_IDX]
-        right_cross = right_toe_pos[:, SIDE_IDX]
-        return right_cross - left_cross
+        left_toe_side = left_toe_pos[:, SIDE_IDX]
+        right_toe_side = right_toe_pos[:, SIDE_IDX]
+        return right_toe_side - left_toe_side
 
     def _update_carioca_state(self):
         """ Detect successful crossing transitions and alternate desired crossing direction. """

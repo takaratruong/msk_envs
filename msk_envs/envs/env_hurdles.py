@@ -1,3 +1,12 @@
+"""
+According to worldathletics:
+    The distance between each hurdle in the men’s 110m hurdles is 9.14m (30 feet).
+    The exceptions are the first and last hurdles:
+        there is a distance of 13.72m (45 feet) to the first hurdle
+        and 14.02m (46 feet) from the final hurdle to the finish.
+    The height of each hurdle in the men’s 110m hurdles is 106.7cm
+"""
+
 import torch
 import msk_warp
 import warp as wp
@@ -6,25 +15,20 @@ from msk_envs.utils.global_params import FWD_IDX, build_axis
 from .env_config import EnvConfig
 from .env_lanes import LanesEnv
 
+HURDLE_START_HEIGHT = 1.0
+HURDLE_END_HEIGHT = 1.0
+HURDLE_POSITIONS = [13.72 + i * 9.14 for i in range(10)]
+HURDLE_HEIGHTS = [HURDLE_START_HEIGHT + i * (HURDLE_END_HEIGHT - HURDLE_START_HEIGHT) / 9 for i in range(10)]
+
 
 class HurdlesEnv(LanesEnv):
-    """
-    According to worldathletics:
-        The distance between each hurdle in the men’s 110m hurdles is 9.14m (30 feet).
-        The exceptions are the first and last hurdles:
-            there is a distance of 13.72m (45 feet) to the first hurdle
-            and 14.02m (46 feet) from the final hurdle to the finish.
-        The height of each hurdle in the men’s 110m hurdles is 106.7cm
-    """
 
     def _add_colliders(self, env_config: EnvConfig) -> None:
         colliders = self.load_result.colliders
 
-        hurdle_positions = [13.72 + i * 9.14 for i in range(10)]
-        hurdle_heights = [0.2 + i * (1.067 - 0.2) / 9 for i in range(10)]
         hurdle_width = 0.7
         hurdle_thickness = 0.035
-        for i, (hurdle_position, hurdle_height) in enumerate(zip(hurdle_positions, hurdle_heights)):
+        for i, (hurdle_position, hurdle_height) in enumerate(zip(HURDLE_POSITIONS, HURDLE_HEIGHTS)):
             hurdle_top = msk_warp.UserGeomData(
                 name=f"hurdle_top_{hurdle_position}",
                 body_name=msk_warp.GROUND,
@@ -78,17 +82,8 @@ class HurdlesEnv(LanesEnv):
             cuda_graph=cuda_graph,
             target_dir=build_axis(FWD_IDX, 1.0),
         )
-        # todo: don't repeat this
-        self.hurdle_positions = torch.tensor(
-            [13.72 + i * 9.14 for i in range(10)],
-            device=self.device,
-            dtype=torch.float32
-        )
-        self.hurdle_heights = torch.tensor(
-            [0.2 + i * (1.067 - 0.2) / 9 for i in range(10)],
-            device=self.device,
-            dtype=torch.float32
-        )
+        self.hurdle_positions = torch.tensor(HURDLE_POSITIONS, device=self.device, dtype=torch.float32)
+        self.hurdle_heights = torch.tensor(HURDLE_HEIGHTS, device=self.device, dtype=torch.float32)
         return
 
     def _get_obs(self) -> torch.Tensor:
@@ -106,11 +101,17 @@ class HurdlesEnv(LanesEnv):
         nearest_hurdle_dist = torch.where(passed_all, torch.zeros_like(nearest_hurdle_dist), nearest_hurdle_dist)
         nearest_hurdle_height = torch.where(passed_all, torch.zeros_like(nearest_hurdle_height), nearest_hurdle_height)
 
+        root_x_qpos_id = self.qpos_id_lookup["pelvis_tx"]
+        joint_positions_without_x = torch.cat((
+            self.joint_positions[:, :root_x_qpos_id],
+            self.joint_positions[:, root_x_qpos_id + 1:]),
+            dim=1)
+
         obs = torch.cat([
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
-            self.joint_positions,
+            joint_positions_without_x,
             self.joint_velocities,
             nearest_hurdle_dist,
             nearest_hurdle_height

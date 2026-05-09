@@ -54,10 +54,10 @@ class CariocaEnv(LanesEnv):
 
         # How far the trailing foot must cross past the lead foot (m)
         self.cross_threshold = 0.1
-        # How close to side-by-side counts as a reset (m)
-        self.reset_threshold = 0.05
+        # How much behind the trailing foot must be to be considered in neutral
+        self.forward_threshold = 0.1
         # Steps allowed per phase before termination
-        self.max_phase_steps = 15
+        self.max_phase_steps = 30
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         self.phase[reset_mask] = 0
@@ -99,15 +99,18 @@ class CariocaEnv(LanesEnv):
         travel_delta, sagittal_delta = self._get_cross_deltas()
 
         # Right foot overtook the left foot
-        crossed_lateral = travel_delta > self.cross_threshold
+        crossed_travel = travel_delta > self.forward_threshold
+
+        # Right foot is behind the left foot (neutral)
+        neutral = (travel_delta < -self.forward_threshold)
 
         # Sagittal position relationship
         right_foot_laterally_ahead = sagittal_delta > self.cross_threshold
         right_foot_laterally_behind = sagittal_delta < -self.cross_threshold
-        neutral = (travel_delta.abs() < self.reset_threshold) & (sagittal_delta.abs() < self.reset_threshold)
 
-        right_foot_crossed_front = crossed_lateral & right_foot_laterally_ahead
-        right_foot_crossed_behind = crossed_lateral & right_foot_laterally_behind
+        # Whether the right foot crossed in front AND is laterally ahead/behind
+        right_foot_crossed_front = crossed_travel & right_foot_laterally_ahead
+        right_foot_crossed_behind = crossed_travel & right_foot_laterally_behind
 
         # Completion condition per phase
         phase_done = torch.stack([

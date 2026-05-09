@@ -44,6 +44,7 @@ class CariocaEnv(LanesEnv):
             cuda_graph=cuda_graph,
             target_dir=build_axis(SIDE_IDX, 1.0),
             angle_tolerance=30.0,
+            lane_width=1.0,  # Bit wider for room
         )
 
         # Current phase index per world (0-3)
@@ -115,9 +116,9 @@ class CariocaEnv(LanesEnv):
         # Completion condition per phase
         phase_done = torch.stack([
             right_foot_crossed_front,  # NEUTRAL -> RIGHT FOOT CROSSED AHEAD
-            neutral,                   # RIGHT FOOT CROSSED AHEAD -> NEUTRAL
-            right_foot_crossed_behind, # NEUTRAL -> RIGHT FOOT CROSSED BEHIND
-            neutral,                   # RIGHT FOOT CROSSED BEHIND -> NEUTRAL
+            neutral,  # RIGHT FOOT CROSSED AHEAD -> NEUTRAL
+            right_foot_crossed_behind,  # NEUTRAL -> RIGHT FOOT CROSSED BEHIND
+            neutral,  # RIGHT FOOT CROSSED BEHIND -> NEUTRAL
         ], dim=1)  # (num_worlds, 4)
 
         completed = phase_done.gather(1, self.phase.unsqueeze(1)).squeeze(1)
@@ -126,11 +127,11 @@ class CariocaEnv(LanesEnv):
         expected_cross_front = (self.phase == self.NEUTRAL_1)
         expected_cross_behind = (self.phase == self.NEUTRAL_2)
         wrong_cross = (expected_cross_front & right_foot_crossed_behind) | (
-                    expected_cross_behind & right_foot_crossed_front)
+                expected_cross_behind & right_foot_crossed_front)
 
         # Transition to next phase, start the timer again
         self.phase = torch.where(completed, (self.phase + 1) % self.NUM_PHASES, self.phase, )
-        self.cross_timer = torch.where(completed, torch.zeros_like(self.cross_timer), self.cross_timer + 1,)
+        self.cross_timer = torch.where(completed, torch.zeros_like(self.cross_timer), self.cross_timer + 1, )
         return wrong_cross
 
     def _get_terminated(self) -> torch.Tensor:

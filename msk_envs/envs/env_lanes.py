@@ -24,6 +24,7 @@ class LanesEnv(MSKEnv):
             cuda_graph: bool,
             target_dir: list[float],
             angle_tolerance: float = 30.0,
+            lane_width: float = 0.6,
     ):
         super().__init__(
             num_envs=num_envs,
@@ -52,6 +53,7 @@ class LanesEnv(MSKEnv):
         self.ignore_jnt_ids = [dof_id for dof_id in self.ignore_jnt_ids if dof_id != -1]
 
         self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
+        self.lane_width = lane_width
         self.max_distance_reached = 0.0
         return
 
@@ -157,7 +159,7 @@ class LanesEnv(MSKEnv):
         toes_out = torch.zeros_like(fallen, dtype=torch.bool)
         for body_idx in self.toes_ids:
             body_pos = self.body_positions[:, body_idx]
-            toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
+            toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > self.lane_width)
 
         # Pelvis or head no longer facing target direction (within N degrees)
         pelvis_facing_direction = self._is_body_facing_direction(self.root_id)
@@ -172,7 +174,7 @@ class LanesEnv(MSKEnv):
         if self.ground_rotation[3] == 1:  # Flat ground
             return SceneSettings(
                 lanes=True,
-                lane_width=0.6,
+                lane_width=self.lane_width,
                 meter_markers=True,
                 axes=False
             )

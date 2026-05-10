@@ -54,11 +54,11 @@ class CariocaEnv(LanesEnv):
         self.cross_timer = torch.zeros(self.num_worlds, dtype=torch.long, device=self.device)
 
         # How far the trailing foot must cross past the lead foot (m)
-        self.cross_threshold = 0.1
+        self.cross_threshold = 0.05
         # How much behind the trailing foot must be to be considered in neutral
         self.forward_threshold = 0.1
         # Steps allowed per phase before termination
-        self.max_phase_steps = 30
+        self.max_phase_steps = 20
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         self.phase[reset_mask] = 0

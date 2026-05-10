@@ -43,7 +43,7 @@ class CariocaEnv(LanesEnv):
             live_render=live_render,
             cuda_graph=cuda_graph,
             target_dir=build_axis(SIDE_IDX, 1.0),
-            angle_tolerance=30.0,
+            angle_tolerance=45.0,  # need more swivel room for carioca
             lane_width=1.0,  # Bit wider for room
         )
 
@@ -59,6 +59,17 @@ class CariocaEnv(LanesEnv):
         self.forward_threshold = 0.1
         # Steps allowed per phase before termination
         self.max_phase_steps = 20
+
+        self.left_foot_collider_ids = [
+            self.collider_id_lookup[collider_key] for collider_key in self.collider_id_lookup.keys()
+            if "left_foot" in collider_key
+        ]
+        self.right_foot_collider_ids = [
+            self.collider_id_lookup[collider_key] for collider_key in self.collider_id_lookup.keys()
+            if "right_foot" in collider_key
+        ]
+
+        return
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         self.phase[reset_mask] = 0
@@ -81,6 +92,15 @@ class CariocaEnv(LanesEnv):
         ], dim=1)
         return obs.detach().clone()
 
+    def _get_touchdown(self) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Returns whether left/right foot is touching the ground
+        """
+        collider_forces = torch.abs(self.collider_forces)
+        left_touchdown = (collider_forces[:, self.left_foot_collider_ids] > 0).any(dim=1)
+        right_touchdown = (collider_forces[:, self.right_foot_collider_ids] > 0).any(dim=1)
+        return left_touchdown, right_touchdown
+
     def _get_cross_deltas(self) -> tuple[torch.Tensor, torch.Tensor]:
         """
         fwd_delta:  right_toe − left_toe along FWD_IDX  (>0 = right foot in front)
@@ -98,9 +118,10 @@ class CariocaEnv(LanesEnv):
         the opposite crossing condition to the one currently expected.
         """
         travel_delta, sagittal_delta = self._get_cross_deltas()
+        left_touchdown, right_touchdown = self._get_touchdown()
 
-        # Right foot overtook the left foot
-        crossed_travel = travel_delta > self.forward_threshold
+        # Right foot overtook the left foot and touchdown
+        crossed_travel = (travel_delta > self.forward_threshold) & right_touchdown
 
         # Right foot is behind the left foot (neutral)
         neutral = (travel_delta < -self.forward_threshold)

@@ -27,3 +27,4 @@ class DerivedEnv(Enum):
     SPRINT_CURVE = 22
     HURDLES = 23
     CARIOCA = 24
+    SPRINT_BLOCK_START = 25

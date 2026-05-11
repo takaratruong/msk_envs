@@ -275,6 +275,20 @@ class SprintHybridConfig(LaneConfig):
 
 
 @dataclass
+class BlockStartSprintConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.SPRINT_BLOCK_START,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_blockstart_hybrid.yaml",
+        noise_start=False,
+        swap_lr=False,
+        default_activation=0.01,
+    ))
+
+
+@dataclass
 class BackpedalHybridConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.BACKPEDAL,
@@ -822,6 +836,7 @@ Config = Union[
     Annotated[SprintCurveConfig, tyro.conf.subcommand(name="sprintcurve")],
     Annotated[HurdlesConfig, tyro.conf.subcommand(name="hurdles")],
     Annotated[CariocaConfig, tyro.conf.subcommand(name="carioca")],
+    Annotated[BlockStartSprintConfig, tyro.conf.subcommand(name="blockstart")],
 ]
 
 

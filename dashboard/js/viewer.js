@@ -126,7 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 let inContact = obj.contact_force > 0.0;
                 color = inContact ? 0x6AEB9D : 0x87CEEB;
             }
-            loadCollider(drawSphereColliders, drawCapsuleColliders,
+            const drawAnyway = obj.name.includes("hurdle");
+            loadCollider(drawSphereColliders, drawCapsuleColliders | drawAnyway,
                 obj.geom_type, obj.scale, obj.rot, color, object => {
                     object.position.set(...obj.pos);
                     object.castShadow = true;
@@ -376,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(frames[0].scene_settings) {
             const settings = frames[0].scene_settings;
             if (settings.meter_markers) setupNumbers(scene, staticObjects);
-            if (settings.lanes) setupLanes(scene, staticObjects);
+            if (settings.lanes) setupLanes(scene, staticObjects, settings.lane_width);
             if (settings.curve) setupCurve(scene, staticObjects);
             if (settings.axes) setupAxes(scene, staticObjects);
         } else {
@@ -385,7 +386,6 @@ document.addEventListener("DOMContentLoaded", () => {
             setupAxes(scene, staticObjects);
             setupCurve(scene, staticObjects);
         }
-        setupCurve(scene, staticObjects);
     }
 
     function animate() {

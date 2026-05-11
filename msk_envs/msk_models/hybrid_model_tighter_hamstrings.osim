@@ -4739,13 +4739,13 @@
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.11843792054365</optimal_fiber_length>
                     <!--Resting length of the tendon-->
-                    <tendon_slack_length>0.318804457684</tendon_slack_length>
+                    <tendon_slack_length>0.2869240113</tendon_slack_length>
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--tendon strain at maximum isometric muscle force-->
                     <FmaxTendonStrain>0.033000000000000002</FmaxTendonStrain>
                     <!--passive muscle strain at maximum isometric muscle force-->
-                    <FmaxMuscleStrain>0.6</FmaxMuscleStrain>
+                    <FmaxMuscleStrain>0.5</FmaxMuscleStrain>
                     <!--shape factor for Gaussian active muscle force-length relationship-->
                     <KshapeActive>0.5</KshapeActive>
                     <!--exponential shape factor for passive force-length relationship-->
@@ -4804,13 +4804,13 @@
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.18518234208015499</optimal_fiber_length>
                     <!--Resting length of the tendon-->
-                    <tendon_slack_length>0.0857404948013</tendon_slack_length>
+                    <tendon_slack_length>0.07716644532</tendon_slack_length>
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.40142572999999998</pennation_angle_at_optimal>
                     <!--tendon strain at maximum isometric muscle force-->
                     <FmaxTendonStrain>0.033000000000000002</FmaxTendonStrain>
                     <!--passive muscle strain at maximum isometric muscle force-->
-                    <FmaxMuscleStrain>0.6</FmaxMuscleStrain>
+                    <FmaxMuscleStrain>0.5</FmaxMuscleStrain>
                     <!--shape factor for Gaussian active muscle force-length relationship-->
                     <KshapeActive>0.5</KshapeActive>
                     <!--exponential shape factor for passive force-length relationship-->
@@ -7976,13 +7976,13 @@
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.11843792054365</optimal_fiber_length>
                     <!--Resting length of the tendon-->
-                    <tendon_slack_length>0.318804457684</tendon_slack_length>
+                    <tendon_slack_length>0.2869240113</tendon_slack_length>
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0</pennation_angle_at_optimal>
                     <!--tendon strain at maximum isometric muscle force-->
                     <FmaxTendonStrain>0.033000000000000002</FmaxTendonStrain>
                     <!--passive muscle strain at maximum isometric muscle force-->
-                    <FmaxMuscleStrain>0.6</FmaxMuscleStrain>
+                    <FmaxMuscleStrain>0.5</FmaxMuscleStrain>
                     <!--shape factor for Gaussian active muscle force-length relationship-->
                     <KshapeActive>0.5</KshapeActive>
                     <!--exponential shape factor for passive force-length relationship-->
@@ -8041,13 +8041,13 @@
                     <!--Optimal length of the muscle fibers-->
                     <optimal_fiber_length>0.18518234208015499</optimal_fiber_length>
                     <!--Resting length of the tendon-->
-                    <tendon_slack_length>0.0857404948013</tendon_slack_length>
+                    <tendon_slack_length>0.07716644532</tendon_slack_length>
                     <!--Angle between tendon and fibers at optimal fiber length expressed in radians-->
                     <pennation_angle_at_optimal>0.40142572999999998</pennation_angle_at_optimal>
                     <!--tendon strain at maximum isometric muscle force-->
                     <FmaxTendonStrain>0.033000000000000002</FmaxTendonStrain>
                     <!--passive muscle strain at maximum isometric muscle force-->
-                    <FmaxMuscleStrain>0.6</FmaxMuscleStrain>
+                    <FmaxMuscleStrain>0.5</FmaxMuscleStrain>
                     <!--shape factor for Gaussian active muscle force-length relationship-->
                     <KshapeActive>0.5</KshapeActive>
                     <!--exponential shape factor for passive force-length relationship-->

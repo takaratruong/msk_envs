@@ -97,9 +97,10 @@ class CariocaEnv(LanesEnv):
         Returns whether left/right foot is touching the ground
         """
         collider_forces = torch.abs(self.collider_forces)
+        grf_nonzero = torch.linalg.norm(self.grf, dim=1) > 0
         left_touchdown = (collider_forces[:, self.left_foot_collider_ids] > 0).any(dim=1)
         right_touchdown = (collider_forces[:, self.right_foot_collider_ids] > 0).any(dim=1)
-        return left_touchdown, right_touchdown
+        return left_touchdown & grf_nonzero, right_touchdown & grf_nonzero
 
     def _get_cross_deltas(self) -> tuple[torch.Tensor, torch.Tensor]:
         """

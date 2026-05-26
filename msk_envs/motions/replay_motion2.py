@@ -1,23 +1,23 @@
-import msk_warp
+import bolt
 import torch
 
 
 def main():
     model_path = "msk_envs/msk_models/athlete15.osim"
     function_path = "msk_envs/msk_models/athlete15paths_minimal.xml"
-    load_result = msk_warp.load_model(
+    load_result = bolt.load_model(
         model_path=model_path,
         n_worlds=1,
-        integrator=msk_warp.IntegratorType.EULER_ADAPTIVE,
+        integrator=bolt.IntegratorType.EULER_ADAPTIVE,
         requires_visuals=True,
         polynomial_data_path=function_path
     )
     m, d = load_result.model, load_result.data
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    renderer = msk_warp.create_renderer(
+    renderer = bolt.create_renderer(
         load_result=load_result,
-        renderer_type=msk_warp.RendererType.TILED,
+        renderer_type=bolt.RendererType.TILED,
         draw_visuals=True,
         draw_colliders=True,
         draw_muscles=True,
@@ -31,10 +31,10 @@ def main():
     ref_time, ref_frames = motion[:, 0], motion[:, 1:]
     num_frames = len(motion)
 
-    joint_positions = msk_warp.joint_positions(d)
+    joint_positions = bolt.joint_positions(d)
     for i in range(num_frames):
         joint_positions[0, :] = ref_frames[i, :]
-        msk_warp.fk(m, d)
+        bolt.fk(m, d)
         renderer.render(m, d)
     return
 

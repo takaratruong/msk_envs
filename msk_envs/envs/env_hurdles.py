@@ -8,14 +8,14 @@ According to worldathletics:
 """
 
 import torch
-import msk_warp
+import bolt
 import warp as wp
 
 from msk_envs.utils.global_params import FWD_IDX, build_axis
 from .env_config import EnvConfig
 from .env_lanes import LanesEnv
 
-HURDLE_START_HEIGHT = 1.0
+HURDLE_START_HEIGHT = 0.7
 HURDLE_END_HEIGHT = 1.0
 HURDLE_POSITIONS = [13.72 + i * 9.14 for i in range(10)]
 HURDLE_HEIGHTS = [HURDLE_START_HEIGHT + i * (HURDLE_END_HEIGHT - HURDLE_START_HEIGHT) / 9 for i in range(10)]
@@ -29,18 +29,18 @@ class HurdlesEnv(LanesEnv):
         hurdle_width = 0.7
         hurdle_thickness = 0.035
         for i, (hurdle_position, hurdle_height) in enumerate(zip(HURDLE_POSITIONS, HURDLE_HEIGHTS)):
-            hurdle_top = msk_warp.UserGeomData(
+            hurdle_top = bolt.UserGeomData(
                 name=f"hurdle_top_{hurdle_position}",
-                body_name=msk_warp.GROUND,
-                geom_type=msk_warp.GeomType.CAPSULE,
+                body_name=bolt.GROUND,
+                geom_type=bolt.GeomType.CAPSULE,
                 transform=wp.transform(wp.vec3(hurdle_position, hurdle_height, 0.0), wp.quat_identity(dtype=float)),
                 size=wp.vec3(hurdle_thickness * 2.0, hurdle_width, hurdle_thickness * 2.0),
                 priority=9,
             )
-            hurdle_side1 = msk_warp.UserGeomData(
+            hurdle_side1 = bolt.UserGeomData(
                 name=f"hurdle_side1_{hurdle_position}",
-                body_name=msk_warp.GROUND,
-                geom_type=msk_warp.GeomType.CAPSULE,
+                body_name=bolt.GROUND,
+                geom_type=bolt.GeomType.CAPSULE,
                 transform=wp.transform(
                     wp.vec3(hurdle_position, hurdle_height / 2.0, -hurdle_width),
                     wp.quat(0.707, 0.0, 0.0, 0.707)
@@ -48,10 +48,10 @@ class HurdlesEnv(LanesEnv):
                 size=wp.vec3(hurdle_thickness, hurdle_height / 2.0, hurdle_thickness),
                 priority=9,
             )
-            hurdle_side2 = msk_warp.UserGeomData(
+            hurdle_side2 = bolt.UserGeomData(
                 name=f"hurdle_side2_{hurdle_position}",
-                body_name=msk_warp.GROUND,
-                geom_type=msk_warp.GeomType.CAPSULE,
+                body_name=bolt.GROUND,
+                geom_type=bolt.GeomType.CAPSULE,
                 transform=wp.transform(
                     wp.vec3(hurdle_position, hurdle_height / 2.0, hurdle_width),
                     wp.quat(0.707, 0.0, 0.0, 0.707)
@@ -59,9 +59,33 @@ class HurdlesEnv(LanesEnv):
                 size=wp.vec3(hurdle_thickness, hurdle_height / 2.0, hurdle_thickness),
                 priority=9,
             )
-            colliders.append(msk_warp.convert_user_collider(hurdle_top))
-            colliders.append(msk_warp.convert_user_collider(hurdle_side1))
-            colliders.append(msk_warp.convert_user_collider(hurdle_side2))
+            hurdle_bot1 = bolt.UserGeomData(
+                name=f"hurdle_bot1_{hurdle_position}",
+                body_name=bolt.GROUND,
+                geom_type=bolt.GeomType.CAPSULE,
+                transform=wp.transform(
+                    wp.vec3(hurdle_position - hurdle_height / 2.0, hurdle_thickness, -hurdle_width),
+                    wp.quat(0.0, 0.70710678, 0.0, 0.70710678)
+                ),
+                size=wp.vec3(hurdle_thickness, hurdle_height / 2.0, hurdle_thickness),
+                priority=9,
+            )
+            hurdle_bot2 = bolt.UserGeomData(
+                name=f"hurdle_bot2_{hurdle_position}",
+                body_name=bolt.GROUND,
+                geom_type=bolt.GeomType.CAPSULE,
+                transform=wp.transform(
+                    wp.vec3(hurdle_position - hurdle_height / 2.0, hurdle_thickness, hurdle_width),
+                    wp.quat(0.0, 0.70710678, 0.0, 0.70710678)
+                ),
+                size=wp.vec3(hurdle_thickness, hurdle_height / 2.0, hurdle_thickness),
+                priority=9,
+            )
+            colliders.append(bolt.convert_user_collider(hurdle_top))
+            colliders.append(bolt.convert_user_collider(hurdle_side1))
+            colliders.append(bolt.convert_user_collider(hurdle_side2))
+            colliders.append(bolt.convert_user_collider(hurdle_bot1))
+            colliders.append(bolt.convert_user_collider(hurdle_bot2))
         return
 
     def __init__(

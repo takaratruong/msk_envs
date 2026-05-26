@@ -1,6 +1,6 @@
 import torch
 import math
-import msk_warp
+import bolt
 import warp as wp
 import os
 
@@ -29,7 +29,7 @@ class MSKEnv:
         self.ground_rotation = torch.tensor(env_config.ground_rotation, dtype=torch.float, device=self.device)
         self.ground_rotation = quat_normalize(self.ground_rotation)
         for collider in colliders:
-            if collider == msk_warp.GROUND_COLLIDER:
+            if collider == bolt.GROUND_COLLIDER:
                 collider.transform = wp.transform(wp.vec3(), wp.quat(self.ground_rotation))
 
 
@@ -50,7 +50,7 @@ class MSKEnv:
                 colliders[geom_id].friction[2] = params.viscous_friction
                 colliders[geom_id].transition_velocity = params.transition_velocity
 
-        msk_warp.update_colliders(self.load_result)
+        bolt.update_colliders(self.load_result)
         return
 
     def _setup_model(self, env_config: EnvConfig) -> None:
@@ -70,9 +70,9 @@ class MSKEnv:
         ]
 
         # Muscles activation and fiber dynamic
-        msk_warp.set_activation_type(self.m, env_config.muscle_activation_dynamics)
-        msk_warp.set_contraction_type(self.m, env_config.muscle_contraction_dynamics)
-        muscle_metadata = msk_warp.muscle_metadata(self.m)
+        bolt.set_activation_type(self.m, env_config.muscle_activation_dynamics)
+        bolt.set_contraction_type(self.m, env_config.muscle_contraction_dynamics)
+        muscle_metadata = bolt.muscle_metadata(self.m)
         muscle_idx_to_name = {idx: name for name, idx in self.load_result.muscle_id_lookup.items()}
         for i, mm in enumerate(muscle_metadata):
             muscle_name = muscle_idx_to_name[i]
@@ -108,7 +108,7 @@ class MSKEnv:
 
             # MuJoCo type muscles
             if env_config.use_mujoco_muscles:
-                # msk_warp.set_contraction_type(self.m, msk_warp.ContractionType.MUJOCO)
+                # bolt.set_contraction_type(self.m, bolt.ContractionType.MUJOCO)
                 mm.ignore_tendon_compliance = True  # rigid tendon
 
                 # We set pennation angle to 0, so this requires updating:
@@ -125,20 +125,20 @@ class MSKEnv:
 
         # Armature
         dof_start = 6 if self.root_free else 0
-        msk_warp.armature(self.m)[dof_start:] = env_config.armature
+        bolt.armature(self.m)[dof_start:] = env_config.armature
 
-        msk_warp.set_implicit_damping(self.m, env_config.use_implicit_damping)
-        msk_warp.set_use_linear_stop(self.m, env_config.use_linear_stop)
+        bolt.set_implicit_damping(self.m, env_config.use_implicit_damping)
+        bolt.set_use_linear_stop(self.m, env_config.use_linear_stop)
 
         # Integrator type
-        msk_warp.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
-        msk_warp.set_integrator_use_inf_norm(self.m, env_config.integrator_use_inf_norm)
+        bolt.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
+        bolt.set_integrator_use_inf_norm(self.m, env_config.integrator_use_inf_norm)
         # Toggle drag forces
-        msk_warp.set_drag_enabled(self.m, env_config.enable_drag)
+        bolt.set_drag_enabled(self.m, env_config.enable_drag)
 
-        msk_warp.set_gravity(self.m, env_config.gravity)
+        bolt.set_gravity(self.m, env_config.gravity)
 
-        msk_warp.reinitialize_model(self.m, self.d)
+        bolt.reinitialize_model(self.m, self.d)
         return
 
     def _setup_cuda_graphs(self):
@@ -146,34 +146,34 @@ class MSKEnv:
             assert torch.cuda.is_available()
             # Step graph
             with wp.ScopedCapture() as capture:
-                msk_warp.step(self.m, self.d)
+                bolt.step(self.m, self.d)
             self.step_graph = capture.graph
 
             # FK graph: forward kinematics (positions only)
             with wp.ScopedCapture() as capture:
-                msk_warp.fk(self.m, self.d)
+                bolt.fk(self.m, self.d)
             self.fk_graph = capture.graph
 
             # Reset graph: call after resetting any the worlds
             with wp.ScopedCapture() as capture:
-                msk_warp.reset(self.m, self.d)
+                bolt.reset(self.m, self.d)
             self.reset_graph = capture.graph
 
             # Post-step graph: computes things like muscle passive forces, needed for rewards
             with wp.ScopedCapture() as capture:
-                msk_warp.compute_muscle_passive_forces(self.m, self.d)
+                bolt.compute_muscle_passive_forces(self.m, self.d)
             self.post_graph = capture.graph
 
             # Analytics graph: anything else needed for analytics
             with wp.ScopedCapture() as capture:
-                msk_warp.compute_muscle_moments(self.m, self.d)
-                msk_warp.compute_net_joint_moments(self.m, self.d)
-                msk_warp.compute_muscle_force_breakdown(self.m, self.d)
+                bolt.compute_muscle_moments(self.m, self.d)
+                bolt.compute_net_joint_moments(self.m, self.d)
+                bolt.compute_muscle_force_breakdown(self.m, self.d)
             self.analytics_graph = capture.graph
 
             # Forward kinematics graph, useful for motion tracking
             with wp.ScopedCapture() as capture:
-                msk_warp.fk(self.m, self.d)
+                bolt.fk(self.m, self.d)
             self.fk_graph = capture.graph
         return
 
@@ -194,14 +194,14 @@ class MSKEnv:
         # Load model
         self.curr_path = os.path.abspath(os.path.dirname(__file__))
         self.model_path = os.path.join(self.curr_path, env_config.model_path)
-        function_path = os.path.join(
+        muscle_fn_path = os.path.join(
             self.curr_path, env_config.muscle_function_path) if env_config.use_function_based_path else None
-        load_result = msk_warp.load_model(
+        load_result = bolt.load_model(
             model_path=self.model_path,
             n_worlds=num_envs,
             integrator=env_config.integrator,
             requires_visuals=requires_visuals,
-            polynomial_data_path=function_path
+            muscle_fn_path=muscle_fn_path
         )
         self.load_result = load_result
         self.m, self.d = load_result.model, load_result.data
@@ -221,69 +221,69 @@ class MSKEnv:
         self.visuals = load_result.mesh_load_results
 
         # Spring stuff bla bla remove me todo
-        qpos_spring_rest = msk_warp.qpos_spring_rest(self.m)
+        qpos_spring_rest = bolt.qpos_spring_rest(self.m)
         if "shoulder_abduction_r" in self.qpos_id_lookup:
             qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_r"]] = 0.261799
         if "shoulder_abduction_l" in self.qpos_id_lookup:
             qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_l"]] = 0.261799
 
         # Model properties
-        self.num_qpos = msk_warp.get_num_qpos(self.m)
-        self.num_dofs = msk_warp.get_num_dofs(self.m)
-        self.num_bodies = msk_warp.get_num_bodies(self.m)
-        self.num_muscles = msk_warp.get_num_muscles(self.m)
-        self.num_actuators = msk_warp.get_num_actuators(self.m)
-        self.num_colliders = msk_warp.get_num_colliders(self.m)
+        self.num_qpos = bolt.get_num_qpos(self.m)
+        self.num_dofs = bolt.get_num_dofs(self.m)
+        self.num_bodies = bolt.get_num_bodies(self.m)
+        self.num_muscles = bolt.get_num_muscles(self.m)
+        self.num_actuators = bolt.get_num_actuators(self.m)
+        self.num_colliders = bolt.get_num_colliders(self.m)
         # [num_envs, num_bodies]
-        self.body_mass = msk_warp.body_mass(self.m)
+        self.body_mass = bolt.body_mass(self.m)
         self.total_mass = self.body_mass.sum()
-        self.gravity = msk_warp.gravity(self.m)
+        self.gravity = bolt.gravity(self.m)
 
         # Data properties. The following are all references
         # [num_envs]
-        self.time = msk_warp.time(self.d)
+        self.time = bolt.time(self.d)
         # [num_envs, num_muscles]
-        self.muscle_activations = msk_warp.muscle_activations(self.d)
-        self.muscle_excitations = msk_warp.muscle_excitations(self.d)
-        self.muscle_fiber_lengths = msk_warp.muscle_fiber_lengths(self.d)
-        self.muscle_fiber_velocities = msk_warp.muscle_fiber_velocities(self.d)
-        self.muscle_powers = msk_warp.muscle_powers(self.d)
+        self.muscle_activations = bolt.muscle_activations(self.d)
+        self.muscle_excitations = bolt.muscle_excitations(self.d)
+        self.muscle_fiber_lengths = bolt.muscle_fiber_lengths(self.d)
+        self.muscle_fiber_velocities = bolt.muscle_fiber_velocities(self.d)
+        self.muscle_powers = bolt.muscle_powers(self.d)
         # [num_envs, num_actuators]
-        self.actuator_activations = msk_warp.actuator_activations(self.d)
-        self.actuator_activations_dot = msk_warp.actuator_activations_dot(self.d)
-        self.actuator_excitations = msk_warp.actuator_excitations(self.d)
+        self.actuator_activations = bolt.actuator_activations(self.d)
+        self.actuator_activations_dot = bolt.actuator_activations_dot(self.d)
+        self.actuator_excitations = bolt.actuator_excitations(self.d)
         # [num_envs, num_bodies, 7], ignore ground
-        self.body_transforms = msk_warp.body_transforms(self.d)
+        self.body_transforms = bolt.body_transforms(self.d)
         # [num_envs, num_bodies, 3], ignore ground
-        self.body_positions = msk_warp.body_com_positions(self.d)
+        self.body_positions = bolt.body_com_positions(self.d)
         # [num_envs, num_bodies, 4] (w, x, y, z)
         self.body_rotations = get_rotation_from_transform(self.body_transforms)
         # [num_envs, num_bodies, 6] (ang, lin)
-        self.body_velocities = msk_warp.body_velocities(self.d)
-        self.body_accelerations = msk_warp.body_accelerations(self.d)
+        self.body_velocities = bolt.body_velocities(self.d)
+        self.body_accelerations = bolt.body_accelerations(self.d)
         # [num_envs, num_bodies, 6] (frc, trq)
-        self.body_user_forces = msk_warp.body_user_forces(self.d)
+        self.body_user_forces = bolt.body_user_forces(self.d)
         # [num_envs, num_qpos]
-        self.joint_positions = msk_warp.joint_positions(self.d)
+        self.joint_positions = bolt.joint_positions(self.d)
         # [num_envs, num_dofs]
-        self.joint_velocities = msk_warp.joint_velocities(self.d)
+        self.joint_velocities = bolt.joint_velocities(self.d)
         # [num_envs, num_dofs]
-        self.ufrc_spring = msk_warp.ufrc_spring(self.d)
-        self.ufrc_damper = msk_warp.ufrc_damper(self.d)
-        self.ufrc_limit = msk_warp.ufrc_limit(self.d)
-        self.ufrc_muscle_passive = msk_warp.ufrc_muscle_passive(self.d)
+        self.ufrc_spring = bolt.ufrc_spring(self.d)
+        self.ufrc_damper = bolt.ufrc_damper(self.d)
+        self.ufrc_limit = bolt.ufrc_limit(self.d)
+        self.ufrc_muscle_passive = bolt.ufrc_muscle_passive(self.d)
         # [num_envs, num_colliders]
-        self.collider_forces = msk_warp.collider_forces(self.d)
+        self.collider_forces = bolt.collider_forces(self.d)
         # [num_envs, num_colliders, 3]
-        self.collider_positions = get_position_from_transform(msk_warp.get_collider_transforms(self.d))
-        # self.collider_self_forces = msk_warp.collider_self_forces(self.d)
-        self.body_self_collision_forces = msk_warp.body_self_collisions(self.d)
+        self.collider_positions = get_position_from_transform(bolt.get_collider_transforms(self.d))
+        # self.collider_self_forces = bolt.collider_self_forces(self.d)
+        self.body_self_collision_forces = bolt.body_self_collisions(self.d)
 
         # [num_envs, 3]
-        self.grf = msk_warp.grf(self.d)
+        self.grf = bolt.grf(self.d)
 
         # [num_envs, num_visuals, 3]
-        self.visual_transforms = msk_warp.get_visual_transforms(self.d)
+        self.visual_transforms = bolt.get_visual_transforms(self.d)
         self.visual_positions = get_position_from_transform(self.visual_transforms)
         # [num_envs, num_visuals, 4]
         self.visual_rotations = get_rotation_from_transform(self.visual_transforms)
@@ -296,7 +296,7 @@ class MSKEnv:
 
         # Simulation steps required to reach env step. if adaptive, just step to desired time
         #  otherwise step in increments of [delta_t_sim]
-        self.is_adaptive = msk_warp.is_adaptive(env_config.integrator)
+        self.is_adaptive = bolt.is_adaptive(env_config.integrator)
         if self.is_adaptive:
             self.delta_t_sim = self.delta_t
             self.sim_steps_per_env_step = 1
@@ -350,9 +350,9 @@ class MSKEnv:
 
         self.render = live_render
         if live_render:
-            self.renderer = msk_warp.create_renderer(
+            self.renderer = bolt.create_renderer(
                 load_result=load_result,
-                renderer_type=msk_warp.RendererType.OPENGL,
+                renderer_type=bolt.RendererType.OPENGL,
                 draw_visuals=True,
                 draw_beams=True,
                 draw_body_mass=False,
@@ -360,7 +360,7 @@ class MSKEnv:
                 draw_muscles=True,
                 draw_sites=False,
             )
-            if self.renderer.viewer_type == msk_warp.RendererType.TILED:
+            if self.renderer.viewer_type == bolt.RendererType.TILED:
                 self.renderer.setup_tiled_renderer(list(range(min(num_envs, 4))))
 
         # CUDA Graphs
@@ -478,7 +478,7 @@ class MSKEnv:
         # Run forward kinematics to ensure contact with ground
         if self.enforce_ground_contact and self.root_free:
             self.fk()
-            collider_body_id = msk_warp.geom_bodyid(self.m)
+            collider_body_id = bolt.geom_bodyid(self.m)
             non_ground_collider_ids = torch.where(collider_body_id != self.ground_id)[0]
 
             # Need at least one non-root collider
@@ -490,12 +490,12 @@ class MSKEnv:
                 self.joint_positions[reset_mask, root_height_q_id] += adjustment[reset_mask]
 
         # Reset sim
-        msk_warp.set_reset(self.d, self.reset_tensor)
+        bolt.set_reset(self.d, self.reset_tensor)
         if self.cuda_graph:
             wp.capture_launch(self.reset_graph)
             wp.synchronize()
         else:
-            msk_warp.reset(self.m, self.d)
+            bolt.reset(self.m, self.d)
         return
 
     # The following are environment-specific and need to be implemented
@@ -604,15 +604,15 @@ class MSKEnv:
     def launch_sim_step(self):
         if self.cuda_graph:
             for _ in range(self.sim_steps_per_env_step):
-                msk_warp.increment_next_time(self.m, self.d, self.delta_t_sim)
+                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
                 wp.capture_launch(self.step_graph)
             wp.capture_launch(self.post_graph)
             wp.synchronize()
         else:
             for _ in range(self.sim_steps_per_env_step):
-                msk_warp.increment_next_time(self.m, self.d, self.delta_t_sim)
-                msk_warp.step(self.m, self.d)
-            msk_warp.post(self.m, self.d)
+                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
+                bolt.step(self.m, self.d)
+            bolt.post(self.m, self.d)
         return
 
     def rl_step(self):
@@ -667,7 +667,7 @@ class MSKEnv:
             wp.capture_launch(self.fk_graph)
             wp.synchronize()
         else:
-            msk_warp.fk(self.m, self.d)
+            bolt.fk(self.m, self.d)
 
     def lookup_body_id(self, body_name: str) -> int:
         return self.body_id_lookup[body_name] if body_name in self.body_id_lookup else -1

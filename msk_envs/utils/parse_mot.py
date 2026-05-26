@@ -1,6 +1,6 @@
 import re
 
-import msk_warp
+import bolt
 import numpy as np
 import torch
 from scipy.spatial.transform import Rotation as R
@@ -119,8 +119,8 @@ def build_motion(data, col_names, qpos_id_lookup: dict[str, int]):
 
 def correct_mot(
         motion,
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         device: torch.device,
 ):
     motion = torch.tensor(motion, device=device)
@@ -131,16 +131,16 @@ def correct_mot(
     corrected_motion = torch.zeros_like(motion)
     corrected_motion[:, 0] = ref_time
 
-    joint_positions = msk_warp.joint_positions(d)
+    joint_positions = bolt.joint_positions(d)
     for i in range(num_frames):
         # Set the joint positions
         joint_positions[0, :] = ref_frames[i, :]
 
         # Reset to fix limits
         d.world_reset.fill_(1.0)
-        msk_warp.fix_limits(m, d)
+        bolt.fix_limits(m, d)
         d.world_reset.fill_(0.0)
-        msk_warp.fk(m, d)
+        bolt.fk(m, d)
 
         # Copy new joint positions
         corrected_motion[i, 1:] = joint_positions[0, :]
@@ -150,7 +150,7 @@ def correct_mot(
 
 def parse_mot(
         motion_file: str,
-        load_result: msk_warp.ModelLoadResult,
+        load_result: bolt.ModelLoadResult,
         device: torch.device,
         in_degrees: bool = True
 ):

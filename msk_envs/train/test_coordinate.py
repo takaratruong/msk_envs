@@ -1,4 +1,4 @@
-import msk_warp
+import bolt
 import torch
 from tqdm import tqdm
 
@@ -19,7 +19,7 @@ def main():
     env_config.q_noise = 0.0
     env_config.qv_noise = 0.0
     # env_config.swap_lr = False
-    env_config.integrator_accuracy = 0.1
+    # env_config.integrator_accuracy = 0.1
     # env_config.armature = 0.0
     # env_config.integrator_use_inf_norm = True
 
@@ -39,13 +39,14 @@ def main():
     max_episode_length = int(env_config.max_episode_duration / env_config.delta_t)
     recording_fps = 120.0
     sim = LoggedSim(envs, device, delta_t_log=1.0 / recording_fps)
+    sim.reset()
 
     increasing = True
     for i in tqdm(range(max_episode_length)):
         actions = torch.ones_like(actions) * -1
 
-        moment_arms = msk_warp.muscle_moment_arms(envs.d)
-        dof_interest = "lumbar_extension"
+        moment_arms = bolt.muscle_moment_arms(envs.d)
+        dof_interest = "shoulder_flexion_l"
         dof_interest_id = envs.qpos_id_lookup[dof_interest]
         dof_low, dof_high = envs.limit_id_lookup[dof_interest]
         dof_med = (dof_low + dof_high) / 2

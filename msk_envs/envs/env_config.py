@@ -1,5 +1,5 @@
 import json
-import msk_warp
+import bolt
 from dataclasses import dataclass, field
 
 from .env_variants import DerivedEnv
@@ -17,7 +17,7 @@ class EnvConfig:
     """ Simulator/physics step size. Ignored if using adaptive integrator """
     max_episode_duration: float = 10.0
     """ Max episode duration in seconds """
-    integrator: msk_warp.IntegratorType = msk_warp.IntegratorType.EULER_ADAPTIVE
+    integrator: bolt.IntegratorType = bolt.IntegratorType.EULER_ADAPTIVE
     """ Integrator type (EULER_FIXED, RK4_FIXED, EULER_ADAPTIVE, RK_MERSON_ADAPTIVE) """
     integrator_use_inf_norm: bool = False
     """ For adaptive integrator, whether to use inf norm or L2-norm error calculation """
@@ -45,7 +45,7 @@ class EnvConfig:
     # --- Model muscle properties ---
     muscle_multiplier: float = 1.0
     """ Multiplier to max isometric force """
-    muscle_activation_dynamics: msk_warp.ActivationType = msk_warp.ActivationType.MILLARD
+    muscle_activation_dynamics: bolt.ActivationType = bolt.ActivationType.MILLARD
     """ Muscle activation dynamics type (DGF, MILLARD) """
     muscle_activation_time_const: float = 0.010
     """ Muscle activation time constant. Default 15ms for DGF, 10ms for Millard """
@@ -57,7 +57,7 @@ class EnvConfig:
     """ Minimum muscle activation. Use non-zero for undamped muscle """
     muscle_max_activation: float = 1.0
     """ Maximum muscle activation """
-    muscle_contraction_dynamics = msk_warp.ContractionType = msk_warp.ContractionType.DGF
+    muscle_contraction_dynamics = bolt.ContractionType = bolt.ContractionType.DGF
     """ Muscle contraction dynamics: which force curves to use (DGF, MILLARD) """
     muscle_active_force_width_scale: float = 1.0
     """ For DGF active force length curve, the scaling factor of the width """

@@ -8,7 +8,7 @@ from msk_envs.utils.animation_builder import create_animation_json
 from msk_envs.utils.pdf_log_builder import create_pdf_output
 
 import math
-import msk_warp
+import bolt
 import os
 import gzip
 import json
@@ -173,9 +173,9 @@ class LoggedSim:
             wp.capture_launch(self.envs.post_graph)
             wp.capture_launch(self.envs.analytics_graph)
         else:
-            msk_warp.post(self.envs.m, self.envs.d)
-            msk_warp.compute_muscle_moments(self.envs.m, self.envs.d)
-            msk_warp.compute_net_joint_moments(self.envs.m, self.envs.d)
+            bolt.compute_muscle_passive_forces(self.envs.m, self.envs.d)
+            bolt.compute_muscle_moments(self.envs.m, self.envs.d)
+            bolt.compute_net_joint_moments(self.envs.m, self.envs.d)
         wp.synchronize()
         return
 
@@ -188,11 +188,11 @@ class LoggedSim:
         return
 
     def perform_step(self, dt_step: float, force_no_log: bool = False):
-        msk_warp.increment_next_time(self.envs.m, self.envs.d, dt_step)
+        bolt.increment_next_time(self.envs.m, self.envs.d, dt_step)
         if self.envs.cuda_graph:
             wp.capture_launch(self.envs.step_graph)
         else:
-            msk_warp.step(self.envs.m, self.envs.d)
+            bolt.step(self.envs.m, self.envs.d)
 
         if not force_no_log:
             self.check_post_step_log()

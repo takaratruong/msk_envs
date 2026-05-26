@@ -300,4 +300,4 @@ timeline_controller = TimelineController(tick_rate=tick_rate_input.value,
 
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(show=False, title="MSK Dashboard",
-           favicon="assets/textures/favicon.png")
+           favicon="assets/textures/favicon.png", port=8081)

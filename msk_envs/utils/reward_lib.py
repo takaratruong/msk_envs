@@ -8,9 +8,9 @@ def _get_velocity(body_velocities, body_id: int, linear: bool, idx: int):
     return body_velocities[:, body_id, idx + 3] if linear else body_velocities[:, body_id, idx]
 
 
-def velocity_reward(body_velocities, body_id: int, coordinate: int, linear: bool):
-    """Forward velocity reward (x-velocity of root body)"""
-    root_velocity = _get_velocity(body_velocities, body_id, linear, coordinate)
+def velocity_reward(body_velocities, body_id: int, coord_idx: int, linear: bool):
+    """ Velocity reward """
+    root_velocity = _get_velocity(body_velocities, body_id, linear, coord_idx)
     return root_velocity
 
 
@@ -252,3 +252,30 @@ def update_dict(reward_dict, key, value):
         reward_dict[key] += value.detach()
     else:
         reward_dict[key] = value.detach()
+
+
+def _sigmoids(x, value_at_1):
+    """ Just a linear 'sigmoid' for now """
+    scale = 1.0 - value_at_1
+    scaled_x = x * scale
+    return torch.where(
+        torch.abs(scaled_x) < 1.0,
+        1.0 - scaled_x,
+        torch.tensor(0.0, dtype=x.dtype, device=x.device)
+    )
+
+
+def tolerance(x, bounds=(0.0, 0.0), margin=0.0, value_at_margin=0.1):
+    """ Returns 1 when `x` falls inside the bounds, between 0 and 1 otherwise. """
+    lower, upper = bounds
+    in_bounds = torch.logical_and(lower <= x, x <= upper)
+
+    if margin == 0:
+        value = torch.where(in_bounds,
+                            torch.tensor(1.0, dtype=x.dtype, device=x.device),
+                            torch.tensor(0.0, dtype=x.dtype, device=x.device))
+    else:
+        d = torch.where(x < lower, lower - x, x - upper) / margin
+        sig_val = _sigmoids(d, value_at_margin)
+        value = torch.where(in_bounds, torch.tensor(1.0, dtype=x.dtype, device=x.device), sig_val)
+    return value

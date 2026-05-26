@@ -1,15 +1,15 @@
 # MSK Envs - RL Environments for Musculoskeletal Simulations
-RL environments built on top of the [MSK Warp](https://github.com/willwng/msk_warp) simulator that run entirely on the GPU.
+RL environments built on top of the [Bolt](https://github.com/willwng/bolt) simulator that run entirely on the GPU.
 
 ## Preqrequisites/Setup
-Installation requires installation of [MSK Warp](https://github.com/willwng/msk_warp), of which the only dependency is [warp-lang](https://github.com/NVIDIA/warp). Use of the environments requires PyTorch. 
+Installation requires installation of [Bolt](https://github.com/willwng/bolt), of which the only dependency is [warp-lang](https://github.com/NVIDIA/warp). Use of the environments requires PyTorch. 
 ```
 conda create -n msk python=3.11
 conda activate msk
 pip install warp-lang
 pip install torch torchvision
 pip install -r requirements.txt
-cd ../msk_warp/  # git clone git@github.com:willwng/msk_warp.git
+cd ../bolt/  # git clone git@github.com:willwng/bolt.git
 pip install -e .
 ```
 

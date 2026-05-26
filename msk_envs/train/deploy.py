@@ -1,3 +1,4 @@
+import bolt
 import torch
 from tqdm import tqdm
 
@@ -5,8 +6,8 @@ from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
 from msk_envs.train.dep.dep import DEP
 from msk_envs.utils.logged_sim import LoggedSim
-from msk_envs.train.nets.sac_networks import load_policy
-# from msk_envs.train.nets.td3_networks import load_policy
+# from msk_envs.train.nets.sac_networks import load_policy
+from msk_envs.train.nets.td3_networks import load_policy
 
 
 def main():
@@ -21,9 +22,9 @@ def main():
     env_config.q_noise = 0.0
     env_config.qv_noise = 0.0
     env_config.swap_lr = False
-    env_config.integrator_accuracy = 0.1
-    # env_config.integrator_use_inf_norm = True
-
+    # env_config.integrator_accuracy = 0.1
+    # env_config.armature = 0.0
+    env_config.integrator_use_inf_norm = False
 
     has_cuda_support = torch.cuda.is_available()
     device = torch.device("cuda" if has_cuda_support else f"cpu")
@@ -36,37 +37,40 @@ def main():
                                  device=device)
 
     actions = envs.get_blank_actions()
-    #
-    policy = load_policy("/home/marth/Documents/msk_envs/models/athlete12_lower_sprint_no_head_ext_obl_fix_2026-04-17_12-23/athlete12_lower_sprint_no_head_ext_obl_fix_2026-04-17_12-23_8000.pt")
-    policy.to(device)
+
+    # policy = load_policy("/home/marth/Documents/bolt/msk_envs/models/bronny_tighterhamstrings_bolt1_2026-05-11_09-45/bronny_tighterhamstrings_bolt1_2026-05-11_09-45_109000.pt")
+    # policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,
               n_envs=num_envs,
-              buffer_size=200,
-              bias_rate=0.002,
+              buffer_size=60,
+              bias_rate=0.0066,
               kappa=1000,
-              tau=40,
-              s4avg=2,
+              tau=12,
+              s4avg=1,
               regularization=32,
-              time_dist=5,
+              time_dist=2,
               with_learning=True,
               device=device)
 
-    # Build a SimLogger to give us a whole pdf of stuff
+    # Build a SimLogger to give us a whole pdf of stuf
     max_episode_length = int(env_config.max_episode_duration / env_config.delta_t)
-    sim = LoggedSim(envs, device, delta_t_log=0.01)
+    recording_fps = 120.0
+    sim = LoggedSim(envs, device, delta_t_log=1.0 / recording_fps)
     obs = sim.reset()
 
-    for _ in tqdm(range(max_episode_length)):
-        # actions = torch.randn_like(actions)
-        actions[:, :envs.num_muscles] = -1.0
-        # actions[:, envs.num_muscles:] = 0.0
-        # muscle_states = envs.muscle_fiber_lengths
-        # actions[:, :envs.num_muscles] = dep.step(muscle_states)
-        # actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
+    for i in tqdm(range(max_episode_length)):
+        actions = torch.randn_like(actions)
+        # actions = torch.ones_like(actions)
+        # actions = torch.ones_like(actions) * 0
 
-        with torch.no_grad():
-            actions = policy(obs)
+        # actions[:, :envs.num_muscles] = -1.0
+        # muscle_states = envs.muscle_fiber_lengths
+        # actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
+        # actions[:, :envs.num_muscles] = dep.step(muscle_states)
+
+        # with torch.no_grad():
+        #     actions = policy(obs)
 
         # try to step the sim, but if it takes too long, break out of the loop
         finished, obs = sim.step(actions)

@@ -20,6 +20,12 @@ from .env_broad_jump import BroadJumpEnv
 from .env_upper_reach import UpperReachTargetEnv
 from .env_upper_curl import UpperCurlEnv
 from .env_reach_pose import ReachPoseEnv
+from .env_vertical_sparse import VerticalSparseEnv
+from .env_curve import CurvedTrackEnv
+from .env_hurdles import HurdlesEnv
+from .env_carioca import CariocaEnv
+from .env_sprint_blocks import BlockStartSprintingEnv
+
 
 # factory
 class EnvFactory:
@@ -69,5 +75,15 @@ class EnvFactory:
             return UpperCurlEnv(**kwargs)
         elif env_variant == DerivedEnv.REACH_POSE:
             return ReachPoseEnv(**kwargs)
+        elif env_variant == DerivedEnv.VERTICAL_SPARSE:
+            return VerticalSparseEnv(**kwargs)
+        elif env_variant == DerivedEnv.SPRINT_CURVE:
+            return CurvedTrackEnv(**kwargs)
+        elif env_variant == DerivedEnv.HURDLES:
+            return HurdlesEnv(**kwargs)
+        elif env_variant == DerivedEnv.CARIOCA:
+            return CariocaEnv(**kwargs)
+        elif env_variant == DerivedEnv.SPRINT_BLOCK_START:
+            return BlockStartSprintingEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

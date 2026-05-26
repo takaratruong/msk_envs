@@ -6,7 +6,7 @@ class TD3Config:
     agent: str = "fasttd3"
     """the type of the agent (fasttd3, simbav2)"""
 
-    num_envs: int = 4096
+    num_envs: int = 1024
     """number of parallel environments"""
 
     num_learning_iterations: int = 150000
@@ -24,7 +24,7 @@ class TD3Config:
     actor_learning_rate_end: float = 3e-5
     """the end learning rate for the actor"""
 
-    buffer_size: int = 256 * 4
+    buffer_size: int = 256 * 2
     """the replay memory buffer size per environment"""
 
     num_steps: int = 1

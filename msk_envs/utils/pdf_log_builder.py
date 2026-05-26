@@ -1,4 +1,4 @@
-import msk_warp
+import bolt
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -205,7 +205,7 @@ def create_pdf_output(
 
         # Find the intervals in which there is contact
         contact_intervals = []
-        contact_threshold = 0.1  # 10% body weight
+        contact_threshold = 0.01  # 1% body weight
         in_contact = False
         contact_start = 0.0
         dt = times[1] - times[0]
@@ -482,8 +482,8 @@ def create_pdf_output(
             muscle_ftl.append([(
                 m.fiber_length / m.optimal_fiber_length,
                 # m.tendon_length / m.tendon_slack_length,
-                msk_warp.MIN_NORM_FIBER_LENGTH,
-                msk_warp.MAX_NORM_FIBER_LENGTH,
+                bolt.MIN_NORM_FIBER_LENGTH,
+                bolt.MAX_NORM_FIBER_LENGTH,
             ) for m in frame.muscles])
             muscle_ma.append([m.moment_arm for m in frame.muscles])
             muscle_frc.append([(m.actuation, m.max_isometric_force) for m in frame.muscles])
@@ -508,8 +508,8 @@ def create_pdf_output(
         # Fiber/tendon lengths
         enforced_range = []
         for m in frame0.muscles:
-            min_range = msk_warp.MIN_NORM_FIBER_LENGTH
-            max_range = msk_warp.MAX_NORM_FIBER_LENGTH
+            min_range = bolt.MIN_NORM_FIBER_LENGTH
+            max_range = bolt.MAX_NORM_FIBER_LENGTH
             enforced_range.append((min_range, max_range))
         create_generic_plot(
             muscle_names, times, frame_ind, muscle_ftl,

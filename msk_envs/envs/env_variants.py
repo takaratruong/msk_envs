@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class DerivedEnv(Enum):
     WALK = 0
     JOG = 1
@@ -22,3 +23,8 @@ class DerivedEnv(Enum):
     UPPER_CURL = 18
     DONT_FALL_ONE_LEG = 19
     REACH_POSE = 20
+    VERTICAL_SPARSE = 21
+    SPRINT_CURVE = 22
+    HURDLES = 23
+    CARIOCA = 24
+    SPRINT_BLOCK_START = 25

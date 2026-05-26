@@ -144,7 +144,7 @@ class WalkConfig(BaseArgs):
 class LaneConfig(BaseArgs):
     """ Reusable hyperparams for lane environments """
     lambda_vel: float = 1e-2
-    lambda_mid_lane: float = 0.0
+    lambda_mid_lane: float = 1e-2
 
     lambda_spring: float = 0.0
     lambda_damper: float = 0.0
@@ -275,6 +275,56 @@ class SprintHybridConfig(LaneConfig):
 
 
 @dataclass
+class SprintHybridTightHamstringsConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        model_path="../msk_models/hybrid_model_tight_hamstrings.osim",
+        env_variant=DerivedEnv.SPRINT,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
+class SprintHybridTighterHamstringsConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        model_path="../msk_models/hybrid_model_tighter_hamstrings.osim",
+        env_variant=DerivedEnv.SPRINT,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
+class SprintHybridTightestHamstringsConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        model_path="../msk_models/hybrid_model_tightest_hamstrings.osim",
+        env_variant=DerivedEnv.SPRINT,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
+class BlockStartSprintConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.SPRINT_BLOCK_START,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_blockstart_hybrid.yaml",
+        noise_start=False,
+        swap_lr=False,
+        default_activation=0.01,
+    ))
+
+
+@dataclass
 class BackpedalHybridConfig(LaneConfig):
     env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.BACKPEDAL,
@@ -293,6 +343,19 @@ class SideShuffleHybridConfig(LaneConfig):
         max_episode_duration=10.0,
         muscle_multiplier=2.0,
         starting_pose_path="../msk_models/starting_pose_sideshuffle_hybrid.yaml",
+    ))
+
+
+@dataclass
+class CariocaConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.CARIOCA,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=10.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_carioca_hybrid.yaml",
+        noise_start=False,
+        swap_lr=False,
     ))
 
 
@@ -319,21 +382,14 @@ class SprintHybridNoArmsConfig(LaneConfig):
 
 
 @dataclass
-class RaceWalkConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+class RaceWalkConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.RACE_WALK,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        # muscle_multiplier=2.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
     ))
-
-    lambda_vel: float = 0.01
-    lambda_mid_lane: float = 0.01
-    lambda_limit: float = -5e-3
-    lambda_actuator: float = -1e-2
-    lambda_fatigue: float = 0.0
-    lambda_metabolic: float = 0.0
 
 
 @dataclass
@@ -422,18 +478,60 @@ class HopHybridConfig(LaneConfig):
 
 
 @dataclass
+class SprintCurveConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.SPRINT_CURVE,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=12.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
+class HurdlesConfig(LaneConfig):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.HURDLES,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=12.0,
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
+    ))
+
+
+@dataclass
 class VerticalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.VERTICAL,
         delta_t=1.0 / 30.0,
         max_episode_duration=2.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_stand.yaml",
+        starting_pose_path="../msk_models/starting_pose_vertical.yaml",
+        default_activation=0.01,
+        noise_start=False,
     ))
 
     """Vertical jump environment specific reward scales"""
-    lambda_max_vertical: float = 1.0
-    lambda_limit: float = -0.2
-    lambda_actuator: float = -5.0
+    lambda_jump: float = 1e-1
+    lambda_limit: float = -3e-4
+    lambda_alive: float = 1e-2
+
+
+@dataclass
+class VerticalSparseConfig(BaseArgs):
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
+        env_variant=DerivedEnv.VERTICAL_SPARSE,
+        delta_t=1.0 / 30.0,
+        max_episode_duration=1.5,
+        starting_pose_path="../msk_models/starting_pose_vertical.yaml",
+        default_activation=0.01,
+        noise_start=False,
+        enforce_ground_contact=False,
+    ))
+
+    """Vertical jump environment specific reward scales"""
+    lambda_jump: float = 1e-1
+    lambda_limit: float = -3e-4
+    lambda_alive: float = 1e-2
 
 
 @dataclass
@@ -579,17 +677,23 @@ class StaticSquatConfig(BaseArgs):
 
 @dataclass
 class ShuttleRunConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigGeneric(
+    env_config: EnvConfig = field(default_factory=lambda: EnvConfigHybrid(
         env_variant=DerivedEnv.SHUTTLE_RUN,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        # muscle_multiplier=2.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_run.yaml",
+        muscle_multiplier=2.0,
+        starting_pose_path="../msk_models/starting_pose_run_hybrid.yaml",
     ))
 
     lambda_target_closer: float = 1.0
-    lambda_limit: float = -2e-3
-    lambda_actuator: float = -1e-2
+    lambda_target_facing: float = 5e-3
+
+    lambda_spring: float = 0.0
+    lambda_damper: float = 0.0
+    lambda_limit: float = -3e-4
+    lambda_muscle_passive: float = 0.0
+
+    lambda_actuator: float = 0.0
     lambda_alive: float = 3e-2
 
 
@@ -750,6 +854,7 @@ Config = Union[
     Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
     Annotated[HopHybridConfig, tyro.conf.subcommand(name="hophybrid")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
+    Annotated[VerticalSparseConfig, tyro.conf.subcommand(name="verticalsparse")],
     Annotated[PerturbConfig, tyro.conf.subcommand(name="perturb")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
     Annotated[DontFallConfig, tyro.conf.subcommand(name="dontfall")],
@@ -764,6 +869,13 @@ Config = Union[
     Annotated[UpperCurl, tyro.conf.subcommand(name="uppercurl")],
     Annotated[NoSpineReachTarget, tyro.conf.subcommand(name="nospinereach")],
     Annotated[ReachPoseConfig, tyro.conf.subcommand(name="reachpose")],
+    Annotated[SprintCurveConfig, tyro.conf.subcommand(name="sprintcurve")],
+    Annotated[HurdlesConfig, tyro.conf.subcommand(name="hurdles")],
+    Annotated[CariocaConfig, tyro.conf.subcommand(name="carioca")],
+    Annotated[BlockStartSprintConfig, tyro.conf.subcommand(name="blockstart")],
+    Annotated[SprintHybridTightHamstringsConfig, tyro.conf.subcommand(name="sprinthybridtighthamstrings")],
+    Annotated[SprintHybridTighterHamstringsConfig, tyro.conf.subcommand(name="sprinthybridtighterhamstrings")],
+    Annotated[SprintHybridTightestHamstringsConfig, tyro.conf.subcommand(name="sprinthybridtightesthamstrings")],
 ]
 
 

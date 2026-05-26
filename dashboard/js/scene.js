@@ -61,16 +61,17 @@ function setupAxes(scene, currentObjects) {
     currentObjects.push(axesHelper);
 }
 
-function setupLanes(scene, currentObjects) {
+function setupLanes(scene, currentObjects, laneSpacing) {
     // Lane 1
     const laneWidth = 100;     // Length of the lane
     const laneThickness = 0.05; // Thickness of the line (height of the plane)
+    const laneSpace = laneSpacing ? laneSpacing : 0.7;
 
     const laneGeometry1 = new THREE.PlaneGeometry(laneWidth, laneThickness);
     const laneMaterial1 = new THREE.MeshBasicMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
 
     const lane1 = new THREE.Mesh(laneGeometry1, laneMaterial1);
-    lane1.position.set(50, 0.01, -0.7);
+    lane1.position.set(50, 0.01, -laneSpace);
     lane1.rotation.x = -Math.PI / 2; // Rotate to lay flat on the XZ plane
 
     scene.add(lane1);
@@ -81,11 +82,44 @@ function setupLanes(scene, currentObjects) {
     const laneMaterial2 = new THREE.MeshBasicMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
 
     const lane2 = new THREE.Mesh(laneGeometry2, laneMaterial2);
-    lane2.position.set(50, 0.01, 0.7);
+    lane2.position.set(50, 0.01, laneSpace);
     lane2.rotation.x = -Math.PI / 2;
 
     scene.add(lane2);
     currentObjects.push(lane2);
+}
+
+function setupCurve(scene, currentObjects, numLanes = 8) {
+    const innerRadius = 36.5;
+    const laneWidth = 1.22;
+    const arcSegments = 128;
+
+    // Agent starts at (0,0,0) at the CENTER of lane 1, so the circle
+    // center is target_radius away in +Z (matching the Python env).
+    const targetRadius = innerRadius + laneWidth / 2;  // 37.11 m
+    const cz = targetRadius;
+
+    // Inner and outer edges are laneWidth/2 from the lane center.
+    const innerR = targetRadius - laneWidth / 2;  // 36.5 m  (= innerRadius)
+    const outerR = targetRadius + laneWidth / 2;  // 37.72 m
+
+    // Arc: agent at angle -PI/2 (-Z from center), CCW through apex (+X) to +PI/2 (+Z).
+    const arcStart = -Math.PI / 2;
+    const arcEnd = Math.PI / 2;
+
+    const lineMat = new THREE.LineBasicMaterial({color: 0xFFFFFF});
+
+    for (const r of [innerR, outerR]) {
+        const curve = new THREE.EllipseCurve(0, cz, r, r, arcStart, arcEnd, false, 0);
+        const pts3d = curve.getPoints(arcSegments).map(p => new THREE.Vector3(p.x, 0.01, p.y));
+
+        const line = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(pts3d),
+            lineMat.clone()
+        );
+        scene.add(line);
+        currentObjects.push(line);
+    }
 }
 
 function setupNumbers(scene, currentObjects) {
@@ -120,4 +154,4 @@ function setupNumbers(scene, currentObjects) {
 }
 
 
-export {setupLightsSky, setupAxes, setupLanes, setupNumbers};
+export {setupLightsSky, setupAxes, setupLanes, setupCurve, setupNumbers};

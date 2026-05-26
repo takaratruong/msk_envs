@@ -23,13 +23,59 @@ def create_sphere(name):
     return sphere
 
 
+def create_capsule(name, radius=1.0, half_depth=2.0):
+    print(f"Creating capsule {name}")
+    bpy.ops.mesh.primitive_cylinder_add(
+        radius=radius,
+        depth=half_depth * 2.0,
+        location=(0, 0, 0)
+    )
+    cylinder = bpy.context.active_object
+
+    # Create top sphere
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=radius,
+        location=(0, 0, half_depth)
+    )
+    sphere_top = bpy.context.active_object
+
+    # Create bottom sphere
+    bpy.ops.mesh.primitive_uv_sphere_add(
+        radius=radius,
+        location=(0, 0, -half_depth)
+    )
+    sphere_bottom = bpy.context.active_object
+
+    # Select all objects
+    bpy.ops.object.select_all(action='DESELECT')
+
+    cylinder.select_set(True)
+    sphere_top.select_set(True)
+    sphere_bottom.select_set(True)
+
+    bpy.context.view_layer.objects.active = cylinder
+
+    # Join into one mesh
+    bpy.ops.object.join()
+
+    capsule = bpy.context.active_object
+    capsule.name = name
+
+    capsule.hide_render = False
+    capsule.hide_viewport = False
+
+    capsule.data.materials.append(collider_material)
+
+    return capsule
+
+
 def create_collider(name, geom_type, scale):
     if geom_type == 0:  # plane
         collider = None  # todo: plane collider
     elif geom_type == 2:  # sphere
         collider = create_sphere(name)
     elif geom_type == 3:  # capsule
-        collider = None  # todo: capsule collider
+        collider = create_capsule(name, radius=scale[0], half_depth=scale[1])
     else:
         collider = None  # todo: other collider types
     return collider
@@ -58,7 +104,8 @@ def update_collider(collider, frame_num, dashboard_src):
         collider.location = pos
         collider.rotation_mode = 'QUATERNION'
         collider.rotation_quaternion = rotation
-        collider.scale = scale
+        if geom_type != 3:
+            collider.scale = scale
 
         collider.keyframe_insert(data_path="location", frame=frame_num)
         collider.keyframe_insert(data_path="rotation_quaternion", frame=frame_num)

@@ -1,4 +1,4 @@
-import msk_warp
+import bolt
 import torch
 
 from msk_envs.utils.frame_data import *
@@ -6,17 +6,17 @@ from msk_envs.utils.transforms import get_position_from_transform, get_rotation_
 
 
 def parse_visual_data(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
-        visual_load_results: list[msk_warp.MeshLoadResult],
+        m: bolt.Model,
+        d: bolt.Data,
+        visual_load_results: list[bolt.MeshLoadResult],
         world_id: int
 ) -> list[VisualData]:
-    visual_transforms = msk_warp.get_visual_transforms(d)
+    visual_transforms = bolt.get_visual_transforms(d)
     visuals_positions = get_position_from_transform(visual_transforms)
     visual_rotations = get_rotation_from_transform(visual_transforms)
 
     visuals = []
-    for i in range(msk_warp.get_num_visuals(m)):
+    for i in range(bolt.get_num_visuals(m)):
         visual_load = visual_load_results[i]
         visual_data = VisualData(
             mesh_file=visual_load.file,
@@ -29,20 +29,20 @@ def parse_visual_data(
 
 
 def parse_collider_data(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         collider_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[ColliderData]:
-    collider_types = msk_warp.get_collider_types(m)
-    collider_scales = msk_warp.get_collider_sizes(m)
-    collider_transforms = msk_warp.get_collider_transforms(d)
+    collider_types = bolt.get_collider_types(m)
+    collider_scales = bolt.get_collider_sizes(m)
+    collider_transforms = bolt.get_collider_transforms(d)
     collider_positions = get_position_from_transform(collider_transforms)
     collider_rotations = get_rotation_from_transform(collider_transforms)
-    collider_forces = msk_warp.collider_forces(d)
+    collider_forces = bolt.collider_forces(d)
 
     colliders = []
-    for i in range(msk_warp.get_num_colliders(m)):
+    for i in range(bolt.get_num_colliders(m)):
         collider_data = ColliderData(
             name=collider_idx_to_name[i],
             geom_type=int(collider_types[i]),
@@ -56,23 +56,23 @@ def parse_collider_data(
 
 
 def parse_muscle_data(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         muscle_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[MuscleData]:
-    muscle_activations = msk_warp.muscle_activations(d)
-    muscle_excitations = msk_warp.muscle_excitations(d)
-    muscle_actuations = msk_warp.muscle_actuations(d)
-    muscle_path_lengths = msk_warp.muscle_path_lengths(d)
-    muscle_path_velocities = msk_warp.muscle_path_velocities(d)
-    muscle_moment_arms = msk_warp.muscle_moment_arms(d)
+    muscle_activations = bolt.muscle_activations(d)
+    muscle_excitations = bolt.muscle_excitations(d)
+    muscle_actuations = bolt.muscle_actuations(d)
+    muscle_path_lengths = bolt.muscle_path_lengths(d)
+    muscle_path_velocities = bolt.muscle_path_velocities(d)
+    muscle_moment_arms = bolt.muscle_moment_arms(d)
 
-    muscle_metadata = msk_warp.muscle_metadata_np(m)
-    muscle_length_info = msk_warp.muscle_length_info_np(d)
+    muscle_metadata = bolt.muscle_metadata_np(m)
+    muscle_length_info = bolt.muscle_length_info_np(d)
     # # sort the muscles based on fiber_passive_force_length_multiplier
     # import numpy as np
-    # nm = msk_warp.get_num_muscles(m)
+    # nm = bolt.get_num_muscles(m)
     # # Muscle names
     # muscle_names = [muscle_idx_to_name[i] for i in range(nm)]
     # # Passive multiplier
@@ -107,14 +107,14 @@ def parse_muscle_data(
     #
     # quit()
 
-    muscle_velocity_info = msk_warp.muscle_velocity_info_np(d)
+    muscle_velocity_info = bolt.muscle_velocity_info_np(d)
 
-    site_positions = msk_warp.site_positions(d)
-    muscle_site_adr = msk_warp.muscle_site_adr(m)
-    muscle_site_num = msk_warp.muscle_site_num(m)
+    site_positions = bolt.site_positions(d)
+    muscle_site_adr = bolt.muscle_site_adr(m)
+    muscle_site_num = bolt.muscle_site_num(m)
 
     muscles = []
-    for i in range(msk_warp.get_num_muscles(m)):
+    for i in range(bolt.get_num_muscles(m)):
         pt_adr = muscle_site_adr[i]
         n_pts = muscle_site_num[i]
         muscle_data = MuscleData(
@@ -143,17 +143,17 @@ def parse_muscle_data(
 
 
 def parse_actuator_data(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         actuation_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[ActuatorData]:
-    actuator_activations = msk_warp.actuator_activations(d)
-    actuator_excitations = msk_warp.actuator_excitations(d)
-    actuator_metadata = msk_warp.actuator_metadata_np(m)
+    actuator_activations = bolt.actuator_activations(d)
+    actuator_excitations = bolt.actuator_excitations(d)
+    actuator_metadata = bolt.actuator_metadata_np(m)
 
     actuators = []
-    for i in range(msk_warp.get_num_actuators(m)):
+    for i in range(bolt.get_num_actuators(m)):
         actuator_data = ActuatorData(
             name=actuation_idx_to_name[i],
             optimal_force=float(actuator_metadata["optimal_force"][i]),
@@ -165,17 +165,17 @@ def parse_actuator_data(
 
 
 def parse_kinetic_data(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         body_name_to_idx: dict[str, int],
         world_id: int
 ) -> KineticData:
-    # com = msk_warp.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
-    body_com_positions = msk_warp.body_com_positions(d)[world_id]
-    grf = msk_warp.grf(d)[world_id].tolist()
-    gravity = msk_warp.gravity(m)
-    com = msk_warp.body_subtree_com_positions(d)[world_id, 0].tolist()
-    mass = msk_warp.body_mass(m).sum()
+    # com = bolt.subtree_com_positions(d)[world_id][1].tolist()  # why am I hardcoded!
+    body_com_positions = bolt.body_com_positions(d)[world_id]
+    grf = bolt.grf(d)[world_id].tolist()
+    gravity = bolt.gravity(m)
+    com = bolt.body_subtree_com_positions(d)[world_id, 0].tolist()
+    mass = bolt.body_mass(m).sum()
 
     if "talus_l" in body_name_to_idx and "talus_r" in body_name_to_idx:
         foot_pos_l = tuple(body_com_positions[body_name_to_idx["talus_l"]].tolist())
@@ -201,19 +201,19 @@ def find_index_1d(tensor, x):
 
 
 def parse_joint_angles(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         qpos_idx_to_name: dict[int, str],
         limit_id_lookup: dict[str, tuple[float, float]],
         world_id: int,
         ref_joint_angles: torch.Tensor | None
 ) -> list[NamedValue]:
-    joint_angles = msk_warp.joint_positions(d)
-    # joint_limit_ranges = msk_warp.joint_limit_ranges(m)
-    # joint_limit_qadr = list(msk_warp.joint_limit_qadr(m))
+    joint_angles = bolt.joint_positions(d)
+    # joint_limit_ranges = bolt.joint_limit_ranges(m)
+    # joint_limit_qadr = list(bolt.joint_limit_qadr(m))
     angles = []
 
-    for i in range(msk_warp.get_num_qpos(m)):
+    for i in range(bolt.get_num_qpos(m)):
         qpos_name = qpos_idx_to_name[i]
         reference = None if ref_joint_angles is None else float(ref_joint_angles[world_id][i].item())
         limits = limit_id_lookup[qpos_name]
@@ -229,31 +229,31 @@ def parse_joint_angles(
 
 
 def parse_joint_velocities(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         world_id: int
 ) -> list[NamedValue]:
-    joint_velocities = msk_warp.joint_velocities(d)
+    joint_velocities = bolt.joint_velocities(d)
     velocities = []  # todo
     return velocities
 
 
 def parse_joint_moments(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         dof_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[JointMoment]:
-    net_moment = msk_warp.joint_moments(d)
-    ufrc_spring = msk_warp.ufrc_spring(d)
-    ufrc_damper = msk_warp.ufrc_damper(d)
-    ufrc_muscle = msk_warp.ufrc_muscle(d)
-    ufrc_muscle_passive = msk_warp.ufrc_muscle_passive(d)
-    ufrc_actuator = msk_warp.ufrc_actuator(d)
-    ufrc_limit = msk_warp.ufrc_limit(d)
+    net_moment = bolt.joint_moments(d)
+    ufrc_spring = bolt.ufrc_spring(d)
+    ufrc_damper = bolt.ufrc_damper(d)
+    ufrc_muscle = bolt.ufrc_muscle(d)
+    ufrc_muscle_passive = bolt.ufrc_muscle_passive(d)
+    ufrc_actuator = bolt.ufrc_actuator(d)
+    ufrc_limit = bolt.ufrc_limit(d)
 
     moments = []
-    for i in range(msk_warp.get_num_dofs(m)):
+    for i in range(bolt.get_num_dofs(m)):
         dof_name = dof_idx_to_name[i]
 
         angle = JointMoment(
@@ -271,22 +271,22 @@ def parse_joint_moments(
 
 
 def parse_joint_passive_moments(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         qpos_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[JointMuscleBreakdown]:
-    qfrc_muscle_passive_breakdown = msk_warp.qfrc_muscle_passive_breakdown(d)
-    qfrc_muscle_active_breakdown = msk_warp.qfrc_muscle_active_breakdown(d)
+    qfrc_muscle_passive_breakdown = bolt.qfrc_muscle_passive_breakdown(d)
+    qfrc_muscle_active_breakdown = bolt.qfrc_muscle_active_breakdown(d)
 
     moments = []
-    for i in range(msk_warp.get_num_qpos(m)):
+    for i in range(bolt.get_num_qpos(m)):
         qpos_name = qpos_idx_to_name[i]
 
         # Build passive muscle breakdown
         passive_breakdown = []
         active_breakdown = []
-        for j in range(msk_warp.get_num_muscles(m)):
+        for j in range(bolt.get_num_muscles(m)):
             passive_breakdown.append(
                 float(qfrc_muscle_passive_breakdown[world_id][i][j].item())
             )
@@ -304,18 +304,18 @@ def parse_joint_passive_moments(
 
 
 def parse_body_forces(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         body_idx_to_name: dict[int, str],
         world_id: int
 ) -> list[BodyForces]:
-    body_force_gravity = msk_warp.body_force_gravity(d)
-    body_force_contact = msk_warp.body_force_contact(d)
-    body_force_muscle = msk_warp.body_force_muscle(d)
-    body_force_drag = msk_warp.body_force_drag(d)
+    body_force_gravity = bolt.body_force_gravity(d)
+    body_force_contact = bolt.body_force_contact(d)
+    body_force_muscle = bolt.body_force_muscle(d)
+    body_force_drag = bolt.body_force_drag(d)
 
     body_forces = []
-    for i in range(msk_warp.get_num_bodies(m)):
+    for i in range(bolt.get_num_bodies(m)):
         angle = BodyForces(
             name=body_idx_to_name[i],
             gravity=tuple(body_force_gravity[world_id][i].tolist()),
@@ -328,12 +328,12 @@ def parse_body_forces(
 
 
 def parse_beam_points(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         world_id: int
 ) -> list[PointData]:
     points = []
-    beam_point_pos = msk_warp.get_beam_visual_positions(d)[world_id]
+    beam_point_pos = bolt.get_beam_visual_positions(d)[world_id]
     beam_point_pos = beam_point_pos.reshape(-1, 3)
     for i in range(beam_point_pos.shape[0]):
         point = PointData(
@@ -345,8 +345,8 @@ def parse_beam_points(
 
 
 def parse_frame(
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         body_name_to_idx: dict[str, int],
         qpos_idx_to_name: dict[int, str],
         qpos_name_to_idx: dict[str, int],
@@ -355,7 +355,7 @@ def parse_frame(
         muscle_idx_to_name: dict[int, str],
         actuation_idx_to_name: dict[int, str],
         collider_idx_to_name: dict[int, str],
-        visual_load_results: list[msk_warp.MeshLoadResult],
+        visual_load_results: list[bolt.MeshLoadResult],
         world_id: int,
         frame_time: float,
         scene_settings: SceneSettings,
@@ -430,14 +430,14 @@ def add_target(
 
 def add_ext_forces_to_frame(
         frame: FrameData,
-        m: msk_warp.Model,
-        d: msk_warp.Data,
+        m: bolt.Model,
+        d: bolt.Data,
         idx_world: int
 ):
-    num_bodies = msk_warp.get_num_bodies(m)
-    body_transforms = msk_warp.body_transforms(d)
+    num_bodies = bolt.get_num_bodies(m)
+    body_transforms = bolt.body_transforms(d)
     body_positions = get_position_from_transform(body_transforms)
-    ext_forces = msk_warp.body_user_forces(d)
+    ext_forces = bolt.body_user_forces(d)
     for i in range(1, num_bodies):
         force = ext_forces[idx_world][i][3:6].tolist()
         point = body_positions[idx_world][i].tolist()

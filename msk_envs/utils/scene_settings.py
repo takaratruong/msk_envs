@@ -6,6 +6,9 @@ class SceneSettings:
     lanes: bool = False
     """ whether to render lane lines """
 
+    curve: bool = False
+    """ whether to render lane curve """
+
     lane_width: float = 0.0
     """ the width of lane lines, only used when lanes=True """
 
@@ -18,6 +21,7 @@ class SceneSettings:
     def to_dict(self):
         return {
             "lanes": self.lanes,
+            "curve": self.curve,
             "lane_width": self.lane_width,
             "meter_markers": self.meter_markers,
             "axes": self.axes
@@ -27,6 +31,7 @@ class SceneSettings:
     def from_dict(d: dict):
         return SceneSettings(
             lanes=d.get("lanes", False),
+            curve=d.get("curve", False),
             lane_width=d.get("lane_width", 0.0),
             meter_markers=d.get("meter_markers", False),
             axes=d.get("axes", False)

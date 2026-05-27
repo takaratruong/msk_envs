@@ -4,6 +4,7 @@ import gzip
 import json
 import os
 import re
+from bolt import get_geometry_dir
 from pathlib import Path
 from nicegui import ui, app, events
 from timeline_controller import TimelineController
@@ -197,8 +198,8 @@ app.add_static_files('/css', 'css')
 app.add_static_files('/js', 'js')
 app.add_static_files('/trajectories', TRAJ_DIR)
 
+app.add_static_files(str(get_geometry_dir()), str(get_geometry_dir()))
 app.add_static_files('/assets', 'assets')
-app.add_static_files('/assets/geometry', 'assets/geometry')
 app.add_static_files('/assets/textures', 'assets/textures')
 
 # Header import three js

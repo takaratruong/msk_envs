@@ -19,7 +19,7 @@ def parse_visual_data(
     for i in range(bolt.get_num_visuals(m)):
         visual_load = visual_load_results[i]
         visual_data = VisualData(
-            mesh_file=visual_load.file,
+            mesh_file=bolt.get_visual_path(visual_load.file),
             pos=visuals_positions[world_id][i].tolist(),
             rot=visual_rotations[world_id][i].tolist(),
             scale=visual_load.scale,
@@ -404,7 +404,7 @@ def add_reference_visuals(
         ref_pos = ref_visuals_pos[i].tolist()
         ref_rot = ref_visuals_rot[i].tolist()
         ref_visual = VisualData(
-            mesh_file=frame.visuals[i].mesh_file,
+            mesh_file=bolt.get_visual_path(frame.visuals[i].mesh_file),
             pos=ref_pos,
             rot=ref_rot,
             scale=frame.visuals[i].scale,

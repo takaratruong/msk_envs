@@ -1,4 +1,6 @@
 import os
+import bolt
+
 from dataclasses import dataclass
 from typing import Optional
 from msk_envs.utils.scene_settings import SceneSettings
@@ -69,14 +71,8 @@ class VisualData:
     opacity: float = 1.0
 
     def to_dict(self):
-        # Remove .vtp if it exists and replace with .obj
-        mesh_obj_file = self.mesh_file
-        if mesh_obj_file.endswith('.vtp'):
-            mesh_obj_file = self.mesh_file
-        mesh_obj_file = os.path.join("assets", "geometry", mesh_obj_file)
-
         return {
-            "mesh_file": mesh_obj_file,
+            "mesh_file": self.mesh_file,
             "pos": list(self.pos),
             "rot": list(self.rot),
             "scale": list(self.scale),

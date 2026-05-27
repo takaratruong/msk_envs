@@ -8,4 +8,4 @@ tqdm
 tyro
 vtk
 wandb
-
+nicegui==2.22.2

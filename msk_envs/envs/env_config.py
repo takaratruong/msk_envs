@@ -1,6 +1,7 @@
 import json
-import bolt
 from dataclasses import dataclass, field
+
+import bolt
 
 from .env_variants import DerivedEnv
 
@@ -27,13 +28,13 @@ class EnvConfig:
     # --- Model articulation properties ---
     model_root_free: bool = True
     """ Whether the model root is free (floating base) """
-    model_path: str = "../msk_models/model_motor_arms_full_contact.osim"
+    model_path: str = ""
     """ OpenSim model file path """
     enable_drag: bool = False
     """ Whether to enable drag forces """
     use_specified_contact_params: bool = True
     """ Whether to use contact parameters defined in contact_params_path """
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
+    contact_params_path: str = ""
     """ Contact parameters file path (YAML). NOTE: this overrides contact parameters defined in the model file """
     armature: float = 0.0
     """ Additional armature to add to joints (decreases realism but increases performance) """
@@ -63,13 +64,13 @@ class EnvConfig:
     """ For DGF active force length curve, the scaling factor of the width """
     muscle_fiber_damping: float = 0.1
     """ Fiber damping (0.0 = undamped) """
-    muscle_v_max: float = 12.0
+    muscle_v_max: float = 10.0
     """ Maximum contraction velocity (in optimal fiber lengths per second) """
     muscle_dynamics_substeps: int = 0
     """ Number of substeps for muscle dynamics integration (can improve stability) """
     use_function_based_path: bool = True
     """ Whether to use function-based path (or geometry path)"""
-    muscle_function_path: str = "../msk_models/athlete_model_FunctionBasedPathSet.xml"
+    muscle_function_path: str = ""
     """ Function-based path data file """
     ignore_short_elastic_tendons: bool = False
     """ Ignore tendon dynamics for muscles where tendon slack length < optimal fiber length"""
@@ -81,9 +82,9 @@ class EnvConfig:
     """ Use MuJoCo muscle type (fixed length tendons, no pennation) """
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    starting_pose_path: str = ""
     """ Starting pose file path (YAML) """
-    target_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    target_pose_path: str = ""
     """ Target pose file path for reach pose env (YAML) """
     noise_start: bool = True
     """ Whether to add noise to starting state """
@@ -97,11 +98,11 @@ class EnvConfig:
     """ Whether to swap left/right sides when adding noise to starting state """
     enforce_ground_contact: bool = True
     """ Whether to enforce contact with ground at start (for free body only) """
-    motion_name: str = "../motions/pred_sprint_two_step.mot"
+    motion_name: str = ""
     """ motion file name for IMITATE environments (or variants) """
     use_prescribed_starting_activations: bool = False
     """ Whether to use prescribed starting activations from file """
-    starting_activations_path: str = "../msk_models/starting_activations.yaml"
+    starting_activations_path: str = ""
     """ Starting activations file path (YAML) """
     default_activation: float = -1.0
     """ Default activation value when prescribed activations are not used. -1.0 is random. """
@@ -163,160 +164,14 @@ class EnvConfig:
 
 
 @dataclass
-class EnvConfigGeneric(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athlete16_reduced_nicos.osim"
-    muscle_function_path: str = "../msk_models/athlete16paths.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigTall(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athletetall_reduced_no_neck.osim"
-    muscle_function_path: str = "../msk_models/athletetall2paths_reduced_no_traps.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigHybrid(EnvConfig):
+class EnvConfigSprinter(EnvConfig):
     model_path: str = "../msk_models/hybrid_model.osim"
     muscle_function_path: str = "../msk_models/hybrid_model_fn.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
+    contact_params_path: str = "../msk_models/contact_params/contact_params_nicos.yaml"
+    starting_pose_path: str = "../msk_models/poses/starting_pose_stand.yaml"
+    ignore_short_elastic_tendons: bool = True
+
+    muscle_multiplier: float = 2.0
+    muscle_v_max: float = 12.0
     armature: float = 1e-3
     integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigHybridMotorArms(EnvConfig):
-    model_path: str = "../msk_models/hybrid_model_motor_arms.osim"
-    muscle_function_path: str = "../msk_models/hybrid_model_motor_arms_fn.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigHybridNoArms(EnvConfig):
-    model_path: str = "../msk_models/hamner_lower_new_upper_no_arms.osim"
-    muscle_function_path: str = "../msk_models/hamner_lower_new_upper_fn_no_arms.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigTallMotorArms(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athletetall_reduced_motor_arms.osim"
-    muscle_function_path: str = "../msk_models/athletetallpaths_motorarms_full.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigLower(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    # model_path: str = "../msk_models/athlete16_lower_reduced.osim"
-    # muscle_function_path: str = "../msk_models/athlete16paths_lower.xml"
-    model_path: str = "../msk_models/athlete16_lower_reduced_stronger_plant_nicos.osim"
-    muscle_function_path: str = "../msk_models/athlete16paths_lower.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigTallLower(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athletetall_reduced_no_neck_lower.osim"
-    muscle_function_path: str = "../msk_models/athletetall2paths_reduced_no_traps_lower.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigTallLowerOldJointLimits(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/athletetall_reduced_no_neck_lower_old_joint_limits.osim"
-    muscle_function_path: str = "../msk_models/athletetall2paths_reduced_no_traps_lower.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigTallLowerOldJointLimitsOldUpper(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    model_path: str = "../msk_models/new_model_old_limits_old_upper.osim"
-    muscle_function_path: str = "../msk_models/new_model_old_limits_old_upper_paths.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    contact_params_path: str = "../msk_models/contact_params_nicos.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigUpper(EnvConfig):
-    model_path: str = "../msk_models/athletetall_reduced_upper.osim"
-    muscle_function_path: str = "../msk_models/athletetall_reducedpaths_upper.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 0.1
-
-
-@dataclass
-class EnvConfigUpperRegression(EnvConfig):
-    model_path: str = "../msk_models/regression/regression_model_upper.osim"
-    muscle_function_path: str = "../msk_models/regression/regression_fn_upper.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-    armature: float = 1e-3
-    integrator_accuracy: float = 0.1
-
-
-@dataclass
-class EnvConfigUpperNoSpine(EnvConfig):
-    model_path: str = "../msk_models/athlete6_upper_no_spine.osim"
-    muscle_function_path: str = "../msk_models/athlete6path_upper.xml"
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-
-
-@dataclass
-class EnvConfigUpperRight(EnvConfig):
-    model_path: str = "../msk_models/athlete_upper_right_only.osim"
-    use_function_based_path: bool = False
-    starting_pose_path: str = "../msk_models/starting_pose_stand.yaml"
-
-
-@dataclass
-class EnvConfigRegression(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-    model_path: str = "../msk_models/regression/regression_model.osim"
-    muscle_function_path: str = "../msk_models/regression/regression_fn.xml"
-    starting_pose_path: str = "../msk_models/regression/starting_pose_run.yaml"
-    contact_params_path: str = "../msk_models/regression/contact_params_regression.yaml"
-
-
-@dataclass
-class EnvConfigRegressionNoArms(EnvConfig):
-    """ Environment configuration for no-hands model"""
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-    model_path: str = "../msk_models/regression/regression_model_no_arms.osim"
-    muscle_function_path: str = "../msk_models/regression/regression_fn.xml"
-    starting_pose_path: str = "../msk_models/regression/starting_pose_run.yaml"
-    contact_params_path: str = "../msk_models/regression/contact_params_regression.yaml"

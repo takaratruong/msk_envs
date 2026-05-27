@@ -139,7 +139,7 @@ class SprintBlockStartConfig(LaneConfig):
         env_variant=DerivedEnv.SPRINT_BLOCK_START,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_blockstart_hybrid.yaml",
+        starting_pose_path="../msk_models/poses/starting_pose_blockstart.yaml",
         noise_start=False,
         swap_lr=False,
         default_activation=0.01,
@@ -152,7 +152,7 @@ class BackpedalConfig(LaneConfig):
         env_variant=DerivedEnv.BACKPEDAL,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_backpedal_hybrid.yaml",
+        starting_pose_path="../msk_models/poses/starting_pose_backpedal.yaml",
     ))
 
 
@@ -172,7 +172,7 @@ class HurdlesConfig(LaneConfig):
         env_variant=DerivedEnv.HURDLES,
         delta_t=1.0 / 30.0,
         max_episode_duration=12.0,
-        starting_pose_path="../msk_models/poses/starting_pose_run_hybrid.yaml",
+        starting_pose_path="../msk_models/poses/starting_pose_run.yaml",
     ))
 
 
@@ -193,7 +193,7 @@ class RunTheBendConfig(LaneConfig):
         env_variant=DerivedEnv.RUN_THE_BEND,
         delta_t=1.0 / 30.0,
         max_episode_duration=12.0,
-        starting_pose_path="../msk_models/poses/starting_pose_run_hybrid.yaml",
+        starting_pose_path="../msk_models/poses/starting_pose_run.yaml",
     ))
 
 
@@ -203,7 +203,7 @@ class HopConfig(LaneConfig):
         env_variant=DerivedEnv.HOP,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        starting_pose_path="../msk_models/no_hands/starting_pose_left_leg_up.yaml",
+        starting_pose_path="../msk_models/poses/starting_pose_hop.yaml",
         swap_lr=False,
     ))
 
@@ -214,7 +214,7 @@ class CariocaConfig(LaneConfig):
         env_variant=DerivedEnv.CARIOCA,
         delta_t=1.0 / 30.0,
         max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_carioca_hybrid.yaml",
+        starting_pose_path="../msk_models/poses/starting_pose_carioca.yaml",
         noise_start=False,
         swap_lr=False,
     ))

@@ -1,8 +1,8 @@
 pelvis_tx:
   q: 0.0
-  v: 1.0
+  v: 0.0
 pelvis_ty:
-  q: 0.92
+  q: 1.05
   v: 0.0
 pelvis_tz:
   q: 0.0
@@ -21,28 +21,27 @@ pelvis_rotation:
   q: 0.0
   v: 0.0
 
-hip_flexion_r:
-  q: 0.3
-  v: 0.0
-hip_adduction_r:
+torso_extension:
   q: -0.1
   v: 0.0
-knee_angle_r:
-  q: 0.5
+
+hip_flexion_r:
+  q: 0.2
   v: 0.0
-ankle_angle_r:
-  q: 0.25
+hip_adduction_r:
+  q: -0.2
+  v: 0.0
+knee_angle_r:
+  q: -0.5
   v: 0.0
 
 hip_flexion_l:
-  q: 0.3
+  q: 0.2
   v: 0.0
 hip_adduction_l:
-  q: -0.1
+  q: -0.2
   v: 0.0
 knee_angle_l:
-  q: 0.5
+  q: -0.5
   v: 0.0
-ankle_angle_l:
-  q: 0.25
-  v: 0.0
+

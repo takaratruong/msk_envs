@@ -199,6 +199,7 @@ app.add_static_files('/js', 'js')
 app.add_static_files('/trajectories', TRAJ_DIR)
 
 app.add_static_files(str(get_geometry_dir()), str(get_geometry_dir()))
+app.add_static_files('/geometry', str(get_geometry_dir()))
 app.add_static_files('/assets', 'assets')
 app.add_static_files('/assets/textures', 'assets/textures')
 

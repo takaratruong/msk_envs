@@ -9,7 +9,7 @@ const planeTexture = textureLoader.load('assets/textures/plane.png');
 
 const modelCache = {};
 
-function loadModel(file, opacity, color, callback) {
+function loadVisual(file, opacity, color, callback) {
     opacity = opacity !== undefined ? opacity : 1.0;
     const cache_key = file + color + opacity;
 
@@ -129,4 +129,4 @@ function loadTarget(radius, rot, color, callback) {
     callback(sphere);
 }
 
-export {loadModel, loadCollider, loadTarget};
+export {loadVisual, loadCollider, loadTarget};

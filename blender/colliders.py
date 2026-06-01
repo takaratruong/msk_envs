@@ -81,7 +81,7 @@ def create_collider(name, geom_type, scale):
     return collider
 
 
-def update_collider(collider, frame_num, dashboard_src):
+def update_collider(collider, frame_num):
     # Fetch object data
     name = collider["name"]
     geom_type = collider["geom_type"]

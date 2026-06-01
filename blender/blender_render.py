@@ -22,11 +22,10 @@ from visuals import update_visual, clear_visual_cache
 from colliders import update_collider, clear_collider_cache
 from targets import update_target, clear_target_cache
 
-# Locate dashboard
+# Locate files
 script_dir = Path(__file__).resolve().parent.parent.parent
-dashboard_src = os.path.join(script_dir, "dashboard")
-json_path = os.path.join(dashboard_src, "trajectories/test/render.json.gz")  # Trajectory to render
-plane_texture_path = os.path.join(dashboard_src, "assets/textures/plane.png")  # Additional assets
+json_path = "/home/marth/Documents/sshfs/msk_envs/dashboard/trajectories/sprint_seed0_2026-05-27_18-31/145000_0.json.gz"
+geometry_path = "/home/marth/Documents/bolt/data/geometry"
 
 
 def main():
@@ -63,13 +62,13 @@ def main():
         update_camera(camera, cam_pos, frame_num)
 
         for visual in frame_data["visuals"]:
-            update_visual(visual, frame_num, dashboard_src)
+            update_visual(visual, frame_num, geometry_path)
 
         for collider in frame_data["colliders"]:
             collider_name = collider["name"]
             # Only draw the shoes
             if collider_name.startswith("left_") or collider_name.startswith("right_"):
-                update_collider(collider, frame_num, dashboard_src)
+                update_collider(collider, frame_num)
 
         for muscle in frame_data["muscles"]:
             update_muscle(muscle, frame_num)

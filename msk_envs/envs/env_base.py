@@ -32,7 +32,6 @@ class MSKEnv:
             if collider == bolt.GROUND_COLLIDER:
                 collider.transform = wp.transform(wp.vec3(), wp.quat(self.ground_rotation))
 
-
         # Set collider contact properties
         if env_config.use_specified_contact_params:
             contact_params_path = os.path.join(self.curr_path, env_config.contact_params_path)
@@ -235,7 +234,7 @@ class MSKEnv:
         self.num_actuators = bolt.get_num_actuators(self.m)
         self.num_colliders = bolt.get_num_colliders(self.m)
         self.muscle_metadata = bolt.muscle_metadata(self.m)
-        self.muscle_max_isometric_forces = bolt.muscle_max_isometric_forces(self.m)
+        self.muscle_max_isometric_forces = bolt.muscle_max_isometric_forces(self.m)  # read-only
         # [num_envs, num_bodies]
         self.body_mass = bolt.body_mass(self.m)
         self.total_mass = self.body_mass.sum()

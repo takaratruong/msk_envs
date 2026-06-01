@@ -87,6 +87,9 @@ class TD3Config:
     use_tanh: bool = True
     """whether to use tanh for the action"""
 
+    use_synergistic_noise: bool = True
+    """whether to use synergistic noise"""
+
     use_gsde: bool = False
     """ whether to use gSDE for exploration """
     gsde_steps: int = 10

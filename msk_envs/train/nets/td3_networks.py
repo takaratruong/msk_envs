@@ -1,7 +1,9 @@
+import math
+from typing import Optional
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
 
 from msk_envs.train.nets.normalizers import EmpiricalNormalization
 from msk_envs.train.nets.simba import SimbaActor
@@ -284,27 +286,74 @@ class Actor(nn.Module):
             action = mean
         return action
 
-    def explore(self, obs: torch.Tensor, dones: torch.Tensor) -> torch.Tensor:
+    def _sample_new_noise(self, logits: torch.Tensor, dones: Optional[torch.Tensor]):
         # Generate new noise scales for done environments
         if dones is not None and dones.sum() > 0:
-            new_scales = (torch.rand(self.n_envs, 1, device=obs.device) *
+            new_scales = (torch.rand(self.n_envs, 1, device=logits.device) *
                           (self.std_max - self.std_min) + self.std_min)
             dones_view = dones.view(-1, 1) > 0
             self.noise_scales.copy_(torch.where(dones_view, new_scales, self.noise_scales))
 
-        # add noise to mean
-        act = self(obs)
-
         # Sample noise every gsde_steps or every step
         if self.use_gsde:
             resample_noise = (self.gsde_step_count % self.gsde_steps) == 0
-            new_noise = torch.randn_like(act) * self.noise_scales
+            new_noise = torch.randn_like(logits) * self.noise_scales
             self.noise.copy_(torch.where(resample_noise, new_noise, self.noise))
             self.gsde_step_count += 1
         else:
-            self.noise.copy_(torch.randn_like(act) * self.noise_scales)
+            self.noise.copy_(torch.randn_like(logits) * self.noise_scales)
+        return
 
-        return act + self.noise
+    def explore(self, obs: torch.Tensor, dones: Optional[torch.Tensor]) -> torch.Tensor:
+        x = self.net(obs)
+        logits = self.fc_mu(x)
+
+        self._sample_new_noise(logits, dones)
+
+        # # add noise to mean
+        # act = self(obs)
+        # return act + self.noise
+
+        noisy_logits = logits + self.noise
+        if self.use_tanh:
+            return torch.tanh(noisy_logits) * self.action_scale + self.action_bias
+        return noisy_logits
+
+    def explore_synergistic(
+            self,
+            obs: torch.Tensor,
+            dones: Optional[torch.Tensor],
+            isometric_forces: torch.Tensor,
+            moment_arms: torch.Tensor
+    ) -> torch.Tensor:
+        x = self.net(obs)
+        logits = self.fc_mu(x)
+
+        self._sample_new_noise(logits, dones)
+
+        # Grab "joint" noise: [envs, n_qpos]
+        _, n_muscles, n_qpos = moment_arms.shape
+        noise_joints = self.noise[:, :n_qpos]
+
+        # Compute muscle torque capacity matrix
+        scaled_isometric_forces = isometric_forces / torch.norm(isometric_forces)
+        R = moment_arms  # [n_envs, n_muscles, n_qpos]
+        W = scaled_isometric_forces.view(1, n_muscles, 1)  # [1, n_muscles, 1]
+        G = R * W  # [n_envs, n_muscles, n_qpos]
+
+        # Map joint noise to muscle noise
+        GtG = torch.bmm(G.transpose(1, 2), G)
+        GtG_damped = GtG + 1e-3 * torch.eye(n_qpos, device=GtG.device).unsqueeze(0)
+        y = torch.linalg.solve(GtG_damped, noise_joints.unsqueeze(-1))  # [n_envs, n_qpos, 1]
+        muscle_noise = torch.bmm(G, y).squeeze(-1)
+
+        # Add noise
+        noisy_logits = logits.clone()
+        noisy_logits[:, :n_muscles] += muscle_noise
+        noisy_logits[:, n_muscles:] += self.noise[..., n_muscles:]
+        if self.use_tanh:
+            return torch.tanh(noisy_logits) * self.action_scale + self.action_bias
+        return noisy_logits
 
 
 # The following are used for inference

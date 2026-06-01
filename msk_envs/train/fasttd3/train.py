@@ -145,7 +145,8 @@ def train(
         raise ValueError(f"Agent {td3_config.agent} not supported")
 
     actor = actor_cls(**actor_kwargs)
-    policy = actor.explore
+    explore = actor.explore
+    explore_synergistic = actor.explore_synergistic
 
     qnet = critic_cls(**critic_kwargs)
     qnet_target = critic_cls(**critic_kwargs)
@@ -381,8 +382,13 @@ def train(
             mode=compile_mode,
             backend=compile_backend,
         )
-        policy = torch.compile(
-            policy,
+        explore = torch.compile(
+            explore,
+            mode=None,
+            backend=compile_backend,
+        )
+        explore_synergistic = torch.compile(
+            explore_synergistic,
             mode=None,
             backend=compile_backend,
         )
@@ -453,7 +459,16 @@ def train(
         with logging_helper.record_collection_time():
             with torch.no_grad(), _maybe_amp():
                 norm_obs = normalize_obs(obs)
-                actions = policy(obs=norm_obs, dones=dones)
+                if td3_config.use_synergistic_noise:
+                    actions = explore_synergistic(
+                        obs=norm_obs,
+                        dones=dones,
+                        isometric_forces=envs.muscle_max_isometric_forces,
+                        moment_arms=envs.muscle_moment_arms,
+                    )
+                else:
+                    actions = explore(obs=norm_obs, dones=dones)
+
                 # DEP EXPLORATION
                 actions = dep_explorer.explore(muscle_states=envs.muscle_fiber_lengths, actions=actions)
 

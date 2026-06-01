@@ -234,6 +234,8 @@ class MSKEnv:
         self.num_muscles = bolt.get_num_muscles(self.m)
         self.num_actuators = bolt.get_num_actuators(self.m)
         self.num_colliders = bolt.get_num_colliders(self.m)
+        self.muscle_metadata = bolt.muscle_metadata(self.m)
+        self.muscle_max_isometric_forces = bolt.muscle_max_isometric_forces(self.m)
         # [num_envs, num_bodies]
         self.body_mass = bolt.body_mass(self.m)
         self.total_mass = self.body_mass.sum()
@@ -248,6 +250,8 @@ class MSKEnv:
         self.muscle_fiber_lengths = bolt.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = bolt.muscle_fiber_velocities(self.d)
         self.muscle_powers = bolt.muscle_powers(self.d)
+        # [num_envs, num_muscles, num_qpos]
+        self.muscle_moment_arms = bolt.muscle_moment_arms(self.d)
         # [num_envs, num_actuators]
         self.actuator_activations = bolt.actuator_activations(self.d)
         self.actuator_activations_dot = bolt.actuator_activations_dot(self.d)

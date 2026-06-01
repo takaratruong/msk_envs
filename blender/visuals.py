@@ -44,7 +44,7 @@ def import_obj(obj_path, identifier):
     return imported
 
 
-def update_visual(visual, frame_num, dashboard_src):
+def update_visual(visual, frame_num, geometry_path):
     # Fetch object data
     identifier = visual["mesh_file"]
     obj_path = visual["mesh_file"]
@@ -57,7 +57,7 @@ def update_visual(visual, frame_num, dashboard_src):
     rotation = q_conv @ rotation
 
     # Retrieve OBJ
-    obj_path = os.path.join(dashboard_src, obj_path)
+    obj_path = os.path.join(geometry_path, os.path.basename(obj_path))
     imported_objects = import_obj(obj_path, identifier)
 
     # Handle multiple objects from a single OBJ file

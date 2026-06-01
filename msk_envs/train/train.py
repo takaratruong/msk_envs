@@ -12,6 +12,7 @@ import warp as wp
 
 import msk_envs.train.fasttd3.train as fasttd3
 import msk_envs.train.fastsac.train as fastsac
+import msk_envs.train.qflex.train as qflex
 from msk_envs.utils.train_utils import set_seed, init_wandb_run
 from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.train.hyperparams import get_args, pretty_print_base_args
@@ -73,6 +74,7 @@ def main():
     env_config = args.env_config
     td3_config = args.td3_config
     sac_config = args.sac_config
+    qflex_config = args.qflex_config
     dep_config = args.dep_config
 
     if args.use_wandb:
@@ -124,6 +126,23 @@ def main():
             envs=envs,
             eval_envs=eval_envs,
             dep_explorer=dep_explorer,
+            traj_out_folder=traj_out_folder,
+            analytics_out_folder=analytics_out_folder,
+            exp_name=args.exp_name,
+            device=device,
+        )
+    elif args.algo == "qflex":
+        envs, eval_envs = _build_envs(
+            num_envs=qflex_config.num_envs,
+            num_eval_envs=qflex_config.num_eval_envs,
+            env_config=env_config,
+            build_cuda_graph=True,
+            device=device,
+        )
+        qflex.train(
+            qflex_config=qflex_config,
+            envs=envs,
+            eval_envs=eval_envs,
             traj_out_folder=traj_out_folder,
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,

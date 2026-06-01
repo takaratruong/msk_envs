@@ -2,6 +2,7 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 
+
 class EmpiricalNormalization(nn.Module):
     """Normalize mean and variance of values based on empirical values."""
 
@@ -144,3 +145,63 @@ class RewardNormalizer(nn.Module):
         return self._scale_reward(rewards)
 
 
+class BatchRenorm(nn.Module):
+    def __init__(
+            self,
+            num_features: int,
+            decay_rate: float,
+            eps: float = 1e-3,
+            r_max: float = 3.0,
+            d_max: float = 5.0,
+            warmup_steps: int = 10,
+    ) -> None:
+        super().__init__()
+        self.num_features = num_features
+        self.eps = eps
+        self.momentum = 1.0 - decay_rate  # fraction of incoming batch used in EMA
+        self.r_max = r_max
+        self.d_max = d_max
+        self.warmup_steps = warmup_steps
+
+        # Learnable affine: scale (weight) and offset (bias)
+        self.weight = nn.Parameter(torch.ones(num_features))
+        self.bias = nn.Parameter(torch.zeros(num_features))
+
+        # Non-trainable running statistics
+        self.register_buffer("running_mean", torch.zeros(num_features))
+        self.register_buffer("running_var", torch.ones(num_features))
+        self.register_buffer("num_batches_tracked", torch.tensor(0, dtype=torch.long))
+
+    def forward(self, x: torch.Tensor, is_training: bool = True) -> torch.Tensor:
+        """ Normalize *x* of shape (B, C) """
+        if is_training:
+            # batch statistics
+            mean = x.mean(dim=0)  # (C,)
+            var = x.var(dim=0, unbiased=False)  # (C,)
+            std = torch.sqrt(var + self.eps)
+            # renorm corrections (stop-gradient)
+            ra_std = torch.sqrt(self.running_var + self.eps)
+            r = (std / ra_std).detach().clamp(1.0 / self.r_max, self.r_max)
+            d = ((mean - self.running_mean) / ra_std).detach().clamp(-self.d_max, self.d_max)
+            # corrected statistics
+            custom_var = var / (r ** 2)
+            custom_mean = mean - d * std / r
+            # during warmup, use raw batch stats (warmed_up = counter >= warmup_th)
+            warmed_up = float(self.num_batches_tracked.item() >= self.warmup_steps)
+            custom_var = warmed_up * custom_var + (1.0 - warmed_up) * var
+            custom_mean = warmed_up * custom_mean + (1.0 - warmed_up) * mean
+            # update running statistics
+            with torch.no_grad():
+                self.running_mean.mul_(1.0 - self.momentum).add_(
+                    mean.detach(), alpha=self.momentum
+                )
+                self.running_var.mul_(1.0 - self.momentum).add_(
+                    var.detach(), alpha=self.momentum
+                )
+                self.num_batches_tracked += 1
+        else:
+            custom_mean = self.running_mean
+            custom_var = self.running_var
+
+        x_hat = (x - custom_mean) / torch.sqrt(custom_var + self.eps)
+        return self.weight * x_hat + self.bias

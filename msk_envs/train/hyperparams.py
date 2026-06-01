@@ -10,6 +10,7 @@ from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.dep.dep_config import DEPConfig
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
+from msk_envs.train.qflex.qflex_config import QFlexConfig
 from msk_envs.utils.train_utils import find_latest_checkpoint
 
 
@@ -31,6 +32,7 @@ class BaseArgs:
 
     td3_config: TD3Config = field(default_factory=TD3Config)
     sac_config: SACConfig = field(default_factory=SACConfig)
+    qflex_config: QFlexConfig = field(default_factory=QFlexConfig)
     dep_config: DEPConfig = field(default_factory=DEPConfig)
     env_config: EnvConfig = field(default_factory=EnvConfig)
 

@@ -87,7 +87,7 @@ class TD3Config:
     use_tanh: bool = True
     """whether to use tanh for the action"""
 
-    use_synergistic_noise: bool = True
+    use_synergistic_noise: bool = False
     """whether to use synergistic noise"""
 
     use_gsde: bool = False

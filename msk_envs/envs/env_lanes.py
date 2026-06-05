@@ -1,14 +1,13 @@
 import torch
 
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
+from msk_envs.utils.quat import rotate_vec
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, actuator_sq_penalty, head_acc_penalty, \
+    activation_square_penalty, mid_lane_reward, has_fallen, \
+    self_collision_penalty, muscle_activation_penalty
 from .env_base import MSKEnv
 from .env_config import EnvConfig
-from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, joint_penalty_w_ignore, \
-    actuator_sq_penalty, head_acc_penalty, activation_square_penalty, mid_lane_reward, has_fallen, \
-    self_collision_penalty, muscle_activation_penalty
 from ..utils.scene_settings import SceneSettings
-from ..utils.quat import quat_mul, quat_conjugate
 
 
 class LanesEnv(MSKEnv):
@@ -43,15 +42,6 @@ class LanesEnv(MSKEnv):
 
         self.fwd_axis = torch.tensor(build_axis(FWD_IDX, 1.0), device=self.device).unsqueeze(0)
         self.toes_ids = [self.lookup_body_id("toes_l"), self.lookup_body_id("toes_r")]
-        self.ignore_jnt_ids = [
-            self.lookup_dof_id("mtp_angle_l"),
-            self.lookup_dof_id("mtp_angle_r"),
-            self.lookup_dof_id("pro_sup_l"),
-            self.lookup_dof_id("pro_sup_r"),
-        ]
-        assert -1 not in self.toes_ids, "Toes body IDs not found in model"
-        self.ignore_jnt_ids = [dof_id for dof_id in self.ignore_jnt_ids if dof_id != -1]
-
         self.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(angle_tolerance, device=self.device)))
         self.lane_width = lane_width
         self.max_distance_reached = 0.0
@@ -67,34 +57,18 @@ class LanesEnv(MSKEnv):
          5. Joint velocities (qv)
          6. Relative body positions and rotations (wrst root), ignore ground
         """
-        # Grab bodies that aren't root or ground
-        bodies_mask = torch.ones(self.num_bodies, dtype=torch.bool, device=self.device)
-        bodies_mask[[self.ground_id, self.root_id]] = False
-        body_positions = self.body_positions[:, bodies_mask, :]
-        body_rotations = self.body_rotations[:, bodies_mask, :]
-
-        # Relative to root
-        relative_body_positions = body_positions - self.root_pos.unsqueeze(1)
-        root_rotation_inv = quat_conjugate(self.root_rot)
-        relative_body_rotations = quat_mul(root_rotation_inv.unsqueeze(1), body_rotations)
-
-        # Exclude the x position
+        # Exclude root x coordinate (forward along lane)
         root_x_qpos_id = self.qpos_id_lookup["pelvis_tx"]
         joint_positions_without_x = torch.cat((
             self.joint_positions[:, :root_x_qpos_id],
             self.joint_positions[:, root_x_qpos_id + 1:]),
             dim=1)
-
-        # time_curr = self.time.view(self.num_worlds, 1) / self.max_episode_duration
         obs = torch.cat([
-            # time_curr,
             self.muscle_activations,
             self.muscle_fiber_lengths,
             self.actuator_activations,
             joint_positions_without_x,
             self.joint_velocities,
-            # relative_body_positions.reshape(self.num_worlds, -1),
-            # relative_body_rotations.reshape(self.num_worlds, -1),
         ], dim=1)
         return obs.detach().clone()
 
@@ -104,15 +78,9 @@ class LanesEnv(MSKEnv):
 
         # Joint passive penalty
         squared_penalties = False
-        # rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
-        # rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
-        # rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
-        # rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
-        rew_spring = joint_penalty_w_ignore(self.ufrc_spring, self.ignore_jnt_ids, squared=squared_penalties)
-        rew_damper = joint_penalty_w_ignore(self.ufrc_damper, self.ignore_jnt_ids, squared=squared_penalties)
-        rew_limit = joint_penalty_w_ignore(self.ufrc_limit, self.ignore_jnt_ids, squared=squared_penalties)
-        # rew_muscle_passive = joint_penalty_w_ignore(self.ufrc_muscle_passive, self.toes_dof_ids,
-        #                                             squared=squared_penalties)
+        rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
+        rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
+        rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
         rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
         rew_muscle_activation = muscle_activation_penalty(self.muscle_activations)
 
@@ -134,7 +102,6 @@ class LanesEnv(MSKEnv):
             "rew_self_collision": rew_self_collision.detach(),
             "rew_head_acc_ang": rew_head_acc_ang.detach(),
             "rew_head_acc_lin": rew_head_acc_lin.detach(),
-            # "rew_metabolic": rew_metabolic.detach(),
         }
 
     def _is_body_facing_direction(self, body_id):

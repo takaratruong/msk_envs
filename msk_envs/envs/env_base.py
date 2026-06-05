@@ -249,6 +249,8 @@ class MSKEnv:
         self.muscle_fiber_lengths = bolt.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = bolt.muscle_fiber_velocities(self.d)
         self.muscle_powers = bolt.muscle_powers(self.d)
+        self.muscle_active_length_multiplier = bolt.muscle_active_length_multiplier(self.d)
+        self.muscle_active_velocity_multiplier = bolt.muscle_active_velocity_multiplier(self.d)
         # [num_envs, num_muscles, num_qpos]
         self.muscle_moment_arms = bolt.muscle_moment_arms(self.d)
         # [num_envs, num_actuators]

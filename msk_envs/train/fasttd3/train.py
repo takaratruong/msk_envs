@@ -463,7 +463,9 @@ def train(
                     actions = explore_synergistic(
                         obs=norm_obs,
                         dones=dones,
-                        isometric_forces=envs.muscle_max_isometric_forces,
+                        max_isometric_force=envs.muscle_max_isometric_forces,
+                        active_length_multiplier=envs.muscle_active_length_multiplier,
+                        active_velocity_multiplier=envs.muscle_active_velocity_multiplier,
                         moment_arms=envs.muscle_moment_arms,
                     )
                 else:

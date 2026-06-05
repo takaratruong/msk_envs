@@ -323,7 +323,9 @@ class Actor(nn.Module):
             self,
             obs: torch.Tensor,
             dones: Optional[torch.Tensor],
-            isometric_forces: torch.Tensor,
+            max_isometric_force: torch.Tensor,
+            active_length_multiplier: torch.Tensor,
+            active_velocity_multiplier: torch.Tensor,
             moment_arms: torch.Tensor
     ) -> torch.Tensor:
         x = self.net(obs)
@@ -335,17 +337,22 @@ class Actor(nn.Module):
         _, n_muscles, n_qpos = moment_arms.shape
         noise_joints = self.noise[:, :n_qpos]
 
+        # Compute relative strength/sensitivity of muscles
+        scaled_isometric_forces = max_isometric_force / torch.mean(max_isometric_force)
+        fal, fav = active_length_multiplier, active_velocity_multiplier
+        W = (scaled_isometric_forces.view(1, n_muscles) * fal * fav).unsqueeze(-1)  # [n_envs, n_muscles, 1]
         # Compute muscle torque capacity matrix
-        scaled_isometric_forces = isometric_forces / torch.norm(isometric_forces)
         R = moment_arms  # [n_envs, n_muscles, n_qpos]
-        W = scaled_isometric_forces.view(1, n_muscles, 1)  # [1, n_muscles, 1]
         G = R * W  # [n_envs, n_muscles, n_qpos]
-
         # Map joint noise to muscle noise
         GtG = torch.bmm(G.transpose(1, 2), G)
-        GtG_damped = GtG + 1e-3 * torch.eye(n_qpos, device=GtG.device).unsqueeze(0)
+        GtG_diag_mean = torch.mean(torch.diagonal(GtG, dim1=1, dim2=2), dim=1, keepdim=True)
+        GtG_damped = GtG + (1e-4 * GtG_diag_mean[:, None] * torch.eye(n_qpos, device=GtG.device))
         y = torch.linalg.solve(GtG_damped, noise_joints.unsqueeze(-1))  # [n_envs, n_qpos, 1]
         muscle_noise = torch.bmm(G, y).squeeze(-1)
+        # Match noise scales
+        muscle_noise_normalized = muscle_noise / (torch.std(muscle_noise, dim=-1, keepdim=True) + 1e-8)
+        muscle_noise = muscle_noise_normalized * self.noise_scales
 
         # Add noise
         noisy_logits = logits.clone()

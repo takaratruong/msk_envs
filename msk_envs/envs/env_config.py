@@ -1,7 +1,10 @@
 import json
 from dataclasses import dataclass, field
+from typing import Union
 
 import bolt
+import tyro
+from typing_extensions import Annotated
 
 from .env_variants import DerivedEnv
 
@@ -165,13 +168,33 @@ class EnvConfig:
 
 @dataclass
 class EnvConfigSprinter(EnvConfig):
-    model_path: str = "../msk_models/hybrid_model.osim"
-    muscle_function_path: str = "../msk_models/hybrid_model_fn.xml"
-    contact_params_path: str = "../msk_models/contact_params/contact_params_nicos.yaml"
-    starting_pose_path: str = "../msk_models/poses/starting_pose_stand.yaml"
+    model_path: str = "../msk_models/sprinter/sprinter_model.osim"
+    muscle_function_path: str = "../msk_models/sprinter/sprinter_model_fn.xml"
+    contact_params_path: str = "../msk_models/sprinter/contact_params/contact_params.yaml"
+    starting_pose_path: str = "../msk_models/sprinter/poses/starting_pose_stand.yaml"
     ignore_short_elastic_tendons: bool = True
 
     muscle_multiplier: float = 2.0
     muscle_v_max: float = 12.0
     armature: float = 1e-3
     integrator_accuracy: float = 1.0
+
+
+@dataclass
+class EnvConfigAthlete(EnvConfig):
+    model_path: str = "../msk_models/athlete/athlete.osim"
+    muscle_function_path: str = "../msk_models/athlete/athlete_fn.xml"
+    contact_params_path: str = "../msk_models/athlete/contact_params/contact_params.yaml"
+    starting_pose_path: str = "../msk_models/athlete/poses/starting_pose_run.yaml"
+    ignore_short_elastic_tendons: bool = True
+
+    muscle_multiplier: float = 2.0
+    muscle_v_max: float = 12.0
+    armature: float = 1e-3
+    integrator_accuracy: float = 1.0
+
+
+EnvConfigUnion = Union[
+    Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
+    Annotated[EnvConfigAthlete, tyro.conf.subcommand(name="athlete")],
+]

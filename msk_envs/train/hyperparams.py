@@ -1,11 +1,11 @@
 from dataclasses import dataclass, asdict, fields, field
 from datetime import datetime
 from typing import Union
-
+import sys
 import tyro
 from typing_extensions import Annotated
 
-from msk_envs.envs.env_config import EnvConfig, EnvConfigSprinter
+from msk_envs.envs.env_config import EnvConfig, EnvConfigUnion
 from msk_envs.envs.env_variants import DerivedEnv
 from msk_envs.train.dep.dep_config import DEPConfig
 from msk_envs.train.fastsac.sac_config import SACConfig
@@ -17,16 +17,13 @@ from msk_envs.utils.train_utils import find_latest_checkpoint
 @dataclass
 class BaseArgs:
     algo: str = "td3"
-
     project: str = "msk_sprinter"
     exp_prefix: str = ""
     exp_name: str = ""
     disable_wandb: bool = False
     resume: bool = False
     override_wandb_config: bool = False
-
     use_dep: bool = False
-
     seed: int = 1
     gpu_id: int = 0
 
@@ -34,11 +31,49 @@ class BaseArgs:
     sac_config: SACConfig = field(default_factory=SACConfig)
     qflex_config: QFlexConfig = field(default_factory=QFlexConfig)
     dep_config: DEPConfig = field(default_factory=DEPConfig)
-    env_config: EnvConfig = field(default_factory=EnvConfig)
+    env_config: EnvConfigUnion = field(default_factory=EnvConfig)
+
+    def _apply_env_overrides(self, pose_name: str = None, **overrides):
+        """
+        Applies task defaults first, and THEN overlays the command line changes
+        specified by the user.
+        """
+        # Identify the model folder name from the chosen class name
+        cls_name = self.env_config.__class__.__name__
+        model_folder = cls_name.replace("EnvConfig", "").lower() or "base"
+        # Find starting pose
+        if pose_name and hasattr(self.env_config, "starting_pose_path"):
+            overrides["starting_pose_path"] = f"../msk_models/{model_folder}/poses/{pose_name}"
+
+        # CLI-set fields
+        valid_fields = {f.name for f in fields(self.env_config.__class__)}
+        user_specified_fields = set()
+        for arg in sys.argv:
+            if arg.startswith("--env-config."):
+                clean_arg = arg.split("=")[0].replace("--env-config.", "").replace("-", "_")
+                if clean_arg in valid_fields:
+                    user_specified_fields.add(clean_arg)
+                # Handle tyro's boolean flag inversions (e.g., --env-config.no-noise-start)
+                elif clean_arg.startswith("no_") and clean_arg[3:] in valid_fields:
+                    user_specified_fields.add(clean_arg[3:])
+
+        saved_cli_changes = {
+            field_name: getattr(self.env_config, field_name)
+            for field_name in user_specified_fields
+            if hasattr(self.env_config, field_name)
+        }
+
+        # Apply all environment task overrides
+        for key, task_default_value in overrides.items():
+            if hasattr(self.env_config, key):
+                setattr(self.env_config, key, task_default_value)
+
+        # Re-apply the command line changes on top of the overrides
+        for key, user_cli_value in saved_cli_changes.items():
+            setattr(self.env_config, key, user_cli_value)
+        return
 
     def __post_init__(self):
-        """Compute derived fields after exp_prefix is set from outside"""
-        # Handle resume logic
         if self.resume and self.exp_prefix:
             checkpoint_path, found_exp_name, global_step = find_latest_checkpoint(self.exp_prefix)
             if checkpoint_path:
@@ -70,9 +105,7 @@ class BaseArgs:
 
 
 def pretty_print_base_args(args: BaseArgs):
-    """Nicely print BaseArgs (and env‑specific overrides) at experiment start."""
     args_dict = asdict(args)
-
     base_field_names = [f.name for f in fields(BaseArgs)]
     base_items = {k: args_dict.get(k) for k in base_field_names}
     extra_items = {k: v for k, v in args_dict.items() if k not in base_items}
@@ -127,115 +160,134 @@ class LaneConfig(BaseArgs):
 
 @dataclass
 class SprintConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.SPRINT,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_run.yaml",
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.SPRINT,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
 
 
 @dataclass
 class SprintBlockStartConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.SPRINT_BLOCK_START,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_blockstart.yaml",
-        noise_start=False,
-        swap_lr=False,
-        default_activation=0.01,
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_blockstart.yaml",
+            env_variant=DerivedEnv.SPRINT_BLOCK_START,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+            noise_start=False,
+            swap_lr=False,
+            default_activation=0.01,
+        )
 
 
 @dataclass
 class BackpedalConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.BACKPEDAL,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_backpedal.yaml",
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_backpedal.yaml",
+            env_variant=DerivedEnv.BACKPEDAL,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
 
 
 @dataclass
 class SideShuffleConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.SIDE_SHUFFLE,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_side.yaml",
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_side.yaml",
+            env_variant=DerivedEnv.SIDE_SHUFFLE,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
 
 
 @dataclass
 class HurdlesConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.HURDLES,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=12.0,
-        starting_pose_path="../msk_models/poses/starting_pose_run.yaml",
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.HURDLES,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=12.0,
+        )
 
 
 @dataclass
 class UphillSprintConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.SPRINT,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_run.yaml",
-        ground_rotation=(0.0, 0.0, 0.2, 0.8)  # ~30 deg incline
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.SPRINT,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+            ground_rotation=(0.0, 0.0, 0.2, 0.8),
+        )
 
 
 @dataclass
 class RunTheBendConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.RUN_THE_BEND,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=12.0,
-        starting_pose_path="../msk_models/poses/starting_pose_run.yaml",
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.RUN_THE_BEND,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=12.0,
+        )
 
 
 @dataclass
 class HopConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.HOP,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_hop.yaml",
-        swap_lr=False,
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_hop.yaml",
+            env_variant=DerivedEnv.HOP,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+            swap_lr=False,
+        )
 
 
 @dataclass
 class CariocaConfig(LaneConfig):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.CARIOCA,
-        delta_t=1.0 / 30.0,
-        max_episode_duration=10.0,
-        starting_pose_path="../msk_models/poses/starting_pose_carioca.yaml",
-        noise_start=False,
-        swap_lr=False,
-    ))
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_carioca.yaml",
+            env_variant=DerivedEnv.CARIOCA,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+            noise_start=False,
+            swap_lr=False,
+        )
 
 
 @dataclass
 class VerticalConfig(BaseArgs):
-    env_config: EnvConfig = field(default_factory=lambda: EnvConfigSprinter(
-        env_variant=DerivedEnv.VERTICAL,
-        delta_t=1.0 / 30.0,
-        starting_pose_path="../msk_models/poses/starting_pose_vertical.yaml",
-        default_activation=0.01,
-        noise_start=False,
-    ))
-
-    """Vertical jump environment specific reward scales"""
     lambda_jump: float = 1e-1
     lambda_limit: float = -3e-4
     lambda_alive: float = 1e-2
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_vertical.yaml",
+            env_variant=DerivedEnv.VERTICAL,
+            delta_t=1.0 / 30.0,
+            default_activation=0.01,
+            noise_start=False,
+        )
 
 
 Config = Union[
@@ -253,7 +305,6 @@ Config = Union[
 
 
 def get_args():
-    """Parse command-line arguments into Config dataclass."""
     args = tyro.cli(Config)
     args.use_wandb = not args.disable_wandb
     return args

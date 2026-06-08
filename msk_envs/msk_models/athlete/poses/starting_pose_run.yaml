@@ -1,0 +1,42 @@
+pelvis_tx:
+  q: 0.0
+  v: 2.0
+pelvis_ty:
+  q: 1.0
+  v: 0.0
+pelvis_tz:
+  q: 0.0
+  v: 0.0
+
+pelvis_quat_w:
+  q: 1.0
+  v: 0.0 # ignored (omega is defined by rot_x, rot_y, rot_z)
+pelvis_tilt:
+  q: 0.0
+  v: 0.0
+pelvis_list:
+  q: 0.0
+  v: 0.0
+pelvis_rotation:
+  q: 0.0
+  v: 0.0
+
+hip_flexion_r:
+  q: 0.5
+  v: 2.0
+knee_angle_r:
+  q: 1.5
+  v: 1.0
+ankle_angle_r:
+  q: 0.6
+  v: 0.0
+
+hip_flexion_l:
+  q: 0.165239
+  v: 0.0
+knee_angle_l:
+  q: 0.288801
+  v: 0.0
+ankle_angle_l:
+  q: 0.01971
+  v: 0.0

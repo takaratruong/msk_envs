@@ -310,14 +310,14 @@ class Actor(nn.Module):
 
         self._sample_new_noise(logits, dones)
 
-        # # add noise to mean
-        # act = self(obs)
-        # return act + self.noise
+        # add noise to output
+        act = self(obs)
+        return act + self.noise
 
-        noisy_logits = logits + self.noise
-        if self.use_tanh:
-            return torch.tanh(noisy_logits) * self.action_scale + self.action_bias
-        return noisy_logits
+        # noisy_logits = logits + self.noise
+        # if self.use_tanh:
+        #     return torch.tanh(noisy_logits) * self.action_scale + self.action_bias
+        # return noisy_logits
 
     def explore_synergistic(
             self,

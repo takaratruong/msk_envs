@@ -27,11 +27,11 @@ class BaseArgs:
     seed: int = 1
     gpu_id: int = 0
 
+    env_config: EnvConfigUnion = field(default_factory=EnvConfig)
     td3_config: TD3Config = field(default_factory=TD3Config)
     sac_config: SACConfig = field(default_factory=SACConfig)
     qflex_config: QFlexConfig = field(default_factory=QFlexConfig)
     dep_config: DEPConfig = field(default_factory=DEPConfig)
-    env_config: EnvConfigUnion = field(default_factory=EnvConfig)
 
     def _apply_env_overrides(self, pose_name: str = None, **overrides):
         """
@@ -143,19 +143,9 @@ class LaneConfig(BaseArgs):
     """ Reusable hyperparams for lane environments """
     lambda_vel: float = 1e-2
     lambda_mid_lane: float = 1e-2
-
     lambda_spring: float = 0.0
     lambda_damper: float = 0.0
     lambda_limit: float = -3e-4
-    lambda_muscle_passive: float = 0.0
-
-    lambda_actuator: float = 0.0
-    lambda_fatigue: float = 0.0
-    lambda_muscle_activation: float = 0.0
-    lambda_metabolic: float = 0.0
-    lambda_self_collision: float = 0.0
-    lambda_head_acc_ang: float = 0.0
-    lambda_head_acc_lin: float = 0.0
 
 
 @dataclass

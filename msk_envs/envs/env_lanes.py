@@ -2,9 +2,7 @@ import torch
 
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, actuator_sq_penalty, head_acc_penalty, \
-    activation_square_penalty, mid_lane_reward, has_fallen, \
-    self_collision_penalty, muscle_activation_penalty
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, mid_lane_reward, has_fallen
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from ..utils.scene_settings import SceneSettings
@@ -50,12 +48,11 @@ class LanesEnv(MSKEnv):
     def _get_obs(self) -> torch.Tensor:
         """
         Observations space:
-         1. Normalized time
-         2. Muscle activations, fiber lengths
-         3. Actuator activations
-         4. Joint positions (q)
-         5. Joint velocities (qv)
-         6. Relative body positions and rotations (wrst root), ignore ground
+         1. Muscle activations, fiber lengths
+         2. Actuator activations
+         3. Joint positions (q)
+         4. Joint velocities (qv)
+         5. Relative body positions and rotations (wrst root), ignore ground
         """
         # Exclude root x coordinate (forward along lane)
         root_x_qpos_id = self.qpos_id_lookup["pelvis_tx"]
@@ -81,13 +78,6 @@ class LanesEnv(MSKEnv):
         rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
         rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
         rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
-        rew_muscle_passive = joint_penalty(self.ufrc_muscle_passive, squared=squared_penalties)
-        rew_muscle_activation = muscle_activation_penalty(self.muscle_activations)
-
-        rew_actuator = actuator_sq_penalty(self.actuator_activations)
-        rew_activation_squared = activation_square_penalty(self.muscle_activations)
-        rew_self_collision = self_collision_penalty(self.body_self_collision_forces, 500.0)
-        rew_head_acc_ang, rew_head_acc_lin = head_acc_penalty(self.body_accelerations[:, self.head_id])
 
         self.reward_dict = {
             "rew_vel": rew_vel.detach(),
@@ -95,13 +85,6 @@ class LanesEnv(MSKEnv):
             "rew_spring": rew_spring.detach(),
             "rew_damper": rew_damper.detach(),
             "rew_limit": rew_limit.detach(),
-            "rew_muscle_passive": rew_muscle_passive.detach(),
-            "rew_actuator": rew_actuator.detach(),
-            "rew_fatigue": rew_activation_squared.detach(),
-            "rew_muscle_activation": rew_muscle_activation.detach(),
-            "rew_self_collision": rew_self_collision.detach(),
-            "rew_head_acc_ang": rew_head_acc_ang.detach(),
-            "rew_head_acc_lin": rew_head_acc_lin.detach(),
         }
 
     def _is_body_facing_direction(self, body_id):
@@ -117,21 +100,14 @@ class LanesEnv(MSKEnv):
         # Has fallen
         fallen = has_fallen(root_pos=self.root_pos, ground_rotation=self.ground_rotation)
 
-        # Any of the bodies are out of the lanes
-        # body_ids = [i for i in range(self.num_bodies) if i != self.ground_id]
-        # body_out = torch.zeros_like(fallen, dtype=torch.bool)
-        # for body_idx in body_ids:
-        #     body_pos = self.body_positions[:, body_idx]
-        #     body_out |= (torch.abs(body_pos[:, SIDE_IDX]) > 0.6)
+        # Any of the toes are out of the lanes
         toes_out = torch.zeros_like(fallen, dtype=torch.bool)
         for body_idx in self.toes_ids:
             body_pos = self.body_positions[:, body_idx]
             toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > self.lane_width)
 
-        # Pelvis or head no longer facing target direction (within N degrees)
+        # Pelvis no longer facing target direction (within N degrees)
         pelvis_facing_direction = self._is_body_facing_direction(self.root_id)
-        # head_facing_direction = self._get_facing_direction(self.head_id)
-        # not_facing_direction = ~(pelvis_facing_direction & head_facing_direction)
         not_facing_direction = ~pelvis_facing_direction
 
         terminated = (fallen | toes_out | not_facing_direction).float()

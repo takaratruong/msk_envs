@@ -239,6 +239,8 @@ class MSKEnv:
         self.body_mass = bolt.body_mass(self.m)
         self.total_mass = self.body_mass.sum()
         self.gravity = bolt.gravity(self.m)
+        # [num_envs, num_colliders]
+        self.collider_sizes = bolt.get_collider_sizes(self.m)
 
         # Data properties. The following are all references
         # [num_envs]
@@ -489,6 +491,7 @@ class MSKEnv:
             # Need at least one non-root collider
             if non_ground_collider_ids.size(0) > 1:
                 collider_heights = self.collider_positions[:, non_ground_collider_ids, UP_IDX]
+                collider_heights -= self.collider_sizes[non_ground_collider_ids, 0]
                 lowest_collider_height = collider_heights.min(dim=1).values
                 adjustment = -lowest_collider_height
                 root_height_q_id = self.qpos_id_lookup["pelvis_ty"] if self.root_free else None

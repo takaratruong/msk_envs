@@ -61,7 +61,7 @@ class EnvConfig:
     """ Minimum muscle activation. Use non-zero for undamped muscle """
     muscle_max_activation: float = 1.0
     """ Maximum muscle activation """
-    muscle_contraction_dynamics = bolt.ContractionType = bolt.ContractionType.DGF
+    muscle_contraction_dynamics: bolt.ContractionType = bolt.ContractionType.DGF
     """ Muscle contraction dynamics: which force curves to use (DGF, MILLARD) """
     muscle_active_force_width_scale: float = 1.0
     """ For DGF active force length curve, the scaling factor of the width """
@@ -184,9 +184,12 @@ class EnvConfigSprinter(EnvConfig):
 class EnvConfigAthlete(EnvConfig):
     model_path: str = "../msk_models/athlete/athlete.osim"
     muscle_function_path: str = "../msk_models/athlete/athlete_fn.xml"
-    contact_params_path: str = "../msk_models/athlete/contact_params/contact_params.yaml"
+    contact_params_path: str = "../msk_models/athlete/contact_params/contact_params_nicos.yaml"
     starting_pose_path: str = "../msk_models/athlete/poses/starting_pose_run.yaml"
     ignore_short_elastic_tendons: bool = True
+
+    # Tuned passive forces using Millard curves
+    muscle_contraction_dynamics: bolt.ContractionType = bolt.ContractionType.DGF_MILLARD_PASSIVE
 
     muscle_multiplier: float = 2.0
     muscle_v_max: float = 12.0

@@ -21,18 +21,7 @@ We provide example training code based on [FastTD3](https://github.com/younggyos
     
 To start a training run, use the corresponding config (found in [hyperparams](msk_envs/train/hyperparams.py)):
 ```bash
-python -m msk_envs.train.train [sprint|vertical|walk] --exp_prefix my_training_run
-```
-
-Or to launch several runs on a SLURM cluster:
-```
-python slurm/deploy.py --input_yaml slurm/cfg/baselines.yaml --mode gen_run
-```
-
-### Motion imitation environment
-To track a motion file (in this example, the starting-phase of a sprint):
-```bash
-python -m msk_envs.train.train imitate --exp_prefix my_imitation --motion_name "../motions/study2_p02_s_01_lowIK.mot"
+python -m msk_envs.train.train [sprint|vertical|walk] --exp_prefix my_training_run --algo td3 env_config:sprinter 
 ```
 
 

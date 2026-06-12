@@ -1,179 +1,78 @@
-import torch
 import math
-import bolt
-import warp as wp
 import os
 
-from .env_config import EnvConfig
-from msk_envs.utils.pose import parse_starting_pose, get_swap_left_right_data
-from msk_envs.utils.muscle_props import parse_starting_activations
-from msk_envs.utils.contact_params import parse_contact_params
+import bolt
+import torch
+import warp as wp
+
+from msk_envs.utils.quat import quat_normalize
+from msk_envs.utils.model_initializer import ModelInitializer
+from msk_envs.utils.perturber import Perturber
+from msk_envs.utils.pose_helper import StartingStateHelper
 from msk_envs.utils.scene_settings import SceneSettings
 from msk_envs.utils.transforms import get_position_from_transform, get_rotation_from_transform
-from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
-from msk_envs.utils.quat import quat_normalize
-from msk_envs.envs.perturber import Perturber
+from .env_config import EnvConfig
 
 
 class MSKEnv:
     """ Superclass for MSK environments """
 
-    def _add_colliders(self, env_config: EnvConfig) -> None:
-        """ Hook for envs to add colliders """
-        return
-
-    def _modify_colliders(self, env_config: EnvConfig) -> None:
-        colliders = self.load_result.colliders
-
-        # Rotated contact plane
-        self.ground_rotation = torch.tensor(env_config.ground_rotation, dtype=torch.float, device=self.device)
-        self.ground_rotation = quat_normalize(self.ground_rotation)
-        for collider in colliders:
-            if collider == bolt.GROUND_COLLIDER:
-                collider.transform = wp.transform(wp.vec3(), wp.quat(self.ground_rotation))
-
-        # Set collider contact properties
-        if env_config.use_specified_contact_params:
-            contact_params_path = os.path.join(self.curr_path, env_config.contact_params_path)
-            contact_params = parse_contact_params(contact_params_path)
-            for params in contact_params:
-                if params.geom_name not in self.load_result.collider_id_lookup:
-                    print(f"Warning: geometry '{params.geom_name}' not found in geom_id_lookup, skipping.")
-                    continue
-                geom_id = self.load_result.collider_id_lookup[params.geom_name]
-                colliders[geom_id].stiffness = params.stiffness
-                colliders[geom_id].dissipation = params.dissipation
-                colliders[geom_id].priority = params.priority
-                colliders[geom_id].friction[0] = params.static_friction
-                colliders[geom_id].friction[1] = params.dynamic_friction
-                colliders[geom_id].friction[2] = params.viscous_friction
-                colliders[geom_id].transition_velocity = params.transition_velocity
-
-        bolt.update_colliders(self.load_result)
-        return
-
-    def _setup_model(self, env_config: EnvConfig) -> None:
-        """ Modify model parameters here. """
-
-        upper_body_muscles = [
-            "coracobrachialis_r", "deltoideus_ant_r", "deltoideus_med_r", "deltoideus_post_r", "latissimus_sup_r",
-            "latissimus_med_r", "latissimus_inf_r", "pectoralis_major_sup_r", "pectoralis_major_med_r",
-            "pectoralis_major_inf_r", "teres_major_r", "teres_minor_r", "infraspinatus_inf_r", "infraspinatus_sup_r",
-            "subscapularis_sup_r", "subscapularis_med_r", "subscapularis_inf_r", "supraspinatus_post_r",
-            "supraspinatus_ant_r", "triceps_long_r", "biceps_long_r", "biceps_brevis_r", "coracobrachialis_l",
-            "deltoideus_ant_l", "deltoideus_med_l", "deltoideus_post_l", "latissimus_sup_l", "latissimus_med_l",
-            "latissimus_inf_l", "pectoralis_major_sup_l", "pectoralis_major_med_l", "pectoralis_major_inf_l",
-            "teres_major_l", "teres_minor_l", "infraspinatus_inf_l", "infraspinatus_sup_l", "subscapularis_sup_l",
-            "subscapularis_med_l", "subscapularis_inf_l", "supraspinatus_post_l", "supraspinatus_ant_l",
-            "triceps_long_l", "biceps_long_l", "biceps_brevis_l",
-        ]
-
-        # Muscles activation and fiber dynamic
-        bolt.set_activation_type(self.m, env_config.muscle_activation_dynamics)
-        bolt.set_contraction_type(self.m, env_config.muscle_contraction_dynamics)
-        muscle_metadata = bolt.muscle_metadata(self.m)
-        muscle_idx_to_name = {idx: name for name, idx in self.load_result.muscle_id_lookup.items()}
-        for i, mm in enumerate(muscle_metadata):
-            muscle_name = muscle_idx_to_name[i]
-
-            # Custom muscle multiplier
-            if muscle_name in env_config.custom_muscle_multipliers:
-                custom_multiplier = env_config.custom_muscle_multipliers[muscle_name]
-                mm.max_isometric_force *= custom_multiplier
-            else:
-                mm.max_isometric_force *= env_config.muscle_multiplier
-
-            mm.activation_time_const = env_config.muscle_activation_time_const
-            mm.deactivation_time_const = env_config.muscle_deactivation_time_const
-            mm.activation_dynamics_smoothing = env_config.muscle_activation_dynamics_smoothing
-            mm.fiber_damping = env_config.muscle_fiber_damping
-            mm.min_activation = env_config.muscle_min_activation
-            mm.max_activation = env_config.muscle_max_activation
-            mm.active_force_width_scale = env_config.muscle_active_force_width_scale
-            mm.v_max = env_config.muscle_v_max
-
-            if env_config.ignore_short_elastic_tendons:
-                mm.ignore_tendon_compliance = (
-                        mm.ignore_tendon_compliance or mm.tendon_slack_length < mm.optimal_fiber_length)
-
-            # "Disable" passive muscle forces for upper body
-            if muscle_name in upper_body_muscles:
-                mm.strain_at_one_norm_force = 3.0
-                mm.stiffness_at_low_force = 0.0
-
-            if env_config.disable_muscle_passive_forces:
-                mm.strain_at_one_norm_force = 3.0
-                mm.stiffness_at_low_force = 0.0
-
-            # MuJoCo type muscles
-            if env_config.use_mujoco_muscles:
-                # bolt.set_contraction_type(self.m, bolt.ContractionType.MUJOCO)
-                mm.ignore_tendon_compliance = True  # rigid tendon
-
-                # We set pennation angle to 0, so this requires updating:
-                #  the optimal fiber length
-                #  the max isometric force
-                cos_pennation = math.cos(mm.optimal_pennation_angle)
-                mm.max_isometric_force = mm.max_isometric_force * cos_pennation
-                mm.optimal_fiber_length = mm.optimal_fiber_length * cos_pennation
-                mm.optimal_pennation_angle = 0.0  # fixed pennation angle
-
-                # mm.fiber_damping = 0.0  # no fiber damping
-                # mm.min_norm_fiber_length = 0.0  # no such thing as a min/max fiber length
-                # mm.max_norm_fiber_length = 10.0
-
-        # Armature
-        dof_start = 6 if self.root_free else 0
-        bolt.armature(self.m)[dof_start:] = env_config.armature
-
-        bolt.set_implicit_damping(self.m, env_config.use_implicit_damping)
-        bolt.set_use_linear_stop(self.m, env_config.use_linear_stop)
-
-        # Integrator type
-        bolt.set_integrator_accuracy(self.m, env_config.integrator_accuracy)
-        bolt.set_integrator_use_inf_norm(self.m, env_config.integrator_use_inf_norm)
-        # Toggle drag forces
-        bolt.set_drag_enabled(self.m, env_config.enable_drag)
-
-        bolt.set_gravity(self.m, env_config.gravity)
-
-        bolt.reinitialize_model(self.m, self.d)
-        return
+    def build_graph(self, *fns):
+        """ Returns the CUDA Graph for executing [fns] """
+        if not self.cuda_graph:
+            return None
+        assert torch.cuda.is_available()
+        with wp.ScopedCapture() as capture:
+            for fn in fns:
+                fn(self.m, self.d)
+        return capture.graph
 
     def _setup_cuda_graphs(self):
+        """ Build CUDA graphs for relevant bolt functions """
+        self.step_graph = self.build_graph(bolt.step)
+        self.fk_graph = self.build_graph(bolt.fk)
+        self.reset_graph = self.build_graph(bolt.reset)
+        self.post_graph = self.build_graph(bolt.compute_muscle_passive_forces)
+        self.analytics_graph = self.build_graph(
+            bolt.compute_muscle_moments, bolt.compute_net_joint_moments, bolt.compute_muscle_force_breakdown)
+        return
+
+    def launch_sim_step(self):
+        """ Launch simulator step """
         if self.cuda_graph:
-            assert torch.cuda.is_available()
-            # Step graph
-            with wp.ScopedCapture() as capture:
+            for _ in range(self.sim_steps_per_env_step):
+                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
+                wp.capture_launch(self.step_graph)
+            wp.capture_launch(self.post_graph)
+            wp.synchronize()
+        else:
+            for _ in range(self.sim_steps_per_env_step):
+                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
                 bolt.step(self.m, self.d)
-            self.step_graph = capture.graph
+            bolt.compute_muscle_passive_forces(self.m, self.d)
+        return
 
-            # FK graph: forward kinematics (positions only)
-            with wp.ScopedCapture() as capture:
-                bolt.fk(self.m, self.d)
-            self.fk_graph = capture.graph
+    def launch_sim_reset(self):
+        """ Launch simulator reset """
+        bolt.set_reset(self.d, self.reset_tensor)
+        if self.cuda_graph:
+            wp.capture_launch(self.reset_graph)
+            wp.synchronize()
+        else:
+            bolt.reset(self.m, self.d)
+        return
 
-            # Reset graph: call after resetting any the worlds
-            with wp.ScopedCapture() as capture:
-                bolt.reset(self.m, self.d)
-            self.reset_graph = capture.graph
+    def fk(self):
+        """ Forward kinematics only (only position dependent) """
+        if self.cuda_graph:
+            wp.capture_launch(self.fk_graph)
+            wp.synchronize()
+        else:
+            bolt.fk(self.m, self.d)
+        return
 
-            # Post-step graph: computes things like muscle passive forces, needed for rewards
-            with wp.ScopedCapture() as capture:
-                bolt.compute_muscle_passive_forces(self.m, self.d)
-            self.post_graph = capture.graph
-
-            # Analytics graph: anything else needed for analytics
-            with wp.ScopedCapture() as capture:
-                bolt.compute_muscle_moments(self.m, self.d)
-                bolt.compute_net_joint_moments(self.m, self.d)
-                bolt.compute_muscle_force_breakdown(self.m, self.d)
-            self.analytics_graph = capture.graph
-
-            # Forward kinematics graph, useful for motion tracking
-            with wp.ScopedCapture() as capture:
-                bolt.fk(self.m, self.d)
-            self.fk_graph = capture.graph
+    def _add_colliders(self, env_config: EnvConfig) -> None:
+        """ Hook for envs to add colliders """
         return
 
     def __init__(
@@ -182,7 +81,6 @@ class MSKEnv:
             env_config: EnvConfig,
             device: torch.device,
             requires_visuals: bool,
-            live_render: bool,
             cuda_graph: bool,
             debug: bool = False
     ):
@@ -190,24 +88,73 @@ class MSKEnv:
         self.device = device
         self.debug = debug
 
-        # Load model
         self.curr_path = os.path.abspath(os.path.dirname(__file__))
-        self.model_path = os.path.join(self.curr_path, env_config.model_path)
-        muscle_fn_path = os.path.join(
-            self.curr_path, env_config.muscle_function_path) if env_config.use_function_based_path else None
+
+        # Load msk model
         load_result = bolt.load_model(
-            model_path=self.model_path,
+            model_path=os.path.join(self.curr_path, env_config.model_path),
             n_worlds=num_envs,
             integrator=env_config.integrator,
             requires_visuals=requires_visuals,
-            muscle_fn_path=muscle_fn_path
+            muscle_fn_path=os.path.join(
+                self.curr_path, env_config.muscle_function_path
+            ) if env_config.use_function_based_path else None
         )
         self.load_result = load_result
-        self.m, self.d = load_result.model, load_result.data
+        self.m = load_result.model
+        self.d = load_result.data
         self.root_free = load_result.root_free
+
+        # Post-load colliders modifications
         self._add_colliders(env_config)
-        self._modify_colliders(env_config)
-        self._setup_model(env_config)
+        self.ground_rotation = quat_normalize(
+            torch.tensor(env_config.ground_rotation, dtype=torch.float, device=device))
+        ModelInitializer.modify_ground_collider(
+            load_result=self.load_result,
+            ground_rotation=self.ground_rotation,
+        )
+        ModelInitializer.modify_collider_params(
+            load_result=self.load_result,
+            contact_params_path=os.path.join(self.curr_path, env_config.contact_params_path),
+            use_specified_contact_params=env_config.use_specified_contact_params,
+        )
+        # Post-load model modifications
+        ModelInitializer.modify_muscle_activation_dynamics(
+            m=self.m,
+            muscle_activation_dynamics=env_config.muscle_activation_dynamics,
+            muscle_activation_time_const=env_config.muscle_activation_time_const,
+            muscle_deactivation_time_const=env_config.muscle_deactivation_time_const,
+            muscle_activation_dynamics_smoothing=env_config.muscle_activation_dynamics_smoothing,
+            muscle_min_activation=env_config.muscle_min_activation,
+            muscle_max_activation=env_config.muscle_max_activation,
+        )
+        ModelInitializer.modify_muscle_contraction_dynamics(
+            m=self.m,
+            muscle_contraction_dynamics=env_config.muscle_contraction_dynamics,
+            muscle_multiplier=env_config.muscle_multiplier,
+            muscle_fiber_damping=env_config.muscle_fiber_damping,
+            muscle_active_force_width_scale=env_config.muscle_active_force_width_scale,
+            muscle_v_max=env_config.muscle_v_max,
+            ignore_short_elastic_tendons=env_config.ignore_short_elastic_tendons,
+        )
+        ModelInitializer.modify_joints(
+            m=self.m,
+            armature=env_config.armature,
+            use_linear_stop=env_config.use_linear_stop,
+            root_free=self.root_free,
+        )
+        ModelInitializer.modify_physics(
+            m=self.m,
+            gravity=env_config.gravity,
+            enable_drag=env_config.enable_drag,
+        )
+        ModelInitializer.modify_integrator(
+            m=self.m,
+            integrator_accuracy=env_config.integrator_accuracy,
+            integrator_use_inf_norm=env_config.integrator_use_inf_norm,
+            use_implicit_damping=env_config.use_implicit_damping,
+        )
+        bolt.reinitialize_model(self.m, self.d)
 
         # Store all convenient lookups
         self.body_id_lookup = load_result.body_id_lookup
@@ -219,14 +166,8 @@ class MSKEnv:
         self.collider_id_lookup = load_result.collider_id_lookup
         self.visuals = load_result.mesh_load_results
 
-        # Spring stuff bla bla remove me todo
-        qpos_spring_rest = bolt.qpos_spring_rest(self.m)
-        if "shoulder_abduction_r" in self.qpos_id_lookup:
-            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_r"]] = 0.261799
-        if "shoulder_abduction_l" in self.qpos_id_lookup:
-            qpos_spring_rest[self.qpos_id_lookup["shoulder_abduction_l"]] = 0.261799
-
-        # Model properties
+        # --- Bindings ---
+        # --- Model properties
         self.num_qpos = bolt.get_num_qpos(self.m)
         self.num_dofs = bolt.get_num_dofs(self.m)
         self.num_bodies = bolt.get_num_bodies(self.m)
@@ -241,8 +182,8 @@ class MSKEnv:
         self.gravity = bolt.gravity(self.m)
         # [num_envs, num_colliders]
         self.collider_sizes = bolt.get_collider_sizes(self.m)
-
-        # Data properties. The following are all references
+        self.collider_body_id = bolt.geom_bodyid(self.m)
+        # --- Data properties. The following are all references
         # [num_envs]
         self.time = bolt.time(self.d)
         # [num_envs, num_muscles]
@@ -259,16 +200,15 @@ class MSKEnv:
         self.actuator_activations = bolt.actuator_activations(self.d)
         self.actuator_activations_dot = bolt.actuator_activations_dot(self.d)
         self.actuator_excitations = bolt.actuator_excitations(self.d)
-        # [num_envs, num_bodies, 7], ignore ground
+        # [num_envs, num_bodies, 7]
         self.body_transforms = bolt.body_transforms(self.d)
-        # [num_envs, num_bodies, 3], ignore ground
+        # [num_envs, num_bodies, 3]
         self.body_positions = bolt.body_com_positions(self.d)
         # [num_envs, num_bodies, 4] (w, x, y, z)
         self.body_rotations = get_rotation_from_transform(self.body_transforms)
         # [num_envs, num_bodies, 6] (ang, lin)
         self.body_velocities = bolt.body_velocities(self.d)
         self.body_accelerations = bolt.body_accelerations(self.d)
-        # [num_envs, num_bodies, 6] (frc, trq)
         self.body_user_forces = bolt.body_user_forces(self.d)
         # [num_envs, num_qpos]
         self.joint_positions = bolt.joint_positions(self.d)
@@ -285,24 +225,32 @@ class MSKEnv:
         self.collider_positions = get_position_from_transform(bolt.get_collider_transforms(self.d))
         # self.collider_self_forces = bolt.collider_self_forces(self.d)
         self.body_self_collision_forces = bolt.body_self_collisions(self.d)
-
         # [num_envs, 3]
         self.grf = bolt.grf(self.d)
-
         # [num_envs, num_visuals, 3]
         self.visual_transforms = bolt.get_visual_transforms(self.d)
         self.visual_positions = get_position_from_transform(self.visual_transforms)
         # [num_envs, num_visuals, 4]
         self.visual_rotations = get_rotation_from_transform(self.visual_transforms)
 
-        # RL Environment metadata
+        # Pre-compute useful body IDs and offsets
+        self.ground_id = self.body_id_lookup["ground"]
+        self.root_id = self.body_id_lookup["pelvis"]
+        self.root_pos = self.body_positions[:, self.root_id]
+
+        # --- RL Environment metadata ---
         self.action_range = (-1.0, 1.0)
         self.max_episode_duration = env_config.max_episode_duration
         self.delta_t = env_config.delta_t
         self.reset_tensor = torch.zeros((num_envs, 1), dtype=torch.float32, device=device)
+        # Rewards storage
+        self.reward_dict = {}
+        self.reward_lambdas = env_config.reward_lambdas
 
-        # Simulation steps required to reach env step. if adaptive, just step to desired time
-        #  otherwise step in increments of [delta_t_sim]
+        # --- Simulator settings
+        # Number of sim steps required to reach RL env step.
+        #  If adaptive, just step to desired time
+        #  Otherwise, step in increments of [delta_t_sim]
         self.is_adaptive = bolt.is_adaptive(env_config.integrator)
         if self.is_adaptive:
             self.delta_t_sim = self.delta_t
@@ -310,90 +258,9 @@ class MSKEnv:
         else:
             self.delta_t_sim = env_config.delta_t_sim
             self.sim_steps_per_env_step = math.ceil(self.delta_t / self.delta_t_sim)
-
-        # Starting position, load from file
-        start_pose_path = os.path.join(self.curr_path, env_config.starting_pose_path)
-        q, qv = parse_starting_pose(
-            start_pose_path, self.qpos_id_lookup, self.dof_id_lookup, self.num_qpos, self.num_dofs)
-        assert len(q) == self.num_qpos and len(qv) == self.num_dofs
-        q_torch = torch.tensor(q, dtype=torch.float32, device=device)
-        qv_torch = torch.tensor(qv, dtype=torch.float32, device=device)
-        self.start_pose_base = q_torch.unsqueeze(0)
-        self.start_velocity_base = qv_torch.unsqueeze(0)
-        # Repeat for all envs
-        self.start_pose = q_torch.unsqueeze(0).repeat(num_envs, 1)
-        self.start_velocity = qv_torch.unsqueeze(0).repeat(num_envs, 1)
-        # Pose noise/reset settings
-        self.noise_start = env_config.noise_start
-        self.q_noise = env_config.q_noise
-        self.qv_noise = env_config.qv_noise
-        self.noise_root = env_config.noise_root
-        self.enforce_ground_contact = env_config.enforce_ground_contact
-        # Pre-compute left-right swap data
-        self.swap_lr = env_config.swap_lr
-        if self.swap_lr:
-            self.swap_lr_data = get_swap_left_right_data(self.qpos_id_lookup, self.dof_id_lookup)
-        else:
-            self.swap_lr_data = []
-
-        # Starting muscle activations
-        self.noise_act_start = False
-        if env_config.use_prescribed_starting_activations:
-            start_activations_path = os.path.join(self.curr_path, env_config.starting_activations_path)
-            start_activations = parse_starting_activations(
-                start_activations_path, self.muscle_id_lookup, env_config.default_activation)
-            self.start_activations = torch.tensor(start_activations, device=device).unsqueeze(0).repeat(num_envs, 1)
-        else:
-            if env_config.default_activation == -1.0:
-                self.start_activations = torch.rand((num_envs, self.num_muscles), device=device)
-                self.noise_act_start = True
-            else:
-                self.start_activations = torch.ones(
-                    (num_envs, self.num_muscles), device=device) * env_config.default_activation
-
-        # Rewards storage
-        self.reward_dict = {}
-        self.reward_lambdas = env_config.reward_lambdas
-
-        self.render = live_render
-        if live_render:
-            self.renderer = bolt.create_renderer(
-                load_result=load_result,
-                renderer_type=bolt.RendererType.OPENGL,
-                draw_visuals=True,
-                draw_beams=True,
-                draw_body_mass=False,
-                draw_colliders=False,
-                draw_muscles=True,
-                draw_sites=False,
-            )
-            if self.renderer.viewer_type == bolt.RendererType.TILED:
-                self.renderer.setup_tiled_renderer(list(range(min(num_envs, 4))))
-
-        # CUDA Graphs
+        # CUDA Graphs setup
         self.cuda_graph = cuda_graph
         self._setup_cuda_graphs()
-
-        # Pre-compute useful body IDs and offsets
-        self.ground_id = self.lookup_body_id("ground")
-        self.root_id = self.lookup_body_id("pelvis")
-        self.head_id = self.lookup_body_id("head")
-        head_offset = torch.zeros(3, device=self.device)
-
-        # Head isn't its own body, compute offset from torso
-        if self.head_id == -1:
-            self.head_id = self.lookup_body_id("torso")
-            head_offset = torch.tensor(build_axis(axis=UP_IDX, scale=0.215), device=self.device)
-
-        self.root_pos = self.body_positions[:, self.root_id]
-        self.root_rot = self.body_rotations[:, self.root_id]
-        self.head_pos = self.body_positions[:, self.head_id]
-        self.head_rot = self.body_rotations[:, self.head_id]
-        self.head_offset = head_offset.unsqueeze(0).repeat(num_envs, 1)
-
-        # Set initial pose
-        # reset_ind = torch.ones_like(self.reset_tensor, dtype=torch.bool)
-        # self.noise_start_pose(reset_ind.ravel())
 
         # Set up random perturber
         self.perturber = Perturber(
@@ -405,47 +272,23 @@ class MSKEnv:
             delta_t=self.delta_t,
             enabled=env_config.apply_perturbations,
         )
-        return
-
-    def noise_start_pose(self, reset_mask: torch.Tensor) -> None:
-        """
-        Re-noise the starting pose and velocity for envs where reset_mask is 1
-        Note: takes effect on next reset or init
-        """
-        # Repeat for all envs
-        q = self.start_pose_base.repeat(self.num_worlds, 1)
-        qv = self.start_velocity_base.repeat(self.num_worlds, 1)
-
-        # Noise starting pose
-        if self.noise_start:
-            if self.noise_root:
-                q += torch.randn_like(q) * self.q_noise
-            else:
-                q[:, 7:] += torch.randn_like(q[:, 7:]) * self.q_noise
-            qv += torch.randn_like(qv) * self.qv_noise
-
-        # Swap left/right sides
-        if self.swap_lr:
-            # Randomly choose to swap left and right
-            swap_mask = (torch.rand(self.num_worlds, device=q.device) > 0.5)
-            q_old, qv_old = q.clone(), qv.clone()
-            for swap_pair in self.swap_lr_data:
-                rq, lq = swap_pair.qpos_r, swap_pair.qpos_l
-                q[swap_mask, rq] = q_old[swap_mask, lq]
-                q[swap_mask, lq] = q_old[swap_mask, rq]
-
-                rdq, ldq = swap_pair.dof_r, swap_pair.dof_l
-                qv[swap_mask, rdq] = qv_old[swap_mask, ldq]
-                qv[swap_mask, ldq] = qv_old[swap_mask, rdq]
-
-        # Set the new starting pose
-        self.start_pose[reset_mask, :] = q[reset_mask, :]
-        self.start_velocity[reset_mask, :] = qv[reset_mask, :]
-
-        # Noise starting muscle activations
-        if self.noise_act_start:
-            random_acts = torch.rand((self.num_worlds, self.num_muscles), device=self.device)
-            self.start_activations[reset_mask, :] = random_acts[reset_mask, :]
+        # Set up random starting pose generator
+        self.starting_state_helper = StartingStateHelper(
+            starting_pose_path=os.path.join(self.curr_path, env_config.starting_pose_path),
+            qpos_id_lookup=self.qpos_id_lookup,
+            dof_id_lookup=self.dof_id_lookup,
+            num_qpos=self.num_qpos,
+            num_dofs=self.num_dofs,
+            num_muscles=self.num_muscles,
+            num_envs=num_envs,
+            apply_start_noise=env_config.apply_start_noise,
+            apply_swap_lr=env_config.apply_swap_lr,
+            q_noise=env_config.q_noise,
+            qv_noise=env_config.qv_noise,
+            default_activation=env_config.default_activation,
+            device=self.device,
+        )
+        self.enforce_ground_contact = env_config.enforce_ground_contact
         return
 
     def num_obs(self) -> int:
@@ -454,86 +297,6 @@ class MSKEnv:
     def num_actions(self) -> int:
         return self._get_actions().shape[1]
 
-    def get_time(self) -> torch.Tensor:
-        return self.time.detach().clone()
-
-    def get_joint_passive_torques(self, include_passive_muscle: bool = True) -> torch.Tensor:
-        """ Returns the net torques from the passive elements of each joint """
-        passive_joint_torques = torch.abs(self.ufrc_spring) + torch.abs(self.ufrc_damper) + torch.abs(self.ufrc_limit)
-        if include_passive_muscle:
-            passive_joint_torques += torch.abs(self.ufrc_muscle_passive)
-        return passive_joint_torques
-
-    def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
-        """ Hook for additional reset behavior in subclasses. Occurs before sim reset """
-        return
-
-    def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
-        """ Hook for additional reset behavior in subclasses. Occurs after sim reset """
-        return
-
-    def _reset_sim(self):
-        # Reset time, starting pose, muscle and actuator activations
-        reset_mask = self.reset_tensor.squeeze(-1).bool()
-        if reset_mask.any():
-            self.time[reset_mask] = 0.0
-            self.joint_positions[reset_mask, :] = self.start_pose[reset_mask, :]
-            self.joint_velocities[reset_mask, :] = self.start_velocity[reset_mask, :]
-            self.muscle_activations[reset_mask, :] = self.start_activations[reset_mask, :]
-            self.actuator_activations[reset_mask, :] = 0.5
-
-        # Run forward kinematics to ensure contact with ground
-        if self.enforce_ground_contact and self.root_free:
-            self.fk()
-            collider_body_id = bolt.geom_bodyid(self.m)
-            non_ground_collider_ids = torch.where(collider_body_id != self.ground_id)[0]
-
-            # Need at least one non-root collider
-            if non_ground_collider_ids.size(0) > 1:
-                collider_heights = self.collider_positions[:, non_ground_collider_ids, UP_IDX]
-                collider_heights -= self.collider_sizes[non_ground_collider_ids, 0]
-                lowest_collider_height = collider_heights.min(dim=1).values
-                adjustment = -lowest_collider_height
-                root_height_q_id = self.qpos_id_lookup["pelvis_ty"] if self.root_free else None
-                self.joint_positions[reset_mask, root_height_q_id] += adjustment[reset_mask]
-
-        # Reset sim
-        bolt.set_reset(self.d, self.reset_tensor)
-        if self.cuda_graph:
-            wp.capture_launch(self.reset_graph)
-            wp.synchronize()
-        else:
-            bolt.reset(self.m, self.d)
-        return
-
-    # The following are environment-specific and need to be implemented
-    def _get_obs(self) -> torch.Tensor:
-        raise NotImplementedError
-
-    def _get_actions(self) -> torch.Tensor:
-        actions = torch.cat([
-            self.muscle_excitations,
-            self.actuator_excitations
-        ], dim=1)
-        return actions.detach().clone()
-
-    def _set_actions(self, raw_action) -> None:
-        self._set_muscle_excitations(raw_action[:, :self.num_muscles])
-        self._set_actuator_excitations(raw_action[:, self.num_muscles:])
-        return
-
-    def _pre_step(self) -> None:
-        """ Hook for any pre-step computations """
-        return
-
-    def _compute_raw_reward_dict(self):
-        """ Guarantee to only run once per step """
-        raise NotImplementedError
-
-    def _get_terminated(self):
-        raise NotImplementedError
-
-    # Rest is standard
     def get_blank_actions(self) -> torch.Tensor:
         """ Returns actions of all 0 in correct shape """
         return torch.zeros_like(self._get_actions())
@@ -543,25 +306,63 @@ class MSKEnv:
         return (torch.rand_like(self._get_actions()) *
                 self.action_range[1] * 2 - self.action_range[1])
 
-    def get_scaled_reward_dict(self) -> dict:
-        reward_dict = self.reward_dict
-        scaled_reward_dict = {}
-        for key, raw_value in reward_dict.items():
-            lambda_key = key.replace("rew_", "lambda_")
-            lambda_value = self.reward_lambdas[lambda_key]
-            scaled_reward_dict[key] = lambda_value * raw_value
-        return scaled_reward_dict
+    def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
+        """ Hook for additional reset behavior in subclasses. Occurs before sim reset """
+        return
 
-    def get_rewards(self) -> torch.Tensor:
-        scaled_rew_dict = self.get_scaled_reward_dict()
-        total_rewards = torch.zeros(self.num_worlds, device=self.device)
-        for key, value in scaled_rew_dict.items():
-            total_rewards += value
-        return total_rewards.detach()
+    def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
+        """ Hook for additional reset behavior in subclasses. Occurs after sim reset """
+        return
 
-    def _get_truncated(self):
-        truncated = (self.get_time() >= self.max_episode_duration).float()
-        return truncated.detach()
+    def _sample_start_and_reset_sim(self):
+        """ Sample new starting state and reset sim """
+        reset_mask = self.reset_tensor.squeeze(-1).bool()
+        if not reset_mask.any():
+            return
+
+        # Sample new starting state and apply
+        self.starting_state_helper.create_new_starting_poses(reset_mask=reset_mask)
+        self.starting_state_helper.set_starting_state(
+            time_out=self.time,
+            q_out=self.joint_positions,
+            qv_out=self.joint_velocities,
+            activations_out=self.muscle_activations,
+            actuator_activations_out=self.actuator_activations,
+            reset_mask=reset_mask
+        )
+
+        # Ensure contact with ground
+        if self.enforce_ground_contact and self.root_free:
+            self.fk()
+            self.starting_state_helper.adjust_for_ground_contact(
+                root_pos=self.root_pos,
+                collider_sizes=self.collider_sizes,
+                collider_body_id=self.collider_body_id,
+                collider_positions=self.collider_positions,
+                ground_rotation=self.ground_rotation,
+                reset_mask=reset_mask,
+                root_height_qpos_id=self.qpos_id_lookup["pelvis_ty"],
+                ground_id=self.ground_id,
+            )
+            self.starting_state_helper.set_starting_state(
+                time_out=self.time,
+                q_out=self.joint_positions,
+                qv_out=self.joint_velocities,
+                activations_out=self.muscle_activations,
+                actuator_activations_out=self.actuator_activations,
+                reset_mask=reset_mask
+            )
+
+        # Reset sim
+        self.launch_sim_reset()
+        return
+
+    def _get_actions(self) -> torch.Tensor:
+        actions = torch.cat([
+            self.muscle_excitations,
+            self.actuator_excitations
+        ], dim=1)
+        return actions.detach().clone()
 
     def _set_muscle_excitations(self, raw_action) -> None:
         # Clamp to [-1, 1], then map to [0, 1]
@@ -574,71 +375,85 @@ class MSKEnv:
         # Clamp to [-1, 1], then map to [0, 1]
         clamped_action = torch.clamp(raw_action, -1.0, 1.0)
         excitations = (clamped_action + 1.0) / 2.0
-
-        # We don't let the mtp motor extend (negative). Map [-1, 1] to [0.5, 1]
-        if "mtp_angle_r_motor" in self.actuator_id_lookup:
-            mtp_angle_r_motor_id = self.actuator_id_lookup["mtp_angle_r_motor"]
-            excitations[..., mtp_angle_r_motor_id] = excitations[..., mtp_angle_r_motor_id] * 0.5 + 0.5
-        if "mtp_angle_l_motor" in self.actuator_id_lookup:
-            mtp_angle_l_motor_id = self.actuator_id_lookup["mtp_angle_l_motor"]
-            excitations[..., mtp_angle_l_motor_id] = excitations[..., mtp_angle_l_motor_id] * 0.5 + 0.5
-
         self.actuator_excitations.copy_(excitations)
         return
 
-    def _perform_reset(self, reset_mask: torch.Tensor):
-        """ Internal reset call, resets only envs where reset_mask is 1 """
-        self.reset_tensor.copy_(reset_mask)
-        self.noise_start_pose(reset_mask.squeeze(-1).bool())
-        self._upon_reset_pre_sim(reset_mask.squeeze(-1).bool())
-        self._reset_sim()
-        self._upon_reset_post_sim(reset_mask.squeeze(-1).bool())
+    def _set_actions(self, raw_action) -> None:
+        self._set_muscle_excitations(raw_action[:, :self.num_muscles])
+        self._set_actuator_excitations(raw_action[:, self.num_muscles:])
+        return
+
+    def _pre_step(self) -> None:
+        """ Hook for any pre-step computations """
+        return
+
+    def _get_obs(self) -> torch.Tensor:
+        raise NotImplementedError
+
+    def _compute_raw_reward_dict(self):
+        """ Guarantee to only run once per step """
+        raise NotImplementedError
+
+    def _get_terminated(self):
+        raise NotImplementedError
+
+    def get_scaled_reward_dict(self) -> dict:
+        """ Scale rewards by their multiplier (defined in hyperparams) """
+        reward_dict = self.reward_dict
+        scaled_reward_dict = {}
+        for key, raw_value in reward_dict.items():
+            lambda_key = key.replace("rew_", "lambda_")
+            lambda_value = self.reward_lambdas[lambda_key]
+            scaled_reward_dict[key] = lambda_value * raw_value
+        return scaled_reward_dict
+
+    def get_rewards(self) -> torch.Tensor:
+        """ Return total rewards (after scaling) """
+        scaled_rew_dict = self.get_scaled_reward_dict()
+        total_rewards = torch.zeros(self.num_worlds, device=self.device)
+        for key, value in scaled_rew_dict.items():
+            total_rewards += value
+        return total_rewards.detach()
+
+    def _get_truncated(self):
+        truncated = (self.time >= self.max_episode_duration).float()
+        return truncated.detach()
+
+    def _perform_reset(self, resets: torch.Tensor):
+        """ Internal reset call, resets envs where reset_mask is 1 """
+        reset_mask = resets.squeeze(-1).bool()
+        self.reset_tensor.copy_(resets)
+        self._upon_reset_pre_sim(reset_mask=reset_mask)
+        self._sample_start_and_reset_sim()
+        self._upon_reset_post_sim(reset_mask=reset_mask)
         self.reset_tensor.fill_(0.0)
+        return
 
-    # The following impl of step is kinda jank, but we need this separation for logging
-    def pre_step(self, actions) -> None:
-        self._pre_step()
-
+    def pre_sim_step(self, actions) -> None:
+        self._pre_step()  # Env-specific hooks
         # Set actions
         self._set_actions(actions)
-
         if self.debug:
             assert not torch.isnan(actions).any(), "Actions contain NaN!"
-
         # Apply perturbations
         self.perturber.apply(self.root_id, self.body_user_forces)
         return
 
-    def launch_sim_step(self):
-        if self.cuda_graph:
-            for _ in range(self.sim_steps_per_env_step):
-                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
-                wp.capture_launch(self.step_graph)
-            wp.capture_launch(self.post_graph)
-            wp.synchronize()
-        else:
-            for _ in range(self.sim_steps_per_env_step):
-                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
-                bolt.step(self.m, self.d)
-            bolt.post(self.m, self.d)
-        return
-
     def rl_step(self):
-        # Only compute reward dict once per step
-        self._compute_raw_reward_dict()
+        self._compute_raw_reward_dict()  # Note we only compute reward dict once per step
 
         final_obs = self._get_obs()
         rew = self.get_rewards()
         terminated = self._get_terminated()
         truncated = self._get_truncated()
-
-        # Reset any worlds that are done
         done = torch.clamp(terminated + truncated, 0.0, 1.0).unsqueeze(-1)
-        if done.any():
+
+        if done.any():  # Reset any worlds that are done
             self._perform_reset(done)
 
         # Training requires the observation *after* the reset (for next action)
         obs = self._get_obs()
+
         # Return raw reward terms for logging
         info = {
             "final_observation": final_obs,
@@ -647,53 +462,33 @@ class MSKEnv:
         }
 
         if self.debug:
+            assert not torch.isnan(final_obs).any(), "Observations contain NaN!"
             assert not torch.isnan(obs).any(), "Observations contain NaN!"
             assert not torch.isnan(rew).any(), "Rewards contain NaN!"
-
-        if self.render and hasattr(self.renderer, 'meshes') and len(
-                self.renderer.meshes) > 0:
-            self.renderer.render(self.m, self.d)
 
         return obs, rew, terminated, truncated, info
 
     def step(self, actions):
         """ External step call """
-        self.pre_step(actions)
+        self.pre_sim_step(actions)
         self.launch_sim_step()
         self.update_metrics()
         return self.rl_step()
 
     def reset(self):
         """ External reset call, resets all envs """
-        self._perform_reset(reset_mask=torch.ones_like(self.reset_tensor))
+        self._perform_reset(resets=torch.ones_like(self.reset_tensor))
         obs = self._get_obs()
         return obs
-
-    def fk(self):
-        """ Forward kinematics only (only position dependent) """
-        if self.cuda_graph:
-            wp.capture_launch(self.fk_graph)
-            wp.synchronize()
-        else:
-            bolt.fk(self.m, self.d)
-
-    def lookup_body_id(self, body_name: str) -> int:
-        return self.body_id_lookup[body_name] if body_name in self.body_id_lookup else -1
-
-    def lookup_dof_id(self, dof_name: str) -> int:
-        return self.dof_id_lookup[dof_name] if dof_name in self.dof_id_lookup else -1
-
-    def lookup_muscle_id(self, muscle_name: str) -> int:
-        return self.muscle_id_lookup[muscle_name] if muscle_name in self.muscle_id_lookup else -1
 
     def scene_settings(self) -> SceneSettings:
         """ Override to provide custom scene settings for viewer/renderer """
         return SceneSettings()
 
     def additional_metrics(self) -> dict:
-        """ Additional metrics to log during training """
+        """ Hook for additional metrics to log during training """
         return {}
 
     def update_metrics(self) -> None:
-        """ Hook to update metrics """
+        """ Hook to update additional metrics """
         return

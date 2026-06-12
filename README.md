@@ -2,17 +2,16 @@
 RL environments built on top of the [Bolt](https://github.com/willwng/bolt) simulator that run entirely on the GPU.
 
 ## Preqrequisites/Setup
-Installation requires installation of [Bolt](https://github.com/willwng/bolt), of which the only dependency is [warp-lang](https://github.com/NVIDIA/warp). Use of the environments requires PyTorch. 
+Installation requires installation of [Bolt](https://github.com/willwng/bolt).
 ```
-conda create -n msk python=3.11
-conda activate msk
-pip install warp-lang
-pip install torch torchvision
-pip install -r requirements.txt
-cd ../bolt/  # git clone git@github.com:willwng/bolt.git
+cd "path to bolt"  # git clone git@github.com:willwng/bolt.git
 pip install -e .
 ```
-
+And rest of packages:
+```
+cd "path to msk_envs"
+pip install -r requirements.txt
+```
 
 ## Training
 We provide example training code based on [FastTD3](https://github.com/younggyoseo/FastTD3), including hyperparameters for the following example environments.

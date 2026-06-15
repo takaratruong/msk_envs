@@ -146,6 +146,7 @@ class LaneConfig(BaseArgs):
     lambda_spring: float = 0.0
     lambda_damper: float = 0.0
     lambda_limit: float = -3e-4
+    lambda_muscle_passive: float = 0.0
 
 
 @dataclass

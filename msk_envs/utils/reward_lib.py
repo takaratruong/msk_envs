@@ -33,6 +33,13 @@ def joint_penalty(limit_torques: torch.Tensor, squared: bool = False):
     return limit_torque_sum
 
 
+def muscle_passive_penalty(muscle_passive_multipliers: torch.Tensor, threshold: float, squared: bool = False):
+    """ Compute sum of passive force multipliers above [threshold], ignores multipliers below [threshold] """
+    passive_force_excess = torch.clamp(muscle_passive_multipliers - threshold, min=0.0)
+    excess_penalty = torch.pow(passive_force_excess, 2) if squared else torch.abs(passive_force_excess)
+    return excess_penalty.sum(dim=1)
+
+
 def metabolic_penalty(muscle_powers, num_muscles, squared: bool = False):
     """Metabolic penalty based on total muscle power"""
     if squared:

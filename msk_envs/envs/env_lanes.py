@@ -2,7 +2,8 @@ import torch
 
 from msk_envs.utils.global_params import UP_IDX, SIDE_IDX, FWD_IDX, build_axis
 from msk_envs.utils.quat import rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, mid_lane_reward, has_fallen
+from msk_envs.utils.reward_lib import velocity_reward, joint_penalty, mid_lane_reward, has_fallen, \
+    muscle_passive_penalty
 from .env_base import MSKEnv
 from .env_config import EnvConfig
 from ..utils.scene_settings import SceneSettings
@@ -69,6 +70,8 @@ class LanesEnv(MSKEnv):
 
         # Joint passive penalty
         squared_penalties = False
+        rew_muscle_passive = muscle_passive_penalty(
+            self.muscle_passive_length_multiplier, threshold=0.1, squared=squared_penalties)
         rew_spring = joint_penalty(self.ufrc_spring, squared=squared_penalties)
         rew_damper = joint_penalty(self.ufrc_damper, squared=squared_penalties)
         rew_limit = joint_penalty(self.ufrc_limit, squared=squared_penalties)
@@ -79,6 +82,7 @@ class LanesEnv(MSKEnv):
             "rew_spring": rew_spring.detach(),
             "rew_damper": rew_damper.detach(),
             "rew_limit": rew_limit.detach(),
+            "rew_muscle_passive": rew_muscle_passive.detach(),
         }
 
     def _is_body_facing_direction(self, body_id):

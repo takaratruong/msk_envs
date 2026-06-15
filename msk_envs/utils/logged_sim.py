@@ -68,6 +68,16 @@ class LoggedSim:
         max_episode_duration = self.envs.max_episode_duration
         self.log_times = torch.arange(0, max_episode_duration + self.delta_t_log, self.delta_t_log, device=device)
 
+        # Functions needed for analytics
+        self.analytics_fn = [
+            bolt.compute_muscle_passive_forces,
+            bolt.compute_muscle_moments,
+            bolt.compute_net_joint_moments,
+            bolt.compute_muscle_force_breakdown,
+        ]
+        self.analytics_graph = self.envs.build_graph(*self.analytics_fn)
+        return
+
     def add_to_rl_log(self):
         # Track rewards
         ind_not_finished = torch.where(self.finished == 0)[0]
@@ -149,12 +159,10 @@ class LoggedSim:
     def perform_post(self):
         """ Run post-processing and analytics task graphs """
         if self.envs.cuda_graph:
-            wp.capture_launch(self.envs.post_graph)
-            wp.capture_launch(self.envs.analytics_graph)
+            wp.capture_launch(self.analytics_graph)
         else:
-            bolt.compute_muscle_passive_forces(self.envs.m, self.envs.d)
-            bolt.compute_muscle_moments(self.envs.m, self.envs.d)
-            bolt.compute_net_joint_moments(self.envs.m, self.envs.d)
+            for fn in self.analytics_fn:
+                fn(self.envs.m, self.envs.d)
         wp.synchronize()
         return
 

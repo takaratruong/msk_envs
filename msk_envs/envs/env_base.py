@@ -32,24 +32,17 @@ class MSKEnv:
         self.step_graph = self.build_graph(bolt.step)
         self.fk_graph = self.build_graph(bolt.fk)
         self.reset_graph = self.build_graph(bolt.reset)
-        self.post_graph = self.build_graph(bolt.compute_muscle_passive_forces)
-        self.analytics_graph = self.build_graph(
-            bolt.compute_muscle_moments, bolt.compute_net_joint_moments, bolt.compute_muscle_force_breakdown)
         return
 
     def launch_sim_step(self):
-        """ Launch simulator step """
-        if self.cuda_graph:
-            for _ in range(self.sim_steps_per_env_step):
-                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
+        """ Launch simulator step(s), integrating sim until RL env step size """
+        for _ in range(self.sim_steps_per_env_step):
+            bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
+            if self.cuda_graph:
                 wp.capture_launch(self.step_graph)
-            wp.capture_launch(self.post_graph)
-            wp.synchronize()
-        else:
-            for _ in range(self.sim_steps_per_env_step):
-                bolt.increment_next_time(self.m, self.d, self.delta_t_sim)
+            else:
                 bolt.step(self.m, self.d)
-            bolt.compute_muscle_passive_forces(self.m, self.d)
+        wp.synchronize()
         return
 
     def launch_sim_reset(self):
@@ -192,6 +185,7 @@ class MSKEnv:
         self.muscle_fiber_lengths = bolt.muscle_fiber_lengths(self.d)
         self.muscle_fiber_velocities = bolt.muscle_fiber_velocities(self.d)
         self.muscle_powers = bolt.muscle_powers(self.d)
+        self.muscle_passive_length_multiplier = bolt.muscle_passive_length_multiplier(self.d)
         self.muscle_active_length_multiplier = bolt.muscle_active_length_multiplier(self.d)
         self.muscle_active_velocity_multiplier = bolt.muscle_active_velocity_multiplier(self.d)
         # [num_envs, num_muscles, num_qpos]

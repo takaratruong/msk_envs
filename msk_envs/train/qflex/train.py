@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
 from msk_envs.train.nets.buffer import SimpleReplayBuffer
 from msk_envs.train.nets.normalizers import EmpiricalNormalization
-from msk_envs.train.qflex.qflex import Critic, QFlexActor, ReferencePolicy, VelocityField
+from msk_envs.train.qflex_networks.qflex import Critic, QFlexActor, ReferencePolicy, VelocityField
 from msk_envs.train.qflex.qflex_config import QFlexConfig
 from msk_envs.train.qflex.qflex_utils import save_params
 from msk_envs.utils.logged_sim import LoggedSim
@@ -27,6 +27,7 @@ def train(
         exp_name: str,
         device: torch.device,
 ):
+    # ------------------------------------------------------------------ logging
     writer = TensorboardSummaryWriter(
         log_dir=f"models/{exp_name}",
         flush_secs=10
@@ -84,14 +85,18 @@ def train(
     def update_critic(data):
         critic.train()
         observations = data["observations"]
-        actions = data["actions"]
         next_observations = data["next"]["observations"]
+        critic_observations = observations
+        next_critic_observations = next_observations
+        actions = data["actions"]
         rewards = data["next"]["rewards"]
-        dones = data["next"]["dones"]
+        dones = data["next"]["dones"].bool()
+        truncations = data["next"]["truncations"].bool()
+        bootstrap = (truncations | ~dones).float()
 
         with torch.no_grad():
             reference.eval()
-            next_action, _, _, _ = reference.sample(next_observations)
+            next_action, next_log_probs, _, _ = reference.sample(next_observations)
 
         b = observations.shape[0]
         cat_obs = torch.cat([observations, next_observations], dim=0)
@@ -167,22 +172,23 @@ def train(
 
     @torch.no_grad()
     def soft_update(tau: float):
-        # Polyak-average params; hard-copy BatchRenorm buffers so the target's
-        # normalization tracks the online statistics (matches the JAX version).
+        # Polyak-average params and hard-copy BatchRenorm buffers so
+        # the target's normalization tracks the online statistics
         for p, tp in zip(critic.parameters(), critic_target.parameters()):
             tp.mul_(1.0 - tau).add_(tau * p)
         for b, tb in zip(critic.buffers(), critic_target.buffers()):
             tb.copy_(b)
+        return
 
-    def sample_and_prepare_batches(batch_size_per_env: int) -> list[TensorDict]:
+    def sample_and_prepare_batches(target_batch_size: int) -> list[TensorDict]:
         """
         Sample a large batch once and split it into smaller batches for each update.
         This reduces sampling overhead by `num_updates` and normalization overhead by `num_updates`.
         """
         # Sample a large batch (batch_size * num_updates)
-        large_batch_size = batch_size_per_env * cfg.num_updates
+        large_batch_size = target_batch_size * cfg.num_updates
         large_data = rb.sample(large_batch_size)
-        samples_per_update = batch_size_per_env * envs.num_worlds
+        samples_per_update = target_batch_size * envs.num_worlds
 
         # Normalize all data once
         large_data["observations"] = obs_normalizer(large_data["observations"])
@@ -223,7 +229,6 @@ def train(
     @torch.compiler.disable
     def evaluate() -> tuple[float, float]:
         actor.eval()
-
         # Build logged sim wrapper
         sim = LoggedSim(eval_envs, device=device)
         eval_obs = sim.reset()
@@ -232,34 +237,27 @@ def train(
                 norm_eval_obs = obs_normalizer(eval_obs)
                 eval_actions = actor.act(norm_eval_obs, deterministic=True)
                 finished, eval_obs = sim.step(eval_actions)
-
             if finished:
                 break
-
         rewards_mean = sim.get_rewards_mean()
         episode_length_mean = sim.get_episode_length_mean()
-
         # Save analytics
         os.makedirs(traj_out_folder, exist_ok=True)
-        sim.save_animation(traj_out_folder, str(global_step), use_gzip=True)
-
         os.makedirs(analytics_out_folder, exist_ok=True)
+        sim.save_animation(traj_out_folder, str(global_step), use_gzip=True)
         sim.save_frame_data(analytics_out_folder, f"frame_data_{global_step}", use_gzip=True)
         sim.save_analytics(analytics_out_folder, f"analytics_{global_step}")
-
         return rewards_mean.item(), episode_length_mean.item()
 
     # -------------------------------------------------------------- training
     obs = envs.reset()
     global_step = 0
-
     pbar = tqdm.tqdm(total=cfg.num_learning_iterations, initial=global_step)
-
     while global_step < cfg.num_learning_iterations:
         mark_step()
         with logging_helper.record_collection_time():
             with torch.no_grad():
-                norm_obs = obs_normalizer.forward(obs)
+                norm_obs = obs_normalizer(obs, update=False)
                 if global_step < cfg.learning_starts:
                     actions = torch.rand((cfg.num_envs, n_act), device=device) * 2.0 - 1.0
                 else:
@@ -303,9 +301,7 @@ def train(
                     soft_update(cfg.tau)
 
                     # Logging metrics
-                    current_metrics = {
-                        **c_logs, **r_logs, **v_logs
-                    }
+                    current_metrics = {**c_logs, **r_logs, **v_logs}
                     raw_rewards_dict = {}
                     for reward_name, reward_tensor in info["raw_rewards"].items():
                         raw_rewards_dict[f"{reward_name}_raw"] = reward_tensor.mean()
@@ -313,7 +309,6 @@ def train(
 
             if global_step % cfg.logging_interval == 0:
                 with torch.no_grad():
-                    # Use accumulated training metrics for smoother logging (reduces noise)
                     accumulated_metrics = training_metrics.mean_and_clear()
 
                     # Convert tensor values to float for logging

@@ -140,7 +140,7 @@ def main():
             device=device,
         )
         qflex.train(
-            qflex_config=qflex_config,
+            cfg=qflex_config,
             envs=envs,
             eval_envs=eval_envs,
             traj_out_folder=traj_out_folder,

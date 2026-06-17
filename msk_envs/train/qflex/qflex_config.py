@@ -32,9 +32,14 @@ class QFlexConfig:
 
     learning_starts: int = 10
     """timestep to start learning"""
+    num_updates: int = 1
+    """the number of updates to perform per step"""
 
     hidden_dim: int = 256
     hidden_num: int = 3
+
+    obs_normalization: bool = False
+    """ whether to normalize observations """
 
     diffusion_steps: int = 20
     """number of diffusion/flow steps"""
@@ -42,14 +47,20 @@ class QFlexConfig:
     learn_reference_gn: bool = True
     """whether to learn reference (Gaussian) guidance network"""
 
+    num_flow_steps: int = 20
+    """Euler steps for sampling from the flow (``diffusion_steps``)."""
     grad_step_size: float = 1e-2
+    """step size of the Q-gradient ascent that builds the flow target."""
     grad_step_num: int = 20
+    """number of Q-gradient ascent steps."""
 
-    compile: bool = True
+    compile: bool = False
     """whether to use torch.compile."""
     compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
     compile_backend: str = "inductor"  # "eager" is slower but safer
 
+    save_interval: int = 1000
+    """ the interval to save the model """
     logging_interval: int = 100
     """ the interval to log the metrics """
 

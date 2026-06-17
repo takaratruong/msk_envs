@@ -464,7 +464,6 @@ class SimbaActor(nn.Module):
             num_blocks: int,
             std_min: float,
             std_max: float,
-            use_tanh: bool = True,
             use_layer_norm: bool = True,
             use_gsde: bool = False,
             gsde_steps: int = 10,
@@ -475,7 +474,6 @@ class SimbaActor(nn.Module):
         super().__init__()
         self.n_obs = n_obs
         self.n_act = n_act
-        self.use_tanh = use_tanh
         self.n_envs = num_envs
         self.device = device
         self.hidden_dim = hidden_dim

@@ -41,19 +41,19 @@ def load_ddp_state_dict(model, state_dict):
 
 
 def save_params_td3(
-    global_step,
-    actor,
-    qnet,
-    qnet_target,
-    obs_normalizer,
-    args,
-    save_path,
-    actor_optimizer=None,
-    q_optimizer=None,
-    actor_scheduler=None,
-    q_scheduler=None,
-    scaler=None,
-    include_optim_state: bool = False,
+        global_step,
+        actor,
+        qnet,
+        qnet_target,
+        obs_normalizer,
+        args,
+        save_path,
+        actor_optimizer=None,
+        q_optimizer=None,
+        actor_scheduler=None,
+        q_scheduler=None,
+        scaler=None,
+        include_optim_state: bool = False,
 ):
     """Save model parameters and training configuration to disk."""
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -168,7 +168,8 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 
-def find_latest_checkpoint(exp_prefix: str, models_dir: str = "models") -> Tuple[Optional[str], Optional[str], Optional[int]]:
+def find_latest_checkpoint(exp_prefix: str, models_dir: str = "models") -> Tuple[
+    Optional[str], Optional[str], Optional[int]]:
     """
     Find the latest checkpoint for an experiment prefix.
     
@@ -184,35 +185,35 @@ def find_latest_checkpoint(exp_prefix: str, models_dir: str = "models") -> Tuple
     """
     if not exp_prefix:
         return None, None, None
-    
+
     models_path = pathlib.Path(models_dir)
     if not models_path.exists():
         return None, None, None
-    
+
     latest_checkpoint = None
     latest_exp_name = None
     latest_global_step = -1
-    
+
     # Pattern to match directories starting with exp_prefix_
     prefix_pattern = re.compile(f"^{re.escape(exp_prefix)}_.*")
-    
+
     # Search for matching directories
     for exp_dir in models_path.iterdir():
         if not exp_dir.is_dir():
             continue
-        
+
         dir_name = exp_dir.name
         if not prefix_pattern.match(dir_name):
             continue
-        
+
         # Search for checkpoint files in this directory
         # Pattern: {exp_name}_{global_step}.pt
         checkpoint_pattern = re.compile(rf"^{re.escape(dir_name)}_(\d+)\.pt$")
-        
+
         for checkpoint_file in exp_dir.iterdir():
             if not checkpoint_file.is_file() or not checkpoint_file.suffix == ".pt":
                 continue
-            
+
             match = checkpoint_pattern.match(checkpoint_file.name)
             if match:
                 global_step = int(match.group(1))
@@ -220,10 +221,10 @@ def find_latest_checkpoint(exp_prefix: str, models_dir: str = "models") -> Tuple
                     latest_global_step = global_step
                     latest_checkpoint = str(checkpoint_file)
                     latest_exp_name = dir_name
-    
+
     if latest_checkpoint is None:
         return None, None, None
-    
+
     return latest_checkpoint, latest_exp_name, latest_global_step
 
 

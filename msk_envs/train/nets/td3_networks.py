@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from msk_envs.train.nets.normalizers import EmpiricalNormalization
+from msk_envs.train.nets.normalizers import EmpiricalNormalization, SimNormLinear
 from msk_envs.train.nets.simba import SimbaActor
 
 
@@ -18,6 +18,9 @@ class DistributionalQNetwork(nn.Module):
             v_min: float,
             v_max: float,
             hidden_dim: int,
+            sim_type: str,
+            sim_dimension: int,
+            seq_len: int,
             use_layer_norm: bool = True,
             device: torch.device | None = None,
     ):
@@ -29,11 +32,26 @@ class DistributionalQNetwork(nn.Module):
             nn.Linear(hidden_dim, hidden_dim // 2, device=device),
             nn.LayerNorm(hidden_dim // 2, device=device) if use_layer_norm else nn.Identity(),
             nn.SiLU(),
-            nn.Linear(hidden_dim // 2, hidden_dim // 4, device=device),
-            nn.LayerNorm(hidden_dim // 4, device=device) if use_layer_norm else nn.Identity(),
-            nn.SiLU(),
-            nn.Linear(hidden_dim // 4, num_atoms, device=device),
         )
+
+        if sim_type in ["sim_both", "sim_critic"]:
+            self.fc_head = nn.Sequential(
+                SimNormLinear(
+                    hidden_dim // 2,
+                    seq_len=seq_len,
+                    simnorm_dim=sim_dimension,
+                    device=device,
+                ),
+                nn.Linear(seq_len * sim_dimension, num_atoms, device=device),
+            )
+        else:
+            self.fc_head = nn.Sequential(
+                nn.Linear(hidden_dim // 2, hidden_dim // 4, device=device),
+                nn.LayerNorm(hidden_dim // 4, device=device) if use_layer_norm else nn.Identity(),
+                nn.SiLU(),
+                nn.Linear(hidden_dim // 4, num_atoms, device=device),
+            )
+
         self.v_min = v_min
         self.v_max = v_max
         self.num_atoms = num_atoms
@@ -41,7 +59,8 @@ class DistributionalQNetwork(nn.Module):
     def forward(self, obs: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
         x = torch.cat([obs, actions], 1)
         x = self.net(x)
-        return x  # noqa: RET504
+        x = self.fc_head(x)
+        return x
 
     def projection(
             self,
@@ -100,30 +119,14 @@ class Critic(nn.Module):
             v_min: float,
             v_max: float,
             hidden_dim: int,
+            sim_type: str,
+            sim_dimension: int,
+            seq_len: int,
             use_layer_norm: bool = True,
             num_q_networks: int = 2,
             device: torch.device | None = None,
     ):
         super().__init__()
-        self.qnet1 = DistributionalQNetwork(
-            n_obs=n_obs,
-            n_act=n_act,
-            num_atoms=num_atoms,
-            v_min=v_min,
-            v_max=v_max,
-            hidden_dim=hidden_dim,
-            device=device,
-        )
-        self.qnet2 = DistributionalQNetwork(
-            n_obs=n_obs,
-            n_act=n_act,
-            num_atoms=num_atoms,
-            v_min=v_min,
-            v_max=v_max,
-            hidden_dim=hidden_dim,
-            device=device,
-        )
-
         self.register_buffer(
             "q_support", torch.linspace(v_min, v_max, num_atoms, device=device)
         )
@@ -135,6 +138,9 @@ class Critic(nn.Module):
         self.num_atoms = num_atoms
         self.v_min = v_min
         self.v_max = v_max
+        self.sim_type = sim_type
+        self.sim_dimension = sim_dimension
+        self.seq_len = seq_len
         self.hidden_dim = hidden_dim
         self.use_layer_norm = use_layer_norm
         if num_q_networks < 1:
@@ -162,6 +168,9 @@ class Critic(nn.Module):
                     v_min=self.v_min,
                     v_max=self.v_max,
                     hidden_dim=self.hidden_dim,
+                    sim_type=self.sim_type,
+                    seq_len=self.seq_len,
+                    sim_dimension=self.sim_dimension,
                     use_layer_norm=self.use_layer_norm,
                     device=self.device,
                 )
@@ -212,36 +221,27 @@ class Actor(nn.Module):
             hidden_dim: int,
             std_min: float,
             std_max: float,
-            use_tanh: bool = True,
+            sim_type: str,
+            sim_dimension: int,
+            seq_len: int,
             use_layer_norm: bool = True,
             use_gsde: bool = False,
             gsde_steps: int = 10,
             device: torch.device = None,
-            action_scale: torch.Tensor | None = None,
-            action_bias: torch.Tensor | None = None,
     ):
         super().__init__()
         self.n_obs = n_obs
         self.n_act = n_act
-        self.use_tanh = use_tanh
         self.n_envs = num_envs
         self.device = device
         self.hidden_dim = hidden_dim
         self.use_layer_norm = use_layer_norm
+        self.sim_type = sim_type
+        self.sim_dimension = sim_dimension
+        self.seq_len = seq_len
 
         # Setup the network - this will be overridden in subclasses if needed
         self.setup_network()
-
-        # Register action scaling parameters as buffers
-        if action_scale is not None:
-            self.register_buffer("action_scale", action_scale.to(device))
-        else:
-            self.register_buffer("action_scale", torch.ones(n_act, device=device))
-
-        if action_bias is not None:
-            self.register_buffer("action_bias", action_bias.to(device))
-        else:
-            self.register_buffer("action_bias", torch.zeros(n_act, device=device))
 
         # Exploration noise scales per environment
         noise_scales = (torch.rand(num_envs, 1, device=device) * (std_max - std_min) + std_min)
@@ -266,30 +266,42 @@ class Actor(nn.Module):
             nn.Linear(self.hidden_dim, self.hidden_dim // 2, device=self.device),
             nn.LayerNorm(self.hidden_dim // 2, device=self.device) if self.use_layer_norm else nn.Identity(),
             nn.SiLU(),
-            nn.Linear(self.hidden_dim // 2, self.hidden_dim // 4, device=self.device),
-            nn.LayerNorm(self.hidden_dim // 4, device=self.device) if self.use_layer_norm else nn.Identity(),
-            nn.SiLU(),
         )
-        self.fc_mu = nn.Sequential(
-            nn.Linear(self.hidden_dim // 4, self.n_act, device=self.device),
-        )
+        if self.sim_type in ["sim_both", "sim_actor"]:
+            self.fc_head = SimNormLinear(
+                self.hidden_dim // 2,
+                seq_len=self.seq_len,
+                simnorm_dim=self.sim_dimension,
+                device=self.device,
+            )
+            self.fc_mu = nn.Sequential(
+                nn.Linear(self.seq_len * self.sim_dimension, self.n_act, device=self.device),
+                nn.Tanh(),
+            )
+        else:
+            self.fc_head = nn.Sequential(
+                nn.Linear(self.hidden_dim // 2, self.hidden_dim // 4, device=self.device),
+                nn.LayerNorm(self.hidden_dim // 4, device=self.device) if self.use_layer_norm else nn.Identity(),
+                nn.SiLU(),
+            )
+            self.fc_mu = nn.Sequential(
+                nn.Linear(self.hidden_dim // 4, self.n_act, device=self.device),
+                nn.Tanh(),
+            )
         nn.init.constant_(self.fc_mu[0].weight, 0.0)
         nn.init.constant_(self.fc_mu[0].bias, 0.0)
 
-    def forward(self, obs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        x = self.net(obs)
-        mean = self.fc_mu(x)
-        if self.use_tanh:
-            tanh_mean = torch.tanh(mean)
-            action = tanh_mean * self.action_scale + self.action_bias
-        else:
-            action = mean
+    def forward(self, obs: torch.Tensor) -> torch.Tensor:
+        x_net = self.net(obs)
+        x_head = self.fc_head(x_net)
+        action = self.fc_mu(x_head)
         return action
 
-    def _sample_new_noise(self, logits: torch.Tensor, dones: Optional[torch.Tensor]):
+    def _sample_new_noise(self, dones: Optional[torch.Tensor]):
+        """ Generate new exploration noise """
         # Generate new noise scales for done environments
         if dones is not None and dones.sum() > 0:
-            new_scales = (torch.rand(self.n_envs, 1, device=logits.device) *
+            new_scales = (torch.rand(self.n_envs, 1, device=self.device) *
                           (self.std_max - self.std_min) + self.std_min)
             dones_view = dones.view(-1, 1) > 0
             self.noise_scales.copy_(torch.where(dones_view, new_scales, self.noise_scales))
@@ -297,27 +309,17 @@ class Actor(nn.Module):
         # Sample noise every gsde_steps or every step
         if self.use_gsde:
             resample_noise = (self.gsde_step_count % self.gsde_steps) == 0
-            new_noise = torch.randn_like(logits) * self.noise_scales
+            new_noise = torch.randn_like(self.noise) * self.noise_scales
             self.noise.copy_(torch.where(resample_noise, new_noise, self.noise))
             self.gsde_step_count += 1
         else:
-            self.noise.copy_(torch.randn_like(logits) * self.noise_scales)
+            self.noise.copy_(torch.randn_like(self.noise) * self.noise_scales)
         return
 
     def explore(self, obs: torch.Tensor, dones: Optional[torch.Tensor]) -> torch.Tensor:
-        x = self.net(obs)
-        logits = self.fc_mu(x)
-
-        self._sample_new_noise(logits, dones)
-
-        # add noise to output
+        self._sample_new_noise(dones)
         act = self(obs)
         return act + self.noise
-
-        # noisy_logits = logits + self.noise
-        # if self.use_tanh:
-        #     return torch.tanh(noisy_logits) * self.action_scale + self.action_bias
-        # return noisy_logits
 
     def explore_synergistic(
             self,
@@ -328,10 +330,9 @@ class Actor(nn.Module):
             active_velocity_multiplier: torch.Tensor,
             moment_arms: torch.Tensor
     ) -> torch.Tensor:
-        x = self.net(obs)
-        logits = self.fc_mu(x)
+        act = self(obs)
 
-        self._sample_new_noise(logits, dones)
+        self._sample_new_noise(dones)
 
         # Grab "joint" noise: [envs, n_qpos]
         _, n_muscles, n_qpos = moment_arms.shape
@@ -355,15 +356,13 @@ class Actor(nn.Module):
         muscle_noise = muscle_noise_normalized * self.noise_scales
 
         # Add noise
-        noisy_logits = logits.clone()
-        noisy_logits[:, :n_muscles] += muscle_noise
-        noisy_logits[:, n_muscles:] += self.noise[..., n_muscles:]
-        if self.use_tanh:
-            return torch.tanh(noisy_logits) * self.action_scale + self.action_bias
-        return noisy_logits
+        noised_act = act.clone()
+        noised_act[:, :n_muscles] += muscle_noise
+        noised_act[:, n_muscles:] += self.noise[..., n_muscles:]
+        return noised_act
 
 
-# The following are used for inference
+# Used for inference only
 class Policy(nn.Module):
     def __init__(self, n_obs: int, n_act: int, args: dict, agent: str):
         super().__init__()
@@ -378,15 +377,19 @@ class Policy(nn.Module):
             hidden_dim=args["actor_hidden_dim"],
             std_min=args["std_min"],
             std_max=args["std_max"],
-            use_tanh=args["use_tanh"],
             use_layer_norm=args["use_layer_norm"],
-            action_scale=args["action_scale"] if "action_scale" in args else None,
-            action_bias=args["action_bias"] if "action_bias" in args else None,
         )
         actor_hidden_dim = args["actor_hidden_dim"]
 
         if agent == "fasttd3":
             actor_cls = Actor
+            actor_kwargs.update(
+                {
+                    "sim_type": args["sim_type"],
+                    "sim_dimension": args["sim_dimension"],
+                    "seq_len": args["actor_seq_len"],
+                }
+            )
         elif agent == "simbav2":
             actor_cls = SimbaActor
             actor_num_blocks = args["actor_num_blocks"]
@@ -431,9 +434,7 @@ def load_policy(checkpoint_path):
         n_obs = torch_checkpoint["actor_state_dict"]["net.0.weight"].shape[-1]
         n_act = torch_checkpoint["actor_state_dict"]["fc_mu.0.weight"].shape[0]
     elif agent == "simbav2":
-        n_obs = (
-                torch_checkpoint["actor_state_dict"]["embedder.w.w.weight"].shape[-1] - 1
-        )
+        n_obs = torch_checkpoint["actor_state_dict"]["embedder.w.w.weight"].shape[-1] - 1
         n_act = torch_checkpoint["actor_state_dict"]["predictor.mean_bias"].shape[0]
     else:
         raise ValueError(f"Agent {agent} not supported")
@@ -444,7 +445,6 @@ def load_policy(checkpoint_path):
     if len(torch_checkpoint["obs_normalizer_state"]) == 0:
         policy.obs_normalizer = nn.Identity()
     else:
-        policy.obs_normalizer.load_state_dict(
-            torch_checkpoint["obs_normalizer_state"])
+        policy.obs_normalizer.load_state_dict(torch_checkpoint["obs_normalizer_state"])
 
     return policy

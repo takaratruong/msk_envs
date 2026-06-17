@@ -82,9 +82,6 @@ def train(
         reward_normalizer = nn.Identity()
 
     action_low, action_high = envs.action_range
-    action_scale = torch.ones(n_act, device=device) * (action_high - action_low) / 2.0
-    action_bias = torch.zeros(n_act, device=device) + (action_high + action_low) / 2.0
-
     actor_kwargs = {
         "n_obs": n_obs,
         "n_act": n_act,
@@ -92,7 +89,6 @@ def train(
         "hidden_dim": td3_config.actor_hidden_dim,
         "std_min": td3_config.std_min,
         "std_max": td3_config.std_max,
-        "use_tanh": td3_config.use_tanh,
         "use_layer_norm": td3_config.use_layer_norm,
         "device": device,
         "use_gsde": td3_config.use_gsde,
@@ -111,7 +107,6 @@ def train(
     }
 
     if td3_config.agent == "simbav2":
-        actor_kwargs.pop("use_tanh")
         actor_kwargs.pop("use_layer_norm")
         critic_kwargs.pop("use_layer_norm")
         critic_kwargs.pop("num_q_networks")
@@ -142,6 +137,20 @@ def train(
     elif td3_config.agent == "fasttd3":
         actor_cls = Actor
         critic_cls = Critic
+        actor_kwargs.update(
+            {
+                "sim_type": td3_config.sim_type,
+                "sim_dimension": td3_config.sim_dimension,
+                "seq_len": td3_config.actor_seq_len,
+            }
+        )
+        critic_kwargs.update(
+            {
+                "sim_type": td3_config.sim_type,
+                "sim_dimension": td3_config.sim_dimension,
+                "seq_len": td3_config.critic_seq_len,
+            }
+        )
     else:
         raise ValueError(f"Agent {td3_config.agent} not supported")
 

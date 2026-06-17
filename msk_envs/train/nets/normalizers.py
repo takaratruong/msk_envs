@@ -1,6 +1,7 @@
 import torch
 import torch.distributed as dist
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class EmpiricalNormalization(nn.Module):
@@ -145,63 +146,86 @@ class RewardNormalizer(nn.Module):
         return self._scale_reward(rewards)
 
 
-class BatchRenorm(nn.Module):
+class BatchRenorm1d(nn.Module):
+    """Batch Renormalization (Ioffe, 2017) over the feature dimension. """
+
     def __init__(
             self,
             num_features: int,
-            decay_rate: float,
-            eps: float = 1e-3,
+            eps: float = 1e-5,
+            momentum: float = 0.01,  # 1 - decay_rate, decay_rate = 0.99
             r_max: float = 3.0,
             d_max: float = 5.0,
             warmup_steps: int = 10,
-    ) -> None:
+    ):
         super().__init__()
-        self.num_features = num_features
         self.eps = eps
-        self.momentum = 1.0 - decay_rate  # fraction of incoming batch used in EMA
+        self.momentum = momentum
         self.r_max = r_max
         self.d_max = d_max
         self.warmup_steps = warmup_steps
 
-        # Learnable affine: scale (weight) and offset (bias)
         self.weight = nn.Parameter(torch.ones(num_features))
         self.bias = nn.Parameter(torch.zeros(num_features))
-
-        # Non-trainable running statistics
         self.register_buffer("running_mean", torch.zeros(num_features))
         self.register_buffer("running_var", torch.ones(num_features))
-        self.register_buffer("num_batches_tracked", torch.tensor(0, dtype=torch.long))
+        self.register_buffer("num_batches_tracked", torch.zeros((), dtype=torch.long))
 
-    def forward(self, x: torch.Tensor, is_training: bool = True) -> torch.Tensor:
-        """ Normalize *x* of shape (B, C) """
-        if is_training:
-            # batch statistics
-            mean = x.mean(dim=0)  # (C,)
-            var = x.var(dim=0, unbiased=False)  # (C,)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.training:
+            mean = x.mean(dim=0)
+            var = x.var(dim=0, unbiased=False)
             std = torch.sqrt(var + self.eps)
-            # renorm corrections (stop-gradient)
-            ra_std = torch.sqrt(self.running_var + self.eps)
-            r = (std / ra_std).detach().clamp(1.0 / self.r_max, self.r_max)
-            d = ((mean - self.running_mean) / ra_std).detach().clamp(-self.d_max, self.d_max)
-            # corrected statistics
-            custom_var = var / (r ** 2)
-            custom_mean = mean - d * std / r
-            # during warmup, use raw batch stats (warmed_up = counter >= warmup_th)
-            warmed_up = float(self.num_batches_tracked.item() >= self.warmup_steps)
-            custom_var = warmed_up * custom_var + (1.0 - warmed_up) * var
-            custom_mean = warmed_up * custom_mean + (1.0 - warmed_up) * mean
-            # update running statistics
+            running_std = torch.sqrt(self.running_var + self.eps)
+
+            # r and d are treated as constants (no gradient), as in BatchRenorm.
+            r = (std.detach() / running_std).clamp(1.0 / self.r_max, self.r_max)
+            d = ((mean.detach() - self.running_mean) / running_std).clamp(-self.d_max, self.d_max)
+
+            if self.num_batches_tracked.item() >= self.warmup_steps:
+                x_hat = (x - mean) / std * r + d
+            else:
+                x_hat = (x - mean) / std
+
+            # Update running statistics (simple EMA).
             with torch.no_grad():
-                self.running_mean.mul_(1.0 - self.momentum).add_(
-                    mean.detach(), alpha=self.momentum
-                )
-                self.running_var.mul_(1.0 - self.momentum).add_(
-                    var.detach(), alpha=self.momentum
-                )
+                self.running_mean += self.momentum * (mean - self.running_mean)
+                self.running_var += self.momentum * (var - self.running_var)
                 self.num_batches_tracked += 1
         else:
-            custom_mean = self.running_mean
-            custom_var = self.running_var
+            x_hat = (x - self.running_mean) / torch.sqrt(self.running_var + self.eps)
 
-        x_hat = (x - custom_mean) / torch.sqrt(custom_var + self.eps)
         return self.weight * x_hat + self.bias
+
+
+class SimNorm(nn.Module):
+    """ Simplicial normalization: https://arxiv.org/abs/2204.00616. """
+
+    def __init__(self, seq_len=8, simnorm_dim=8):
+        super().__init__()
+        self.L = seq_len
+        self.dim = simnorm_dim
+
+    def forward(self, x):
+        shp = x.shape
+        x = x.view(*shp[:-1], self.L, self.dim)
+        x = F.softmax(x, dim=-1)
+        return x.view(*shp)
+
+
+class SimNormLinear(nn.Module):
+    def __init__(
+            self,
+            in_features: int,
+            seq_len: int,
+            simnorm_dim: int,
+            device: torch.device = None,
+    ):
+        super().__init__()
+        out_features = seq_len * simnorm_dim
+        self.linear = nn.Linear(in_features, out_features, device=device)
+        self.norm = nn.LayerNorm(out_features, device=device)
+        self.simnorm = SimNorm(seq_len, simnorm_dim)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.simnorm(self.norm(self.linear(x)))

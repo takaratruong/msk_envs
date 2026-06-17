@@ -1,60 +1,10 @@
 import math
 from typing import Tuple
 
+from msk_envs.train.nets.normalizers import BatchRenorm1d
+
 import torch
 import torch.nn as nn
-
-
-class BatchRenorm1d(nn.Module):
-    """Batch Renormalization (Ioffe, 2017) over the feature dimension. """
-
-    def __init__(
-            self,
-            num_features: int,
-            eps: float = 1e-5,
-            momentum: float = 0.01,  # 1 - decay_rate, decay_rate = 0.99
-            r_max: float = 3.0,
-            d_max: float = 5.0,
-            warmup_steps: int = 10,
-    ):
-        super().__init__()
-        self.eps = eps
-        self.momentum = momentum
-        self.r_max = r_max
-        self.d_max = d_max
-        self.warmup_steps = warmup_steps
-
-        self.weight = nn.Parameter(torch.ones(num_features))
-        self.bias = nn.Parameter(torch.zeros(num_features))
-        self.register_buffer("running_mean", torch.zeros(num_features))
-        self.register_buffer("running_var", torch.ones(num_features))
-        self.register_buffer("num_batches_tracked", torch.zeros((), dtype=torch.long))
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        if self.training:
-            mean = x.mean(dim=0)
-            var = x.var(dim=0, unbiased=False)
-            std = torch.sqrt(var + self.eps)
-            running_std = torch.sqrt(self.running_var + self.eps)
-
-            # r and d are treated as constants (no gradient), as in BatchRenorm.
-            r = (std.detach() / running_std).clamp(1.0 / self.r_max, self.r_max)
-            d = ((mean.detach() - self.running_mean) / running_std).clamp(-self.d_max, self.d_max)
-
-            if self.num_batches_tracked.item() >= self.warmup_steps:
-                x_hat = (x - mean) / std * r + d
-            else:
-                x_hat = (x - mean) / std
-
-            # Update running statistics (simple EMA).
-            with torch.no_grad():
-                self.running_mean += self.momentum * (mean - self.running_mean)
-                self.running_var += self.momentum * (var - self.running_var)
-                self.num_batches_tracked += 1
-        else:
-            x_hat = (x - self.running_mean) / torch.sqrt(self.running_var + self.eps)
-
-        return self.weight * x_hat + self.bias
 
 
 def _bn_mlp(in_dim: int, hidden_sizes, out_dim: int) -> nn.Module:

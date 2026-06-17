@@ -121,6 +121,8 @@ def pretty_print_base_args(args: BaseArgs):
         SACConfig.pretty_print(args.sac_config)
     elif args.algo.lower() == "td3":
         TD3Config.pretty_print(args.td3_config)
+    elif args.algo.lower() == "qflex":
+        QFlexConfig.pretty_print(args.qflex_config)
 
     print("BaseArgs:")
     for k in base_field_names:

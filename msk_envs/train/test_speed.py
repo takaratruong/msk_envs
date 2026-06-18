@@ -20,11 +20,10 @@ def main():
 
     has_cuda_support = torch.cuda.is_available()
     device = torch.device("cuda" if has_cuda_support else f"cpu")
-    num_envs = 4096
+    num_envs = 1024
     envs = EnvFactory.create_env(num_envs=num_envs,
                                  env_config=env_config,
                                  requires_visuals=False,
-                                 live_render=False,
                                  cuda_graph=has_cuda_support,
                                  device=device)
     envs.reset()

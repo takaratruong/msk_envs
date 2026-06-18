@@ -18,7 +18,6 @@ class LanesEnv(MSKEnv):
             env_config: EnvConfig,
             device: torch.device,
             requires_visuals: bool,
-            live_render: bool,
             cuda_graph: bool,
             target_dir: list[float],
             angle_tolerance: float = 30.0,

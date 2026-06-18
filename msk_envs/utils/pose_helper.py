@@ -199,6 +199,7 @@ class StartingStateHelper:
         # Need at least one non-root collider
         if non_ground_collider_ids.size(0) > 1:
             ground_height = compute_ground_height(position=root_pos, ground_rotation=ground_rotation)
+            # Adjust based on lowest object
             collider_heights = collider_positions[:, non_ground_collider_ids, UP_IDX]
             collider_heights -= collider_sizes[non_ground_collider_ids, 0]
             lowest_collider_height = collider_heights.min(dim=1).values

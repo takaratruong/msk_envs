@@ -14,7 +14,6 @@ class BlockStartSprintingEnv(LanesEnv):
             env_config: EnvConfig,
             device: torch.device,
             requires_visuals: bool,
-            live_render: bool,
             cuda_graph: bool
     ):
         super().__init__(
@@ -22,7 +21,6 @@ class BlockStartSprintingEnv(LanesEnv):
             env_config=env_config,
             device=device,
             requires_visuals=requires_visuals,
-            live_render=live_render,
             cuda_graph=cuda_graph,
             target_dir=build_axis(FWD_IDX, 1.0),
         )

@@ -267,6 +267,24 @@ class CariocaConfig(LaneConfig):
 
 
 @dataclass
+class LocomotionConfig(BaseArgs):
+    """ General locomotion: track a commanded horizontal velocity. """
+    lambda_vel_track: float = 1e-1
+    lambda_alive: float = 1e-2
+    lambda_limit: float = -3e-4
+    lambda_muscle_passive: float = 0.0
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.LOCOMOTION,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
+
+
+@dataclass
 class VerticalConfig(BaseArgs):
     lambda_jump: float = 1e-1
     lambda_limit: float = -3e-4
@@ -294,6 +312,7 @@ Config = Union[
     Annotated[HopConfig, tyro.conf.subcommand(name="hop")],
     Annotated[CariocaConfig, tyro.conf.subcommand(name="carioca")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
+    Annotated[LocomotionConfig, tyro.conf.subcommand(name="locomotion")],
 ]
 
 

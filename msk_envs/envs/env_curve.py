@@ -15,7 +15,6 @@ class CurvedTrackEnv(MSKEnv):
             env_config: EnvConfig,
             device: torch.device,
             requires_visuals: bool,
-            live_render: bool,
             cuda_graph: bool,
             angle_tolerance: float = 30.0,
             lane_index: int = 0  # 0 for Lane 1

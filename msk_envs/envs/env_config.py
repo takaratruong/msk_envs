@@ -180,6 +180,23 @@ class EnvConfigAthlete(EnvConfig):
     muscle_contraction_dynamics: bolt.ContractionType = bolt.ContractionType.DGF_MILLARD_PASSIVE
 
     muscle_multiplier: float = 2.0
+
+    armature: float = 1e-3
+    integrator_accuracy: float = 1.0
+
+
+@dataclass
+class EnvConfigAthlete2(EnvConfig):
+    model_path: str = "../msk_models/athlete2/athlete2.osim"
+    muscle_function_path: str = "../msk_models/athlete2/athlete2_rajagopal_fn.xml"
+    contact_params_path: str = "../msk_models/athlete2/contact_params/contact_params_generic.yaml"
+    starting_pose_path: str = "../msk_models/athlete2/poses/starting_pose_run.yaml"
+    ignore_short_elastic_tendons: bool = True
+
+    # Tuned passive forces using Millard curves
+    muscle_contraction_dynamics: bolt.ContractionType = bolt.ContractionType.DGF_MILLARD_PASSIVE
+
+    muscle_multiplier: float = 2.0
     muscle_v_max: float = 12.0
     armature: float = 1e-3
     integrator_accuracy: float = 1.0
@@ -188,4 +205,5 @@ class EnvConfigAthlete(EnvConfig):
 EnvConfigUnion = Union[
     Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
     Annotated[EnvConfigAthlete, tyro.conf.subcommand(name="athlete")],
+    Annotated[EnvConfigAthlete2, tyro.conf.subcommand(name="athlete2")],
 ]

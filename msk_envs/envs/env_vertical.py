@@ -14,7 +14,6 @@ class VerticalEnv(MSKEnv):
             env_config: EnvConfig,
             device: torch.device,
             requires_visuals: bool,
-            live_render: bool,
             cuda_graph: bool,
     ):
         super().__init__(num_envs=num_envs, env_config=env_config, device=device, requires_visuals=requires_visuals,

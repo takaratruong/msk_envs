@@ -28,7 +28,6 @@ def main():
     num_envs = 1
     envs = EnvFactory.create_env(num_envs=num_envs,
                                  env_config=env_config,
-                                 live_render=False,
                                  requires_visuals=True,
                                  cuda_graph=has_cuda_support,
                                  device=device)

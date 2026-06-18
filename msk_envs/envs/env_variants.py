@@ -11,3 +11,4 @@ class DerivedEnv(Enum):
     HOP = 5
     CARIOCA = 6
     VERTICAL = 7
+    LOCOMOTION = 8

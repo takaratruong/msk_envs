@@ -23,7 +23,6 @@ def _build_envs(num_envs, num_eval_envs, env_config, build_cuda_graph, device):
     envs = EnvFactory.create_env(
         num_envs=num_envs,
         env_config=env_config,
-        live_render=False,
         requires_visuals=False,
         cuda_graph=build_cuda_graph,
         device=device,
@@ -31,7 +30,6 @@ def _build_envs(num_envs, num_eval_envs, env_config, build_cuda_graph, device):
     eval_envs = EnvFactory.create_env(
         num_envs=num_eval_envs,
         env_config=env_config,
-        live_render=False,
         requires_visuals=True,
         cuda_graph=build_cuda_graph,
         device=device,

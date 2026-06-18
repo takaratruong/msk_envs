@@ -447,6 +447,16 @@ class SimbaCritic(nn.Module):
         """Calculate value from logits using support"""
         return torch.sum(probs * self.q_support, dim=1)
 
+    def q_value(self, obs: torch.Tensor, actions: torch.Tensor, use_cdq: bool) -> torch.Tensor:
+        qf1, qf2 = self.forward(obs, actions)
+        qf1_value = self.get_value(F.softmax(qf1, dim=1))
+        qf2_value = self.get_value(F.softmax(qf2, dim=1))
+        if use_cdq:
+            q_value = torch.minimum(qf1_value, qf2_value)
+        else:
+            q_value = (qf1_value + qf2_value) / 2.0
+        return q_value
+
 
 class SimbaActor(nn.Module):
     def __init__(

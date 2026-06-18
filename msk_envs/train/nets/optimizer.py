@@ -426,8 +426,8 @@ class SOAP(optim.Optimizer):
         return final
 
 
-def make_optimizer(model, lr: float, betas: tuple[float, float], weight_decay: float, use_muon: bool):
-    if not use_muon:
+def make_optimizer(model, lr: float, betas: tuple[float, float], weight_decay: float, use_soap: bool):
+    if not use_soap:
         optimizer = optim.AdamW(
             list(model.parameters()),
             lr=lr,

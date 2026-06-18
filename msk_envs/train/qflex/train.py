@@ -6,12 +6,13 @@ import torch
 import torch.nn.functional as F
 import tqdm
 from loguru import logger
-from tensordict import TensorDict
 from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
-from msk_envs.train.nets.buffer import SimpleReplayBuffer
+from msk_envs.train.nets.buffer import SimpleReplayBuffer, collect_experience, sample_and_prepare_batches
 from msk_envs.train.nets.normalizers import EmpiricalNormalization
-from msk_envs.train.qflex_networks.qflex import Critic, QFlexActor, ReferencePolicy, VelocityField
+from msk_envs.train.nets.qflex_networks import QFlexActor, ReferencePolicy, VelocityField
+from msk_envs.train.nets.distributional_critic import Critic
+from msk_envs.train.nets.optimizer import make_optimizer
 from msk_envs.train.qflex.qflex_config import QFlexConfig
 from msk_envs.train.qflex.qflex_utils import save_params
 from msk_envs.utils.logged_sim import LoggedSim
@@ -43,25 +44,74 @@ def train(
         num_gpus=1,
     )
     training_metrics = TensorAverageMeterDict()
+    c_logs, r_logs, v_logs = {}, {}, {}
 
     # ------------------------------------------------------------------ envs
     n_obs, n_act = envs.num_obs(), envs.num_actions()
-    hidden_sizes = [cfg.hidden_dim] * cfg.hidden_num
+    action_low, action_high = envs.action_range
 
     # --------------------------------------------------------------- networks
-    critic = Critic(n_obs, n_act, hidden_sizes).to(device)
+    critic = Critic(
+        n_obs=n_obs,
+        n_act=n_act,
+        num_atoms=cfg.num_atoms,
+        v_min=cfg.v_min,
+        v_max=cfg.v_max,
+        hidden_dim=cfg.critic_hidden_dim,
+        use_layer_norm=cfg.use_layer_norm,
+        num_q_networks=cfg.num_q_networks,
+        device=device,
+    )
     critic_target = copy.deepcopy(critic).to(device)
     for p in critic_target.parameters():
         p.requires_grad_(False)
 
-    reference = ReferencePolicy(n_obs, n_act, hidden_sizes).to(device)
-    velocity_field = VelocityField(n_obs, n_act, hidden_sizes).to(device)
-    actor = QFlexActor(reference, velocity_field, cfg.num_flow_steps).to(device)
+    reference = ReferencePolicy(
+        n_obs=n_obs,
+        n_act=n_act,
+        hidden_dim=cfg.actor_hidden_dim,
+        layer_norm=cfg.use_layer_norm,
+        device=device
+    )
+    velocity_field = VelocityField(
+        n_obs=n_obs,
+        n_act=n_act,
+        hidden_dim=cfg.velocity_hidden_dim,
+        layer_norm=cfg.use_layer_norm,
+        device=device
+    )
+    actor = QFlexActor(
+        reference=reference,
+        velocity_field=velocity_field,
+        num_timesteps=cfg.num_flow_steps,
+        device=device,
+        n_act=n_act,
+        num_envs=cfg.num_envs,
+        std_min=0.001,
+        std_max=0.4,
+    ).to(device)
 
-    betas = (0.5, 0.999)
-    q_optim = torch.optim.Adam(critic.parameters(), lr=cfg.learning_rate, betas=betas)
-    ref_optim = torch.optim.Adam(reference.parameters(), lr=cfg.learning_rate, betas=betas)
-    vel_optim = torch.optim.Adam(velocity_field.parameters(), lr=cfg.learning_rate, betas=betas)
+    q_optimizer = make_optimizer(
+        model=critic,
+        lr=cfg.learning_rate,
+        betas=(0.9, 0.95),
+        weight_decay=0.001,
+        use_soap=False,
+    )
+    ref_optimizer = make_optimizer(
+        model=reference,
+        lr=cfg.learning_rate,
+        betas=(0.9, 0.95),
+        weight_decay=0.001,
+        use_soap=False,
+    )
+    vel_optimizer = make_optimizer(
+        model=velocity_field,
+        lr=cfg.learning_rate,
+        betas=(0.9, 0.95),
+        weight_decay=0.001,
+        use_soap=False,
+    )
 
     obs_normalizer = (
         EmpiricalNormalization(shape=n_obs, device=device)
@@ -83,7 +133,6 @@ def train(
 
     # ---------------------------------------------------------- update steps
     def update_critic(data):
-        critic.train()
         observations = data["observations"]
         next_observations = data["next"]["observations"]
         critic_observations = observations
@@ -95,53 +144,76 @@ def train(
         bootstrap = (truncations | ~dones).float()
 
         with torch.no_grad():
-            reference.eval()
-            next_action, next_log_probs, _, _ = reference.sample(next_observations)
+            clipped_noise = torch.randn_like(actions)
+            clipped_noise = clipped_noise.mul(cfg.policy_noise).clamp(-cfg.noise_clip, cfg.noise_clip)
+            next_actions = reference(next_observations)
+            next_actions = (next_actions + clipped_noise).clamp(action_low, action_high)
 
-        b = observations.shape[0]
-        cat_obs = torch.cat([observations, next_observations], dim=0)
-        cat_act = torch.cat([actions, next_action], dim=0)
-        q1_all, q2_all = critic(cat_obs, cat_act)
-        cur_q1, next_q1 = q1_all[:b], q1_all[b:]
-        cur_q2, next_q2 = q2_all[:b], q2_all[b:]
+            discount = cfg.gamma ** data["next"]["effective_n_steps"]
+            qf1_next_target_projected, qf2_next_target_projected = (
+                critic_target.projection(
+                    next_critic_observations,
+                    next_actions,
+                    rewards,
+                    bootstrap,
+                    discount,
+                )
+            )
+            qf1_next_target_value = critic_target.get_value(qf1_next_target_projected)
+            qf2_next_target_value = critic_target.get_value(qf2_next_target_projected)
+            if cfg.use_cdq:
+                qf_next_target_dist = torch.where(
+                    qf1_next_target_value.unsqueeze(1)
+                    < qf2_next_target_value.unsqueeze(1),
+                    qf1_next_target_projected,
+                    qf2_next_target_projected,
+                )
+                qf1_next_target_dist = qf2_next_target_dist = qf_next_target_dist
+            else:
+                qf1_next_target_dist, qf2_next_target_dist = (
+                    qf1_next_target_projected,
+                    qf2_next_target_projected,
+                )
+        qf1, qf2 = critic(critic_observations, actions)
+        qf1_loss = -torch.sum(qf1_next_target_dist * F.log_softmax(qf1, dim=1), dim=1).mean()
+        qf2_loss = -torch.sum(qf2_next_target_dist * F.log_softmax(qf2, dim=1), dim=1).mean()
+        q_loss = qf1_loss + qf2_loss
 
-        q_target = torch.minimum(next_q1, next_q2).detach()
-        q_backup = rewards + (1.0 - dones) * cfg.gamma * q_target
-        q_loss = F.mse_loss(cur_q1, q_backup) + F.mse_loss(cur_q2, q_backup)
-
-        q_optim.zero_grad(set_to_none=True)
+        q_optimizer.zero_grad(set_to_none=True)
         q_loss.backward()
-        q_optim.step()
-        return {"q_loss": q_loss.detach(), "q_mean": cur_q1.mean().detach()}
+        q_optimizer.step()
+
+        return {
+            "q_loss": q_loss.detach(),
+            "q_min": qf1_next_target_value.min().detach(),
+            "q_max": qf1_next_target_value.max().detach(),
+        }
 
     def update_reference(data):
-        reference.train()
-        critic_target.eval()
-        observations = data["observations"]
-        new_action, new_logp, _, _ = reference.sample(observations)
-        q = critic_target.min_q(observations, new_action)
-        ref_loss = -q.mean()
+        ref_actions = reference(data["observations"])
+        critic_observations = data["observations"]
+        q_value = critic.q_value(critic_observations, ref_actions, use_cdq=cfg.use_cdq)
+        ref_loss = -q_value.mean()
 
-        ref_optim.zero_grad(set_to_none=True)
+        ref_optimizer.zero_grad(set_to_none=True)
         ref_loss.backward()
-        ref_optim.step()
-        return {"reference_loss": ref_loss.detach(), "reference_entropy": -new_logp.sum(-1).mean().detach()}
+        ref_optimizer.step()
+        return {
+            "reference_loss": ref_loss.detach()
+        }
 
     def update_velocity(data):
-        reference.eval()
-        velocity_field.train()
-        critic_target.eval()
         next_obs = data["next"]["observations"]
 
         with torch.no_grad():
-            action_init, _, _, _ = reference.sample(next_obs)
-        q_init = critic_target.min_q(next_obs, action_init).detach()
+            action_init = reference(next_obs)
+        q_init = critic_target.q_value(next_obs, action_init, cfg.use_cdq).detach()
 
         # Bounded Q-gradient ascent in action space builds the flow target.
         y = action_init.clone()
         for _ in range(cfg.grad_step_num):
             y = y.detach().requires_grad_(True)
-            q = critic_target.min_q(next_obs, y)
+            q = critic_target.q_value(next_obs, y, cfg.use_cdq)
             grad_y = torch.autograd.grad(q.sum(), y)[0]
             grad_norm = grad_y.norm(dim=1, keepdim=True)
             step = torch.minimum(
@@ -151,18 +223,18 @@ def train(
             y = (y + step * grad_y).detach()
         action_flow_update = y
 
-        # Conditional flow matching toward the straight line init -> updated.
+        # Conditional flow matching toward the straight line init -> updated
         t = torch.rand(next_obs.shape[0], 1, device=next_obs.device)
         temp_action = (1.0 - t) * action_init + t * action_flow_update
         temp_velocity = velocity_field(next_obs, temp_action, t)
         target_velocity = action_flow_update - action_init
         vel_loss = ((temp_velocity - target_velocity) ** 2).mean()
 
-        vel_optim.zero_grad(set_to_none=True)
+        vel_optimizer.zero_grad(set_to_none=True)
         vel_loss.backward()
-        vel_optim.step()
+        vel_optimizer.step()
 
-        q_flow = critic_target.min_q(next_obs, action_flow_update).detach()
+        q_flow = critic_target.q_value(next_obs, action_flow_update, cfg.use_cdq).detach()
         return {
             "velocity_loss": vel_loss.detach(),
             "q_init": q_init.mean(),
@@ -171,58 +243,12 @@ def train(
         }
 
     @torch.no_grad()
-    def soft_update(tau: float):
-        # Polyak-average params and hard-copy BatchRenorm buffers so
-        # the target's normalization tracks the online statistics
-        for p, tp in zip(critic.parameters(), critic_target.parameters()):
-            tp.mul_(1.0 - tau).add_(tau * p)
-        for b, tb in zip(critic.buffers(), critic_target.buffers()):
-            tb.copy_(b)
+    def update_target():
+        src_ps = [p.data for p in critic.parameters()]
+        tgt_ps = [p.data for p in critic_target.parameters()]
+        torch._foreach_mul_(tgt_ps, 1.0 - cfg.tau)
+        torch._foreach_add_(tgt_ps, src_ps, alpha=cfg.tau)
         return
-
-    def sample_and_prepare_batches(target_batch_size: int) -> list[TensorDict]:
-        """
-        Sample a large batch once and split it into smaller batches for each update.
-        This reduces sampling overhead by `num_updates` and normalization overhead by `num_updates`.
-        """
-        # Sample a large batch (batch_size * num_updates)
-        large_batch_size = target_batch_size * cfg.num_updates
-        large_data = rb.sample(large_batch_size)
-        samples_per_update = target_batch_size * envs.num_worlds
-
-        # Normalize all data once
-        large_data["observations"] = obs_normalizer(large_data["observations"])
-        large_data["next"]["observations"] = obs_normalizer(large_data["next"]["observations"])
-
-        # Split into smaller batches
-        prepared_batches = []
-
-        for i in range(cfg.num_updates):
-            start_idx = i * samples_per_update
-            end_idx = (i + 1) * samples_per_update
-
-            # Create a slice of the large batch
-            batch_data = TensorDict(
-                {
-                    "observations": large_data["observations"][start_idx:end_idx],
-                    "actions": large_data["actions"][start_idx:end_idx],
-                    "next": {
-                        "rewards": large_data["next"]["rewards"][start_idx:end_idx],
-                        "dones": large_data["next"]["dones"][start_idx:end_idx],
-                        "truncations": large_data["next"]["truncations"][start_idx:end_idx],
-                        "observations": large_data["next"]["observations"][start_idx:end_idx],
-                        "effective_n_steps": large_data["next"]["effective_n_steps"][start_idx:end_idx],
-                    },
-                },
-                batch_size=samples_per_update,
-            )
-            prepared_batches.append(batch_data)
-        return prepared_batches
-
-    if cfg.compile:
-        update_critic = torch.compile(update_critic)
-        update_reference = torch.compile(update_reference)
-        # update_velocity uses autograd.grad in a python loop; left uncompiled.
 
     # ----------------------------------------------------------- evaluation
     @torch.no_grad()
@@ -234,8 +260,8 @@ def train(
         eval_obs = sim.reset()
         for _ in range(sim.max_env_steps):
             with torch.no_grad():
-                norm_eval_obs = obs_normalizer(eval_obs)
-                eval_actions = actor.act(norm_eval_obs, deterministic=True)
+                norm_eval_obs = obs_normalizer(eval_obs, update=False)
+                eval_actions = actor.act(norm_eval_obs)
                 finished, eval_obs = sim.step(eval_actions)
             if finished:
                 break
@@ -262,43 +288,36 @@ def train(
                     actions = torch.rand((cfg.num_envs, n_act), device=device) * 2.0 - 1.0
                 else:
                     actor.eval()
-                    actions = actor.act(norm_obs)
+                    actions = actor.explore(norm_obs, dones)
 
             next_obs, rewards, terminated, truncations, info = envs.step(actions)
-            dones = (terminated + truncations).bool()
+            collect_experience(
+                rb=rb, obs=obs, actions=actions, next_obs=next_obs, rewards=rewards,
+                terminated=terminated, truncations=truncations, info=info,
+            )
+
             # Update episode stats using logging helper
+            dones = (terminated + truncations).bool()
             logging_helper.update_episode_stats(rewards, dones)
 
-            # Compute 'true' next_obs for saving
-            true_next_obs = torch.where(dones[:, None] > 0, info["final_observation"], next_obs)
-
-            transition = TensorDict(
-                {
-                    "observations": obs,
-                    "actions": torch.as_tensor(actions, device=device, dtype=torch.float),
-                    "next": {
-                        "observations": true_next_obs,
-                        "rewards": torch.as_tensor(rewards, device=device, dtype=torch.float),
-                        "truncations": truncations.long(),
-                        "dones": dones.long(),
-                    },
-                },
-                batch_size=(envs.num_worlds,),
-                device=device,
-            )
-            rb.extend(transition)
             obs = next_obs
 
         batch_size = max(cfg.batch_size // cfg.num_envs, 1)
         if rb.ptr >= cfg.learning_starts:
             with logging_helper.record_learn_time():
-                # Use batched sampling: sample once, normalize once, split into updates
-                prepared_batches = sample_and_prepare_batches(batch_size)
+                prepared_batches = sample_and_prepare_batches(
+                    rb=rb, obs_normalizer=obs_normalizer,
+                    num_updates=cfg.num_updates, target_batch_size=batch_size
+                )
                 for i, data in enumerate(prepared_batches):
                     c_logs = update_critic(data)
-                    r_logs = update_reference(data)
-                    v_logs = update_velocity(data)
-                    soft_update(cfg.tau)
+                    if cfg.num_updates > 1 and i % cfg.policy_frequency == 1:
+                        r_logs = update_reference(data)
+                        v_logs = update_velocity(data)
+                    elif global_step % cfg.policy_frequency == 0:
+                        r_logs = update_reference(data)
+                        v_logs = update_velocity(data)
+                    update_target()
 
                     # Logging metrics
                     current_metrics = {**c_logs, **r_logs, **v_logs}
@@ -309,25 +328,14 @@ def train(
 
             if global_step % cfg.logging_interval == 0:
                 with torch.no_grad():
-                    accumulated_metrics = training_metrics.mean_and_clear()
-
-                    # Convert tensor values to float for logging
-                    loss_dict = {}
-                    for key, value in accumulated_metrics.items():
-                        if isinstance(value, torch.Tensor):
-                            loss_dict[key] = value.item()
-                        else:
-                            loss_dict[key] = float(value)
-
-                    # Add current env rewards (not part of training loop accumulation)
-                    loss_dict["env_rewards"] = rewards.mean().item()
-
-                # Use logging helper
-                extra_log_dicts = {
-                    "raw_rewards": raw_rewards_dict,
-                    "additional_metrics": envs.additional_metrics(),
-                }
-                logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_dict, extra_log_dicts=extra_log_dicts)
+                    loss_metrics = training_metrics.get_metrics_and_clear()
+                    loss_metrics["env_rewards"] = rewards.mean().item()
+                    extra_log_dicts = {
+                        "raw_rewards": raw_rewards_dict,
+                        "additional_metrics": envs.additional_metrics(),
+                    }
+                    logging_helper.post_epoch_logging(it=global_step, loss_dict=loss_metrics,
+                                                      extra_log_dicts=extra_log_dicts)
 
             if cfg.save_interval > 0 and global_step > 0 and global_step % cfg.save_interval == 0:
                 logger.info(f"Saving model at global step {global_step}")

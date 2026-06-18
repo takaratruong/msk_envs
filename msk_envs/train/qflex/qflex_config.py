@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class QFlexConfig:
-    num_envs: int = 1024
+    num_envs: int = 4096
     """number of parallel environments"""
 
     num_learning_iterations: int = 150000
@@ -12,10 +12,7 @@ class QFlexConfig:
     learning_rate: float = 3e-4
     """learning rate"""
 
-    alpha_learning_rate: float = 3e-4
-    """alpha learning rate"""
-
-    buffer_size: int = 256 * 2
+    buffer_size: int = 256 * 20
     """the replay memory buffer size per environment"""
 
     num_steps: int = 1
@@ -32,20 +29,37 @@ class QFlexConfig:
 
     learning_starts: int = 10
     """timestep to start learning"""
-    num_updates: int = 1
+    num_updates: int = 2
     """the number of updates to perform per step"""
+    policy_frequency: int = 1
+    """the frequency of training policy (delayed)"""
 
-    hidden_dim: int = 256
-    hidden_num: int = 3
+    num_atoms: int = 101
+    """the number of atoms"""
+    v_min: float = -5.0
+    """the minimum value of the support"""
+    v_max: float = 15.0
+    """the maximum value of the support"""
+    critic_hidden_dim: int = 768
+    """the hidden dimension of the critic network"""
+    use_layer_norm: bool = False
+    """whether to use layer normalization"""
+    num_q_networks: int = 2
+    """number of Q-networks to ensemble"""
+    policy_noise: float = 0.001
+    """the scale of target action noise"""
+    noise_clip: float = 0.5
+    """the clip range of target action noise"""
+    use_cdq: bool = True
+    """whether to use Clipped Double Q-learning"""
 
-    obs_normalization: bool = False
+    actor_hidden_dim: int = 512
+    """the hidden dimension of the actor network"""
+    velocity_hidden_dim: int = 768
+    """hidden dimension of velocity network"""
+
+    obs_normalization: bool = True
     """ whether to normalize observations """
-
-    diffusion_steps: int = 20
-    """number of diffusion/flow steps"""
-
-    learn_reference_gn: bool = True
-    """whether to learn reference (Gaussian) guidance network"""
 
     num_flow_steps: int = 20
     """Euler steps for sampling from the flow (``diffusion_steps``)."""
@@ -70,7 +84,7 @@ class QFlexConfig:
 
     @staticmethod
     def pretty_print(qflex_config):
-        print("TD3 Configuration:")
+        print("QFlex Configuration:")
         for field in qflex_config.__dataclass_fields__:
             value = getattr(qflex_config, field)
             print(f"  {field}: {value}")

@@ -39,85 +39,6 @@ def load_ddp_state_dict(model, state_dict):
     else:
         model.load_state_dict(state_dict)
 
-
-def save_params_td3(
-        global_step,
-        actor,
-        qnet,
-        qnet_target,
-        obs_normalizer,
-        args,
-        save_path,
-        actor_optimizer=None,
-        q_optimizer=None,
-        actor_scheduler=None,
-        q_scheduler=None,
-        scaler=None,
-        include_optim_state: bool = False,
-):
-    """Save model parameters and training configuration to disk."""
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    save_dict = {
-        "actor_state_dict": cpu_state(get_ddp_state_dict(actor)),
-        "qnet_state_dict": cpu_state(get_ddp_state_dict(qnet)),
-        "qnet_target_state_dict": cpu_state(get_ddp_state_dict(qnet_target)),
-        "obs_normalizer_state": (
-            cpu_state(obs_normalizer.state_dict())
-            if hasattr(obs_normalizer, "state_dict")
-            else None
-        ),
-        "args": vars(args),
-        "global_step": global_step,
-    }
-    if include_optim_state:
-        if actor_optimizer is not None:
-            save_dict["actor_optimizer_state_dict"] = actor_optimizer.state_dict()
-        if q_optimizer is not None:
-            save_dict["q_optimizer_state_dict"] = q_optimizer.state_dict()
-        if actor_scheduler is not None:
-            save_dict["actor_scheduler_state_dict"] = actor_scheduler.state_dict()
-        if q_scheduler is not None:
-            save_dict["q_scheduler_state_dict"] = q_scheduler.state_dict()
-        if scaler is not None:
-            save_dict["grad_scaler_state_dict"] = scaler.state_dict()
-    if wandb.run is not None:
-        save_dict["wandb_run_id"] = wandb.run.id
-    torch.save(save_dict, save_path, _use_new_zipfile_serialization=True)
-    print(f"Saved parameters and configuration to {save_path}")
-
-
-def save_params_sac(
-        global_step, actor, qnet, qnet_target, log_alpha, obs_normalizer,
-        actor_optimizer, q_optimizer, alpha_optimizer, scaler, args, save_path: str, save_fn=torch.save,
-        metadata=None,
-):
-    """Save model parameters and training configuration to disk."""
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    save_dict = {
-        "actor_state_dict": cpu_state(actor.state_dict()),
-        "qnet_state_dict": cpu_state(qnet.state_dict()),
-        "qnet_target_state_dict": cpu_state(qnet_target.state_dict()),
-        "log_alpha": log_alpha.detach().cpu(),
-        "obs_normalizer_state": (
-            cpu_state(obs_normalizer.state_dict()) if hasattr(obs_normalizer, "state_dict") else None
-        ),
-        "actor_optimizer_state_dict": actor_optimizer.state_dict(),
-        "q_optimizer_state_dict": q_optimizer.state_dict(),
-        "alpha_optimizer_state_dict": alpha_optimizer.state_dict(),
-        "grad_scaler_state_dict": scaler.state_dict() if scaler is not None else None,
-        "args": vars(args),  # Save all arguments
-        "global_step": global_step,
-    }
-    # Save wandb run ID if available
-    if wandb.run is not None:
-        save_dict["wandb_run_id"] = wandb.run.id
-    if metadata is None:
-        raise ValueError("Checkpoint metadata is required when saving FastSAC parameters.")
-    save_dict.update(metadata)
-    save_fn(save_dict, save_path)
-    print(f"Saved parameters and configuration to {save_path}")
-
-
 def init_wandb_run(args):
     if not getattr(args, "use_wandb", False):
         return None
@@ -282,6 +203,17 @@ class TensorAverageMeterDict:
         mean = self.mean()
         self.clear()
         return mean
+
+    def get_metrics_and_clear(self):
+        accumulated_metrics = self.mean_and_clear()
+        # Convert tensor values to float for logging
+        metrics = {}
+        for key, value in accumulated_metrics.items():
+            if isinstance(value, torch.Tensor):
+                metrics[key] = value.item()
+            else:
+                metrics[key] = float(value)
+        return metrics
 
 
 class LoggingHelper:

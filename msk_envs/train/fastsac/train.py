@@ -14,12 +14,15 @@ from torch.amp import autocast, GradScaler
 from loguru import logger
 from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
-from msk_envs.utils.logged_sim import LoggedSim
 from msk_envs.train.fastsac.sac_config import SACConfig
-from msk_envs.train.nets.buffer import SimpleReplayBuffer
+from msk_envs.train.fastsac.sac_utils import save_params
+
+from msk_envs.utils.logged_sim import LoggedSim
+from msk_envs.train.nets.buffer import SimpleReplayBuffer, sample_and_prepare_batches, collect_experience
 from msk_envs.train.nets.normalizers import EmpiricalNormalization
-from msk_envs.train.nets.sac_networks import Actor, Critic, load_policy
-from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper, save_params_sac
+from msk_envs.train.nets.distributional_critic import Critic
+from msk_envs.train.nets.sac_networks import Actor, load_policy
+from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper
 
 torch.set_float32_matmul_precision("high")
 
@@ -282,51 +285,12 @@ def train(
             action_std.detach(),
         )
 
-    def _sample_and_prepare_batches() -> list[TensorDict]:
-        """
-        Sample a large batch once and split it into smaller batches for each update.
-        This reduces sampling overhead by `num_updates` and normalization overhead by `num_updates`.
-        """
-        # Sample a large batch (batch_size * num_updates)
-        large_batch_size = batch_size * sac_config.num_updates
-        large_data = rb.sample(large_batch_size)
-        samples_per_update = batch_size * envs.num_worlds
-
-        # Normalize all data once
-        large_data["observations"] = normalize_obs(large_data["observations"])
-        large_data["next"]["observations"] = normalize_obs(large_data["next"]["observations"])
-
-        # Split into smaller batches
-        prepared_batches = []
-
-        for i in range(sac_config.num_updates):
-            start_idx = i * samples_per_update
-            end_idx = (i + 1) * samples_per_update
-
-            # Create a slice of the large batch
-            batch_data = TensorDict(
-                {
-                    "observations": large_data["observations"][start_idx:end_idx],
-                    "actions": large_data["actions"][start_idx:end_idx],
-                    "next": {
-                        "rewards": large_data["next"]["rewards"][start_idx:end_idx],
-                        "dones": large_data["next"]["dones"][start_idx:end_idx],
-                        "truncations": large_data["next"]["truncations"][start_idx:end_idx],
-                        "observations": large_data["next"]["observations"][start_idx:end_idx],
-                        "effective_n_steps": large_data["next"]["effective_n_steps"][start_idx:end_idx],
-                    },
-                },
-                batch_size=samples_per_update,
-            )
-            prepared_batches.append(batch_data)
-        return prepared_batches
-
     def _checkpoint_metadata(iteration: int | None = None) -> dict:
         metadata = {"iteration": int(iteration)}
         return metadata
 
     def save(path: str) -> None:  # type: ignore[override]
-        save_params_sac(
+        save_params(
             global_step,
             actor,
             qnet,
@@ -397,30 +361,14 @@ def train(
                 actions = dep_explorer.explore(muscle_states=envs.muscle_fiber_lengths, actions=actions)
 
             next_obs, rewards, terminated, truncations, info = envs.step(actions.float())
-            dones = (terminated + truncations).bool()
+            collect_experience(
+                rb=rb, obs=obs, actions=actions, next_obs=next_obs, rewards=rewards,
+                terminated=terminated, truncations=truncations, info=info,
+            )
 
             # Update episode stats using logging helper
+            dones = (terminated + truncations).bool()
             logging_helper.update_episode_stats(rewards, dones)
-
-            # Compute 'true' next_obs for saving
-            # true_next_obs = torch.where(truncations[:, None] > 0, info["final_observation"], next_obs)
-            true_next_obs = torch.where(dones[:, None] > 0, info["final_observation"], next_obs)
-
-            transition = TensorDict(
-                {
-                    "observations": obs,
-                    "actions": torch.as_tensor(actions, device=device, dtype=torch.float),
-                    "next": {
-                        "observations": true_next_obs,
-                        "rewards": torch.as_tensor(rewards, device=device, dtype=torch.float),
-                        "truncations": truncations.long(),
-                        "dones": dones.long(),
-                    },
-                },
-                batch_size=(envs.num_worlds,),
-                device=device,
-            )
-            rb.extend(transition)
 
             obs = next_obs
 
@@ -430,7 +378,10 @@ def train(
         if rb.ptr >= sac_config.learning_starts:
             with logging_helper.record_learn_time():
                 # Use batched sampling: sample once, normalize once, split into updates
-                prepared_batches = _sample_and_prepare_batches()
+                prepared_batches = sample_and_prepare_batches(
+                    rb=rb, obs_normalizer=normalize_obs,
+                    num_updates=sac_config.num_updates, target_batch_size=batch_size
+                )
                 for i, data in enumerate(prepared_batches):
                     # Data is already normalized, just run the updates
                     buffer_rewards, critic_grad_norm, qf_loss, qf_max, qf_min, alpha_loss = update_main(data)
@@ -498,10 +449,10 @@ def train(
                 # self.export(onnx_file_path=os.path.join(self.log_dir, f"model_{global_step:07d}.onnx"))
 
             if global_step % sac_config.eval_freq == 0 and latest_model_path is not None:
-                print(f"Evaluating at global step {global_step}")
+                logger.info(f"Evaluating at global step {global_step}")
                 eval_avg_return, eval_avg_length = evaluate(latest_model_path)
                 # Todo: log eval metrics
-                print(f"Eval Average Return: {eval_avg_return}, Eval Average Length: {eval_avg_length}")
+                logger.info(f"Eval Average Return: {eval_avg_return}, Eval Average Length: {eval_avg_length}")
 
         if save_requested:
             path = latest_model_path or f"models/{exp_name}/{exp_name}_{global_step}.pt"

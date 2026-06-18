@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from tensordict import TensorDict
+from typing import Callable
 
 
 class SimpleReplayBuffer(nn.Module):
@@ -65,7 +66,8 @@ class SimpleReplayBuffer(nn.Module):
             obs_indices = indices.unsqueeze(-1).expand(-1, -1, self.n_obs)
             act_indices = indices.unsqueeze(-1).expand(-1, -1, self.n_act)
             observations = torch.gather(self.observations, 1, obs_indices).reshape(self.n_env * batch_size, self.n_obs)
-            next_observations = torch.gather(self.next_observations, 1, obs_indices).reshape(self.n_env * batch_size, self.n_obs)
+            next_observations = torch.gather(self.next_observations, 1, obs_indices).reshape(self.n_env * batch_size,
+                                                                                             self.n_obs)
             actions = torch.gather(self.actions, 1, act_indices).reshape(self.n_env * batch_size, self.n_act)
             rewards = torch.gather(self.rewards, 1, indices).reshape(self.n_env * batch_size)
             dones = torch.gather(self.dones, 1, indices).reshape(self.n_env * batch_size)
@@ -212,3 +214,79 @@ class SimpleReplayBuffer(nn.Module):
         return out
 
 
+def collect_experience(
+        rb: SimpleReplayBuffer,
+        obs: torch.Tensor,
+        actions: torch.Tensor,
+        next_obs: torch.Tensor,
+        rewards: torch.Tensor,
+        terminated: torch.Tensor,
+        truncations: torch.Tensor,
+        info: dict,
+):
+    dones = (terminated + truncations).bool()
+
+    # Compute 'true' next_obs for saving
+    true_next_obs = torch.where(dones[:, None] > 0, info["final_observation"], next_obs)
+
+    transition = TensorDict(
+        {
+            "observations": obs,
+            "actions": torch.as_tensor(actions, device=rb.device, dtype=torch.float),
+            "next": {
+                "observations": true_next_obs,
+                "rewards": torch.as_tensor(rewards, device=rb.device, dtype=torch.float),
+                "truncations": truncations.long(),
+                "dones": dones.long(),
+            },
+        },
+        batch_size=(rb.n_env,),
+        device=rb.device,
+    )
+    rb.extend(transition)
+    return
+
+
+def sample_and_prepare_batches(
+        rb: SimpleReplayBuffer,
+        obs_normalizer: Callable,
+        num_updates: int,
+        target_batch_size: int
+) -> list[TensorDict]:
+    """
+    Sample a large batch once and split it into smaller batches for each update.
+    This reduces sampling overhead by `num_updates` and normalization overhead by `num_updates`.
+    """
+    # Sample a large batch (batch_size * num_updates)
+    large_batch_size = target_batch_size * num_updates
+    large_data = rb.sample(large_batch_size)
+    samples_per_update = target_batch_size * rb.n_env
+
+    # Normalize all data once
+    large_data["observations"] = obs_normalizer(large_data["observations"])
+    large_data["next"]["observations"] = obs_normalizer(large_data["next"]["observations"])
+
+    # Split into smaller batches
+    prepared_batches = []
+
+    for i in range(num_updates):
+        start_idx = i * samples_per_update
+        end_idx = (i + 1) * samples_per_update
+
+        # Create a slice of the large batch
+        batch_data = TensorDict(
+            {
+                "observations": large_data["observations"][start_idx:end_idx],
+                "actions": large_data["actions"][start_idx:end_idx],
+                "next": {
+                    "rewards": large_data["next"]["rewards"][start_idx:end_idx],
+                    "dones": large_data["next"]["dones"][start_idx:end_idx],
+                    "truncations": large_data["next"]["truncations"][start_idx:end_idx],
+                    "observations": large_data["next"]["observations"][start_idx:end_idx],
+                    "effective_n_steps": large_data["next"]["effective_n_steps"][start_idx:end_idx],
+                },
+            },
+            batch_size=samples_per_update,
+        )
+        prepared_batches.append(batch_data)
+    return prepared_batches

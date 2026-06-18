@@ -42,11 +42,11 @@ class TD3Config:
     learning_starts: int = 10
     """timestep to start learning"""
 
-    policy_frequency: int = 4
-    """the frequency of training policy (delayed)"""
-
     num_updates: int = 8
     """the number of updates to perform per step"""
+
+    policy_frequency: int = 4
+    """the frequency of training policy (delayed)"""
 
     policy_noise: float = 0.001
     """the scale of target action noise"""

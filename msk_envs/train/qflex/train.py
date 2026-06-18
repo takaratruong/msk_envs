@@ -89,6 +89,8 @@ def train(
         num_envs=cfg.num_envs,
         std_min=0.001,
         std_max=0.4,
+        action_low=action_low,
+        action_high=action_high,
     ).to(device)
 
     q_optimizer = make_optimizer(
@@ -203,8 +205,9 @@ def train(
         }
 
     def update_velocity(data):
-        next_obs = data["next"]["observations"]
+        critic_target.eval()
 
+        next_obs = data["next"]["observations"]
         with torch.no_grad():
             action_init = reference(next_obs)
         q_init = critic_target.q_value(next_obs, action_init, cfg.use_cdq).detach()
@@ -220,7 +223,7 @@ def train(
                 torch.full_like(grad_norm, cfg.grad_step_size),
                 max_update / (grad_norm + 1e-6),
             )
-            y = (y + step * grad_y).detach()
+            y = torch.clamp(y + step * grad_y, action_low, action_high).detach()
         action_flow_update = y
 
         # Conditional flow matching toward the straight line init -> updated
@@ -275,12 +278,29 @@ def train(
         sim.save_analytics(analytics_out_folder, f"analytics_{global_step}")
         return rewards_mean.item(), episode_length_mean.item()
 
+    # -------------------------------------------------------------- compilation
+    if cfg.compile:
+        compile_mode = cfg.compile_mode
+        compile_backend = cfg.compile_backend
+        update_critic = torch.compile(
+            update_critic,
+            mode=compile_mode,
+            backend=compile_backend,
+        )
+        update_reference = torch.compile(
+            update_reference,
+            mode=compile_mode,
+            backend=compile_backend,
+        )
+
     # -------------------------------------------------------------- training
     obs = envs.reset()
+    dones = None
     global_step = 0
     pbar = tqdm.tqdm(total=cfg.num_learning_iterations, initial=global_step)
     while global_step < cfg.num_learning_iterations:
         mark_step()
+
         with logging_helper.record_collection_time():
             with torch.no_grad():
                 norm_obs = obs_normalizer(obs, update=False)
@@ -311,12 +331,14 @@ def train(
                 )
                 for i, data in enumerate(prepared_batches):
                     c_logs = update_critic(data)
-                    if cfg.num_updates > 1 and i % cfg.policy_frequency == 1:
-                        r_logs = update_reference(data)
-                        v_logs = update_velocity(data)
+                    if cfg.num_updates > 1:
+                        if i % cfg.policy_frequency == 1:
+                            r_logs = update_reference(data)
+                            v_logs = update_velocity(data)
                     elif global_step % cfg.policy_frequency == 0:
                         r_logs = update_reference(data)
                         v_logs = update_velocity(data)
+
                     update_target()
 
                     # Logging metrics

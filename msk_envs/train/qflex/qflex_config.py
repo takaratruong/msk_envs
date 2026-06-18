@@ -11,27 +11,23 @@ class QFlexConfig:
 
     learning_rate: float = 3e-4
     """learning rate"""
+    tau: float = 0.1
+    """the soft update coefficient"""
 
     buffer_size: int = 256 * 20
     """the replay memory buffer size per environment"""
-
     num_steps: int = 1
     """the number of steps to use for the multi-step return"""
-
     gamma: float = 0.99
     """the discount factor"""
-
-    tau: float = 1.0
-    """the soft update coefficient"""
-
     batch_size: int = 8192
     """the batch size of sample from the replay memory"""
 
     learning_starts: int = 10
     """timestep to start learning"""
-    num_updates: int = 2
+    num_updates: int = 8
     """the number of updates to perform per step"""
-    policy_frequency: int = 1
+    policy_frequency: int = 4
     """the frequency of training policy (delayed)"""
 
     num_atoms: int = 101

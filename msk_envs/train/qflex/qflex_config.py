@@ -63,6 +63,8 @@ class QFlexConfig:
     """step size of the Q-gradient ascent that builds the flow target."""
     grad_step_num: int = 20
     """number of Q-gradient ascent steps."""
+    clamp_velocity: bool = False
+    """whether to clamp the velocity field output to action bounds"""
 
     compile: bool = False
     """whether to use torch.compile."""

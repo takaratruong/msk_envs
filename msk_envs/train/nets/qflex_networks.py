@@ -82,6 +82,7 @@ class QFlexActor(nn.Module):
             num_envs: int,
             std_min: float,
             std_max: float,
+            clamp_velocity: bool,
             action_low: float,
             action_high: float,
     ):
@@ -89,6 +90,8 @@ class QFlexActor(nn.Module):
         self.reference = reference
         self.velocity_field = velocity_field
         self.num_timesteps = num_timesteps
+
+        self.clamp_velocity = clamp_velocity
         self.action_low = action_low
         self.action_high = action_high
 
@@ -112,7 +115,10 @@ class QFlexActor(nn.Module):
             dx = self.velocity_field(obs, x, ti)
             dx = dx.clamp(-1.0 / dt, 1.0 / dt)
             x = x + dt * dx
-        return x.clamp(self.action_low, self.action_high)
+        if self.clamp_velocity:
+            return x.clamp(self.action_low, self.action_high)
+        else:
+            return x
 
     @torch.no_grad()
     def act(self, obs: torch.Tensor) -> torch.Tensor:

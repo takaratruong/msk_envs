@@ -89,6 +89,7 @@ def train(
         num_envs=cfg.num_envs,
         std_min=0.001,
         std_max=0.4,
+        clamp_velocity=cfg.clamp_velocity,
         action_low=action_low,
         action_high=action_high,
     ).to(device)
@@ -223,7 +224,10 @@ def train(
                 torch.full_like(grad_norm, cfg.grad_step_size),
                 max_update / (grad_norm + 1e-6),
             )
-            y = torch.clamp(y + step * grad_y, action_low, action_high).detach()
+            y = (y + step * grad_y).detach()
+            if cfg.clamp_velocity:
+                y = torch.clamp(y, action_low, action_high)
+
         action_flow_update = y
 
         # Conditional flow matching toward the straight line init -> updated

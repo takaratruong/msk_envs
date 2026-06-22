@@ -31,15 +31,14 @@ def main():
     num_envs = 1
     envs = EnvFactory.create_env(num_envs=num_envs,
                                  env_config=env_config,
-                                 live_render=False,
                                  requires_visuals=True,
                                  cuda_graph=has_cuda_support,
                                  device=device)
 
     actions = envs.get_blank_actions()
 
-    policy = load_policy("/home/marth/Documents/msk_envs/models/post_submission_test_2026-05-26_17-10/post_submission_test_2026-05-26_17-10_148000.pt")
-    policy.to(device)
+    # policy = load_policy("/home/marth/Documents/msk_envs/models/post_submission_test_2026-05-26_17-10/post_submission_test_2026-05-26_17-10_148000.pt")
+    # policy.to(device)
 
     dep = DEP(n_motors=envs.num_muscles,
               n_envs=num_envs,
@@ -69,8 +68,8 @@ def main():
         # actions[:, envs.num_muscles:] = torch.randn_like(actions[:, envs.num_muscles:])
         # actions[:, :envs.num_muscles] = dep.step(muscle_states)
 
-        with torch.no_grad():
-            actions = policy(obs)
+        # with torch.no_grad():
+        #     actions = policy(obs)
 
         # try to step the sim, but if it takes too long, break out of the loop
         finished, obs = sim.step(actions)

@@ -206,18 +206,17 @@ def train(
         }
 
     def update_velocity(data):
-        critic_target.eval()
+        critic.eval()
 
         next_obs = data["next"]["observations"]
         with torch.no_grad():
             action_init = reference(next_obs)
-        q_init = critic_target.q_value(next_obs, action_init, cfg.use_cdq).detach()
 
         # Bounded Q-gradient ascent in action space builds the flow target.
         y = action_init.clone()
         for _ in range(cfg.grad_step_num):
             y = y.detach().requires_grad_(True)
-            q = critic_target.q_value(next_obs, y, cfg.use_cdq)
+            q = critic.q_value(next_obs, y, cfg.use_cdq)
             grad_y = torch.autograd.grad(q.sum(), y)[0]
             grad_norm = grad_y.norm(dim=1, keepdim=True)
             step = torch.minimum(
@@ -241,11 +240,14 @@ def train(
         vel_loss.backward()
         vel_optimizer.step()
 
-        q_flow = critic_target.q_value(next_obs, action_flow_update, cfg.use_cdq).detach()
+        q_init = critic.q_value(next_obs, action_init, cfg.use_cdq).detach()
+        q_flow = critic.q_value(next_obs, action_flow_update, cfg.use_cdq).detach()
+        q_flow_diff = q_flow - q_init
         return {
             "velocity_loss": vel_loss.detach(),
             "q_init": q_init.mean(),
             "q_flow_update": q_flow.mean(),
+            "q_flow_diff": q_flow_diff.mean(),
             "target_velocity_norm": target_velocity.norm(dim=1).mean().detach(),
         }
 

@@ -4597,30 +4597,11 @@
 						</PhysicalOffsetFrame>
 					</frames>
 				</PinJoint>
-				<PinJoint name="radioulnar_r">
+				<WeldJoint name="radioulnar_r">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>ulna_r_offset</socket_parent_frame>
 					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
 					<socket_child_frame>radius_r_offset</socket_child_frame>
-					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
-					<coordinates>
-						<Coordinate name="pro_sup_r">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 2.0899999999999999</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
-							<prescribed_function />
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-					</coordinates>
 					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
 					<frames>
 						<PhysicalOffsetFrame name="ulna_r_offset">
@@ -4654,7 +4635,7 @@
 							<orientation>-1.56884 0.056427999999999999 1.5361400000000001</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-				</PinJoint>
+				</WeldJoint>
 				<WeldJoint name="radius_hand_r">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>radius_r_offset</socket_parent_frame>
@@ -4907,30 +4888,11 @@
 						</PhysicalOffsetFrame>
 					</frames>
 				</PinJoint>
-				<PinJoint name="radioulnar_l">
+				<WeldJoint name="radioulnar_l">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>ulna_l_offset</socket_parent_frame>
 					<!--Path to a Component that satisfies the Socket 'child_frame' of type PhysicalFrame (description: The child frame for the joint.).-->
 					<socket_child_frame>radius_l_offset</socket_child_frame>
-					<!--List containing the generalized coordinates (q's) that parameterize this joint.-->
-					<coordinates>
-						<Coordinate name="pro_sup_l">
-							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0</default_value>
-							<!--The speed value of this coordinate before any value has been set. Rotational coordinate value is in rad/s and Translational in m/s.-->
-							<default_speed_value>0</default_speed_value>
-							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
-							<range>0 2.0899999999999999</range>
-							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
-							<clamped>true</clamped>
-							<!--Flag indicating whether or not the values of the coordinates should be constrained to the current (e.g. default) value, above.-->
-							<locked>false</locked>
-							<!--If specified, the coordinate can be prescribed by a function of time. It can be any OpenSim Function with valid second order derivatives.-->
-							<prescribed_function />
-							<!--Flag indicating whether or not the values of the coordinates should be prescribed according to the function above. It is ignored if the no prescribed function is specified.-->
-							<prescribed>false</prescribed>
-						</Coordinate>
-					</coordinates>
 					<!--Physical offset frames owned by the Joint that are typically used to satisfy the owning Joint's parent and child frame connections (sockets). PhysicalOffsetFrames are often used to describe the fixed transformation from a Body's origin to another location of interest on the Body (e.g., the joint center). When the joint is deleted, so are the PhysicalOffsetFrame components in this list.-->
 					<frames>
 						<PhysicalOffsetFrame name="ulna_l_offset">
@@ -4964,7 +4926,7 @@
 							<orientation>1.56884 -0.056427999999999999 1.5361400000000001</orientation>
 						</PhysicalOffsetFrame>
 					</frames>
-				</PinJoint>
+				</WeldJoint>
 				<WeldJoint name="radius_hand_l">
 					<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The parent frame for the joint.).-->
 					<socket_parent_frame>radius_l_offset</socket_parent_frame>
@@ -5410,6 +5372,71 @@
 					<!--Damping constant.-->
 					<viscosity>1.0</viscosity>
 				</SpringGeneralizedForce>
+                <SpringGeneralizedForce name="arm_flex_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>arm_flex_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="arm_flex_l_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>arm_flex_l</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="arm_add_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>arm_add_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="arm_add_l_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>arm_add_l</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="arm_rot_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>arm_rot_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="arm_rot_l_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>arm_rot_l</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.1</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="elbow_flex_r_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>elbow_flex_r</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.01</viscosity>
+                </SpringGeneralizedForce>
+                <SpringGeneralizedForce name="elbow_flex_l_spring_force">
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <coordinate>elbow_flex_l</coordinate>
+                    <!--Name of the coordinate to which this force is applied.-->
+                    <stiffness>0.0</stiffness>
+                    <!--Damping constant.-->
+                    <viscosity>0.01</viscosity>
+                </SpringGeneralizedForce>
+
 				<CoordinateLimitForce name="lumbar_extension_limit_force">
 					<coordinate>lumbar_extension</coordinate>
 					<upper_stiffness>8.726646259971648</upper_stiffness>
@@ -5440,6 +5467,86 @@
 					<transition>1</transition>
 					<compute_dissipation_energy>false</compute_dissipation_energy>
 				</CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_flex_r_limit_force">
+                    <coordinate>arm_flex_r</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>180</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>-75</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_flex_l_limit_force">
+                    <coordinate>arm_flex_l</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>180</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>-75</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_add_r_limit_force">
+                    <coordinate>arm_add_r</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>0.0</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>-45.0</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_add_l_limit_force">
+                    <coordinate>arm_add_l</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>0.0</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>-45.0</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_rot_r_limit_force">
+                    <coordinate>arm_rot_r</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>25</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>-25</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="arm_rot_l_limit_force">
+                    <coordinate>arm_rot_l</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>25</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>-25</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="elbow_flex_r_limit_force">
+                    <coordinate>elbow_flex_r</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>150</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>5.0</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
+                <CoordinateLimitForce name="elbow_flex_l_limit_force">
+                    <coordinate>elbow_flex_l</coordinate>
+                    <upper_stiffness>3.49066</upper_stiffness>
+                    <upper_limit>150</upper_limit>
+                    <lower_stiffness>3.49066</lower_stiffness>
+                    <lower_limit>5.0</lower_limit>
+                    <damping>0.017453292519943295</damping>
+                    <transition>1</transition>
+                    <compute_dissipation_energy>false</compute_dissipation_energy>
+                </CoordinateLimitForce>
 
 				<Millard2012EquilibriumMuscle name="addbrev_r">
 					<!--The set of points defining the path of the actuator.-->
@@ -14299,136 +14406,116 @@
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
-				<CoordinateActuator name="lumbar_ext">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				<ActivationCoordinateActuator name="lumbar_ext">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>lumbar_extension</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="lumbar_bend">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="lumbar_bend">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>lumbar_bending</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="lumbar_rot">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="lumbar_rot">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>lumbar_rotation</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_flex_r">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="shoulder_flex_r">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>arm_flex_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_add_r">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="shoulder_add_r">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>arm_add_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_rot_r">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="shoulder_rot_r">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>arm_rot_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="elbow_flex_r">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="elbow_flex_r">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>elbow_flex_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="pro_sup_r">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>pro_sup_r</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_flex_l">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="shoulder_flex_l">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>arm_flex_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_add_l">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="shoulder_add_l">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>arm_add_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="shoulder_rot_l">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="shoulder_rot_l">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>arm_rot_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="elbow_flex_l">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
+				</ActivationCoordinateActuator>
+				<ActivationCoordinateActuator name="elbow_flex_l">
+                    <!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
+                    <activation_time_constant>0.035</activation_time_constant>
+                    <!--Value of activation in the default state (default: 0.5).-->
+                    <default_activation>0.5</default_activation>
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>elbow_flex_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
 					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
-				<CoordinateActuator name="pro_sup_l">
-					<!--Minimum allowed value for control signal. Used primarily when solving for control values.-->
-					<min_control>-Inf</min_control>
-					<!--Maximum allowed value for control signal. Used primarily when solving for control values.-->
-					<max_control>Inf</max_control>
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>pro_sup_l</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>10</optimal_force>
-				</CoordinateActuator>
+				</ActivationCoordinateActuator>
 			</objects>
 		</ForceSet>
 		<!--Geometry to be used in contact forces.-->

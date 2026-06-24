@@ -191,14 +191,16 @@ class EnvConfigRajagopal(EnvConfig):
     muscle_function_path: str = "../msk_models/rajagopal/RajagopalLaiUhlrich2023_fn.xml"
     contact_params_path: str = "../msk_models/rajagopal/contact_params/contact_params_generic.yaml"
     starting_pose_path: str = "../msk_models/rajagopal/poses/starting_pose_run.yaml"
-    ignore_short_elastic_tendons: bool = True
+    ignore_short_elastic_tendons: bool = False
+
+    enforce_ground_contact: bool = False
 
     muscle_contraction_dynamics: bolt.ContractionType = bolt.ContractionType.DGF_MILLARD_PASSIVE
 
-    muscle_multiplier: float = 2.0
-    muscle_v_max: float = 12.0
+    muscle_multiplier: float = 1.0
+    muscle_v_max: float = 10.0
     armature: float = 1e-3
-    integrator_accuracy: float = 1.0
+    integrator_accuracy: float = 0.01
 
 
 EnvConfigUnion = Union[

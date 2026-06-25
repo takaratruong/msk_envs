@@ -175,6 +175,7 @@ class EnvConfigSprinterExp(EnvConfig):
     contact_params_path: str = "../msk_models/sprinterexp/contact_params/contact_params.yaml"
     starting_pose_path: str = "../msk_models/sprinterexp/poses/starting_pose_stand.yaml"
     ignore_short_elastic_tendons: bool = False
+    enforce_ground_contact: bool = False
 
     muscle_multiplier: float = 2.0
     muscle_v_max: float = 12.0

@@ -25,17 +25,15 @@ class LoggedSim:
         self.worlds_to_save = list(range(envs.num_worlds))
         self.delta_t_log = delta_t_log
         n_worlds = envs.num_worlds
-        n_worlds_to_save = len(self.worlds_to_save)
-        assert n_worlds_to_save <= n_worlds
         assert min(self.worlds_to_save) >= 0
         assert max(self.worlds_to_save) < n_worlds
 
         # Build storage for things to track
         max_env_steps = int(envs.max_episode_duration / envs.delta_t) + 1
         self.finished = torch.zeros((n_worlds,), dtype=torch.bool, device=device)
-        self.rewards = torch.zeros((n_worlds_to_save, max_env_steps), dtype=torch.float32, device=device)
+        self.rewards = torch.zeros((n_worlds, max_env_steps), dtype=torch.float32, device=device)
         self.episode_length = torch.zeros((n_worlds,), dtype=torch.int32, device=device)
-        self.reward_data = [[] for _ in range(n_worlds_to_save)]
+        self.reward_data = [[] for _ in range(n_worlds)]
         self.max_env_steps = max_env_steps
 
         # Frame data: logged every delta_t_log seconds
@@ -44,10 +42,10 @@ class LoggedSim:
             self.num_sim_steps_per_log = 1
         else:
             self.num_sim_steps_per_log = math.ceil(self.delta_t_log / self.envs.delta_t_sim)
-        self.frame_data = [[] for _ in range(n_worlds_to_save)]
+        self.frame_data = [[] for _ in range(n_worlds)]
 
         self.n_worlds = n_worlds
-        self.n_worlds_to_save = n_worlds_to_save
+        self.n_worlds = n_worlds
         self.curr_policy_step = 0
         self.curr_sim_step = 0
         self.device = device
@@ -90,7 +88,7 @@ class LoggedSim:
 
         # Reward breakdown
         reward_dict = self.envs.get_scaled_reward_dict()
-        for i in range(self.n_worlds_to_save):
+        for i in range(self.n_worlds):
             idx_world = self.worlds_to_save[i]
             if self.finished[idx_world]:
                 continue
@@ -239,8 +237,8 @@ class LoggedSim:
         self.finished[:] = 0
         self.rewards[:] = 0
         self.episode_length[:] = 0
-        self.reward_data = [[] for _ in range(self.n_worlds_to_save)]
-        self.frame_data = [[] for _ in range(self.n_worlds_to_save)]
+        self.reward_data = [[] for _ in range(self.n_worlds)]
+        self.frame_data = [[] for _ in range(self.n_worlds)]
         obs = self.envs.reset()
 
         self.add_to_log()
@@ -289,7 +287,7 @@ class LoggedSim:
 
     def save_analytics(self, out_folder: str, base_filename: str):
         """ Create PDF analytics files """
-        for i in range(self.n_worlds_to_save):
+        for i in range(self.n_worlds):
             idx_world = self.worlds_to_save[i]
             out_file = os.path.join(out_folder, f"{base_filename}_{idx_world}.pdf")
             create_pdf_output(self.frame_data[i], self.reward_data[i], out_file)

@@ -169,6 +169,20 @@ class EnvConfigSprinter(EnvConfig):
 
 
 @dataclass
+class EnvConfigSprinterExp(EnvConfig):
+    model_path: str = "../msk_models/sprinterexp/sprinter_model_exp.osim"
+    muscle_function_path: str = "../msk_models/sprinterexp/sprinter_model_fn.xml"
+    contact_params_path: str = "../msk_models/sprinterexp/contact_params/contact_params.yaml"
+    starting_pose_path: str = "../msk_models/sprinterexp/poses/starting_pose_stand.yaml"
+    ignore_short_elastic_tendons: bool = False
+
+    muscle_multiplier: float = 2.0
+    muscle_v_max: float = 12.0
+    armature: float = 1e-3
+    integrator_accuracy: float = 0.01
+
+
+@dataclass
 class EnvConfigAthlete(EnvConfig):
     model_path: str = "../msk_models/athlete/athlete.osim"
     muscle_function_path: str = "../msk_models/athlete/athlete_fn.xml"
@@ -205,6 +219,7 @@ class EnvConfigRajagopal(EnvConfig):
 
 EnvConfigUnion = Union[
     Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
+    Annotated[EnvConfigSprinterExp, tyro.conf.subcommand(name="sprinterexp")],
     Annotated[EnvConfigAthlete, tyro.conf.subcommand(name="athlete")],
     Annotated[EnvConfigRajagopal, tyro.conf.subcommand(name="rajagopal")],
 ]

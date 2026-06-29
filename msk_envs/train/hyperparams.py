@@ -11,6 +11,7 @@ from msk_envs.train.dep.dep_config import DEPConfig
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fasttd3.td3_config import TD3Config
 from msk_envs.train.qflex.qflex_config import QFlexConfig
+from msk_envs.train.ppo.ppo_config import PPOConfig
 from msk_envs.utils.train_utils import find_latest_checkpoint
 
 
@@ -31,6 +32,7 @@ class BaseArgs:
     td3_config: TD3Config = field(default_factory=TD3Config)
     sac_config: SACConfig = field(default_factory=SACConfig)
     qflex_config: QFlexConfig = field(default_factory=QFlexConfig)
+    ppo_config: PPOConfig = field(default_factory=PPOConfig)
     dep_config: DEPConfig = field(default_factory=DEPConfig)
 
     def _apply_env_overrides(self, pose_name: str = None, **overrides):
@@ -123,6 +125,8 @@ def pretty_print_base_args(args: BaseArgs):
         TD3Config.pretty_print(args.td3_config)
     elif args.algo.lower() == "qflex":
         QFlexConfig.pretty_print(args.qflex_config)
+    elif args.algo.lower() == "ppo":
+        PPOConfig.pretty_print(args.ppo_config)
 
     print("BaseArgs:")
     for k in base_field_names:

@@ -1,123 +1,210 @@
-import math
-import os
-import signal
-import sys
-from contextlib import contextmanager
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-import tqdm
-from tensordict import TensorDict
-from torch.amp import autocast, GradScaler
-from loguru import logger
-from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
-from msk_envs.utils.logged_sim import LoggedSim
-from msk_envs.train.ppo.ppo_config import PPOConfig
-from msk_envs.train.nets.buffer import SimpleReplayBuffer
-from msk_envs.train.nets.normalizers import EmpiricalNormalization
-from msk_envs.train.ppo.ppo_networks import PPOActor, PPOCritic
-from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper, save_params_sac
-
-torch.set_float32_matmul_precision("high")
-
-save_requested = False
+from .ppo_config import PPOConfig
+from .agent import ContinuousAC
+from .buffers import RolloutBuffer
+from .normalize import RewardsShaper
+from .stats import PPOStatsTracker, PerfTimer
 
 
-def on_sigusr1(signum, frame):
-    global save_requested
-    save_requested = True
+@torch.no_grad()
+def rollout(agent, envs, buffer, rewards_shaper, stats, timer):
+    obs = envs._get_obs()
+    dones = torch.zeros_like(buffer.next_dones)
+    for step in range(0, buffer.horizon):
+        timer.start_inference()
+        actions, log_probs, values = agent.act(obs)
+        timer.end_inference()
+
+        timer.start_sim()
+        obs_, rews, terminated, truncations, info = envs.step(actions)
+        dones_ = (terminated + truncations)
+        stats.update(rews, dones_)
+
+        rews = rewards_shaper(rews)
+        timer.end_sim()
+
+        # store
+        buffer.obs[step] = obs
+        buffer.dones[step] = dones
+        buffer.actions[step] = actions
+        buffer.values[step] = values
+        buffer.log_probs[step] = log_probs
+        buffer.rewards[step] = rews
+        buffer.terminated[step] = terminated
+
+        # last step, prepare boostrap
+        if step == buffer.horizon - 1:
+            buffer.next_value[:] = agent.evaluate(obs_)
+            buffer.next_dones[:] = dones_
+
+        obs = obs_
+        dones = dones_
+    return
+
+
+@torch.no_grad()
+def compute_advantages(buffer, agent, gamma, gae_lambda):
+    advantages = buffer.advantages
+    rewards = buffer.rewards
+    returns = buffer.returns
+    values = agent.unnorm_value(buffer.values)
+    next_value = agent.unnorm_value(buffer.next_value)
+
+    # Bootstrap
+    last_gae_lam = 0.0
+    for t in reversed(range(buffer.horizon)):
+        if t == buffer.horizon - 1:
+            next_non_terminal = 1.0 - buffer.next_dones
+            next_values = next_value
+        else:
+            next_non_terminal = 1.0 - buffer.dones[t + 1]
+            next_values = values[t + 1]
+        delta = rewards[t] + gamma * next_values * next_non_terminal - values[t]
+        advantages[t] = last_gae_lam = delta + gamma * gae_lambda * next_non_terminal * last_gae_lam
+    returns[:] = advantages + values
+
+    # Normalize advantages
+    mu, sigma = advantages.mean(), advantages.std()
+    advantages[:] = (advantages - mu) / (sigma + 1e-8)
+
+    # Normalize values and returns (updates normalizers)
+    agent.obs_norm.update(buffer.obs)
+
+    agent.value_norm.update(values)
+    values[:] = agent.value_norm(values)
+    agent.value_norm.update(returns)
+    returns[:] = agent.value_norm(returns)
+    return
+
+
+def update_policy(buffer, agent, optimizer, cfg, stats, device):
+    total_steps = buffer.get_total_steps()
+    minibatch_size = total_steps // cfg.num_minibatches
+
+    # Mini epochs
+    for epoch in range(cfg.update_epochs):
+        b_inds = torch.randperm(total_steps, device=device)
+        # Sample minibatches
+        for start in range(0, total_steps, minibatch_size):
+            mb_inds = b_inds[start:start + minibatch_size]
+            o, a, lp, v, adv, ret = buffer.get_minibatch(mb_inds)
+            # stats of batch
+            pi_, v_ = agent(o)
+            mu = pi_.mean()
+            lp_ = pi_.log_prob(a)
+            e = pi_.entropy()
+
+            # actor loss
+            ratio = torch.exp(lp_ - lp)
+            surr1 = -adv * ratio
+            surr2 = -adv * torch.clamp(ratio, 1 - cfg.clip_coef, 1 + cfg.clip_coef)
+            pg_loss = torch.max(surr1, surr2).mean()
+            # critic loss
+            vf_loss = (v_ - ret) ** 2
+            v_clip = v + (v_ - v).clamp(-cfg.clip_coef, cfg.clip_coef)
+            vf_loss_clip = (v_clip - ret) ** 2
+            c_loss = 0.5 * torch.max(vf_loss, vf_loss_clip).mean()
+            # entropy loss
+            entropy_loss = -e.mean()
+            # bounds loss
+            soft_bound = 1.1
+            mu_loss_high = torch.clamp_min(mu - soft_bound, 0.0) ** 2
+            mu_loss_low = torch.clamp_max(mu + soft_bound, 0.0) ** 2
+            bounds_loss = (mu_loss_high + mu_loss_low).sum(dim=-1).mean()
+
+            c_loss *= cfg.c_coef
+            entropy_loss *= cfg.ent_coef
+            bounds_loss *= cfg.bounds_loss_coef
+            loss = pg_loss + c_loss + entropy_loss + bounds_loss
+
+            stats.set_losses(pg_loss, c_loss, entropy_loss, bounds_loss)
+
+            optimizer.zero_grad()
+            loss.backward()
+            nn.utils.clip_grad_norm_(agent.parameters(), cfg.max_grad_norm)
+            optimizer.step()
+    return
+
+
+def ppo(env, agent, device, cfg: PPOConfig, callback=None):
+    agent = agent.to(device)
+    optimizer = optim.Adam(agent.parameters(), lr=cfg.learning_rate, eps=1e-8)
+
+    rewards_shaper = RewardsShaper(scale_value=cfg.rewards_scale)
+
+    # Allocate storage
+    buffer = RolloutBuffer(
+        n_steps=cfg.num_rollout_steps,
+        n_envs=env.num_worlds,
+        obs_dim=env.num_obs(),
+        act_dim=env.num_actions(),
+        device=device
+    )
+
+    stats = PPOStatsTracker(n_envs=env.num_worlds, device=device)
+    timer = PerfTimer()
+    for iteration in range(1, cfg.num_iterations + 1):
+        timer.start_iter()
+        timer.add_steps(env.num_worlds * cfg.num_rollout_steps)
+
+        # Annealing the rate
+        if cfg.anneal_lr:
+            frac = 1.0 - (iteration - 1.0) / cfg.num_iterations
+            lr_now = frac * cfg.learning_rate
+            optimizer.param_groups[0]["lr"] = lr_now
+
+        # Collect rollouts
+        agent.eval()
+        timer.start_rollout()
+        rollout(agent, env, buffer, rewards_shaper, stats, timer)
+        timer.end_rollout()
+
+        # Advantages
+        compute_advantages(buffer, agent, cfg.gamma, cfg.gae_lambda)
+
+        # Optimization steps
+        agent.train()
+        timer.start_update()
+        update_policy(buffer, agent, optimizer, cfg, stats, device)
+        timer.end_update()
+
+        timer.end_iter()
+        if callback is not None:
+            callback(iteration, stats, timer)
 
 
 def train(
-        ppo_config: PPOConfig,
+        cfg: PPOConfig,
         envs,
         eval_envs,
-        dep_explorer,
         traj_out_folder: str,
         analytics_out_folder: str,
         exp_name: str,
         device: torch.device,
 ):
-    global save_requested
-    writer = TensorboardSummaryWriter(
-        log_dir=f"models/{exp_name}",
-        flush_secs=10
-    )
-    logging_helper = LoggingHelper(
-        writer,
-        log_dir=f"models/{exp_name}",
-        device=device,
-        num_envs=ppo_config.num_envs,
-        num_steps_per_env=ppo_config.logging_interval,
-        num_learning_iterations=ppo_config.num_learning_iterations,
-        is_main_process=True,
-        num_gpus=1,
-    )
-
     n_act = envs.num_actions()
     n_obs = envs.num_obs() if type(envs.num_obs()) == int else envs.num_obs()[0]
-    if ppo_config.obs_normalization:
-        actor_obs_normalizer = EmpiricalNormalization(shape=n_obs, device=device)
-        critic_obs_normalizer = EmpiricalNormalization(shape=n_obs, device=device)
-    else:
-        obs_normalizer = nn.Identity()
-
-    actor = PPOActor(
-        n_obs=n_obs,
-        n_act=n_act,
-        module_config_dict=ppo_config.module_dict.actor,
-        init_noise_std=ppo_config.init_noise_std,
-    )
-    critic = PPOCritic(
-        n_obs=n_obs,
-        module_config_dict=ppo_config.module_dict.critic,
+    agent = ContinuousAC(
+        cfg=cfg.agent_config,
+        input_dim=n_obs,
+        output_dim=n_act,
     )
 
-    actor_optimizer = optim.AdamW(
-        list(actor.parameters()),
-        lr=ppo_config.actor_learning_rate,
-        weight_decay=0.001,
-    )
-    critic_optimizer = optim.AdamW(
-        list(critic.parameters()),
-        lr=ppo_config.critic_learning_rate,
-        weight_decay=0.001,
-    )
+    def train_callback(iteration: int, ppo_stats: PPOStatsTracker,
+                       ppo_timer: PerfTimer):
+        if iteration % 10 == 0:
+            print(f"\nUpdate: {iteration}", end=' ')
+            ppo_timer.print()
+            ppo_stats.print()
 
-    def _normalize_actor_obs(self, actor_obs: torch.Tensor, update: bool = True) -> torch.Tensor:
-        if self.empirical_normalization:
-            return actor_obs_normalizer(actor_obs, update=update)
-        return actor_obs
+        # if iteration % 100 == 0:
+        #     agent.save(os.path.join(checkpoint_dir, f"{iteration}.pt"))
 
-    def _normalize_critic_obs(self, critic_obs: torch.Tensor, update: bool = True) -> torch.Tensor:
-        if self.empirical_normalization:
-            return critic_obs_normalizer(critic_obs, update=update)
-        return critic_obs
+        ppo_timer.reset()
+        ppo_stats.reset()
 
-    def _setup_storage(self):
-        self.storage = RolloutStorage(self.env.num_envs, self.config.num_steps_per_env, device=self.device)
-        actor_obs_dim = self._get_obs_dim(self.actor_obs_keys)
-        print(f"Registering key: actor_obs with shape: {actor_obs_dim}")
-        self.storage.register("actor_obs", shape=(actor_obs_dim,), dtype=torch.float)
-
-        critic_obs_dim = self._get_obs_dim(self.critic_obs_keys)
-        print(f"Registering key: critic_obs with shape: {critic_obs_dim}")
-        self.storage.register("critic_obs", shape=(critic_obs_dim,), dtype=torch.float)
-
-        # Register others based on Minibatch structure
-        minibatch_keys = [
-            ("actions", (self.num_act,), torch.float),
-            ("rewards", (1,), torch.float),
-            ("dones", (1,), torch.bool),
-            ("values", (1,), torch.float),
-            ("returns", (1,), torch.float),
-            ("advantages", (1,), torch.float),
-            ("actions_log_prob", (1,), torch.float),
-            ("action_mean", (self.num_act,), torch.float),
-            ("action_sigma", (self.num_act,), torch.float),
-        ]
-        for key, shape, dtype in minibatch_keys:
-            self.storage.register(key, shape=shape, dtype=dtype)
+    ppo(envs, agent, device, cfg, train_callback)
+    return

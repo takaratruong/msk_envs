@@ -1,7 +1,5 @@
 import math
 import os
-import signal
-import sys
 from contextlib import contextmanager
 
 import torch
@@ -9,29 +7,22 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import tqdm
+from loguru import logger
 from tensordict import TensorDict
 from torch.amp import autocast, GradScaler
-from loguru import logger
 from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
 from msk_envs.train.fastsac.sac_config import SACConfig
 from msk_envs.train.fastsac.sac_utils import save_params
-
-from msk_envs.utils.logged_sim import LoggedSim
 from msk_envs.train.nets.buffer import SimpleReplayBuffer, sample_and_prepare_batches, collect_experience
-from msk_envs.train.nets.normalizers import EmpiricalNormalization
 from msk_envs.train.nets.distributional_critic import Critic
+from msk_envs.train.nets.normalizers import EmpiricalNormalization
+from msk_envs.train.nets.optimizer import make_optimizer
 from msk_envs.train.nets.sac_networks import Actor, load_policy
+from msk_envs.utils.logged_sim import LoggedSim
 from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper
 
 torch.set_float32_matmul_precision("high")
-
-save_requested = False
-
-
-def on_sigusr1(signum, frame):
-    global save_requested
-    save_requested = True
 
 
 def train(
@@ -44,8 +35,6 @@ def train(
         exp_name: str,
         device: torch.device,
 ):
-    global save_requested
-
     amp_enabled = sac_config.amp
     amp_device_type = "cuda"
     amp_dtype = torch.bfloat16 if sac_config.amp_dtype == "bf16" else torch.float16
@@ -117,19 +106,19 @@ def train(
     )
     qnet_target.load_state_dict(qnet.state_dict())
 
-    q_optimizer = optim.AdamW(
-        list(qnet.parameters()),
+    q_optimizer = make_optimizer(
+        model=qnet,
         lr=sac_config.critic_learning_rate,
+        betas=(0.9, 0.95),
         weight_decay=sac_config.weight_decay,
-        fused=True,
-        betas=(0.9, 0.95)
+        use_soap=False,
     )
-    actor_optimizer = optim.AdamW(
-        list(actor.parameters()),
+    actor_optimizer = make_optimizer(
+        model=actor,
         lr=sac_config.actor_learning_rate,
+        betas=(0.9, 0.95),
         weight_decay=sac_config.weight_decay,
-        fused=True,
-        betas=(0.9, 0.95)
+        use_soap=False,
     )
 
     target_entropy = -n_act * sac_config.target_entropy_ratio
@@ -318,9 +307,6 @@ def train(
         policy = policy
         normalize_obs = obs_normalizer.forward
 
-    # Register handler for pre-timeout checkpointing
-    signal.signal(signal.SIGUSR1, on_sigusr1)
-
     global_step = 0
     if sac_config.checkpoint_path:
         torch_checkpoint = torch.load(sac_config.checkpoint_path, map_location=device, weights_only=False)
@@ -355,7 +341,7 @@ def train(
         mark_step()
         with logging_helper.record_collection_time():
             with torch.no_grad(), _maybe_amp():
-                norm_obs = normalize_obs(obs, update=False)
+                norm_obs = normalize_obs(obs)
                 actions = policy(obs=norm_obs, dones=dones)
                 # DEP EXPLORATION
                 actions = dep_explorer.explore(muscle_states=envs.muscle_fiber_lengths, actions=actions)
@@ -453,13 +439,6 @@ def train(
                 eval_avg_return, eval_avg_length = evaluate(latest_model_path)
                 # Todo: log eval metrics
                 logger.info(f"Eval Average Return: {eval_avg_return}, Eval Average Length: {eval_avg_length}")
-
-        if save_requested:
-            path = latest_model_path or f"models/{exp_name}/{exp_name}_{global_step}.pt"
-            logger.info(f"SIGUSR1 received, saving checkpoint at global step {global_step} and exiting with code 42.")
-            save(path)
-            save_requested = False
-            sys.exit(42)
 
         # Avoid global_step being incremented beyond args.num_learning_iterations, so that the final checkpoint is
         # saved at exactly args.num_learning_iterations. In the `while` condition, we check for self.global_step <=

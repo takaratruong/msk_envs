@@ -15,7 +15,7 @@ class ActionDistribution:
     def mean(self):
         raise NotImplementedError
 
-    def update_mean_std(self, mu, log_sigma, latent_sde=None):
+    def update_mean_std(self, mu, log_sigma):
         raise NotImplementedError
 
     def reset_noise(self):
@@ -42,7 +42,7 @@ class NormalDistribution(ActionDistribution):
     def mean(self):
         return self.dist.mean
 
-    def update_mean_std(self, mu, log_sigma, latent_sde=None):
+    def update_mean_std(self, mu, log_sigma):
         # probably easier to just create a new distribution
         sigma = torch.exp(log_sigma)
         self.dist = Normal(mu, sigma)

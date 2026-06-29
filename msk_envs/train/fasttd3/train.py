@@ -1,7 +1,5 @@
 import math
 import os
-import signal
-import sys
 from contextlib import contextmanager
 
 import torch
@@ -9,31 +7,22 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import tqdm
-from tensordict import TensorDict
-from torch.amp import autocast, GradScaler
 from loguru import logger
+from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
 from msk_envs.train.fasttd3.td3_config import TD3Config
 from msk_envs.train.fasttd3.td3_utils import save_params
 from msk_envs.train.nets.buffer import SimpleReplayBuffer, collect_experience, sample_and_prepare_batches
+from msk_envs.train.nets.distributional_critic import Critic
 from msk_envs.train.nets.normalizers import EmpiricalNormalization, RewardNormalizer
+from msk_envs.train.nets.optimizer import make_optimizer
 from msk_envs.train.nets.simba import SimbaActor, SimbaCritic
 from msk_envs.train.nets.td3_networks import Actor, load_policy
-from msk_envs.train.nets.distributional_critic import Critic
-from msk_envs.train.nets.optimizer import make_optimizer
 from msk_envs.utils.logged_sim import LoggedSim
 from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper
 
 torch.set_float32_matmul_precision("high")
-
-save_requested = False
-
-
-def on_sigusr1(signum, frame):
-    global save_requested
-    save_requested = True
-
 
 def train(
         td3_config: TD3Config,
@@ -45,8 +34,6 @@ def train(
         exp_name: str,
         device: torch.device,
 ):
-    global save_requested
-
     amp_enabled = td3_config.amp
     amp_device_type = "cuda"
     amp_dtype = torch.bfloat16 if td3_config.amp_dtype == "bf16" else torch.float16
@@ -381,9 +368,6 @@ def train(
             update_stats = reward_normalizer.update_stats
         normalize_reward = reward_normalizer.forward
 
-    # Register handler for pre-timeout checkpointing
-    signal.signal(signal.SIGUSR1, on_sigusr1)
-
     global_step = 0
     if td3_config.checkpoint_path:
         # Load checkpoint if specified
@@ -543,27 +527,6 @@ def train(
                 eval_avg_return, eval_avg_length = evaluate(latest_model_path)
                 # Todo: log eval metrics
                 logger.info(f"Eval Average Return: {eval_avg_return}, Eval Average Length: {eval_avg_length}")
-
-        if save_requested:
-            latest_model_path = f"models/{exp_name}/{exp_name}_{global_step}.pt"
-            logger.info(f"SIGUSR1 received, saving checkpoint at global step {global_step} and exiting with code 42.")
-            save_params(
-                global_step,
-                actor,
-                qnet,
-                qnet_target,
-                obs_normalizer,
-                td3_config,
-                latest_model_path,
-                actor_optimizer=actor_optimizer,
-                q_optimizer=q_optimizer,
-                actor_scheduler=actor_scheduler,
-                q_scheduler=q_scheduler,
-                scaler=scaler,
-                include_optim_state=True,
-            )
-            save_requested = False
-            sys.exit(42)
 
         if global_step >= td3_config.num_learning_iterations:
             break

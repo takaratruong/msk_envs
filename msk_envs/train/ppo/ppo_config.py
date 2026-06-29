@@ -6,7 +6,7 @@ from .agent_config import AgentConfig
 @dataclass
 class PPOConfig:
     num_envs: int = 2048
-    num_iterations: int = 100_000
+    num_iterations: int = 10_000
     num_rollout_steps: int = 8
     learning_rate: float = 3e-4
     anneal_lr: bool = False
@@ -19,6 +19,7 @@ class PPOConfig:
 
     num_eval_envs: int = 1
     eval_freq: int = 100
+    logging_interval: int = 10
 
     # Losses
     clip_coef: float = 0.2

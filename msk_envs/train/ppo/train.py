@@ -1,33 +1,30 @@
+import os
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import os
+from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
-from .ppo_config import PPOConfig
+from msk_envs.utils.logged_sim import LoggedSim
+from msk_envs.utils.train_utils import TensorAverageMeterDict, LoggingHelper
 from .agent import ContinuousAC
 from .buffers import RolloutBuffer
 from .normalize import RewardsShaper
-from .stats import PPOStatsTracker, PerfTimer
-
-from msk_envs.utils.logged_sim import LoggedSim
+from .ppo_config import PPOConfig
 
 
 @torch.no_grad()
-def rollout(agent, envs, buffer, rewards_shaper, stats, timer):
+def rollout(agent, envs, buffer, rewards_shaper, logging_helper):
     obs = envs._get_obs()
     dones = torch.zeros_like(buffer.next_dones)
     for step in range(0, buffer.horizon):
-        timer.start_inference()
         actions, log_probs, values = agent.act(obs)
-        timer.end_inference()
 
-        timer.start_sim()
-        obs_, rews, terminated, truncations, info = envs.step(actions)
+        obs_, rewards, terminated, truncations, info = envs.step(actions)
         dones_ = (terminated + truncations)
-        stats.update(rews, dones_)
+        logging_helper.update_episode_stats(rewards, dones)
 
-        rews = rewards_shaper(rews)
-        timer.end_sim()
+        rewards = rewards_shaper(rewards)
 
         # store
         buffer.obs[step] = obs
@@ -35,7 +32,7 @@ def rollout(agent, envs, buffer, rewards_shaper, stats, timer):
         buffer.actions[step] = actions
         buffer.values[step] = values
         buffer.log_probs[step] = log_probs
-        buffer.rewards[step] = rews
+        buffer.rewards[step] = rewards
         buffer.terminated[step] = terminated
 
         # last step, prepare boostrap
@@ -83,7 +80,7 @@ def compute_advantages(buffer, agent, gamma, gae_lambda):
     return
 
 
-def update_policy(buffer, agent, optimizer, cfg, stats, device):
+def update_policy(buffer, agent, optimizer, cfg, device, training_metrics):
     total_steps = buffer.get_total_steps()
     minibatch_size = total_steps // cfg.num_minibatches
 
@@ -123,60 +120,18 @@ def update_policy(buffer, agent, optimizer, cfg, stats, device):
             bounds_loss *= cfg.bounds_loss_coef
             loss = pg_loss + c_loss + entropy_loss + bounds_loss
 
-            stats.set_losses(pg_loss, c_loss, entropy_loss, bounds_loss)
-
             optimizer.zero_grad()
             loss.backward()
             nn.utils.clip_grad_norm_(agent.parameters(), cfg.max_grad_norm)
             optimizer.step()
+
+            current_metrics = {
+                "actor_loss": pg_loss,
+                "c_loss": c_loss,
+                "e_loss": entropy_loss,
+            }
+            training_metrics.add(current_metrics)
     return
-
-
-def ppo(env, agent, device, cfg: PPOConfig, callback=None):
-    agent = agent.to(device)
-    optimizer = optim.Adam(agent.parameters(), lr=cfg.learning_rate, eps=1e-8)
-
-    rewards_shaper = RewardsShaper(scale_value=cfg.rewards_scale)
-
-    # Allocate storage
-    buffer = RolloutBuffer(
-        n_steps=cfg.num_rollout_steps,
-        n_envs=env.num_worlds,
-        obs_dim=env.num_obs(),
-        act_dim=env.num_actions(),
-        device=device
-    )
-
-    stats = PPOStatsTracker(n_envs=env.num_worlds, device=device)
-    timer = PerfTimer()
-    for iteration in range(1, cfg.num_iterations + 1):
-        timer.start_iter()
-        timer.add_steps(env.num_worlds * cfg.num_rollout_steps)
-
-        # Annealing the rate
-        if cfg.anneal_lr:
-            frac = 1.0 - (iteration - 1.0) / cfg.num_iterations
-            lr_now = frac * cfg.learning_rate
-            optimizer.param_groups[0]["lr"] = lr_now
-
-        # Collect rollouts
-        agent.eval()
-        timer.start_rollout()
-        rollout(agent, env, buffer, rewards_shaper, stats, timer)
-        timer.end_rollout()
-
-        # Advantages
-        compute_advantages(buffer, agent, cfg.gamma, cfg.gae_lambda)
-
-        # Optimization steps
-        agent.train()
-        timer.start_update()
-        update_policy(buffer, agent, optimizer, cfg, stats, device)
-        timer.end_update()
-
-        timer.end_iter()
-        if callback is not None:
-            callback(iteration, stats, timer)
 
 
 @torch.no_grad()
@@ -215,6 +170,24 @@ def train(
         exp_name: str,
         device: torch.device,
 ):
+    # --- Logging ---
+    writer = TensorboardSummaryWriter(
+        log_dir=f"models/{exp_name}",
+        flush_secs=10
+    )
+    logging_helper = LoggingHelper(
+        writer,
+        log_dir=f"models/{exp_name}",
+        device=device,
+        num_envs=cfg.num_envs,
+        num_steps_per_env=cfg.logging_interval,
+        num_learning_iterations=cfg.num_iterations,
+        is_main_process=True,
+        num_gpus=1,
+    )
+    training_metrics = TensorAverageMeterDict()
+
+    # --- Agent ---
     n_act = envs.num_actions()
     n_obs = envs.num_obs() if type(envs.num_obs()) == int else envs.num_obs()[0]
     agent = ContinuousAC(
@@ -222,21 +195,58 @@ def train(
         input_dim=n_obs,
         output_dim=n_act,
     )
+    agent = agent.to(device)
+    optimizer = optim.Adam(agent.parameters(), lr=cfg.learning_rate, eps=1e-8)
+    rewards_shaper = RewardsShaper(scale_value=cfg.rewards_scale)
 
-    def train_callback(iteration: int, ppo_stats: PPOStatsTracker,
-                       ppo_timer: PerfTimer):
-        if iteration % 10 == 0:
-            print(f"\nUpdate: {iteration}", end=' ')
-            ppo_timer.print()
-            ppo_stats.print()
+    # Allocate storage
+    buffer = RolloutBuffer(
+        n_steps=cfg.num_rollout_steps,
+        n_envs=cfg.num_envs,
+        obs_dim=n_obs,
+        act_dim=n_act,
+        device=device
+    )
 
-        # if iteration % 100 == 0:
-        #     agent.save(os.path.join(checkpoint_dir, f"{iteration}.pt"))
+    # --- Training ---
+    for iteration in range(1, cfg.num_iterations + 1):
+        # Annealing the rate
+        if cfg.anneal_lr:
+            frac = 1.0 - (iteration - 1.0) / cfg.num_iterations
+            lr_now = frac * cfg.learning_rate
+            optimizer.param_groups[0]["lr"] = lr_now
+
+        # Collect rollouts
+        with logging_helper.record_collection_time():
+            agent.eval()
+            rollout(agent, envs, buffer, rewards_shaper, logging_helper)
+
+        # Policy update
+        with logging_helper.record_learn_time():
+            compute_advantages(buffer, agent, cfg.gamma, cfg.gae_lambda)
+
+            # Optimization steps
+            agent.train()
+            update_policy(buffer, agent, optimizer, cfg, device, training_metrics)
+
+        # Logging
+        if iteration % cfg.logging_interval == 0:
+            with torch.no_grad():
+                accumulated_metrics = training_metrics.mean_and_clear()
+                # Convert tensor values to float for logging
+                loss_dict = {}
+                for key, value in accumulated_metrics.items():
+                    if isinstance(value, torch.Tensor):
+                        loss_dict[key] = value.item()
+                    else:
+                        loss_dict[key] = float(value)
+                extra_log_dicts = {
+                    "additional_metrics": envs.additional_metrics(),
+                }
+                logging_helper.post_epoch_logging(it=iteration, loss_dict=loss_dict, extra_log_dicts=extra_log_dicts)
+
+        # Evaluation
         if iteration % cfg.eval_freq == 0:
             evaluate(agent, eval_envs, device, traj_out_folder, analytics_out_folder, iteration)
 
-        ppo_timer.reset()
-        ppo_stats.reset()
-
-    ppo(envs, agent, device, cfg, train_callback)
     return

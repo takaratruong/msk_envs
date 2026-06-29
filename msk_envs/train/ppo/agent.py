@@ -97,9 +97,6 @@ class ContinuousAC(nn.Module):
         self.obs_norm = RunningMeanStd(input_dim, clamp=5.0)
         self.value_norm = RunningMeanStd(1, clamp=5.0)
 
-    def reset_noise(self):
-        self.actor.reset_noise()
-
     def act(self, obs, best=False):
         obs_norm = self.obs_norm(obs)
         latent = self.backbone(obs_norm)
@@ -135,95 +132,3 @@ class ContinuousAC(nn.Module):
     def load(self, path):
         self.load_state_dict(torch.load(path, map_location='cpu'))
         return
-
-
-def weight_init(m):
-    """Custom weight init for Conv2D and Linear layers."""
-    if isinstance(m, nn.Linear):
-        nn.init.orthogonal_(m.weight.data)
-        m.bias.data.fill_(0.0)
-
-
-class SoftQNetwork(nn.Module):
-    def __init__(self, cfg: AgentConfig, obs_dim, act_dim):
-        super().__init__()
-
-        layer_dims = ([obs_dim + act_dim] + list(cfg.q_dims) + [1])
-        layers = []
-        for i, (in_d, out_d) in enumerate(zip(layer_dims[:-1], layer_dims[1:])):
-            layers.append(nn.Linear(in_d, out_d))
-            if i != len(layer_dims[:-1]) - 1:
-                if cfg.dropout > 0:
-                    layers.append(nn.Dropout(cfg.dropout))
-                if cfg.layer_norm:
-                    layers.append(nn.LayerNorm(out_d))
-                layers.append(get_activation(cfg.sac_activation_fn))
-        self.net = nn.Sequential(*layers)
-
-        self.apply(weight_init)
-
-    def forward(self, x, a):
-        x = torch.cat([x, a], 1)
-        return self.net(x)
-
-
-class SACActor(nn.Module):
-    def __init__(self, cfg: AgentConfig, obs_dim, act_dim):
-        super().__init__()
-
-        self.obs_norm = RunningMeanStd(obs_dim, clamp=5.0)
-
-        layer_dims = [obs_dim] + list(cfg.a_dims)
-        layers = []
-        for in_d, out_d in zip(layer_dims[:-1], layer_dims[1:]):
-            layers.append(nn.Linear(in_d, out_d))
-            layers.append(get_activation(cfg.sac_activation_fn))
-        self.backbone = nn.Sequential(*layers)
-        self.mu = nn.Linear(layer_dims[-1], act_dim)
-        self.log_std = nn.Linear(layer_dims[-1], act_dim)
-
-        # action rescaling
-        h, l = 1.0, -1.0
-        self.register_buffer(
-            "action_scale", torch.tensor((h - l) / 2.0, dtype=torch.float32)
-        )
-        self.register_buffer(
-            "action_bias", torch.tensor((h + l) / 2.0, dtype=torch.float32)
-        )
-
-        self._log_std_min = cfg.log_std_min
-        self._log_std_max = cfg.log_std_max
-
-        self.apply(weight_init)
-
-    def forward(self, x):
-        x = self.backbone(x)
-        mean = self.mu(x)
-        log_std = self.log_std(x)
-        log_std = torch.tanh(log_std)
-        log_std = self._log_std_min + 0.5 * (
-                self._log_std_max - self._log_std_min) * (
-                          log_std + 1
-                  )
-        return mean, log_std
-
-    def get_action(self, x, norm_obs=True):
-        if norm_obs:
-            x = self.obs_norm(x)
-        mean, log_std = self(x)
-        std = log_std.exp()
-        normal = torch.distributions.Normal(mean, std)
-        x_t = normal.rsample()
-        y_t = torch.tanh(x_t)
-        action = y_t * self.action_scale + self.action_bias
-        log_prob = normal.log_prob(x_t)
-        # Enforcing Action Bound
-        log_prob -= torch.log(self.action_scale * (1 - y_t.pow(2)) + 1e-6)
-        log_prob = log_prob.sum(1, keepdim=True)
-        mean = torch.tanh(mean) * self.action_scale + self.action_bias
-        return action, log_prob, mean
-
-    def to(self, device):
-        self.action_scale = self.action_scale.to(device)
-        self.action_bias = self.action_bias.to(device)
-        return super().to(device)

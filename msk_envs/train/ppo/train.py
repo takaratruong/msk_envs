@@ -1,12 +1,15 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import os
 
 from .ppo_config import PPOConfig
 from .agent import ContinuousAC
 from .buffers import RolloutBuffer
 from .normalize import RewardsShaper
 from .stats import PPOStatsTracker, PerfTimer
+
+from msk_envs.utils.logged_sim import LoggedSim
 
 
 @torch.no_grad()
@@ -176,6 +179,33 @@ def ppo(env, agent, device, cfg: PPOConfig, callback=None):
             callback(iteration, stats, timer)
 
 
+@torch.no_grad()
+def evaluate(agent, eval_envs, device, traj_out_folder, analytics_out_folder, global_step):
+    # Build logged sim wrapper
+    sim = LoggedSim(eval_envs, device=device)
+    eval_obs = sim.reset()
+    for _ in range(sim.max_env_steps):
+        with torch.no_grad():
+            pi_, v_ = agent(eval_obs)
+            eval_actions = pi_.mean()
+            finished, eval_obs = sim.step(eval_actions)
+
+        if finished:
+            break
+
+    rewards_mean = sim.get_rewards_mean()
+    episode_length_mean = sim.get_episode_length_mean()
+
+    # Save analytics
+    os.makedirs(traj_out_folder, exist_ok=True)
+    sim.save_animation(traj_out_folder, str(global_step), use_gzip=True)
+
+    os.makedirs(analytics_out_folder, exist_ok=True)
+    sim.save_frame_data(analytics_out_folder, f"frame_data_{global_step}", use_gzip=True)
+    sim.save_analytics(analytics_out_folder, f"analytics_{global_step}")
+    return rewards_mean.item(), episode_length_mean.item()
+
+
 def train(
         cfg: PPOConfig,
         envs,
@@ -202,6 +232,8 @@ def train(
 
         # if iteration % 100 == 0:
         #     agent.save(os.path.join(checkpoint_dir, f"{iteration}.pt"))
+        if iteration % cfg.eval_freq == 0:
+            evaluate(agent, eval_envs, device, traj_out_folder, analytics_out_folder, iteration)
 
         ppo_timer.reset()
         ppo_stats.reset()

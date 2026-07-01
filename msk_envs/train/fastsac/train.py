@@ -300,12 +300,14 @@ def train(
         update_main = torch.compile(_update_main)
         update_pol = torch.compile(_update_pol)
         policy = torch.compile(policy)
-        normalize_obs = torch.compile(obs_normalizer.forward)
     else:
         update_main = _update_main
         update_pol = _update_pol
         policy = policy
-        normalize_obs = obs_normalizer.forward
+
+    @torch._dynamo.disable
+    def normalize_obs(x):
+        return obs_normalizer.forward(x)
 
     global_step = 0
     if sac_config.checkpoint_path:

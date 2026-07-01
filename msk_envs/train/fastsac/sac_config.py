@@ -18,7 +18,7 @@ class SACConfig:
     alpha_learning_rate: float = 3e-4
     """the learning rate for the alpha"""
 
-    buffer_size: int = 256 * 4
+    buffer_size: int = 256 * 25
     """the replay memory buffer size per environment"""
 
     num_steps: int = 1
@@ -27,7 +27,7 @@ class SACConfig:
     gamma: float = 0.99
     """the discount factor gamma"""
 
-    tau: float = 0.05
+    tau: float = 0.1
     """target smoothing coefficient (default: 0.005)"""
 
     batch_size: int = 8192
@@ -36,22 +36,22 @@ class SACConfig:
     learning_starts: int = 10
     """timestep to start learning"""
 
-    policy_frequency: int = 4
-    """the frequency of training policy (delayed)"""
-
     num_updates: int = 8
     """the number of updates to perform per step"""
+
+    policy_frequency: int = 4
+    """the frequency of training policy (delayed)"""
 
     target_entropy_ratio: float = 0.1
     """the ratio of the target entropy to the number of actions"""
 
-    num_atoms: int = 501
+    num_atoms: int = 101
     """the number of atoms"""
 
-    v_min: float = -20.0
+    v_min: float = -5.0
     """the minimum value of the support"""
 
-    v_max: float = 20.0
+    v_max: float = 15.0
     """the maximum value of the support"""
 
     critic_hidden_dim: int = 768
@@ -81,7 +81,7 @@ class SACConfig:
     obs_normalization: bool = True
     """whether to enable observation normalization"""
 
-    use_layer_norm: bool = True
+    use_layer_norm: bool = False
     """whether to use layer normalization"""
 
     num_q_networks: int = 2

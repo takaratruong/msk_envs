@@ -55,7 +55,7 @@ class RolloutStorage:
     def compute_returns(self, last_values: torch.Tensor, gamma: float, lam: float):
         """Generalized Advantage Estimation (truncations treated as done).
 
-        Advantages are normalized once over the whole rollout, matching holosoma.
+        Advantages are normalized once over the whole rollout
         """
         advantage = torch.zeros(self.num_envs, device=self.device)
         for t in reversed(range(self.num_steps)):

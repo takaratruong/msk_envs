@@ -78,7 +78,7 @@ def train(
     actor_lr = cfg.actor_learning_rate
     critic_lr = cfg.critic_learning_rate
 
-    # Adaptive-LR bounds (None -> holosoma-style defaults)
+    # Adaptive-LR bounds
     min_actor_lr = cfg.min_actor_learning_rate if cfg.min_actor_learning_rate is not None else 1e-5
     max_actor_lr = cfg.max_actor_learning_rate if cfg.max_actor_learning_rate is not None else 1e-2
     min_critic_lr = cfg.min_critic_learning_rate if cfg.min_critic_learning_rate is not None else 1e-5
@@ -125,7 +125,7 @@ def train(
         )
         surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
 
-        # Clipped value loss (holosoma always clips)
+        # Clipped value loss
         value_clipped = old_values + (values - old_values).clamp(
             -cfg.clip_param, cfg.clip_param
         )
@@ -185,7 +185,7 @@ def train(
         return {
             "surrogate_loss": surrogate_loss.detach(),
             "value_loss": value_loss.detach(),
-            "entropy": entropy_loss.detach(),
+            "entropy_loss": entropy_loss.detach(),
             "kl": kl_mean.detach(),
         }
 

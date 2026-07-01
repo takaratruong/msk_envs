@@ -1,3 +1,4 @@
+""" Based on Holosoma """
 import torch
 import torch.nn as nn
 from torch.distributions import Normal
@@ -14,12 +15,6 @@ def build_mlp(
         use_layer_norm: bool = False,
         device: torch.device = None,
 ) -> nn.Sequential:
-    """MLP builder mirroring holosoma's ``build_mlp_layer``.
-
-    Activation (a ``torch.nn`` module resolved by name) is applied after every
-    hidden layer but not on the output. Layer norm / dropout are optional and
-    off by default, matching holosoma's default MLP.
-    """
     act_cls = getattr(nn, activation)
     layers: list[nn.Module] = []
 
@@ -47,7 +42,7 @@ def build_mlp(
 
 
 class PPOActor(nn.Module):
-    """Gaussian policy with a raw, state-independent std parameter (holosoma)."""
+    """Gaussian policy with a raw, state-independent std parameter """
 
     def __init__(
             self,
@@ -72,7 +67,6 @@ class PPOActor(nn.Module):
         self.actor = build_mlp(
             n_obs, hidden_dims, n_act, activation, dropout_prob, use_layer_norm, device
         )
-        # Raw (non-log) state-independent std, exactly as holosoma.
         self.std = nn.Parameter(init_noise_std * torch.ones(n_act, device=device))
 
     def _clamped_std(self) -> torch.Tensor:

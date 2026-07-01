@@ -1,35 +1,41 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class PPOConfig:
-    num_envs: int = 2048
+    num_envs: int = 4096
     """number of parallel environments"""
 
-    num_learning_iterations: int = 20000
+    num_learning_iterations: int = 1000000
     """total number of policy-update iterations (each collects a full rollout)"""
 
     num_steps_per_env: int = 24
     """number of environment steps collected per env per rollout"""
 
-    num_learning_epochs: int = 5
+    num_learning_epochs: int = 8
     """number of passes over the collected rollout per iteration"""
 
     num_mini_batches: int = 4
     """number of minibatches the rollout is split into per epoch"""
 
     # ------------------------------------------------------------------ optim
-    actor_learning_rate: float = 3e-4
+    actor_learning_rate: float = 1e-5
     """the learning rate of the actor"""
 
-    critic_learning_rate: float = 3e-4
+    critic_learning_rate: float = 1e-5
     """the learning rate of the critic"""
 
-    max_learning_rate: float = 1e-2
-    """upper bound for the adaptive learning rate"""
+    max_actor_learning_rate: float | None = None
+    """upper bound for the adaptive actor learning rate (None -> 1e-2)"""
 
-    min_learning_rate: float = 1e-5
-    """lower bound for the adaptive learning rate"""
+    min_actor_learning_rate: float | None = None
+    """lower bound for the adaptive actor learning rate (None -> 1e-5)"""
+
+    max_critic_learning_rate: float | None = None
+    """upper bound for the adaptive critic learning rate (None -> 1e-2)"""
+
+    min_critic_learning_rate: float | None = None
+    """lower bound for the adaptive critic learning rate (None -> 1e-5)"""
 
     schedule: str = "adaptive"
     """learning-rate schedule: 'adaptive' (KL based) or 'fixed'"""
@@ -45,52 +51,49 @@ class PPOConfig:
     """the GAE lambda"""
 
     clip_param: float = 0.2
-    """the PPO surrogate clipping coefficient"""
+    """the PPO surrogate (and value) clipping coefficient"""
 
-    entropy_coef: float = 0.0
+    entropy_coef: float = 0.01
     """coefficient of the entropy bonus"""
 
     value_loss_coef: float = 1.0
     """coefficient of the value loss"""
 
-    use_clipped_value_loss: bool = True
-    """whether to use the clipped value loss"""
-
     max_grad_norm: float = 1.0
     """maximum gradient norm for clipping (<= 0 disables)"""
 
-    normalize_advantage: bool = True
-    """whether to normalize advantages per rollout"""
-
     # ------------------------------------------------------------- networks
-    actor_hidden_dim: int = 512
-    """the hidden dimension of the actor network"""
+    hidden_dims: list[int] = field(default_factory=lambda: [512, 256, 128])
+    """hidden layer sizes shared by the actor and critic MLPs"""
 
-    critic_hidden_dim: int = 512
-    """the hidden dimension of the critic network"""
+    activation: str = "ELU"
+    """activation function (name of a torch.nn module, e.g. 'ELU')"""
 
-    use_layer_norm: bool = True
+    use_layer_norm: bool = False
     """whether to use layer normalization in the networks"""
 
-    init_noise_std: float = 1.0
+    dropout_prob: float = 0.0
+    """dropout probability between hidden layers (0 disables)"""
+
+    init_noise_std: float = 0.8
     """initial standard deviation of the (state-independent) action noise"""
 
-    std_min: float = 0.01
-    """minimum action standard deviation"""
+    min_noise_std: float | None = None
+    """if set, clamp the action std to this minimum value"""
 
-    std_max: float = 4.0
-    """maximum action standard deviation"""
+    min_mean_noise_std: float | None = None
+    """if set, scale std up when its mean falls below this threshold"""
 
     # ------------------------------------------------------------ misc/train
-    obs_normalization: bool = True
-    """whether to normalize observations"""
+    empirical_normalization: bool = False
+    """whether to normalize observations with running empirical statistics"""
 
     compile: bool = False
     """whether to torch.compile the loss computation"""
     compile_mode: str | None = None
     compile_backend: str = "inductor"
 
-    save_interval: int = 200
+    save_interval: int = 100
     """the interval (in iterations) to save the model"""
 
     logging_interval: int = 1
@@ -100,11 +103,11 @@ class PPOConfig:
 
     """ Evaluation """
     num_eval_envs: int = 1
-    eval_freq: int = 200
+    eval_freq: int = 100
 
     @staticmethod
     def pretty_print(ppo_config):
         print("PPO Configuration:")
-        for field in ppo_config.__dataclass_fields__:
-            value = getattr(ppo_config, field)
-            print(f"  {field}: {value}")
+        for field_name in ppo_config.__dataclass_fields__:
+            value = getattr(ppo_config, field_name)
+            print(f"  {field_name}: {value}")

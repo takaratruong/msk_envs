@@ -15,6 +15,17 @@ def velocity_reward(body_velocities, body_id: int, coord_idx: int, linear: bool)
     return root_velocity
 
 
+def velocity_reward_max(body_velocities, body_id: int, coord_idx: int, linear: bool, target_speed: float):
+    """ Velocity reward up to  a certain speed, lower reward for going faster than that speed """
+    root_velocity = _get_velocity(body_velocities, body_id, linear, coord_idx)
+
+    reward = root_velocity
+    above_target = root_velocity > target_speed
+    reward[~above_target] = root_velocity[~above_target]
+    reward[above_target] = target_speed - (root_velocity[above_target] - target_speed)
+    return reward
+
+
 def mid_lane_reward(root_position: torch.Tensor, weight: float = 2.5):
     """Reward for being in the center of the lane"""
     dist_from_center = torch.abs(root_position[:, SIDE_IDX])

@@ -77,6 +77,8 @@ class EnvConfig:
     """ Function-based path data file """
     ignore_short_elastic_tendons: bool = False
     """ Ignore tendon dynamics for muscles where tendon slack length < optimal fiber length"""
+    force_rigid_tendons: bool = False
+    """ Force all tendons to be rigid"""
 
     # Starting pose (starting_pose and noise is ignored for IMITATE variant)
     starting_pose_path: str = ""

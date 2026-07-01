@@ -129,6 +129,7 @@ class MSKEnv:
             muscle_active_force_width_scale=env_config.muscle_active_force_width_scale,
             muscle_v_max=env_config.muscle_v_max,
             ignore_short_elastic_tendons=env_config.ignore_short_elastic_tendons,
+            force_rigid_tendons=env_config.force_rigid_tendons
         )
         ModelInitializer.modify_joints(
             m=self.m,

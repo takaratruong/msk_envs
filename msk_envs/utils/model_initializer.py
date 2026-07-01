@@ -75,6 +75,7 @@ class ModelInitializer:
             muscle_active_force_width_scale: float,
             muscle_v_max: float,
             ignore_short_elastic_tendons: bool,
+            force_rigid_tendons: bool,
     ) -> None:
         bolt.set_contraction_type(m, muscle_contraction_dynamics)
         # Individual muscle properties
@@ -89,6 +90,8 @@ class ModelInitializer:
             if ignore_short_elastic_tendons:
                 mm.ignore_tendon_compliance = \
                     (mm.ignore_tendon_compliance or mm.tendon_slack_length < mm.optimal_fiber_length)
+            if force_rigid_tendons:
+                mm.ignore_tendon_compliance = True
         return
 
     @staticmethod

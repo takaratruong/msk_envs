@@ -12,8 +12,8 @@ from tensordict import TensorDict
 from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
-from msk_envs.train.fastsac.sac_config import SACConfig
-from msk_envs.train.fastsac.sac_utils import save_params
+from msk_envs.train.sac.sac_config import SACConfig
+from msk_envs.train.sac.sac_utils import save_params
 from msk_envs.train.nets.buffer import SimpleReplayBuffer, sample_and_prepare_batches, collect_experience
 from msk_envs.train.nets.distributional_critic import Critic
 from msk_envs.train.nets.normalizers import EmpiricalNormalization

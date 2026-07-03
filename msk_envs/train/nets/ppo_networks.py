@@ -105,7 +105,8 @@ class PPOActor(nn.Module):
         return log_prob, entropy, dist.mean, dist.stddev
 
     def act_inference(self, obs: torch.Tensor) -> torch.Tensor:
-        return self.actor(obs)
+        # return self.actor(obs)
+        return self.act(obs)[0]
 
 
 class PPOCritic(nn.Module):

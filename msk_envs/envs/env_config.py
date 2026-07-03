@@ -157,7 +157,7 @@ class EnvConfig:
 
 
 @dataclass
-class EnvConfigSprinter(EnvConfig):
+class EnvConfigSprinter(EnvConfig):  # Setup used for publication
     model_path: str = "../msk_models/sprinter/sprinter_model.osim"
     muscle_function_path: str = "../msk_models/sprinter/sprinter_model_fn.xml"
     contact_params_path: str = "../msk_models/sprinter/contact_params/contact_params.yaml"

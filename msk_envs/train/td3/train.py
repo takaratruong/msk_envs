@@ -11,8 +11,8 @@ from loguru import logger
 from torch.amp import autocast, GradScaler
 from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 
-from msk_envs.train.fasttd3.td3_config import TD3Config
-from msk_envs.train.fasttd3.td3_utils import save_params
+from msk_envs.train.td3.td3_config import TD3Config
+from msk_envs.train.td3.td3_utils import save_params
 from msk_envs.train.nets.buffer import SimpleReplayBuffer, collect_experience, sample_and_prepare_batches
 from msk_envs.train.nets.distributional_critic import Critic
 from msk_envs.train.nets.normalizers import EmpiricalNormalization, RewardNormalizer

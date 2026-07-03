@@ -10,8 +10,8 @@ if 'WARP_CACHE_DIR' not in os.environ:
 import torch
 import warp as wp
 
-import msk_envs.train.fasttd3.train as fasttd3
-import msk_envs.train.fastsac.train as fastsac
+import msk_envs.train.td3.train as fasttd3
+import msk_envs.train.sac.train as fastsac
 import msk_envs.train.qflex.train as qflex
 import msk_envs.train.ppo.train as ppo
 from msk_envs.utils.train_utils import set_seed, init_wandb_run

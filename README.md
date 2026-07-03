@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ```
 
 ## Training
-We provide example training code based on [FastTD3](https://github.com/younggyoseo/FastTD3), SAC, and PPO, including hyperparameters for the example environments.
+We provide example training code based on [FastTD3](https://github.com/younggyoseo/FastTD3), [QFlex](https://github.com/LNSGroup/Qflex), SAC, and PPO (see [Holosoma](https://github.com/amazon-far/holosoma/tree/main)), including hyperparameters for the example environments.
 
 ### Example: train sprinting
 To start a training run, use the corresponding config (found in [hyperparams](msk_envs/train/hyperparams.py)):

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class QFlexConfig:
-    num_envs: int = 4096
+    num_envs: int = 1024
     """number of parallel environments"""
 
     num_learning_iterations: int = 150000
@@ -11,8 +11,10 @@ class QFlexConfig:
 
     learning_rate: float = 3e-4
     """learning rate"""
-    tau: float = 0.1
-    """the soft update coefficient"""
+    betas: tuple[float, float] = (0.5, 0.999)
+    """Adam betas"""
+    weight_decay: float = 0.0
+    """weight decay"""
 
     buffer_size: int = 256 * 20
     """the replay memory buffer size per environment"""
@@ -25,36 +27,28 @@ class QFlexConfig:
 
     learning_starts: int = 10
     """timestep to start learning"""
-    num_updates: int = 8
+    num_updates: int = 1
     """the number of updates to perform per step"""
-    policy_frequency: int = 4
+    policy_frequency: int = 1
     """the frequency of training policy (delayed)"""
 
-    num_atoms: int = 101
-    """the number of atoms"""
-    v_min: float = -5.0
-    """the minimum value of the support"""
-    v_max: float = 15.0
-    """the maximum value of the support"""
-    critic_hidden_dim: int = 768
+    actor_hidden_dim: int = 256
+    """the hidden dimension of the actor network"""
+    velocity_hidden_dim: int = 256
+    """hidden dimension of velocity network"""
+    hidden_num: int = 3
+    """number of hidden layers in each MLP (uniform width)"""
+    log_std_max: float = 2.0
+    """the maximum value of the log std"""
+    log_std_min: float = -20.0
+    """the minimum value of the log std"""
+
+    critic_hidden_dim: int = 256
     """the hidden dimension of the critic network"""
-    use_layer_norm: bool = False
-    """whether to use layer normalization"""
     num_q_networks: int = 2
     """number of Q-networks to ensemble"""
-    policy_noise: float = 0.001
-    """the scale of target action noise"""
-    noise_clip: float = 0.5
-    """the clip range of target action noise"""
-    use_cdq: bool = True
-    """whether to use Clipped Double Q-learning"""
 
-    actor_hidden_dim: int = 512
-    """the hidden dimension of the actor network"""
-    velocity_hidden_dim: int = 768
-    """hidden dimension of velocity network"""
-
-    obs_normalization: bool = True
+    obs_normalization: bool = False
     """ whether to normalize observations """
 
     num_flow_steps: int = 20
@@ -63,10 +57,8 @@ class QFlexConfig:
     """step size of the Q-gradient ascent that builds the flow target."""
     grad_step_num: int = 20
     """number of Q-gradient ascent steps."""
-    clamp_velocity: bool = False
-    """whether to clamp the velocity field output to action bounds"""
 
-    compile: bool = False
+    compile: bool = True
     """whether to use torch.compile."""
     compile_mode: str = "reduce-overhead"  # "max-autotune" can fail on some GPU architectures
     compile_backend: str = "inductor"  # "eager" is slower but safer

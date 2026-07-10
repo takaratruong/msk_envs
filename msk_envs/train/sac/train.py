@@ -15,10 +15,10 @@ from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 from msk_envs.train.sac.sac_config import SACConfig
 from msk_envs.train.sac.sac_utils import save_params
 from msk_envs.train.nets.buffer import SimpleReplayBuffer, sample_and_prepare_batches, collect_experience
-from msk_envs.train.nets.distributional_critic import Critic
+from msk_envs.train.nets.distributional_critic import DistributionalCritic
 from msk_envs.train.nets.normalizers import EmpiricalNormalization
 from msk_envs.train.nets.optimizer import make_optimizer
-from msk_envs.train.nets.sac_networks import Actor, load_policy
+from msk_envs.train.nets.gaussian_policy import GaussianPolicy, load_policy
 from msk_envs.utils.logged_sim import LoggedSim
 from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper
 
@@ -66,7 +66,7 @@ def train(
     action_scale = torch.ones(n_act, device=device) * (action_high - action_low) / 2.0
     action_bias = torch.zeros(n_act, device=device) + (action_high + action_low) / 2.0
 
-    actor = Actor(
+    actor = GaussianPolicy(
         n_obs=n_obs,
         n_act=n_act,
         num_envs=sac_config.num_envs,
@@ -81,7 +81,7 @@ def train(
     )
     policy = actor.explore
 
-    qnet = Critic(
+    qnet = DistributionalCritic(
         n_obs=n_obs,
         n_act=n_act,
         num_atoms=sac_config.num_atoms,
@@ -93,7 +93,7 @@ def train(
         device=device,
     )
 
-    qnet_target = Critic(
+    qnet_target = DistributionalCritic(
         n_obs=n_obs,
         n_act=n_act,
         num_atoms=sac_config.num_atoms,

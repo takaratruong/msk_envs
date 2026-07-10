@@ -14,11 +14,11 @@ from torch.utils.tensorboard import SummaryWriter as TensorboardSummaryWriter
 from msk_envs.train.td3.td3_config import TD3Config
 from msk_envs.train.td3.td3_utils import save_params
 from msk_envs.train.nets.buffer import SimpleReplayBuffer, collect_experience, sample_and_prepare_batches
-from msk_envs.train.nets.distributional_critic import Critic
+from msk_envs.train.nets.distributional_critic import DistributionalCritic
 from msk_envs.train.nets.normalizers import EmpiricalNormalization, RewardNormalizer
 from msk_envs.train.nets.optimizer import make_optimizer
 from msk_envs.train.nets.simba import SimbaActor, SimbaCritic
-from msk_envs.train.nets.td3_networks import Actor, load_policy
+from msk_envs.train.nets.deterministic_policy import DeterministicPolicy, load_policy
 from msk_envs.utils.logged_sim import LoggedSim
 from msk_envs.utils.train_utils import mark_step, TensorAverageMeterDict, LoggingHelper
 
@@ -124,8 +124,8 @@ def train(
         actor_cls = SimbaActor
         critic_cls = SimbaCritic
     elif td3_config.agent == "fasttd3":
-        actor_cls = Actor
-        critic_cls = Critic
+        actor_cls = DeterministicPolicy
+        critic_cls = DistributionalCritic
         actor_kwargs.update(
             {
                 "sim_type": td3_config.sim_type,

@@ -8,7 +8,7 @@ from msk_envs.train.nets.normalizers import EmpiricalNormalization, SimNormLinea
 from msk_envs.train.nets.simba import SimbaActor
 
 
-class Actor(nn.Module):
+class DeterministicPolicy(nn.Module):
     def __init__(
             self,
             n_obs: int,
@@ -178,7 +178,7 @@ class Policy(nn.Module):
         actor_hidden_dim = args["actor_hidden_dim"]
 
         if agent == "fasttd3":
-            actor_cls = Actor
+            actor_cls = DeterministicPolicy
             actor_kwargs.update(
                 {
                     "sim_type": args.get("sim_type", ""),

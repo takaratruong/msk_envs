@@ -6,7 +6,7 @@ from torch import nn
 from msk_envs.train.nets.normalizers import EmpiricalNormalization
 
 
-class Actor(nn.Module):
+class GaussianPolicy(nn.Module):
     def __init__(
             self,
             n_obs: int,
@@ -144,7 +144,7 @@ class Policy(nn.Module):
         super().__init__()
 
         self.args = args
-        self.actor = Actor(
+        self.actor = GaussianPolicy(
             n_obs=n_obs,
             n_act=n_act,
             num_envs=args["num_envs"],

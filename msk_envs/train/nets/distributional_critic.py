@@ -106,7 +106,7 @@ class DistributionalQNetwork(nn.Module):
         return proj_dist
 
 
-class Critic(nn.Module):
+class DistributionalCritic(nn.Module):
     def __init__(
             self,
             n_obs: int,

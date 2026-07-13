@@ -145,6 +145,7 @@ class MSKEnv:
         ModelInitializer.modify_integrator(
             m=self.m,
             integrator_accuracy=env_config.integrator_accuracy,
+            integrator_min_step_size=env_config.integrator_min_step_size,
             integrator_use_inf_norm=env_config.integrator_use_inf_norm,
             use_implicit_damping=env_config.use_implicit_damping,
         )

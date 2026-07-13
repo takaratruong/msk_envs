@@ -122,11 +122,13 @@ class ModelInitializer:
     def modify_integrator(
             m: Model,
             integrator_accuracy: float,
+            integrator_min_step_size: float,
             integrator_use_inf_norm: bool,
             use_implicit_damping: bool,
     ) -> None:
         # Integrator settings
         bolt.set_implicit_damping(m, use_implicit_damping)
         bolt.set_integrator_accuracy(m, integrator_accuracy)
+        bolt.set_integrator_min_step_size(m, integrator_min_step_size)
         bolt.set_integrator_use_inf_norm(m, integrator_use_inf_norm)
         return

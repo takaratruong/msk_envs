@@ -27,6 +27,8 @@ class EnvConfig:
     """ For adaptive integrator, whether to use inf norm or L2-norm error calculation """
     integrator_accuracy: float = 0.1
     """ For adaptive integrator, overall accuracy/tolerance. Lower = more accurate but slower """
+    integrator_min_step_size: float = 1e-5
+    """ Minimum step size for adaptive integrator """
 
     # --- Model articulation properties ---
     model_root_free: bool = True

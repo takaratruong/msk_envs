@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class QFlexConfig:
-    num_envs: int = 1024
+    num_envs: int = 4096
     """number of parallel environments"""
 
     num_learning_iterations: int = 150000
@@ -27,9 +27,9 @@ class QFlexConfig:
 
     learning_starts: int = 10
     """timestep to start learning"""
-    num_updates: int = 1
+    num_updates: int = 8
     """the number of updates to perform per step"""
-    policy_frequency: int = 1
+    policy_frequency: int = 4
     """the frequency of training policy (delayed)"""
 
     actor_hidden_dim: int = 256
@@ -42,6 +42,10 @@ class QFlexConfig:
     """the maximum value of the log std"""
     log_std_min: float = -20.0
     """the minimum value of the log std"""
+    target_entropy_ratio: float = 0.1
+    """the ratio of the target entropy to the number of actions"""
+    alpha_init: float = 0.001
+    """the initial value of the alpha"""
 
     critic_hidden_dim: int = 256
     """the hidden dimension of the critic network"""

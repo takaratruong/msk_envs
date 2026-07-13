@@ -70,6 +70,7 @@ def train(
         action_scale=action_scale,
         action_bias=action_bias,
     )
+    log_alpha = torch.tensor([math.log(cfg.alpha_init)], requires_grad=True, device=device)
 
     velocity_field = VelocityField(
         n_obs=n_obs,
@@ -104,6 +105,12 @@ def train(
         betas=cfg.betas,
         weight_decay=cfg.weight_decay,
     )
+    alpha_optimizer = optim.AdamW(
+        [log_alpha],
+        lr=cfg.learning_rate,
+        betas=cfg.betas,
+        weight_decay=cfg.weight_decay,
+    )
 
     obs_normalizer = (
         EmpiricalNormalization(shape=n_obs, device=device)
@@ -120,12 +127,14 @@ def train(
         gamma=cfg.gamma,
         device=device,
     )
-
+    target_entropy = -cfg.target_entropy_ratio * n_act
     max_update = 2.0 * math.sqrt(n_act)  # bound on the Q-gradient-ascent step
 
     # ---------------------------------------------------------- update steps
     def update_critic(data):
         critic.train()
+        reference.eval()
+
         observations = data["observations"]
         next_observations = data["next"]["observations"]
         critic_observations = observations
@@ -139,13 +148,15 @@ def train(
         with torch.no_grad():
             next_actions, next_log_probs = reference.get_actions_and_log_probs(next_observations)
             discount = cfg.gamma ** data["next"]["effective_n_steps"]
+            alpha = log_alpha.exp()
 
         qf_current, qf_next = critic.forward_joint(
             critic_observations, actions, next_critic_observations, next_actions
         )
         qf1, qf2 = qf_current.squeeze(-1)
         qf1_next_value, qf2_next_value = qf_next.detach().squeeze(-1)
-        qf_next_value = torch.minimum(qf1_next_value, qf2_next_value)
+        # Soft target: entropy bonus keeps the reference policy from collapsing.
+        qf_next_value = torch.minimum(qf1_next_value, qf2_next_value) - alpha * next_log_probs
         qf_next_target = rewards + bootstrap * discount * qf_next_value
 
         qf1_loss = F.mse_loss(qf1, qf_next_target)
@@ -157,32 +168,46 @@ def train(
         q_optimizer.step()
 
         return {
-            "q_loss": q_loss.detach(),
-            "q_min": qf_next_value.min().detach(),
-            "q_max": qf_next_value.max().detach(),
+            "q_loss": q_loss.detach().item(),
+            "q_min": qf_next_value.min().detach().item(),
+            "q_max": qf_next_value.max().detach().item(),
+            "alpha": alpha.detach().item(),
         }
 
     def update_reference(data):
         critic.eval()
+        reference.train()
+
         critic_observations = data["observations"]
         actions, log_probs = reference.get_actions_and_log_probs(data["observations"])
 
+        alpha = log_alpha.exp()
         q_value = critic.q_value(critic_observations, actions)
-        ref_loss = -q_value.mean()
+        ref_loss = (alpha.detach() * log_probs - q_value).mean()
 
         ref_optimizer.zero_grad(set_to_none=True)
         ref_loss.backward()
         ref_optimizer.step()
+
+        alpha_loss = -(log_alpha.exp() * (log_probs + target_entropy).detach()).mean()
+        alpha_optimizer.zero_grad(set_to_none=True)
+        alpha_loss.backward()
+        alpha_optimizer.step()
         return {
-            "reference_loss": ref_loss.detach()
+            "reference_loss": ref_loss.detach().item(),
+            "reference_entropy": -log_probs.mean().detach().item(),
+            "alpha_loss": alpha_loss.detach().item(),
         }
 
     def update_velocity(data):
         critic.eval()
+        reference.eval()
+        velocity_field.train()
 
         next_obs = data["next"]["observations"]
         with torch.no_grad():
             action_init, _ = reference.get_actions_and_log_probs(next_obs)
+        # action_init = torch.rand_like(action_init) * (action_high - action_low) + action_low # Try random action
 
         # Bounded Q-gradient ascent in action space builds the flow target.
         y = action_init.clone()
@@ -214,11 +239,11 @@ def train(
         q_flow = critic.q_value(next_obs, action_flow_update).detach()
         q_flow_diff = q_flow - q_init
         return {
-            "velocity_loss": vel_loss.detach(),
-            "q_init": q_init.mean(),
-            "q_flow_update": q_flow.mean(),
-            "q_flow_diff": q_flow_diff.mean(),
-            "target_velocity_norm": target_velocity.norm(dim=1).mean().detach(),
+            "velocity_loss": vel_loss.detach().item(),
+            "q_init": q_init.mean().detach().item(),
+            "q_flow_update": q_flow.mean().detach().item(),
+            "q_flow_diff": q_flow_diff.mean().detach().item(),
+            "target_velocity_norm": target_velocity.norm(dim=1).mean().detach().item(),
         }
 
     # ----------------------------------------------------------- evaluation

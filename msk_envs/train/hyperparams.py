@@ -176,7 +176,7 @@ class SprintBlockStartConfig(LaneConfig):
             env_variant=DerivedEnv.SPRINT_BLOCK_START,
             delta_t=1.0 / 30.0,
             max_episode_duration=10.0,
-            noise_start=False,
+            apply_start_noise=False,
             swap_lr=False,
             default_activation=0.01,
         )
@@ -265,7 +265,7 @@ class CariocaConfig(LaneConfig):
             env_variant=DerivedEnv.CARIOCA,
             delta_t=1.0 / 30.0,
             max_episode_duration=10.0,
-            noise_start=False,
+            apply_start_noise=False,
             swap_lr=False,
         )
 
@@ -301,7 +301,24 @@ class VerticalConfig(BaseArgs):
             env_variant=DerivedEnv.VERTICAL,
             delta_t=1.0 / 30.0,
             default_activation=0.01,
-            noise_start=False,
+            apply_start_noise=False,
+        )
+
+
+@dataclass
+class ImitateConfig(BaseArgs):
+    lambda_track_q: float = 0.0
+    lambda_track_u: float = 0.0
+    lambda_track_bp: float = 1e-1
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            env_variant=DerivedEnv.IMITATE,
+            delta_t=1.0 / 60.0,
+            apply_start_noise=False,
+            enforce_ground_contact=False,
+            default_activation=0.1,
         )
 
 
@@ -317,6 +334,7 @@ Config = Union[
     Annotated[CariocaConfig, tyro.conf.subcommand(name="carioca")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[LocomotionConfig, tyro.conf.subcommand(name="locomotion")],
+    Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
 ]
 
 

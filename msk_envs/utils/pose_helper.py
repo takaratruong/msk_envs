@@ -113,17 +113,23 @@ class StartingStateHelper:
             self.swap_lr_data = []
 
         # Allocate space for the starting pose for each env
-        self.start_pose = q_torch.unsqueeze(0).repeat(num_envs, 1)
-        self.start_velocity = qv_torch.unsqueeze(0).repeat(num_envs, 1)
+        self._start_pose = q_torch.unsqueeze(0).repeat(num_envs, 1)
+        self._start_velocity = qv_torch.unsqueeze(0).repeat(num_envs, 1)
 
         # Starting muscle activations
         self.default_activation = default_activation
         if default_activation == -1.0:
-            self.start_activations = torch.rand((num_envs, self.num_muscles), device=device)
+            self._start_activations = torch.rand((num_envs, self.num_muscles), device=device)
         else:
-            self.start_activations = torch.ones(
+            self._start_activations = torch.ones(
                 (num_envs, self.num_muscles), device=device) * default_activation
         return
+
+    def update_starting_pose(self, start_pose: torch.Tensor):
+        self.start_pose_base[:] = start_pose
+
+    def update_starting_velocity(self, start_velocity: torch.Tensor):
+        self.start_velocity_base[:] = start_velocity
 
     def _apply_starting_pose_noise(self, q: torch.Tensor, qv: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """ Apply noise to given starting pose (q) and velocity (qv) """
@@ -157,13 +163,13 @@ class StartingStateHelper:
         q, qv = self._apply_starting_pose_noise(q=q, qv=qv)
         q, qv = self._apply_swap_lr_noise(q=q, qv=qv)
         # Set the new starting pose
-        self.start_pose[reset_mask, :] = q[reset_mask, :]
-        self.start_velocity[reset_mask, :] = qv[reset_mask, :]
+        self._start_pose[reset_mask, :] = q[reset_mask, :]
+        self._start_velocity[reset_mask, :] = qv[reset_mask, :]
 
         # Noise starting muscle activations
         if self.default_activation == -1.0:
             random_acts = torch.rand((self.num_envs, self.num_muscles), device=self.device)
-            self.start_activations[reset_mask, :] = random_acts[reset_mask, :]
+            self._start_activations[reset_mask, :] = random_acts[reset_mask, :]
         return
 
     def set_starting_state(
@@ -177,9 +183,9 @@ class StartingStateHelper:
     ):
         """ Apply new starting state for envs where reset_mask is 1 """
         time_out[reset_mask] = 0.0
-        q_out[reset_mask, :] = self.start_pose[reset_mask, :]
-        qv_out[reset_mask, :] = self.start_velocity[reset_mask, :]
-        activations_out[reset_mask, :] = self.start_activations[reset_mask, :]
+        q_out[reset_mask, :] = self._start_pose[reset_mask, :]
+        qv_out[reset_mask, :] = self._start_velocity[reset_mask, :]
+        activations_out[reset_mask, :] = self._start_activations[reset_mask, :]
         actuator_activations_out[reset_mask, :] = 0.5
         return
 
@@ -204,7 +210,7 @@ class StartingStateHelper:
             collider_heights -= collider_sizes[non_ground_collider_ids, 0]
             lowest_collider_height = collider_heights.min(dim=1).values
             adjustment = -lowest_collider_height + ground_height
-            self.start_pose[reset_mask, root_height_qpos_id] += adjustment[reset_mask]
+            self._start_pose[reset_mask, root_height_qpos_id] += adjustment[reset_mask]
         return
 
     def apply(
@@ -216,8 +222,8 @@ class StartingStateHelper:
             reset_mask: torch.Tensor,
     ):
         """ Modify starting pose and velocity for envs where reset_mask is 1 """
-        q_out[reset_mask, :] = self.start_pose[reset_mask, :]
-        qv_out[reset_mask, :] = self.start_velocity[reset_mask, :]
-        activations_out[reset_mask, :] = self.start_activations[reset_mask, :]
+        q_out[reset_mask, :] = self._start_pose[reset_mask, :]
+        qv_out[reset_mask, :] = self._start_velocity[reset_mask, :]
+        activations_out[reset_mask, :] = self._start_activations[reset_mask, :]
         actuator_activations_out[reset_mask, :] = 0.5
         return

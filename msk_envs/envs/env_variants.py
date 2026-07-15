@@ -12,3 +12,4 @@ class DerivedEnv(Enum):
     CARIOCA = 6
     VERTICAL = 7
     LOCOMOTION = 8
+    IMITATE = 9

@@ -9,6 +9,7 @@ from .env_hurdles import HurdlesEnv
 from .env_carioca import CariocaEnv
 from .env_sprint_blocks import BlockStartSprintingEnv
 from .env_locomotion import LocomotionEnv
+from .env_imitate import ImitateEnv
 
 
 # factory
@@ -37,5 +38,7 @@ class EnvFactory:
             return BlockStartSprintingEnv(**kwargs)
         elif env_variant == DerivedEnv.LOCOMOTION:
             return LocomotionEnv(**kwargs)
+        elif env_variant == DerivedEnv.IMITATE:
+            return ImitateEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

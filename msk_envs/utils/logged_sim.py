@@ -102,13 +102,10 @@ class LoggedSim:
         times = self.envs.time
         scene_settings = self.envs.scene_settings()
 
-        # If we are using the ImitateEnv, add reference visuals
+        # If we are using the ImitateEnv, add reference data
         add_reference, ref_joint_angles = False, None
-        if hasattr(self.envs, "get_reference_visuals") and hasattr(self.envs, "get_reference_times") \
-                and hasattr(self.envs, "get_reference_joint_angles"):
-            ref_joint_angles = self.envs.get_reference_joint_angles()
-            ref_visuals_pos, ref_visuals_rot = self.envs.get_reference_visuals()
-            ref_times = self.envs.get_reference_times()
+        if hasattr(self.envs, "get_references"):
+            ref_visuals_pos, ref_visuals_rot, ref_joint_angles = self.envs.get_references()
             add_reference = True
 
         for i in range(len(self.worlds_to_save)):
@@ -135,13 +132,10 @@ class LoggedSim:
             )
 
             if add_reference:
-                # find time in ref_times closest to frame_time
-                time_diffs = torch.abs(ref_times - frame_time)
-                closest_idx = torch.argmin(time_diffs).item()
                 add_reference_visuals(
                     frame,
-                    ref_visuals_pos[closest_idx],
-                    ref_visuals_rot[closest_idx],
+                    ref_visuals_pos[idx_world],
+                    ref_visuals_rot[idx_world],
                 )
 
             add_ext_forces_to_frame(

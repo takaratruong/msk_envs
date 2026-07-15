@@ -14759,7 +14759,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.012670465763027947 -0.0175 -0.009408062663105943</location>
+                        <location>0.012670465763027947 0.0 -0.009408062663105943</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="lateralRearfoot_r">
@@ -14786,7 +14786,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.07349295892220219 -0.0175 0.02594508923361074</location>
+                        <location>0.07349295892220219 0.0 0.02594508923361074</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="lateralMidfoot_r">
@@ -14813,7 +14813,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.13271101620324216 -0.0175 0.04557193874406669</location>
+                        <location>0.13271101620324216 0.0 0.04557193874406669</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="lateralToe_r">
@@ -14840,7 +14840,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.020396210584827205 -0.0175 0.05942451396007953</location>
+                        <location>0.020396210584827205 0.0 0.05942451396007953</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="medialToe_r">
@@ -14867,7 +14867,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.06590438027807016 -0.0175 -0.023078969828319782</location>
+                        <location>0.06590438027807016 0.0 -0.023078969828319782</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="medialMidfoot_r">
@@ -14894,7 +14894,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.1762162283132694 -0.0175 -0.030544887882054273</location>
+                        <location>0.1762162283132694 0.0 -0.030544887882054273</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="heel_l">
@@ -14921,7 +14921,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.012670465763027947 -0.0175 0.009408062663105943</location>
+                        <location>0.012670465763027947 0.0 0.009408062663105943</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="lateralRearfoot_l">
@@ -14948,7 +14948,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.07349295892220219 -0.0175 -0.02594508923361074</location>
+                        <location>0.07349295892220219 0.0 -0.02594508923361074</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="lateralMidfoot_l">
@@ -14975,7 +14975,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.13271101620324216 -0.0175 -0.04557193874406669</location>
+                        <location>0.13271101620324216 0.0 -0.04557193874406669</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="lateralToe_l">
@@ -15002,7 +15002,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.020396210584827205 -0.0175 -0.05942451396007953</location>
+                        <location>0.020396210584827205 0.0 -0.05942451396007953</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="medialToe_l">
@@ -15029,7 +15029,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.06590438027807016 -0.0175 0.023078969828319782</location>
+                        <location>0.06590438027807016 0.0 0.023078969828319782</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="medialMidfoot_l">
@@ -15056,7 +15056,7 @@
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.1762162283132694 -0.0175 0.030544887882054273</location>
+                        <location>0.1762162283132694 0.0 0.030544887882054273</location>
                     </Station>
                 </ExponentialContactForce>
             </objects>

@@ -1,8 +1,8 @@
-<svg width="100%" viewBox="30 0 770 200" role="img" style="" xmlns="http://www.w3.org/2000/svg">
+<svg width="100%" viewBox="20 0 770 200" role="img" style="" xmlns="http://www.w3.org/2000/svg">
     <rect x="0" y="0" width="790" height="190" fill="#FFFFFF"
           style="fill:rgb(255, 255, 255)"/>
-    <circle cx="95" cy="95" r="60" fill="none" stroke="#7D97CE" stroke-width="10"
-            style="fill:none;stroke:rgb(125, 151, 206)"/>
+    <rect x="30" y="30" width="130" height="130" rx="32" ry="32" fill="none" stroke="#7D97CE" stroke-width="10"
+          style="fill:rgb(125, 151, );stroke:rgb(0, 0, 0)"/>
     <g transform="translate(95 95) scale(6.1) translate(-9.2335 -9.2335)"
        style="fill:rgb(125, 151, 206)">
         <path d="M17.109,5.454c-0.242-0.289-0.673-0.327-0.962-0.086l-1.894,1.591l-0.871-2.158
@@ -21,7 +21,7 @@
               fill="#7D97CE" stroke="#111111" stroke-width="0.55" stroke-linejoin="round"/>
         <circle cx="13.671" cy="1.905" r="1.905" fill="#7D97CE" stroke="#111111" stroke-width="0.55"/>
     </g>
-    <text x="210" y="132" font-family="Arial, Helvetica, sans-serif" font-size="100" font-weight="700" fill="#111111"
+    <text x="185" y="132" font-family="Arial, Helvetica, sans-serif" font-size="100" font-weight="700" fill="#111111"
           style="fill:rgb(17, 17, 17)">
         MSK Envs
     </text>

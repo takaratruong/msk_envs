@@ -12,7 +12,7 @@ RL environments built on top of the [Bolt](https://github.com/willwng/bolt) simu
 Requires installation of [Bolt](https://github.com/willwng/bolt) (instructions can be found in the README).
 
 Rest of packages (required for training and visualization):
-```
+```bash
 cd "path to msk_envs"
 pip install -r requirements.txt
 ```
@@ -47,19 +47,19 @@ python3 dashboard.py
 
 First, mount the remote traj dir to your local machine
 
-```
+```bash
 sshfs remote_dir ./dashboard/remote_trajectories
 ```
 
 Then run the dashboard pointing to it
-```
+```bash
 cd dashboard
 python dashboard.py --traj-dir remote_trajectories
 ```
 
 ### Blender
 We include scripts for importing trajectories as Blender animations
-```
+```bash
 cd blender
 blender render_render.py
 ```

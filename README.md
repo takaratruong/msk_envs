@@ -30,6 +30,9 @@ python -m msk_envs.train.train [sprint|vertical|...] --exp_prefix my_training_ru
 ## Visualization
 We provide visualization tools (as a dashboard/web-viewer) as well as scripts to generate analytics of trajectories (as PDFs).
 ### Dashboard
+<div float="center">
+  <img src="assets/webviewer.png" width="700"/>
+</div>
 During training, every `eval_freq` steps, the training script will save a 
 checkpoint and a trajectory JSON. This trajectory can be visualized with 
 the web-viewer.

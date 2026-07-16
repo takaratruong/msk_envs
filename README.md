@@ -1,10 +1,13 @@
-# MSK Envs - RL Environments for Musculoskeletal Simulations
+<h2>
+<img src="assets/logo.svg" width="500"><br>RL Environments for Musculoskeletal Simulations
+</h2>
+
 RL environments built on top of the [Bolt](https://github.com/willwng/bolt) simulator that run entirely on the GPU.
 
 ## Preqrequisites/Setup
 Requires installation of [Bolt](https://github.com/willwng/bolt) (instructions can be found in the README).
 
-Rest of packages:
+Rest of packages (required for training and visualization):
 ```
 cd "path to msk_envs"
 pip install -r requirements.txt

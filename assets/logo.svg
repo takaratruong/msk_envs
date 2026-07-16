@@ -1,0 +1,33 @@
+<svg width="100%" viewBox="0 0 850 200" role="img" xmlns="http://www.w3.org/2000/svg">
+    <title>MSK Envs logo, musculoskeletal simulation and reinforcement learning icon with white background</title>
+    <desc>A badge icon combining a blue bone with a thick black outer outline, sitting inside a black ring with a
+        circular reinforcement-learning feedback loop, next to the bold black wordmark "MSK Envs", on a solid white
+        background.
+    </desc>
+    <rect x="0" y="0" width="840" height="190" fill="#FFFFFF"/>
+
+    <circle cx="95" cy="95" r="70" fill="none" stroke="#111111" stroke-width="10"/>
+
+    <path d="M 77.9 142 A 50 50 0 1 1 127.1 133.3" fill="none" stroke="#6FB98F" stroke-width="6"
+          stroke-linecap="round"/>
+    <path d="M 118.5 141.5 L 136.5 136.5 L 128.0 121.5 Z" fill="#6FB98F"/>
+    <circle cx="45" cy="95" r="4.5" fill="#6FB98F"/>
+    <circle cx="95" cy="45" r="4.5" fill="#6FB98F"/>
+    <circle cx="145" cy="95" r="4.5" fill="#6FB98F"/>
+
+    <line x1="61" y1="129" x2="129" y2="61" stroke="#111111" stroke-width="28"/>
+    <rect x="-17" y="-8.5" width="34" height="17" rx="8" fill="#111111"
+          transform="translate(61 129) rotate(45)"/>
+    <rect x="-17" y="-8.5" width="34" height="17" rx="8" fill="#111111"
+          transform="translate(129 61) rotate(45)"/>
+
+    <line x1="61" y1="129" x2="129" y2="61" stroke="#7D97CE" stroke-width="18"/>
+    <rect x="-12" y="-6" width="24" height="12" rx="5.5" fill="#7D97CE"
+          transform="translate(61 129) rotate(45)"/>
+    <rect x="-12" y="-6" width="24" height="12" rx="5.5" fill="#7D97CE"
+          transform="translate(129 61) rotate(45)"/>
+
+    <text x="210" y="132" font-family="Arial, Helvetica, sans-serif" font-size="100" font-weight="700" fill="#111111">
+        MSK Envs
+    </text>
+</svg>

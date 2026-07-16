@@ -4,6 +4,10 @@
 
 RL environments built on top of the [Bolt](https://github.com/willwng/bolt) simulator that run entirely on the GPU.
 
+<div float="center">
+  <img src="assets/animation.gif" width="700"/>
+</div>
+
 ## Preqrequisites/Setup
 Requires installation of [Bolt](https://github.com/willwng/bolt) (instructions can be found in the README).
 

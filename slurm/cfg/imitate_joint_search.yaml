@@ -1,4 +1,0 @@
-base_cmd: python -m msk_envs.train.train imitate --no-amp --exp-prefix
-args:
-  extra_rewarded_joints: ['pelvis', 'toes_l,toes_r', 'hand_l,hand_r']
-  lambda_extra_rewarded_joints: [1., 5., 10.]

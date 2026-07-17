@@ -1,5 +1,0 @@
-base_cmd: python -m msk_envs.train.train {TASK} --td3_config.no-amp --exp-prefix
-task: "sideshuffle"
-args: 
-  seed: [1, 2, 3, 4, 5, 6]
-  

@@ -1,4 +1,0 @@
-base_cmd: python -m msk_envs.train.train imitate --no-amp --exp-prefix
-args:
-  extra_rewarded_dofs: ['ankle_angle_l,ankle_angle_r', 'mtp_angle_l,mtp_angle_r', 'knee_angle_l,knee_angle_r']
-  lambda_extra_rewarded_dofs: [1., 5., 10.]

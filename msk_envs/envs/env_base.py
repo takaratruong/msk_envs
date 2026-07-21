@@ -228,6 +228,9 @@ class MSKEnv:
         self.visual_positions = get_position_from_transform(self.visual_transforms)
         # [num_envs, num_visuals, 4]
         self.visual_rotations = get_rotation_from_transform(self.visual_transforms)
+        # [num_envs, num_sites, 3]
+        self.site_positions = bolt.site_positions(self.d)
+        self.marker_positions = self.site_positions[:, bolt.get_site_marker_slice(self.m), :]
 
         # Pre-compute useful body IDs and offsets
         self.ground_id = self.body_id_lookup["ground"]

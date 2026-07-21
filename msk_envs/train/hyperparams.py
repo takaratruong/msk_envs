@@ -310,6 +310,7 @@ class ImitateConfig(BaseArgs):
     lambda_track_q: float = 0.0
     lambda_track_u: float = 0.0
     lambda_track_bp: float = 1e-1
+    lambda_track_mp: float = 1e-1
 
     def __post_init__(self):
         super().__post_init__()

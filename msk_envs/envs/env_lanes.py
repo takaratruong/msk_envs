@@ -44,9 +44,8 @@ class LanesEnv(MSKEnv):
         Observations space:
          1. Muscle activations, fiber lengths
          2. Actuator activations
-         3. Joint positions (q)
+         3. Joint positions (q), excluding forward position
          4. Joint velocities (qv)
-         5. Relative body positions and rotations (wrst root), ignore ground
         """
         # Exclude root x coordinate (forward along lane)
         root_x_qpos_id = self.qpos_id_lookup["pelvis_tx"]
@@ -104,10 +103,11 @@ class LanesEnv(MSKEnv):
             toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > self.lane_width)
 
         # Pelvis no longer facing target direction (within N degrees)
-        pelvis_facing_direction = self._is_body_facing_direction(self.root_id)
-        not_facing_direction = ~pelvis_facing_direction
+        # pelvis_facing_direction = self._is_body_facing_direction(self.root_id)
+        # not_facing_direction = ~pelvis_facing_direction
 
-        terminated = (fallen | toes_out | not_facing_direction).float()
+        # terminated = (fallen | toes_out | not_facing_direction).float()
+        terminated = (fallen | toes_out).float()
         return terminated.detach()
 
     def scene_settings(self) -> SceneSettings:

@@ -23,9 +23,27 @@ def fk(m, d):
     return
 
 
+def check_limits(
+        load_result,
+        joint_positions,
+):
+    limit_id_lookup = load_result.limit_id_lookup
+    qpos_id_lookup = load_result.qpos_id_lookup
+
+    for coord_name, (coord_lo, coord_hi) in limit_id_lookup.items():
+        coord_qpos_id = qpos_id_lookup[coord_name]
+        coord_value = joint_positions[0, coord_qpos_id].item()
+        if coord_value < coord_lo or coord_value > coord_hi:
+            print(
+                f"Warning: Coordinate '{coord_name}' out of limits: "
+                f"{coord_value:.4f} not in [{coord_lo:.4f}, {coord_hi:.4f}]"
+            )
+
+
 def main():
-    motion_file = "/home/marth/Downloads/Data/GT_motionData/maxVerticalJump_3step/IK/maxvert_3step_1_1_segment_0_ik.mot"
-    model_path = "/home/marth/Documents/msk_envs/msk_envs/msk_models/rajagopal/RajagopalLaiUhlrich2023.osim"
+    motion_file = "msk_envs/msk_models/gt/motions/maxVerticalJump_3step.mot"
+    model_path = "msk_envs/msk_models/gt/gt_model.osim"
+    validate_limits = True
     load_result = bolt.load_model(
         model_path=model_path,
         n_worlds=1,
@@ -41,10 +59,10 @@ def main():
         renderer_type=bolt.RendererType.TILED,
         draw_visuals=True,
         draw_colliders=False,
-        draw_muscles=False,
+        draw_muscles=True,
         draw_body_mass=False,
         draw_beams=True,
-        draw_sites=False,
+        draw_sites=True,
     )
 
     motion = parse_mot(motion_file, load_result, in_degrees=False)
@@ -63,6 +81,9 @@ def main():
         joint_positions[0, :] = ref_frames[idx, :]
         fk(m, d)
         renderer.render(m, d)
+
+        if validate_limits:
+            check_limits(load_result, joint_positions)
 
     return
 

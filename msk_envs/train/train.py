@@ -74,6 +74,7 @@ def main():
     td3_config = args.td3_config
     sac_config = args.sac_config
     qflex_config = args.qflex_config
+    qflex_ref_config = args.qflex_ref_config
     ppo_config = args.ppo_config
     dep_config = args.dep_config
 
@@ -131,7 +132,7 @@ def main():
             exp_name=args.exp_name,
             device=device,
         )
-    elif args.algo == "qflex":
+    elif args.algo == "qflex":  # Torch impl of QFlex
         envs, eval_envs = _build_envs(
             num_envs=qflex_config.num_envs,
             num_eval_envs=qflex_config.num_eval_envs,
@@ -147,6 +148,25 @@ def main():
             analytics_out_folder=analytics_out_folder,
             exp_name=args.exp_name,
             device=device,
+        )
+    elif args.algo == "qflex_ref":  # Reference JAX QFlex with the OffPolicyTrainer
+        import msk_envs.train.qflex_ref.train_ref as qflex_ref
+        envs, eval_envs = _build_envs(
+            num_envs=qflex_ref_config.num_envs,
+            num_eval_envs=qflex_ref_config.num_eval_envs,
+            env_config=env_config,
+            build_cuda_graph=True,
+            device=device,
+        )
+        qflex_ref.train(
+            cfg=qflex_ref_config,
+            envs=envs,
+            eval_envs=eval_envs,
+            traj_out_folder=traj_out_folder,
+            analytics_out_folder=analytics_out_folder,
+            exp_name=args.exp_name,
+            device=device,
+            seed=args.seed,
         )
     elif args.algo == "ppo":
         envs, eval_envs = _build_envs(

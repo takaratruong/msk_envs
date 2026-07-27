@@ -3394,8 +3394,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/pelvis</socket_parent>
@@ -3410,8 +3409,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/torso</socket_parent>
@@ -3431,7 +3429,7 @@
                             <axis>0 0 1</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>1 0</coefficients>
+                                <coefficients> 1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The second TransformAxis defining a rotation about an axis with to a set of generalized coordinates.-->
@@ -3442,7 +3440,7 @@
                             <axis>1 0 0</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>1 0</coefficients>
+                                <coefficients> 1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The third TransformAxis defining a rotation about an axis with to a set of generalized coordinates.-->
@@ -3453,7 +3451,7 @@
                             <axis>0 1 0</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>1 0</coefficients>
+                                <coefficients> 1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The first TransformAxis defining a translation along an axis with to a set of generalized coordinates.-->
@@ -3513,8 +3511,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/torso</socket_parent>
@@ -3529,8 +3526,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/clavicle_r</socket_parent>
@@ -3554,8 +3550,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/torso</socket_parent>
@@ -3570,8 +3565,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/clavicle_l</socket_parent>
@@ -3595,8 +3589,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/scapula_r</socket_parent>
@@ -3620,8 +3613,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/scapula_l</socket_parent>
@@ -3690,14 +3682,12 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/scapula_r</socket_parent>
                             <!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-                            <translation>-0.0095499999999999995 -0.033867399999999999 0.0096704999999999985
-                            </translation>
+                            <translation>-0.0095499999999999995 -0.033867399999999999 0.0096704999999999985</translation>
                             <!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
                             <orientation>-0.25 0 -0.125</orientation>
                         </PhysicalOffsetFrame>
@@ -3712,7 +3702,7 @@
                             <axis>0 0 1</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>1 0</coefficients>
+                                <coefficients> 1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The second TransformAxis defining a rotation about an axis with to a set of generalized coordinates.-->
@@ -3723,7 +3713,7 @@
                             <axis>1 0 0</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>-1 0</coefficients>
+                                <coefficients> -1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The third TransformAxis defining a rotation about an axis with to a set of generalized coordinates.-->
@@ -3734,7 +3724,7 @@
                             <axis>0 1 0</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>1 0</coefficients>
+                                <coefficients> 1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The first TransformAxis defining a translation along an axis with to a set of generalized coordinates.-->
@@ -3839,14 +3829,12 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/scapula_l</socket_parent>
                             <!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-                            <translation>-0.0095499999999999995 -0.033867399999999999 -0.0096704999999999985
-                            </translation>
+                            <translation>-0.0095499999999999995 -0.033867399999999999 -0.0096704999999999985</translation>
                             <!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
                             <orientation>0.25 0 -0.125</orientation>
                         </PhysicalOffsetFrame>
@@ -3861,7 +3849,7 @@
                             <axis>0 0 1</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>1 0</coefficients>
+                                <coefficients> 1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The second TransformAxis defining a rotation about an axis with to a set of generalized coordinates.-->
@@ -3872,7 +3860,7 @@
                             <axis>1 0 0</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>1 0</coefficients>
+                                <coefficients> 1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The third TransformAxis defining a rotation about an axis with to a set of generalized coordinates.-->
@@ -3883,7 +3871,7 @@
                             <axis>0 1 0</axis>
                             <!--The transform function with respect to the generalized coordinates used to represent the amount of displacement about or along the TransformAxis. Default: Constant(0).-->
                             <LinearFunction name="function">
-                                <coefficients>-1 0</coefficients>
+                                <coefficients> -1 0</coefficients>
                             </LinearFunction>
                         </TransformAxis>
                         <!--The first TransformAxis defining a translation along an axis with to a set of generalized coordinates.-->
@@ -3960,8 +3948,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/humerus_r</socket_parent>
@@ -3976,8 +3963,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/ulna_r</socket_parent>
@@ -4018,8 +4004,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/humerus_l</socket_parent>
@@ -4034,8 +4019,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/ulna_l</socket_parent>
@@ -4059,8 +4043,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/ulna_r</socket_parent>
@@ -4075,8 +4058,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/radius_r</socket_parent>
@@ -4100,14 +4082,12 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/ulna_l</socket_parent>
                             <!--Translational offset (in meters) of this frame's origin from the parent frame's origin, expressed in the parent frame.-->
-                            <translation>-0.0067270000000000003 -0.013884972499999999 -0.026082999999999999
-                            </translation>
+                            <translation>-0.0067270000000000003 -0.013884972499999999 -0.026082999999999999</translation>
                             <!--Orientation offset (in radians) of this frame in its parent frame, expressed as a frame-fixed x-y-z rotation sequence.-->
                             <orientation>1.56884 -0.056427999999999999 2.6361400000000001</orientation>
                         </PhysicalOffsetFrame>
@@ -4117,8 +4097,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/radius_l</socket_parent>
@@ -4142,8 +4121,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/radius_r</socket_parent>
@@ -4158,8 +4136,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/hand_r</socket_parent>
@@ -4183,8 +4160,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/radius_l</socket_parent>
@@ -4199,8 +4175,7 @@
                                 <!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
                                 <socket_frame>..</socket_frame>
                                 <!--Scale factors in X, Y, Z directions respectively.-->
-                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001
-                                </scale_factors>
+                                <scale_factors>0.20000000000000001 0.20000000000000001 0.20000000000000001</scale_factors>
                             </FrameGeometry>
                             <!--Path to a Component that satisfies the Socket 'parent' of type C (description: The parent frame to this frame.).-->
                             <socket_parent>/bodyset/hand_l</socket_parent>
@@ -10775,8 +10750,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="ercspn_r_FiberForceLengthCurve">
@@ -10864,8 +10838,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="ercspn_l_FiberForceLengthCurve">
@@ -10953,8 +10926,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="coracobrachialis_r_FiberForceLengthCurve">
@@ -11051,8 +11023,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="deltoideus_ant_r_FiberForceLengthCurve">
@@ -11101,8 +11072,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.0051000000000000004 -0.0066738700000000001 0.033309499999999999
-                                    </location>
+                                    <location>-0.0051000000000000004 -0.0066738700000000001 0.033309499999999999</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -11150,8 +11120,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="deltoideus_med_r_FiberForceLengthCurve">
@@ -11209,8 +11178,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/humerus_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.0047999999999999996 -0.10303486000000001 0.0062399999999999999
-                                    </location>
+                                    <location>-0.0047999999999999996 -0.10303486000000001 0.0062399999999999999</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -11249,8 +11217,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="deltoideus_post_r_FiberForceLengthCurve">
@@ -11344,8 +11311,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="latissimus_sup_r_FiberForceLengthCurve">
@@ -11392,8 +11358,7 @@
                                 <!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
                                 <socket_contact_geometry>/bodyset/torso/thorax_r_obstacle</socket_contact_geometry>
                                 <!--The contact hint for the obstacle.-->
-                                <contact_hint>-0.042000000000000003 0.0089999999999999993 0.085000000000000006
-                                </contact_hint>
+                                <contact_hint>-0.042000000000000003 0.0089999999999999993 0.085000000000000006</contact_hint>
                             </Scholz2015GeometryPathObstacle>
                             <Scholz2015GeometryPathPoint name="path_point_1">
                                 <!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -11440,8 +11405,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="latissimus_med_r_FiberForceLengthCurve">
@@ -11497,8 +11461,7 @@
                                 <!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
                                 <socket_contact_geometry>/bodyset/torso/thorax_r_obstacle</socket_contact_geometry>
                                 <!--The contact hint for the obstacle.-->
-                                <contact_hint>-0.025000000000000001 -0.029999999999999999 0.095000000000000001
-                                </contact_hint>
+                                <contact_hint>-0.025000000000000001 -0.029999999999999999 0.095000000000000001</contact_hint>
                             </Scholz2015GeometryPathObstacle>
                             <Scholz2015GeometryPathPoint name="path_point_2">
                                 <!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -11506,8 +11469,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/humerus_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0030000000000000001 -0.028687200000000003 -0.0030000000000000001
-                                    </location>
+                                    <location>0.0030000000000000001 -0.028687200000000003 -0.0030000000000000001</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -11546,8 +11508,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="latissimus_inf_r_FiberForceLengthCurve">
@@ -11587,8 +11548,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/clavicle_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0025000000000000001 0.0050000000000000001 0.053725000000000002
-                                    </location>
+                                    <location>0.0025000000000000001 0.0050000000000000001 0.053725000000000002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathObstacle name="obstacle_0">
@@ -11642,8 +11602,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="pectoralis_major_sup_r_FiberForceLengthCurve">
@@ -11690,8 +11649,7 @@
                                 <!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
                                 <socket_contact_geometry>/bodyset/torso/pectoralis_r_obstacle</socket_contact_geometry>
                                 <!--The contact hint for the obstacle.-->
-                                <contact_hint>0.080000000000000002 0.10000000000000001 0.036999999999999998
-                                </contact_hint>
+                                <contact_hint>0.080000000000000002 0.10000000000000001 0.036999999999999998</contact_hint>
                             </Scholz2015GeometryPathObstacle>
                             <Scholz2015GeometryPathPoint name="path_point_1">
                                 <!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -11738,8 +11696,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="pectoralis_major_med_r_FiberForceLengthCurve">
@@ -11833,8 +11790,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="pectoralis_major_inf_r_FiberForceLengthCurve">
@@ -11922,8 +11878,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="teres_major_r_FiberForceLengthCurve">
@@ -11963,8 +11918,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.084400000000000003 -0.065842209999999998 -0.045451349999999995
-                                    </location>
+                                    <location>-0.084400000000000003 -0.065842209999999998 -0.045451349999999995</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -12012,8 +11966,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="teres_minor_r_FiberForceLengthCurve">
@@ -12062,8 +12015,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.064000000000000001 -0.049805000000000002 -0.034383999999999998
-                                    </location>
+                                    <location>-0.064000000000000001 -0.049805000000000002 -0.034383999999999998</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -12120,8 +12072,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="infraspinatus_inf_r_FiberForceLengthCurve">
@@ -12227,8 +12178,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="infraspinatus_sup_r_FiberForceLengthCurve">
@@ -12277,8 +12227,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.035000000000000003 -0.036855699999999998 -0.045129000000000002
-                                    </location>
+                                    <location>-0.035000000000000003 -0.036855699999999998 -0.045129000000000002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -12335,8 +12284,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="subscapularis_sup_r_FiberForceLengthCurve">
@@ -12376,8 +12324,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.083599999999999994 -0.054685889999999994 -0.080265150000000007
-                                    </location>
+                                    <location>-0.083599999999999994 -0.054685889999999994 -0.080265150000000007</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -12443,8 +12390,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="subscapularis_med_r_FiberForceLengthCurve">
@@ -12484,8 +12430,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.095100000000000004 -0.097318969999999991 -0.091762300000000005
-                                    </location>
+                                    <location>-0.095100000000000004 -0.097318969999999991 -0.091762300000000005</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -12551,8 +12496,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="subscapularis_inf_r_FiberForceLengthCurve">
@@ -12592,8 +12536,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.060499999999999998 -0.0013945399999999999 -0.053187750000000006
-                                    </location>
+                                    <location>-0.060499999999999998 -0.0013945399999999999 -0.053187750000000006</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -12650,8 +12593,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="supraspinatus_post_r_FiberForceLengthCurve">
@@ -12691,8 +12633,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.049000000000000002 0.0013945399999999999 -0.074355400000000002
-                                    </location>
+                                    <location>-0.049000000000000002 0.0013945399999999999 -0.074355400000000002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -12701,8 +12642,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/humerus_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0070000000000000001 0.039444900000000005 -0.0040000000000000001
-                                    </location>
+                                    <location>0.0070000000000000001 0.039444900000000005 -0.0040000000000000001</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -12750,8 +12690,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="supraspinatus_ant_r_FiberForceLengthCurve">
@@ -12845,8 +12784,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="triceps_long_r_FiberForceLengthCurve">
@@ -12949,8 +12887,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="biceps_long_r_FiberForceLengthCurve">
@@ -12990,8 +12927,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_r</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0094999999999999998 -0.038051019999999998 -0.026002899999999999
-                                    </location>
+                                    <location>0.0094999999999999998 -0.038051019999999998 -0.026002899999999999</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathObstacle name="obstacle_0">
@@ -13045,8 +12981,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="biceps_brevis_r_FiberForceLengthCurve">
@@ -13134,8 +13069,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="coracobrachialis_l_FiberForceLengthCurve">
@@ -13232,8 +13166,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="deltoideus_ant_l_FiberForceLengthCurve">
@@ -13282,8 +13215,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.0051000000000000004 -0.0066738700000000001 -0.033309499999999999
-                                    </location>
+                                    <location>-0.0051000000000000004 -0.0066738700000000001 -0.033309499999999999</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -13331,8 +13263,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="deltoideus_med_l_FiberForceLengthCurve">
@@ -13390,8 +13321,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.0047999999999999996 -0.10303486000000001 -0.0062399999999999999
-                                    </location>
+                                    <location>-0.0047999999999999996 -0.10303486000000001 -0.0062399999999999999</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -13430,8 +13360,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="deltoideus_post_l_FiberForceLengthCurve">
@@ -13525,8 +13454,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="latissimus_sup_l_FiberForceLengthCurve">
@@ -13573,8 +13501,7 @@
                                 <!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
                                 <socket_contact_geometry>/bodyset/torso/thorax_l_obstacle</socket_contact_geometry>
                                 <!--The contact hint for the obstacle.-->
-                                <contact_hint>-0.042000000000000003 0.0089999999999999993 -0.085000000000000006
-                                </contact_hint>
+                                <contact_hint>-0.042000000000000003 0.0089999999999999993 -0.085000000000000006</contact_hint>
                             </Scholz2015GeometryPathObstacle>
                             <Scholz2015GeometryPathPoint name="path_point_1">
                                 <!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -13621,8 +13548,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="latissimus_med_l_FiberForceLengthCurve">
@@ -13678,8 +13604,7 @@
                                 <!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
                                 <socket_contact_geometry>/bodyset/torso/thorax_l_obstacle</socket_contact_geometry>
                                 <!--The contact hint for the obstacle.-->
-                                <contact_hint>-0.025000000000000001 -0.029999999999999999 -0.095000000000000001
-                                </contact_hint>
+                                <contact_hint>-0.025000000000000001 -0.029999999999999999 -0.095000000000000001</contact_hint>
                             </Scholz2015GeometryPathObstacle>
                             <Scholz2015GeometryPathPoint name="path_point_2">
                                 <!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -13687,8 +13612,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0030000000000000001 -0.028687200000000003 0.0030000000000000001
-                                    </location>
+                                    <location>0.0030000000000000001 -0.028687200000000003 0.0030000000000000001</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                         </path_elements>
@@ -13727,8 +13651,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="latissimus_inf_l_FiberForceLengthCurve">
@@ -13768,8 +13691,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/clavicle_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0025000000000000001 0.0050000000000000001 -0.053725000000000002
-                                    </location>
+                                    <location>0.0025000000000000001 0.0050000000000000001 -0.053725000000000002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathObstacle name="obstacle_0">
@@ -13823,8 +13745,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="pectoralis_major_sup_l_FiberForceLengthCurve">
@@ -13871,8 +13792,7 @@
                                 <!--Path to a Component that satisfies the Socket 'contact_geometry' of type ContactGeometry (description: The contact geometry representing the obstacle.).-->
                                 <socket_contact_geometry>/bodyset/torso/pectoralis_l_obstacle</socket_contact_geometry>
                                 <!--The contact hint for the obstacle.-->
-                                <contact_hint>0.080000000000000002 0.10000000000000001 -0.036999999999999998
-                                </contact_hint>
+                                <contact_hint>0.080000000000000002 0.10000000000000001 -0.036999999999999998</contact_hint>
                             </Scholz2015GeometryPathObstacle>
                             <Scholz2015GeometryPathPoint name="path_point_1">
                                 <!--A point fixed to a PhysicalFrame that the path must pass through.-->
@@ -13919,8 +13839,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="pectoralis_major_med_l_FiberForceLengthCurve">
@@ -14014,8 +13933,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="pectoralis_major_inf_l_FiberForceLengthCurve">
@@ -14103,8 +14021,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="teres_major_l_FiberForceLengthCurve">
@@ -14144,8 +14061,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.084400000000000003 -0.065842209999999998 0.045451349999999995
-                                    </location>
+                                    <location>-0.084400000000000003 -0.065842209999999998 0.045451349999999995</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -14193,8 +14109,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="teres_minor_l_FiberForceLengthCurve">
@@ -14243,8 +14158,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.064000000000000001 -0.049805000000000002 0.034383999999999998
-                                    </location>
+                                    <location>-0.064000000000000001 -0.049805000000000002 0.034383999999999998</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -14301,8 +14215,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="infraspinatus_inf_l_FiberForceLengthCurve">
@@ -14408,8 +14321,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="infraspinatus_sup_l_FiberForceLengthCurve">
@@ -14458,8 +14370,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.035000000000000003 -0.036855699999999998 0.045129000000000002
-                                    </location>
+                                    <location>-0.035000000000000003 -0.036855699999999998 0.045129000000000002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -14516,8 +14427,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="subscapularis_sup_l_FiberForceLengthCurve">
@@ -14557,8 +14467,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.083599999999999994 -0.054685889999999994 0.080265150000000007
-                                    </location>
+                                    <location>-0.083599999999999994 -0.054685889999999994 0.080265150000000007</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -14624,8 +14533,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="subscapularis_med_l_FiberForceLengthCurve">
@@ -14665,8 +14573,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.095100000000000004 -0.097318969999999991 0.091762300000000005
-                                    </location>
+                                    <location>-0.095100000000000004 -0.097318969999999991 0.091762300000000005</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -14732,8 +14639,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="subscapularis_inf_l_FiberForceLengthCurve">
@@ -14773,8 +14679,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.060499999999999998 -0.0013945399999999999 0.053187750000000006
-                                    </location>
+                                    <location>-0.060499999999999998 -0.0013945399999999999 0.053187750000000006</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -14831,8 +14736,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="supraspinatus_post_l_FiberForceLengthCurve">
@@ -14872,8 +14776,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>-0.049000000000000002 0.0013945399999999999 0.074355400000000002
-                                    </location>
+                                    <location>-0.049000000000000002 0.0013945399999999999 0.074355400000000002</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_1">
@@ -14882,8 +14785,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/humerus_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0070000000000000001 0.039444900000000005 0.0040000000000000001
-                                    </location>
+                                    <location>0.0070000000000000001 0.039444900000000005 0.0040000000000000001</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathPoint name="path_point_2">
@@ -14931,8 +14833,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="supraspinatus_ant_l_FiberForceLengthCurve">
@@ -15026,8 +14927,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="triceps_long_l_FiberForceLengthCurve">
@@ -15130,8 +15030,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="biceps_long_l_FiberForceLengthCurve">
@@ -15171,8 +15070,7 @@
                                     <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
                                     <socket_parent_frame>/bodyset/scapula_l</socket_parent_frame>
                                     <!--The fixed location of the path point expressed in its parent frame.-->
-                                    <location>0.0094999999999999998 -0.038051019999999998 0.026002899999999999
-                                    </location>
+                                    <location>0.0094999999999999998 -0.038051019999999998 0.026002899999999999</location>
                                 </PathPoint>
                             </Scholz2015GeometryPathPoint>
                             <Scholz2015GeometryPathObstacle name="obstacle_0">
@@ -15226,8 +15124,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="biceps_brevis_l_FiberForceLengthCurve">
@@ -15315,8 +15212,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="extobl_r_FiberForceLengthCurve">
@@ -15404,8 +15300,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="extobl_l_FiberForceLengthCurve">
@@ -15493,8 +15388,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="intobl_r_FiberForceLengthCurve">
@@ -15582,8 +15476,7 @@
                         <!--Curve slope just before reaching eccentric_slope_at_vmax-->
                         <eccentric_slope_near_vmax>0.14999999999999999</eccentric_slope_near_vmax>
                         <!--Curve value at the maximum normalized eccentric contraction velocity-->
-                        <max_eccentric_velocity_force_multiplier>1.3999999999999999
-                        </max_eccentric_velocity_force_multiplier>
+                        <max_eccentric_velocity_force_multiplier>1.3999999999999999</max_eccentric_velocity_force_multiplier>
                     </ForceVelocityCurve>
                     <!--Passive-force-length curve.-->
                     <FiberForceLengthCurve name="intobl_l_FiberForceLengthCurve">
@@ -16088,7 +15981,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16100,13 +15993,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.0699 -0.0399 -0.0286</location>
+                        <location>0.0699 -0.0299 -0.0286</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="right_foot_2">
@@ -16115,7 +16008,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16127,13 +16020,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.0294 -0.0399 1.52117512787486e-08</location>
+                        <location>0.0294 -0.0299 1.52117512787486e-08</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="right_foot_3">
@@ -16142,7 +16035,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16154,13 +16047,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.1499 -0.0382 6.88422621894502e-08</location>
+                        <location>0.1499 -0.0282 6.88422621894502e-08</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="right_foot_4">
@@ -16169,7 +16062,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16181,13 +16074,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.1499 -0.0382 -0.022726164905747</location>
+                        <location>0.1499 -0.0282 -0.022726164905747</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="right_foot_5">
@@ -16196,7 +16089,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16208,13 +16101,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.07 -0.0382 0.0449</location>
+                        <location>0.07 -0.0282 0.0449</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="right_foot_6">
@@ -16223,7 +16116,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16235,13 +16128,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.119 -0.0382 -6.09264804874582e-08</location>
+                        <location>0.119 -0.0282 -6.09264804874582e-08</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="right_foot_7">
@@ -16250,7 +16143,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16262,13 +16155,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_r</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.0 -0.01 0.0</location>
+                        <location>0.0 0.0 0.0</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="left_foot_1">
@@ -16277,7 +16170,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16289,13 +16182,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.0699 -0.0399 0.0286</location>
+                        <location>0.0699 -0.0299 0.0286</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="left_foot_2">
@@ -16304,7 +16197,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16316,13 +16209,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/toes_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.0294 -0.0399 -1.52117512787486e-08</location>
+                        <location>0.0294 -0.0299 -1.52117512787486e-08</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="left_foot_3">
@@ -16331,7 +16224,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16343,13 +16236,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.1499 -0.0382 -6.88422621894502e-08</location>
+                        <location>0.1499 -0.0282 -6.88422621894502e-08</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="left_foot_4">
@@ -16358,7 +16251,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16370,13 +16263,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.1499 -0.0382 0.022726164905747</location>
+                        <location>0.1499 -0.0282 0.022726164905747</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="left_foot_5">
@@ -16385,7 +16278,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16397,13 +16290,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.07 -0.0382 -0.0449</location>
+                        <location>0.07 -0.0282 -0.0449</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="left_foot_6">
@@ -16412,7 +16305,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16424,13 +16317,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.119 -0.0382 6.09264804874582e-08</location>
+                        <location>0.119 -0.0282 6.09264804874582e-08</location>
                     </Station>
                 </ExponentialContactForce>
                 <ExponentialContactForce name="left_foot_7">
@@ -16439,7 +16332,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.5</normal_viscosity>
+                    <normal_viscosity>0.0725</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16451,13 +16344,13 @@
                     <!--Initial value of the static coefficient of friction.-->
                     <initial_mu_static>0.95</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.3</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
                         <socket_parent_frame>/bodyset/calcn_l</socket_parent_frame>
                         <!--The fixed location of the station expressed in its parent frame.-->
-                        <location>0.0 -0.01 0.0</location>
+                        <location>0.0 0.0 0.0</location>
                     </Station>
                 </ExponentialContactForce>
             </objects>

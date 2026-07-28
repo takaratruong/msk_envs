@@ -103,11 +103,10 @@ class LanesEnv(MSKEnv):
             toes_out |= (torch.abs(body_pos[:, SIDE_IDX]) > self.lane_width)
 
         # Pelvis no longer facing target direction (within N degrees)
-        # pelvis_facing_direction = self._is_body_facing_direction(self.root_id)
-        # not_facing_direction = ~pelvis_facing_direction
+        pelvis_facing_direction = self._is_body_facing_direction(self.root_id)
+        not_facing_direction = ~pelvis_facing_direction
 
-        # terminated = (fallen | toes_out | not_facing_direction).float()
-        terminated = (fallen | toes_out).float()
+        terminated = (fallen | toes_out | not_facing_direction).float()
         return terminated.detach()
 
     def scene_settings(self) -> SceneSettings:

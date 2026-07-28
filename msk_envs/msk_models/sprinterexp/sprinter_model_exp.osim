@@ -16143,7 +16143,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.0725</normal_viscosity>
+                    <normal_viscosity>1.0</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16153,9 +16153,9 @@
                     <!--Velocity below which static friction conditions are triggered (0.01 m/s).-->
                     <settle_velocity>0.01</settle_velocity>
                     <!--Initial value of the static coefficient of friction.-->
-                    <initial_mu_static>0.95</initial_mu_static>
+                    <initial_mu_static>0.1</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.0</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->
@@ -16332,7 +16332,7 @@
                     <!--Shape parameters for the exponential that models the normal force: d0 (0.0065905 m), d1 (0.5336 N), d2 (1150.0/m).-->
                     <exponential_shape_parameters>0.0065905 0.53359999999999996 1150</exponential_shape_parameters>
                     <!--Viscosity in the normal direction (0.5 s/m).-->
-                    <normal_viscosity>0.0725</normal_viscosity>
+                    <normal_viscosity>1.0</normal_viscosity>
                     <!--Maximum allowed normal force (100,000.0 N).-->
                     <max_normal_force>100000</max_normal_force>
                     <!--Elasticity of the friction spring (20,000.0 N/m).-->
@@ -16342,9 +16342,9 @@
                     <!--Velocity below which static friction conditions are triggered (0.01 m/s).-->
                     <settle_velocity>0.01</settle_velocity>
                     <!--Initial value of the static coefficient of friction.-->
-                    <initial_mu_static>0.95</initial_mu_static>
+                    <initial_mu_static>0.1</initial_mu_static>
                     <!--Initial value of the kinetic coefficient of friction.-->
-                    <initial_mu_kinetic>0.5</initial_mu_kinetic>
+                    <initial_mu_kinetic>0.0</initial_mu_kinetic>
                     <!--The station at which the contact force is applied.-->
                     <Station name="station">
                         <!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame to which this station is fixed.).-->

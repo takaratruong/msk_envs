@@ -1,9 +1,11 @@
 from dataclasses import dataclass, asdict, fields, field
 from datetime import datetime
 from typing import Union
+import os
 import sys
 import tyro
 from typing_extensions import Annotated
+from pathlib import Path
 
 from msk_envs.envs.env_config import EnvConfig, EnvConfigUnion
 from msk_envs.envs.env_variants import DerivedEnv
@@ -42,12 +44,10 @@ class BaseArgs:
         Applies task defaults first, and THEN overlays the command line changes
         specified by the user.
         """
-        # Identify the model folder name from the chosen class name
-        cls_name = self.env_config.__class__.__name__
-        model_folder = cls_name.replace("EnvConfig", "").lower() or "base"
+        model_folder = Path(self.env_config.model_path).parent
         # Find starting pose
         if pose_name and hasattr(self.env_config, "starting_pose_path"):
-            overrides["starting_pose_path"] = f"../msk_models/{model_folder}/poses/{pose_name}"
+            overrides["starting_pose_path"] = os.path.join(model_folder, "poses", pose_name)
 
         # CLI-set fields
         valid_fields = {f.name for f in fields(self.env_config.__class__)}

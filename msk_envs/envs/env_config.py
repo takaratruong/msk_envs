@@ -173,6 +173,48 @@ class EnvConfigSprinter(EnvConfig):  # Setup used for publication
 
 
 @dataclass
+class EnvConfigSprinterUncalibrated(EnvConfig):  # Setup used for publication
+    model_path: str = "../msk_models/sprinter/uncalibrated_sprinter_model.osim"
+    muscle_function_path: str = "../msk_models/sprinter/sprinter_model_fn.xml"
+    contact_params_path: str = "../msk_models/sprinter/contact_params/contact_params.yaml"
+    starting_pose_path: str = "../msk_models/sprinter/poses/starting_pose_stand.yaml"
+    ignore_short_elastic_tendons: bool = True
+
+    muscle_multiplier: float = 2.0
+    muscle_v_max: float = 12.0
+    armature: float = 1e-3
+    integrator_accuracy: float = 1.0
+
+
+@dataclass
+class EnvConfigSprinterNoArms(EnvConfig):  # Setup used for publication
+    model_path: str = "../msk_models/sprinter/sprinter_model_no_arms.osim"
+    muscle_function_path: str = "../msk_models/sprinter/sprinter_model_no_arms_fn.xml"
+    contact_params_path: str = "../msk_models/sprinter/contact_params/contact_params.yaml"
+    starting_pose_path: str = "../msk_models/sprinter/poses/starting_pose_stand.yaml"
+    ignore_short_elastic_tendons: bool = True
+
+    muscle_multiplier: float = 2.0
+    muscle_v_max: float = 12.0
+    armature: float = 1e-3
+    integrator_accuracy: float = 1.0
+
+
+@dataclass
+class EnvConfigHaralabidis(EnvConfig):  # Setup used for publication
+    model_path: str = "../msk_models/haralabidis/haralabidis.osim"
+    muscle_function_path: str = "../msk_models/haralabidis/haralabidis_fn.xml"
+    contact_params_path: str = "../msk_models/haralabidis/contact_params/contact_params.yaml"
+    starting_pose_path: str = "../msk_models/haralabidis/poses/starting_pose_stand.yaml"
+    ignore_short_elastic_tendons: bool = True
+
+    muscle_multiplier: float = 2.0
+    muscle_v_max: float = 12.0
+    armature: float = 1e-3
+    integrator_accuracy: float = 1.0
+
+
+@dataclass
 class EnvConfigSprinterExp(EnvConfig):
     model_path: str = "../msk_models/sprinterexp/sprinter_model_exp.osim"
     muscle_function_path: str = "../msk_models/sprinterexp/sprinter_model_fn.xml"
@@ -224,6 +266,9 @@ class EnvConfigRajagopal(EnvConfig):
 
 EnvConfigUnion = Union[
     Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
+    Annotated[EnvConfigSprinterUncalibrated, tyro.conf.subcommand(name="sprinteruncalibrated")],
+    Annotated[EnvConfigSprinterNoArms, tyro.conf.subcommand(name="sprinternoarms")],
+    Annotated[EnvConfigHaralabidis, tyro.conf.subcommand(name="haralabidis")],
     Annotated[EnvConfigSprinterExp, tyro.conf.subcommand(name="sprinterexp")],
     Annotated[EnvConfigAthlete, tyro.conf.subcommand(name="athlete")],
     Annotated[EnvConfigRajagopal, tyro.conf.subcommand(name="rajagopal")],

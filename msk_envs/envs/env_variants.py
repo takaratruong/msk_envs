@@ -8,8 +8,8 @@ class DerivedEnv(Enum):
     SIDE_SHUFFLE = 3
     HURDLES = 4
     RUN_THE_BEND = 5
-    HOP = 5
-    CARIOCA = 6
-    VERTICAL = 7
-    LOCOMOTION = 8
-    IMITATE = 9
+    HOP = 6
+    CARIOCA = 7
+    VERTICAL = 8
+    LOCOMOTION = 9
+    IMITATE = 10

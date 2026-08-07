@@ -187,34 +187,6 @@ class EnvConfigSprinterUncalibrated(EnvConfig):  # Setup used for publication
 
 
 @dataclass
-class EnvConfigSprinterNoArms(EnvConfig):  # Setup used for publication
-    model_path: str = "../msk_models/sprinter/sprinter_model_no_arms.osim"
-    muscle_function_path: str = "../msk_models/sprinter/sprinter_model_no_arms_fn.xml"
-    contact_params_path: str = "../msk_models/sprinter/contact_params/contact_params.yaml"
-    starting_pose_path: str = "../msk_models/sprinter/poses/starting_pose_stand.yaml"
-    ignore_short_elastic_tendons: bool = True
-
-    muscle_multiplier: float = 2.0
-    muscle_v_max: float = 12.0
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigHaralabidis(EnvConfig):  # Setup used for publication
-    model_path: str = "../msk_models/haralabidis/haralabidis.osim"
-    muscle_function_path: str = "../msk_models/haralabidis/haralabidis_fn.xml"
-    contact_params_path: str = "../msk_models/haralabidis/contact_params/contact_params.yaml"
-    starting_pose_path: str = "../msk_models/haralabidis/poses/starting_pose_stand.yaml"
-    ignore_short_elastic_tendons: bool = True
-
-    muscle_multiplier: float = 2.0
-    muscle_v_max: float = 12.0
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
 class EnvConfigSprinterExp(EnvConfig):
     model_path: str = "../msk_models/sprinterexp/sprinter_model_exp.osim"
     muscle_function_path: str = "../msk_models/sprinterexp/sprinter_model_fn.xml"
@@ -229,47 +201,8 @@ class EnvConfigSprinterExp(EnvConfig):
     integrator_accuracy: float = 0.01
 
 
-@dataclass
-class EnvConfigAthlete(EnvConfig):
-    model_path: str = "../msk_models/athlete/athlete.osim"
-    muscle_function_path: str = "../msk_models/athlete/athlete_fn.xml"
-    contact_params_path: str = "../msk_models/athlete/contact_params/contact_params_generic.yaml"
-    starting_pose_path: str = "../msk_models/athlete/poses/starting_pose_run.yaml"
-    ignore_short_elastic_tendons: bool = True
-
-    # Tuned passive forces using Millard curves
-    muscle_contraction_dynamics: bolt.ContractionType = bolt.ContractionType.DGF_MILLARD_PASSIVE
-
-    muscle_multiplier: float = 2.0
-
-    armature: float = 1e-3
-    integrator_accuracy: float = 1.0
-
-
-@dataclass
-class EnvConfigRajagopal(EnvConfig):
-    model_path: str = "../msk_models/rajagopal/RajagopalLaiUhlrich2023.osim"
-    muscle_function_path: str = "../msk_models/rajagopal/RajagopalLaiUhlrich2023_fn.xml"
-    contact_params_path: str = "../msk_models/rajagopal/contact_params/contact_params_generic.yaml"
-    starting_pose_path: str = "../msk_models/rajagopal/poses/starting_pose_run.yaml"
-    ignore_short_elastic_tendons: bool = False
-
-    enforce_ground_contact: bool = False
-
-    muscle_contraction_dynamics: bolt.ContractionType = bolt.ContractionType.DGF_MILLARD_PASSIVE
-
-    muscle_multiplier: float = 1.0
-    muscle_v_max: float = 10.0
-    armature: float = 1e-3
-    integrator_accuracy: float = 0.01
-
-
 EnvConfigUnion = Union[
     Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
     Annotated[EnvConfigSprinterUncalibrated, tyro.conf.subcommand(name="sprinteruncalibrated")],
-    Annotated[EnvConfigSprinterNoArms, tyro.conf.subcommand(name="sprinternoarms")],
-    Annotated[EnvConfigHaralabidis, tyro.conf.subcommand(name="haralabidis")],
     Annotated[EnvConfigSprinterExp, tyro.conf.subcommand(name="sprinterexp")],
-    Annotated[EnvConfigAthlete, tyro.conf.subcommand(name="athlete")],
-    Annotated[EnvConfigRajagopal, tyro.conf.subcommand(name="rajagopal")],
 ]

@@ -1,0 +1,53 @@
+{
+  "planPath": "docs/superpowers/plans/2026-08-28-muscle-to-torque-dagger.md",
+  "tasks": [
+    {
+      "id": 1,
+      "subject": "Task 0: Sprinter torque-twin model + config",
+      "status": "pending",
+      "description": "**Goal:** Produce sprinter_torque.osim (sprinter + 25 ActivationCoordinateActuators, muscles retained), optimal_force sized from teacher torques, register env config. **Verify:** cd /home/ubuntu/bolt && python add_sprinter_torque_actuators.py -> reload muscles=136 actuators=25. Full steps in plan doc Task 0.",
+      "description_metadata": {"files": ["/home/ubuntu/bolt/add_sprinter_torque_actuators.py", "/home/ubuntu/msk_envs/msk_envs/envs/env_config.py"], "verifyCommand": "cd /home/ubuntu/bolt && python add_sprinter_torque_actuators.py", "acceptanceCriteria": ["output osim loads with 136 muscles and 25 actuators", "optimal_force sized as 1.2x teacher max|ufrc_muscle| per dof", "env-config:sprintertorque resolves"], "modelTier": "standard"}
+    },
+    {
+      "id": 2,
+      "subject": "Task 1: Teacher wrapper + torque label",
+      "status": "pending",
+      "blockedBy": [1],
+      "description": "**Goal:** distill/teacher.py loads muscle checkpoint; returns teacher muscle excitations + 25-DoF torque label from ufrc_muscle. **Verify:** python -m msk_envs.distill.teacher -> label shape (64,25) finite. Full steps in plan doc Task 1.",
+      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/teacher.py", "/home/ubuntu/msk_envs/msk_envs/distill/dof_utils.py", "/home/ubuntu/msk_envs/msk_envs/distill/__init__.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.teacher", "acceptanceCriteria": ["Teacher.action returns num_muscles-dim excitations", "torque_label returns (n_envs,25) finite tensor sliced from ufrc_muscle"], "modelTier": "standard"}
+    },
+    {
+      "id": 3,
+      "subject": "Task 2: Torque student + conversion",
+      "status": "pending",
+      "blockedBy": [2],
+      "description": "**Goal:** distill/student.py MLP obs->25 torques + torque<->excitation conversion + apply-to-env. **Verify:** python -m msk_envs.distill.student -> roundtrip max err <1e-5, applied step ok. Full steps in plan doc Task 2.",
+      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/student.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.student", "acceptanceCriteria": ["Student(obs) returns (n_envs,25)", "torque_to_excitation round-trips within clamp", "apply() steps env without error"], "modelTier": "standard"}
+    },
+    {
+      "id": 4,
+      "subject": "Task 3: DAgger loop orchestrator",
+      "status": "pending",
+      "blockedBy": [3],
+      "description": "**Goal:** distill/dagger.py DAgger loop: beta-mixed rollouts, teacher-labeled torques via ufrc_muscle, aggregate + MSE refit; save student.pt + metrics.json. **Verify:** python -m msk_envs.distill.dagger --rounds 8 -> final val_mse < 0.6x round-0, SAVED student.pt. Full steps in plan doc Task 3.",
+      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/dagger.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.dagger --rounds 8", "acceptanceCriteria": ["8 rounds run, buffer grows each round", "final val_mse < 0.6x round-0 val_mse", "saves student.pt + metrics.json"], "modelTier": "frontier"}
+    },
+    {
+      "id": 5,
+      "subject": "Task 4: Rollout-fidelity eval + BC ablation",
+      "status": "pending",
+      "blockedBy": [4],
+      "description": "**Goal:** distill/evaluate.py rollout fidelity (upright/speed_err/drift) for teacher+dagger+bc; PHASE_A_PASS if student upright>=0.7 and speed_err<=1.5x teacher. USER-ORDERED GATE — non-skippable; close only after a real GPU run captures the metrics table + PHASE_A verdict. **Verify:** python -m msk_envs.distill.evaluate. Full steps in plan doc Task 4.",
+      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/evaluate.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.evaluate", "acceptanceCriteria": ["reports upright/speed_err/drift for teacher+dagger+bc over 256 envs", "prints PHASE_A_PASS or PHASE_A_FAIL from upright>=0.7 and speed_err<=1.5x teacher", "DAgger-vs-BC comparison printed"], "modelTier": "frontier", "userGate": true, "tags": ["user-gate"], "requireEvidenceTokens": [["teacher"], ["dagger"], ["bc"]]}
+    },
+    {
+      "id": 6,
+      "subject": "Task 5: Render distilled student to dashboard",
+      "status": "pending",
+      "blockedBy": [5],
+      "description": "**Goal:** distill/record.py records student rollout via LoggedSim; render_trajectory.py -> mp4; add dashboard card; open Firefox on :1. **Verify:** ls dagger_student.mp4 non-empty + screenshot of :1 shows card. Full steps in plan doc Task 5.",
+      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/record.py", "/home/ubuntu/bolt_baselines/dashboard.html"], "verifyCommand": "ls -la /home/ubuntu/bolt_baselines/videos/dagger_student.mp4", "acceptanceCriteria": ["student rollout rendered to mp4", "dashboard shows student card and opens in Firefox on :1"], "modelTier": "standard"}
+    }
+  ],
+  "lastUpdated": "2026-08-28"
+}

@@ -173,6 +173,13 @@ class EnvConfigSprinter(EnvConfig):  # Setup used for publication
 
 
 @dataclass
+class EnvConfigSprinterTorque(EnvConfigSprinter):
+    """Sprinter skeleton carrying BOTH muscles and 25 coordinate-actuators.
+    Teacher drives muscles; torque student drives actuators. See distill/ + spec."""
+    model_path: str = "../msk_models/sprinter/sprinter_torque.osim"
+
+
+@dataclass
 class EnvConfigSprinterUncalibrated(EnvConfig):  # Setup used for publication
     model_path: str = "../msk_models/sprinter/uncalibrated_sprinter_model.osim"
     muscle_function_path: str = "../msk_models/sprinter/sprinter_model_fn.xml"
@@ -201,8 +208,49 @@ class EnvConfigSprinterExp(EnvConfig):
     integrator_accuracy: float = 0.01
 
 
+@dataclass
+class EnvConfigSconeH0918(EnvConfig):
+    """SCONE H0918 planar biped (18 muscles, 9 DoF), bridged from OpenSim into Bolt.
+    Uses geometry-based muscle paths (no fitted function-based paths) and Bolt's
+    default contact model (the model's HuntCrossley/HalfSpace were stripped on import)."""
+    model_path: str = "../msk_models/sconeh0918/H0918M_bolt.osim"
+    starting_pose_path: str = "../msk_models/sconeh0918/poses/starting_pose_stand.yaml"
+    use_function_based_path: bool = False
+    use_specified_contact_params: bool = False
+    ignore_short_elastic_tendons: bool = True
+    integrator_accuracy: float = 1.0
+    armature: float = 1e-3
+
+
+@dataclass
+class EnvConfigG1Muscle(EnvConfig):
+    """Unitree G1 leg retargeted to a muscle model (H0918 template rescaled to G1
+    proportions/masses). 18 muscles, geometry-based paths, Bolt's contact model.
+    Standing pose tuned for G1's short legs (pelvis_ty=0.65)."""
+    model_path: str = "../msk_models/g1muscle/g1_muscle_h0918.osim"
+    starting_pose_path: str = "../msk_models/g1muscle/poses/starting_pose_stand.yaml"
+    use_function_based_path: bool = False
+    use_specified_contact_params: bool = False
+    ignore_short_elastic_tendons: bool = True
+    integrator_accuracy: float = 1.0
+    armature: float = 1e-3
+
+
+@dataclass
+class EnvConfigG1MuscleFn(EnvConfigG1Muscle):
+    """G1 muscle model but with fitted function-based muscle paths (via OpenSim
+    PolynomialPathFitter, see bolt/fit_g1_muscle_functions.py). Same physics as
+    EnvConfigG1Muscle; only the muscle path representation differs."""
+    use_function_based_path: bool = True
+    muscle_function_path: str = "../msk_models/g1muscle/g1_muscle_h0918_fn.xml"
+
+
 EnvConfigUnion = Union[
     Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
+    Annotated[EnvConfigSprinterTorque, tyro.conf.subcommand(name="sprintertorque")],
     Annotated[EnvConfigSprinterUncalibrated, tyro.conf.subcommand(name="sprinteruncalibrated")],
     Annotated[EnvConfigSprinterExp, tyro.conf.subcommand(name="sprinterexp")],
+    Annotated[EnvConfigSconeH0918, tyro.conf.subcommand(name="sconeh0918")],
+    Annotated[EnvConfigG1Muscle, tyro.conf.subcommand(name="g1muscle")],
+    Annotated[EnvConfigG1MuscleFn, tyro.conf.subcommand(name="g1musclefn")],
 ]

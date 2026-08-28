@@ -39,24 +39,28 @@ def build_teacher_obs_cols(env, device):
     """Column indices mapping the 359-dim SprinterTorque obs -> 336-dim base-Sprinter obs.
 
     The teacher checkpoint is a *base* Sprinter policy (obs dim 336, action dim 138 = 136 muscle
-    excitations + 2 mtp-motor excitations). The SprinterTorque twin emits obs dim 359, because its
-    obs layout carries a larger actuator-activation block:
-        [ cmd(2) | muscle_act(136) | muscle_fiber(136) | actuator_act(N) | qpos(29) | qvel(31) ]
+    excitations + 2 mtp-motor excitations). Both Sprinter and SprinterTorque are SprintingEnv, which
+    has NO command prefix (verified: hasattr(env,'command_vel') is False; _get_obs starts directly
+    with muscle activations). The obs layout is:
+        [ muscle_act(136) | muscle_fiber(136) | actuator_act(N) | qpos(31) | qvel(31) ]
     where N = 2 in the base env (mtp_angle_r_motor, mtp_angle_l_motor) but N = 25 in the twin
-    (the 25 coordinate actuators). Every other block is identical between the two models.
+    (the 25 coordinate actuators). Every other block is identical between the two models:
+        - base:  136 + 136 +  2 + 31 + 31 = 336
+        - twin:  136 + 136 + 25 + 31 + 31 = 359
 
     So to feed the teacher, we keep everything EXCEPT the 25-actuator block, and re-insert just the
     two mtp-motor columns (in the base env's order: act_mtp_angle_r, act_mtp_angle_l). This drops the
     23 non-mtp actuator-activation columns that the base teacher never saw. The kept columns are:
-        - cmd(2) + muscle_act(136) + muscle_fiber(136)  (everything before the actuator block)
-        - act_mtp_angle_r, act_mtp_angle_l              (the 2 columns the teacher expects)
-        - qpos(29) + qvel(31)                           (everything after the actuator block)
-    Total = 274 + 2 + 60 = 336.
+        - muscle_act(136) + muscle_fiber(136)  (everything before the actuator block)
+        - act_mtp_angle_r, act_mtp_angle_l     (the 2 columns the teacher expects)
+        - qpos(31) + qvel(31)                  (everything after the actuator block)
+    Total = 272 + 2 + 62 = 336.
 
     Returns a LongTensor of length 336. Asserts the result length == 336.
     """
-    cmd_dim = 2
-    act_start = cmd_dim + 2 * env.num_muscles
+    # SprintingEnv obs has NO command prefix; the actuator-activation block starts right after
+    # muscle activations (136) + muscle fiber lengths (136).
+    act_start = 2 * env.num_muscles
     tail_start = act_start + env.num_actuators
     al = env.actuator_id_lookup
     mtp_cols = [act_start + al["act_mtp_angle_r"], act_start + al["act_mtp_angle_l"]]

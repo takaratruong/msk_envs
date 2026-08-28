@@ -1,0 +1,28 @@
+{
+  "teacher": {
+    "upright_fraction": 0.30608072876930237,
+    "fwd_speed": 1.7148550748825073,
+    "speed_err": 3.109830856323242,
+    "drift": 0.0727769136428833
+  },
+  "dagger": {
+    "upright_fraction": 0.04305989295244217,
+    "fwd_speed": -0.22326719760894775,
+    "speed_err": 1.822198748588562,
+    "drift": 0.047077059745788574
+  },
+  "bc": {
+    "upright_fraction": 0.06039062514901161,
+    "fwd_speed": -0.24861690402030945,
+    "speed_err": 1.847548484802246,
+    "drift": 0.08842552453279495
+  },
+  "pass": false,
+  "teacher_ref_speed": 1.5989315509796143,
+  "n_envs": 256,
+  "steps": 300,
+  "gate": {
+    "upright_min": 0.7,
+    "speed_err_max_mult": 1.5
+  }
+}

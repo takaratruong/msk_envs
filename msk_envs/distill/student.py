@@ -28,8 +28,14 @@ def torque_to_excitation(tau, optimal_force):
 
 def apply(env, tau, optimal_force, act_perm=None, base_action=None):
     """
-    Write student torques into env actuator excitations and step.
-    Muscle slice left at blank (min activation).
+    Write student torques into env actuator excitations and step, with muscles fully OFF.
+
+    Pure torque control: the muscle slice is forced to raw -1 (excitation 0), NOT left at
+    the blank default. get_blank_actions() returns zeros, and the env maps raw 0 -> excitation
+    0.5, i.e. all muscles held at ~50% tone. That is wrong for a torque student: the goal is a
+    policy that controls the body with joint torques ALONE so it can transfer to a muscle-less
+    motor robot (Unitree G1). Leaning on 50% muscle tone would not transfer and would muddy the
+    fidelity comparison. Setting the muscle slice to -1 makes muscles genuinely min-activation.
 
     Args:
         env: The environment instance
@@ -52,6 +58,7 @@ def apply(env, tau, optimal_force, act_perm=None, base_action=None):
     raw = exc * 2.0 - 1.0
     if act_perm is not None:
         raw = raw.index_select(1, act_perm)  # route each torque to its actuator slot
+    a[:, :env.num_muscles] = -1.0            # muscles OFF (raw -1 -> excitation 0)
     a[:, env.num_muscles:] = raw
     return env.step(a)
 

@@ -76,6 +76,10 @@ def rollout_and_label(env, teacher, student, of, beta, horizon, device, teacher_
                 tau = student(obs)                       # (n, 25) in `names` order
             raw = torque_to_excitation(tau, of) * 2.0 - 1.0
             a2 = env.get_blank_actions()
+            # Muscles OFF: raw -1 -> excitation 0. Pure torque control (no 50% muscle tone),
+            # so this student can transfer to a muscle-less motor robot (Unitree G1) and Task 4's
+            # fidelity comparison is clean. get_blank_actions() returns zeros (raw 0 -> exc 0.5).
+            a2[:, :n_musc] = -1.0
             a2[:, n_musc:] = raw.index_select(1, act_perm)  # route each torque to its actuator
             obs, _, _, _, _ = env.step(a2)
     return torch.cat(O), torch.cat(T)

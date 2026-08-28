@@ -7,8 +7,12 @@ faithfully it reproduces the muscle teacher's sprint gait.
 The brief assumed a LocomotionEnv with `_root_vel_xy()` + `command_vel`. In fact SprinterTorque
 is a SprintingEnv (LanesEnv branch): a MAX-forward-speed sprint task with NO commanded velocity.
 So the fidelity metrics are defined for the sprint task as:
-  - upright_fraction : mean fraction of the episode each env stays upright / in-lane / facing fwd
-                       (env._get_terminated(): fallen OR toes out of lane OR pelvis not facing fwd).
+  - upright_fraction : mean fraction of the episode each env stays UPRIGHT (not fallen) before its
+                       first fall, via has_fallen(). NOTE we deliberately do NOT use the env's full
+                       _get_terminated() (fallen OR out-of-lane OR not-facing-fwd): the lane/facing
+                       conditions are far stricter than "upright" and the healthy teacher trips them
+                       while never falling, so full-termination latching mis-scores the teacher at
+                       ~0.27 vs its true ~1.0 not-fallen rate. See run_metrics docstring.
   - fwd_speed        : mean forward (FWD) root velocity over the alive portion.
   - speed_err        : mean |fwd_speed - target| over the alive portion, where `target` is the
                        TEACHER's own achieved mean sprint speed. This is the natural sprint-fidelity
@@ -42,8 +46,11 @@ from msk_envs.envs.env_config import EnvConfigSprinterTorque
 from msk_envs.distill.teacher import Teacher
 from msk_envs.distill import student as student_mod
 from msk_envs.distill.student import Student
-from msk_envs.distill.dof_utils import joint_dof_indices, build_actuator_perm
+from msk_envs.distill.dof_utils import (
+    joint_dof_indices, build_actuator_perm, build_teacher_obs_cols,
+)
 from msk_envs.utils.global_params import FWD_IDX, SIDE_IDX
+from msk_envs.utils.reward_lib import has_fallen
 
 CKPT = "/home/ubuntu/msk_envs/models/baseline_sprint_2026-08-27_20-59/baseline_sprint_2026-08-27_20-59_149000.pt"
 STUDENT_PT = "/home/ubuntu/msk_envs/models/dagger_sprint/student.pt"
@@ -55,35 +62,6 @@ BLANK_REWARD_LAMBDAS = {
     "lambda_vel": 0.0, "lambda_mid_lane": 0.0, "lambda_spring": 0.0,
     "lambda_damper": 0.0, "lambda_limit": 0.0, "lambda_muscle_passive": 0.0,
 }
-
-
-def build_teacher_obs_cols_fixed(env, device):
-    """359-dim SprinterTorque obs -> 336-dim base-Sprinter obs, CORRECTED for the sprint task.
-
-    NOTE — bug found in Task 4. The shared dof_utils.build_teacher_obs_cols assumes the obs
-    layout begins with a 2-dim command block (act_start = 2 + 2*num_muscles). That is the
-    LocomotionEnv layout. SprinterTorque, however, is a SprintingEnv (LanesEnv branch) whose
-    _get_obs() has NO command prefix:
-        [ muscle_act(136) | muscle_fiber(136) | actuator_act(N) | qpos | qvel ]
-    Verified empirically: obs[:, :num_muscles] == env.muscle_activations exactly, and
-    obs[:, 2*num_muscles : 2*num_muscles+num_actuators] == env.actuator_activations exactly.
-
-    The shared adapter is therefore off by 2 columns. It still returns length 336 (so its only
-    assert passes), but feeds the teacher the WRONG 336 features, and the base-Sprinter teacher
-    collapses in the twin (fwd_speed -0.5, upright 0.04) despite sprinting fine natively
-    (fwd_speed +2.16). With this corrected adapter the teacher sprints in the twin
-    (fwd_speed +1.54, upright 0.29). We keep this fix local to evaluate.py (task constraint:
-    modify only distill/evaluate.py); the same bug corrupts DAgger training and should be fixed
-    upstream in dof_utils.
-    """
-    act_start = 2 * env.num_muscles                 # no command prefix in the sprint task
-    tail_start = act_start + env.num_actuators
-    al = env.actuator_id_lookup
-    mtp_cols = [act_start + al["act_mtp_angle_r"], act_start + al["act_mtp_angle_l"]]
-    obs_dim = env._get_obs().shape[1]
-    cols = list(range(act_start)) + mtp_cols + list(range(tail_start, obs_dim))
-    assert len(cols) == 336, f"teacher obs adapter produced {len(cols)} cols, expected 336"
-    return torch.tensor(cols, device=device, dtype=torch.long)
 
 
 def _fwd_speed(env):
@@ -101,8 +79,21 @@ def run_metrics(env, controller, is_teacher, of=None, act_perm=None,
       student : muscles forced OFF (raw -1) and torques permuted via act_perm into the
                 actuator slice — identical to the training-time student.apply() convention.
 
-    Metrics accumulate only while an env is still alive (before it first terminates); once an
-    env terminates the auto-reset scrambles its state, so the alive mask zeroes it out.
+    --- Why we step manually instead of env.step() ---
+    env.step() -> rl_step() AUTO-RESETS any env whose _get_terminated() fires, and for the
+    sprint task _get_terminated() = (fallen OR toes-out-of-lane OR pelvis-not-facing-forward).
+    Two problems for fidelity metrics: (1) the lane/facing conditions are far stricter than
+    "still upright" — the healthy teacher trips them constantly while never actually falling,
+    so latching on the full termination scores the teacher ~0.27 upright, contradicting its
+    true ~1.0 not-fallen rate; (2) after an auto-reset the env state is scrambled, so any state
+    read post-step() is unreliable.
+
+    So we drive the physics directly (pre_sim_step -> launch_sim_step, the teacher.py smoke-test
+    path) with NO auto-reset, and define "upright" as NOT-FALLEN via has_fallen() on the live
+    post-physics state. `upright_fraction` is then the mean fraction of the episode each env
+    stays upright before its first fall — the "upright duration" the brief asks for and the
+    semantic the coordinator's sanity check (teacher ~0.9+) uses. Once an env falls, the alive
+    mask latches it off for the rest of the episode.
 
     target_speed: if given, speed_err = mean_alive |fwd_speed - target_speed|; else speed_err
                   is left at 0 (used for the teacher's first pass to measure its mean speed).
@@ -123,14 +114,22 @@ def run_metrics(env, controller, is_teacher, of=None, act_perm=None,
         if is_teacher:
             exc = controller(obs.index_select(1, teacher_cols))[:, :n_musc]
             a[:, :n_musc] = exc
-            _, _, term, _, _ = env.step(a)
         else:
             with torch.no_grad():
                 tau = controller(obs)                      # (n, 25) in `names` order
             # Match student.apply exactly: muscles OFF, torque->excitation, permute to slice.
-            _, _, term, _, _ = student_mod.apply(env, tau, of, act_perm=act_perm)
+            exc = student_mod.torque_to_excitation(tau, of) * 2.0 - 1.0
+            a[:, :n_musc] = -1.0                           # muscles OFF (raw -1 -> excitation 0)
+            a[:, n_musc:] = exc.index_select(1, act_perm)  # route each torque to its actuator
 
-        alive = alive * (1.0 - term.float())
+        # Manual step, NO auto-reset (see docstring). Mirrors teacher.py's smoke path.
+        env.pre_sim_step(a)
+        env.launch_sim_step()
+        env.update_metrics()
+
+        # Latch on falling only (true "upright"), on the live pre-reset state.
+        fallen = has_fallen(root_pos=env.root_pos, ground_rotation=env.ground_rotation).float()
+        alive = alive * (1.0 - fallen)
         upright += alive
         v = _fwd_speed(env)
         fwd_sum += v * alive
@@ -198,7 +197,7 @@ def main():
     names, _ = joint_dof_indices(env)
     teacher = Teacher(CKPT, env, dev)
     assert names == teacher.names, "label order (joint_dof_indices) != teacher.names"
-    teacher_cols = build_teacher_obs_cols_fixed(env, dev)  # 359-obs -> 336-obs (bug-fixed)
+    teacher_cols = build_teacher_obs_cols(env, dev)   # 359-obs -> 336-obs teacher adapter (shared)
     act_perm = build_actuator_perm(env, names, dev)   # student(names) -> actuator-slice order
     n_obs = env.reset().shape[1]
     steps = int(round(env.max_episode_duration / env.delta_t))

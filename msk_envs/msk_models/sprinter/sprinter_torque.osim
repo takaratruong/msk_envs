@@ -15282,31 +15282,11 @@
 					<!--Damping constant.-->
 					<viscosity>0.01</viscosity>
 				</SpringGeneralizedForce>
-				<ActivationCoordinateActuator name="mtp_angle_r_motor">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>mtp_angle_r</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>-40</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.01</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
-				<ActivationCoordinateActuator name="mtp_angle_l_motor">
-					<!--Name of the generalized coordinate to which the actuator applies.-->
-					<coordinate>mtp_angle_l</coordinate>
-					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>-40</optimal_force>
-					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
-					<activation_time_constant>0.01</activation_time_constant>
-					<!--Value of activation in the default state (default: 0.5).-->
-					<default_activation>0.5</default_activation>
-				</ActivationCoordinateActuator>
 				<ActivationCoordinateActuator name="act_hip_flexion_r">
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>hip_flexion_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>590.09201660156248</optimal_force>
+					<optimal_force>537.64398193359375</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15316,7 +15296,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>hip_adduction_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>217.49884643554688</optimal_force>
+					<optimal_force>274.26143188476561</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15326,7 +15306,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>hip_rotation_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>194.41235961914063</optimal_force>
+					<optimal_force>181.34965209960936</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15336,7 +15316,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>knee_angle_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>534.77651367187502</optimal_force>
+					<optimal_force>545.2963989257812</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15346,7 +15326,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>ankle_angle_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>539.99102783203125</optimal_force>
+					<optimal_force>568.5791015625</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15356,7 +15336,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>subtalar_angle_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>139.52082824707031</optimal_force>
+					<optimal_force>139.41454467773437</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15366,7 +15346,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>30.970756530761719</optimal_force>
+					<optimal_force>27.309860229492188</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15376,7 +15356,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>hip_flexion_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>547.09771728515625</optimal_force>
+					<optimal_force>541.36713867187495</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15386,7 +15366,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>hip_adduction_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>241.77095947265624</optimal_force>
+					<optimal_force>304.97239379882814</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15396,7 +15376,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>hip_rotation_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>442.62583007812498</optimal_force>
+					<optimal_force>477.23983154296872</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15406,7 +15386,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>knee_angle_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>561.29989013671877</optimal_force>
+					<optimal_force>542.69696044921875</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15416,7 +15396,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>ankle_angle_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>554.8574340820312</optimal_force>
+					<optimal_force>575.36506347656245</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15426,7 +15406,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>subtalar_angle_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>160.49241943359374</optimal_force>
+					<optimal_force>153.43560791015625</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15436,7 +15416,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>mtp_angle_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>33.427942657470702</optimal_force>
+					<optimal_force>32.985516357421872</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15446,7 +15426,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>torso_extension</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>363.45834960937498</optimal_force>
+					<optimal_force>376.5977783203125</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15456,7 +15436,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>torso_bending</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>449.48935546874998</optimal_force>
+					<optimal_force>444.65544433593749</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15466,7 +15446,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>torso_rotation</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>210.38133544921874</optimal_force>
+					<optimal_force>282.53770751953124</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15476,7 +15456,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>shoulder_flexion_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>344.95975341796873</optimal_force>
+					<optimal_force>319.77626953124997</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15486,7 +15466,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>shoulder_abduction_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>186.7188720703125</optimal_force>
+					<optimal_force>187.30036010742188</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15496,7 +15476,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>shoulder_rotation_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>136.50213317871092</optimal_force>
+					<optimal_force>152.92824096679686</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15506,7 +15486,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>shoulder_flexion_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>344.22495117187498</optimal_force>
+					<optimal_force>317.02679443359375</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15516,7 +15496,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>shoulder_abduction_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>229.79080810546876</optimal_force>
+					<optimal_force>227.18997802734376</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15526,7 +15506,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>shoulder_rotation_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>141.17694396972655</optimal_force>
+					<optimal_force>148.31006469726563</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15536,7 +15516,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>elbow_flex_r</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>174.93825073242186</optimal_force>
+					<optimal_force>175.03154296874999</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->
@@ -15546,7 +15526,7 @@
 					<!--Name of the generalized coordinate to which the actuator applies.-->
 					<coordinate>elbow_flex_l</coordinate>
 					<!--The maximum generalized force produced by this actuator.-->
-					<optimal_force>134.34330139160156</optimal_force>
+					<optimal_force>134.54514770507811</optimal_force>
 					<!--Larger value means activation changes more slowly (units: seconds; default: 0.01 seconds).-->
 					<activation_time_constant>0</activation_time_constant>
 					<!--Value of activation in the default state (default: 0.5).-->

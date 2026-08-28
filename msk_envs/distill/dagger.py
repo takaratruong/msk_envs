@@ -36,7 +36,7 @@ from msk_envs.envs.env_factory import EnvFactory
 from msk_envs.envs.env_config import EnvConfigSprinterTorque
 from msk_envs.distill.teacher import Teacher
 from msk_envs.distill.student import Student, torque_to_excitation
-from msk_envs.distill.dof_utils import joint_dof_indices
+from msk_envs.distill.dof_utils import joint_dof_indices, build_actuator_perm, build_teacher_obs_cols
 
 CKPT = "/home/ubuntu/msk_envs/models/baseline_sprint_2026-08-27_20-59/baseline_sprint_2026-08-27_20-59_149000.pt"
 OPTFORCE = "/home/ubuntu/msk_envs/msk_envs/msk_models/sprinter/sprinter_torque_optforce.json"
@@ -54,37 +54,6 @@ def read_optimal_force(names, device):
     with open(OPTFORCE) as f:
         of_map = json.load(f)
     return torch.tensor([of_map[n] for n in names], device=device, dtype=torch.float32)
-
-
-def build_teacher_obs_cols(env, device):
-    """Column indices that map the 359-dim twin obs to the 336-dim base-Sprinter obs the
-    teacher was trained on. Obs layout: [cmd(2) | musc_act(136) | musc_fiber(136) |
-    actuator_act(N) | qpos(29) | qvel(31)]. The base env has 2 mtp motors in that block;
-    the twin has 25 coordinate actuators. Keep the two mtp-motor columns (base order:
-    mtp_angle_r_motor, mtp_angle_l_motor) and drop the rest of the actuator block."""
-    cmd_dim = 2
-    act_start = cmd_dim + 2 * env.num_muscles
-    tail_start = act_start + env.num_actuators
-    al = env.actuator_id_lookup
-    # Base Sprinter actuator order is (mtp_angle_r_motor, mtp_angle_l_motor); the twin names
-    # them act_mtp_angle_r / act_mtp_angle_l. Preserve that order.
-    mtp_cols = [act_start + al["act_mtp_angle_r"], act_start + al["act_mtp_angle_l"]]
-    obs_dim = env._get_obs().shape[1]
-    cols = list(range(act_start)) + mtp_cols + list(range(tail_start, obs_dim))
-    return torch.tensor(cols, device=device, dtype=torch.long)
-
-
-def build_actuator_perm(env, names, device):
-    """Permutation `perm` s.t. for actuator slot p, perm[p] is the student output column
-    (index into `names`) whose torque belongs on that actuator. Writing
-    excitations[:, p] = raw[:, perm[p]] routes each torque to the correct joint."""
-    slot_names = [None] * env.num_actuators
-    for k, v in env.actuator_id_lookup.items():
-        slot_names[v] = k[len("act_"):]      # strip the "act_" prefix -> joint-DoF name
-    name_to_col = {n: i for i, n in enumerate(names)}
-    perm = [name_to_col[sn] for sn in slot_names]
-    assert sorted(perm) == list(range(len(names))), "actuator<->name permutation is not a bijection"
-    return torch.tensor(perm, device=device, dtype=torch.long)
 
 
 def rollout_and_label(env, teacher, student, of, beta, horizon, device, teacher_cols, act_perm):

@@ -26,24 +26,32 @@ def torque_to_excitation(tau, optimal_force):
     return torch.clamp(tau / (2.0 * optimal_force) + 0.5, 0.0, 1.0)
 
 
-def apply(env, tau, optimal_force, base_action=None):
+def apply(env, tau, optimal_force, act_perm=None, base_action=None):
     """
     Write student torques into env actuator excitations and step.
     Muscle slice left at blank (min activation).
 
     Args:
         env: The environment instance
-        tau: Torque targets tensor (n_envs, n_dof)
-        optimal_force: Optimal force per DoF (n_dof,)
+        tau: Torque targets tensor (n_envs, n_dof), in `names` (joint_dof_indices) order
+        optimal_force: Optimal force per DoF (n_dof,), in the SAME `names` order
+        act_perm: Optional LongTensor from dof_utils.build_actuator_perm routing the
+            `names`-ordered vector into the env's actuator-slice order. REQUIRED for real
+            use: the env actuator slice (actuator_id_lookup order) does NOT match `names`
+            order, so without it torques land on the wrong joints. If None, the raw vector
+            is written straight through (back-compat only; correct only if the two orders
+            already coincide).
         base_action: Optional base action tensor to modify (n_envs, action_dim)
 
     Returns:
-        Tuple of (terminated, obs) from env.step()
+        Whatever env.step() returns.
     """
     a = base_action if base_action is not None else env.get_blank_actions()
     exc = torque_to_excitation(tau, optimal_force)  # [0,1]
     # env maps raw_action [-1,1] -> excitation (a+1)/2 for actuators; pre-invert to raw:
     raw = exc * 2.0 - 1.0
+    if act_perm is not None:
+        raw = raw.index_select(1, act_perm)  # route each torque to its actuator slot
     a[:, env.num_muscles:] = raw
     return env.step(a)
 
@@ -81,7 +89,10 @@ if __name__ == "__main__":
         cuda_graph=True,
         device=dev
     )
+    from msk_envs.distill.dof_utils import joint_dof_indices, build_actuator_perm
     obs = env.reset()
     s = Student(obs.shape[1], device=dev)
-    apply(env, s(obs), of)
-    print("applied step ok")
+    names, _ = joint_dof_indices(env)
+    act_perm = build_actuator_perm(env, names, dev)  # names-order -> actuator-slice order
+    apply(env, s(obs), of, act_perm=act_perm)
+    print("applied step ok (with actuator permutation)")

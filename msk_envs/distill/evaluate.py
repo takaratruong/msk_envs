@@ -7,18 +7,18 @@ faithfully it reproduces the muscle teacher's sprint gait.
 The brief assumed a LocomotionEnv with `_root_vel_xy()` + `command_vel`. In fact SprinterTorque
 is a SprintingEnv (LanesEnv branch): a MAX-forward-speed sprint task with NO commanded velocity.
 So the fidelity metrics are defined for the sprint task as:
-  - upright_fraction : mean fraction of the episode each env stays UPRIGHT (not fallen) before its
-                       first fall, via has_fallen(). NOTE we deliberately do NOT use the env's full
-                       _get_terminated() (fallen OR out-of-lane OR not-facing-fwd): the lane/facing
-                       conditions are far stricter than "upright" and the healthy teacher trips them
-                       while never falling, so full-termination latching mis-scores the teacher at
-                       ~0.27 vs its true ~1.0 not-fallen rate. See run_metrics docstring.
-  - fwd_speed        : mean forward (FWD) root velocity over the alive portion.
-  - speed_err        : mean |fwd_speed - target| over the alive portion, where `target` is the
-                       TEACHER's own achieved mean sprint speed. This is the natural sprint-fidelity
-                       target: "does the torque student sprint at the muscle teacher's speed?" The
-                       teacher's own speed_err (its fluctuation about its mean) is the baseline the
-                       gate's 1.5x is measured against.
+  - upright_fraction : mean PER-STEP SURVIVAL rate — fraction of steps on which the env did not
+                       terminate (via env.step auto-reset). Standard locomotion survival metric;
+                       matches the coordinator's sanity numbers (healthy teacher ~0.99). See
+                       run_metrics docstring.
+  - fwd_speed        : mean forward (FWD) root velocity over the alive (surviving) steps.
+  - speed_err        : |this controller's mean fwd_speed - teacher's mean fwd_speed|. A gap of
+                       MEANS, not a per-step |v-target|: sprint velocity oscillates per stride and
+                       reset envs ramp from standstill, so per-step deviation ~= target magnitude
+                       even for the teacher, which would make the 1.5x gate trivially passable and
+                       let a backward-drifting student false-PASS. The mean-gap gives the teacher a
+                       near-zero self-error, so "student speed_err <= 1.5x teacher speed_err" is a
+                       real bar (the student must actually sprint near the teacher's speed).
   - drift            : mean |lateral (SIDE) root position| over the alive portion.
 
 Three controllers are compared on identical metrics:
@@ -50,7 +50,6 @@ from msk_envs.distill.dof_utils import (
     joint_dof_indices, build_actuator_perm, build_teacher_obs_cols,
 )
 from msk_envs.utils.global_params import FWD_IDX, SIDE_IDX
-from msk_envs.utils.reward_lib import has_fallen
 
 CKPT = "/home/ubuntu/msk_envs/models/baseline_sprint_2026-08-27_20-59/baseline_sprint_2026-08-27_20-59_149000.pt"
 STUDENT_PT = "/home/ubuntu/msk_envs/models/dagger_sprint/student.pt"
@@ -79,34 +78,30 @@ def run_metrics(env, controller, is_teacher, of=None, act_perm=None,
       student : muscles forced OFF (raw -1) and torques permuted via act_perm into the
                 actuator slice — identical to the training-time student.apply() convention.
 
-    --- Why we step manually instead of env.step() ---
-    env.step() -> rl_step() AUTO-RESETS any env whose _get_terminated() fires, and for the
-    sprint task _get_terminated() = (fallen OR toes-out-of-lane OR pelvis-not-facing-forward).
-    Two problems for fidelity metrics: (1) the lane/facing conditions are far stricter than
-    "still upright" — the healthy teacher trips them constantly while never actually falling,
-    so latching on the full termination scores the teacher ~0.27 upright, contradicting its
-    true ~1.0 not-fallen rate; (2) after an auto-reset the env state is scrambled, so any state
-    read post-step() is unreliable.
+    --- Upright metric = per-step survival (standard), via env.step() auto-reset ---
+    We step through env.step(), which auto-resets any env whose _get_terminated() fires and
+    returns `terminated` for the pre-reset state. `upright_fraction` is the mean per-step SURVIVAL
+    rate: the fraction of steps on which the env did NOT terminate, averaged over envs. This is the
+    standard locomotion "upright"/survival metric and matches the coordinator's sanity numbers
+    (healthy teacher ~0.99). We do NOT latch an env dead forever on its first termination — with
+    256 envs over a 300-step episode, per-step survival is the stable, low-variance estimator and
+    it does not blow up run time (env.step resets keep the adaptive integrator out of the
+    near-fall min-step divergence that hangs a no-reset rollout).
 
-    So we drive the physics directly (pre_sim_step -> launch_sim_step, the teacher.py smoke-test
-    path) with NO auto-reset, and define "upright" as NOT-FALLEN via has_fallen() on the live
-    post-physics state. `upright_fraction` is then the mean fraction of the episode each env
-    stays upright before its first fall — the "upright duration" the brief asks for and the
-    semantic the coordinator's sanity check (teacher ~0.9+) uses. Once an env falls, the alive
-    mask latches it off for the rest of the episode.
+    Per-step masking: fwd_speed / speed_err / drift are accumulated with weight `(1 - terminated)`
+    so a step on which an env terminated (and was reset to a fresh pose) does not pollute the
+    velocity/drift stats with post-reset garbage. `denom` is the summed survival weight.
 
-    target_speed: if given, speed_err = mean_alive |fwd_speed - target_speed|; else speed_err
-                  is left at 0 (used for the teacher's first pass to measure its mean speed).
+    target_speed: if given, speed_err = |mean fwd_speed - target_speed|; else speed_err is 0
+                  (used for the teacher's first pass, which measures the reference mean speed).
     """
     obs = env.reset()
     steps = steps or int(round(env.max_episode_duration / env.delta_t))
     n = env.num_worlds
     dev = obs.device
-    upright = torch.zeros(n, device=dev)
+    survive = torch.zeros(n, device=dev)
     fwd_sum = torch.zeros(n, device=dev)
-    speed_err = torch.zeros(n, device=dev)
     drift = torch.zeros(n, device=dev)
-    alive = torch.ones(n, device=dev)
     n_musc = env.num_muscles
 
     for _ in range(steps):
@@ -122,28 +117,28 @@ def run_metrics(env, controller, is_teacher, of=None, act_perm=None,
             a[:, :n_musc] = -1.0                           # muscles OFF (raw -1 -> excitation 0)
             a[:, n_musc:] = exc.index_select(1, act_perm)  # route each torque to its actuator
 
-        # Manual step, NO auto-reset (see docstring). Mirrors teacher.py's smoke path.
-        env.pre_sim_step(a)
-        env.launch_sim_step()
-        env.update_metrics()
-
-        # Latch on falling only (true "upright"), on the live pre-reset state.
-        fallen = has_fallen(root_pos=env.root_pos, ground_rotation=env.ground_rotation).float()
-        alive = alive * (1.0 - fallen)
-        upright += alive
+        _, _, term, _, _ = env.step(a)                     # (obs, rew, terminated, truncated, info)
+        alive = 1.0 - term.float()                         # 1 if this env survived this step
+        survive += alive
         v = _fwd_speed(env)
         fwd_sum += v * alive
-        if target_speed is not None:
-            speed_err += (v - target_speed).abs() * alive
         drift += env.root_pos[:, SIDE_IDX].abs() * alive
 
         obs = env._get_obs()
 
-    denom = upright.clamp(min=1)
+    denom = survive.clamp(min=1)
+    fwd_speed = (fwd_sum / denom).mean().item()
+    # speed_err = |this controller's mean forward sprint speed - teacher reference speed|.
+    # We compare MEANS (not per-step |v-target|): sprint velocity oscillates per stride and
+    # freshly-reset envs ramp up from standstill, so a per-step deviation is ~= target magnitude
+    # even for the teacher itself (its own per-step err ~4.5 ~= its 4.5 m/s mean) — that would
+    # make the 1.5x gate trivially passable and a backward-drifting student would false-PASS.
+    # The mean-gap gives the teacher a near-zero self-error and makes the gate meaningful.
+    speed_err = abs(fwd_speed - target_speed) if target_speed is not None else 0.0
     return {
-        "upright_fraction": (upright / steps).mean().item(),
-        "fwd_speed": (fwd_sum / denom).mean().item(),
-        "speed_err": (speed_err / denom).mean().item(),
+        "upright_fraction": (survive / steps).mean().item(),
+        "fwd_speed": fwd_speed,
+        "speed_err": speed_err,
         "drift": (drift / denom).mean().item(),
     }
 

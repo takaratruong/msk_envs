@@ -77,9 +77,9 @@ def main():
             break
 
     # Save trajectory for the Bolt renderer (json.gz format)
-    # save_animation writes to dashboard/trajectories/<name>_<id>.json.gz
+    # save_animation writes to dashboard/trajectories/<folder>/<base>_<world_idx>.json.gz
     sim.save_animation("dashboard/trajectories/dagger_student", "1", use_gzip=True)
-    print("WROTE dashboard/trajectories/dagger_student_1.json.gz")
+    print("WROTE dashboard/trajectories/dagger_student/1_0.json.gz")
 
 
 if __name__ == "__main__":

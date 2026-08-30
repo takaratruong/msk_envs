@@ -47,6 +47,8 @@ class EnvConfig:
     """ Whether to integrate joint damping implicitly """
     use_linear_stop: bool = False
     """ Whether to use LinearStop force instead of CoordinateLimitForce """
+    use_pd_actuators: bool = False
+    """ Whether to use sub-step PD actuators for coordinate actuators """
 
     # --- Model muscle properties ---
     muscle_multiplier: float = 1.0
@@ -111,6 +113,60 @@ class EnvConfig:
     """ How long to wait between pushes """
     force_std: float = 300.0
     """ Standard deviation of perturbation force magnitude to apply """
+    perturbation_vertical_scale: float = 0.2
+    """ Scale on the vertical component of push directions (1.0 = isotropic, 0.0 = horizontal-only) """
+    perturbation_ramp_steps: int = 0
+    """ Env steps over which push magnitude ramps from 0 to force_std (0 = full strength immediately) """
+
+    # Command resampling (LOCOMOTION variant)
+    resample_commands: bool = True
+    """ Whether to resample the velocity command mid-episode (stops/starts/turns) """
+    command_resample_interval: tuple = (2.0, 5.0)
+    """ Range of seconds a velocity command is held before resampling """
+
+    # Walk (WALK variant): capped forward-velocity reward
+    walk_target_speed: float = 1.4
+    """ Forward speed (m/s) the velocity reward caps at; exceeding it is penalized. ~1.4 = normal human walk """
+
+    # Stepping targets (STEPS variant, ALLSTEPS Xie et al. 2020)
+    steps_curriculum_start: float = 0.0
+    """ Initial curriculum in [0,1]: 0=easy (straight, narrow), 1=hard (wide/turning) """
+    steps_len_range: tuple = (0.35, 0.65)
+    """ Forward spacing (m) between consecutive foot targets """
+    steps_width_max: float = 0.30
+    """ Max lateral jitter (m) of targets at full curriculum """
+    steps_turn_max_deg: float = 20.0
+    """ Max heading turn (deg) per step at full curriculum """
+    steps_n_targets: int = 32
+    """ Number of foot targets in the sequence """
+    steps_target_radius: float = 0.10
+    """ Hit radius (m): plant foot within this of the target advances progress """
+    steps_hit_sigma: float = 0.25
+    """ Std (m) of the Gaussian target-hitting shaping reward """
+    steps_stone_radius: float = 0.20
+    """ Physical stone radius (m): a foot planting >this from every target = a gap = fall/terminate """
+    steps_gap_terminate: bool = True
+    """ Whether planting a foot off all stones terminates the episode (ALLSTEPS miss=fall) """
+    steps_grace_time: float = 0.5
+    """ Seconds after reset before gap-termination applies (lets the run-start pose settle onto the course) """
+    steps_require_support: bool = True
+    """ Anti-leap: require at least one foot grounded on a stone at all times (forbids flight-phase leaping off) """
+    steps_curriculum_threshold: float = 5.0
+    """ Mean targets-reached (EMA) above which the curriculum widens difficulty """
+    steps_curriculum_step: float = 0.05
+    """ Curriculum increment per promotion (widens step width + turn toward hard) """
+
+    # Terrain noise (LOCOMOTION variant): small ground bumps, unobserved by the policy
+    apply_terrain_noise: bool = False
+    """ Whether to scatter small sphere bumps on the ground (shared across worlds) """
+    terrain_bump_count: int = 200
+    """ Number of ground bumps """
+    terrain_extent: float = 15.0
+    """ Radius (m) of the disk around the origin covered by bumps """
+    terrain_clear_radius: float = 1.0
+    """ Bump-free radius (m) around the spawn point """
+    terrain_bump_height: tuple = (0.005, 0.03)
+    """ Range (m) of bump heights above the ground plane """
 
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)
@@ -177,6 +233,12 @@ class EnvConfigSprinterTorque(EnvConfigSprinter):
     """Sprinter skeleton carrying BOTH muscles and 25 coordinate-actuators.
     Teacher drives muscles; torque student drives actuators. See distill/ + spec."""
     model_path: str = "../msk_models/sprinter/sprinter_torque.osim"
+
+
+@dataclass
+class EnvConfigSprinterTorquePD(EnvConfigSprinterTorque):
+    """Sprinter torque twin driven by sub-step PD actuators (q_des,kp,kd per joint)."""
+    use_pd_actuators: bool = True
 
 
 @dataclass
@@ -248,6 +310,7 @@ class EnvConfigG1MuscleFn(EnvConfigG1Muscle):
 EnvConfigUnion = Union[
     Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
     Annotated[EnvConfigSprinterTorque, tyro.conf.subcommand(name="sprintertorque")],
+    Annotated[EnvConfigSprinterTorquePD, tyro.conf.subcommand(name="sprintertorquepd")],
     Annotated[EnvConfigSprinterUncalibrated, tyro.conf.subcommand(name="sprinteruncalibrated")],
     Annotated[EnvConfigSprinterExp, tyro.conf.subcommand(name="sprinterexp")],
     Annotated[EnvConfigSconeH0918, tyro.conf.subcommand(name="sconeh0918")],

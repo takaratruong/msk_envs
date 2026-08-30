@@ -91,7 +91,8 @@ class MSKEnv:
             requires_visuals=requires_visuals,
             muscle_fn_path=os.path.join(
                 self.curr_path, env_config.muscle_function_path
-            ) if env_config.use_function_based_path else None
+            ) if env_config.use_function_based_path else None,
+            use_pd_actuators=getattr(env_config, "use_pd_actuators", False),
         )
         self.load_result = load_result
         self.m = load_result.model

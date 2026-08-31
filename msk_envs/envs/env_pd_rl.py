@@ -145,7 +145,6 @@ class SprinterPDRLEnv(SprintingEnv):
         """
         if self._oracle_loaded:
             return
-        self._oracle_loaded = True
         from msk_envs.distill.impedance_cache import load_oracle, ORACLE_PATH, ORACLE_EPS
         self._oracle_eps = ORACLE_EPS
         if not os.path.exists(ORACLE_PATH):
@@ -156,8 +155,21 @@ class SprinterPDRLEnv(SprintingEnv):
                 flush=True,
             )
             self._oracle = None
+            self._oracle_loaded = True
             return
-        self._oracle, _ = load_oracle(ORACLE_PATH, self.device)
+        # Guard the load: a corrupt/unloadable .pt must degrade to rew_impedance=0 (exactly like a
+        # missing file), NOT crash the multi-day RL training loop.
+        try:
+            self._oracle, _ = load_oracle(ORACLE_PATH, self.device)
+        except Exception as e:
+            print(
+                f"WARNING [SprinterPDRLEnv]: failed to load impedance oracle at {ORACLE_PATH} "
+                f"({type(e).__name__}: {e}); rew_impedance disabled (0.0). Rebuild it via "
+                f"`python -m msk_envs.distill.impedance_cache --rebuild`.",
+                flush=True,
+            )
+            self._oracle = None
+        self._oracle_loaded = True
 
     def _compute_raw_reward_dict(self):
         """Compute sprint rewards + rew_impedance (log-space distance to teacher impedance).

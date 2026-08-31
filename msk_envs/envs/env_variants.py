@@ -13,3 +13,8 @@ class DerivedEnv(Enum):
     VERTICAL = 8
     LOCOMOTION = 9
     IMITATE = 10
+    STEPS = 11
+    WALK = 12
+    WALK_STEPS = 13
+    STONE_COURSE = 14
+    SPRINT_PD_RL = 15

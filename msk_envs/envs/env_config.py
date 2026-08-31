@@ -124,6 +124,18 @@ class EnvConfig:
     command_resample_interval: tuple = (2.0, 5.0)
     """ Range of seconds a velocity command is held before resampling """
 
+    # Stone course (STONE_COURSE variant): physical stones, minimal reward
+    course_count: int = 16
+    """ Legacy setting; StoneCourse now samples one independent layout per world on reset """
+    course_stones: int = 24
+    """ Number of physical slab instances in every world """
+    course_step_len: tuple = (0.4, 0.7)
+    """ Per-reset random forward gap range (m) between consecutive slabs """
+    course_step_width: float = 0.10
+    """ Per-reset lateral jitter (m) added to alternating L/R slab offsets """
+    course_stone_radius: float = 0.18
+    """ Stone slab half-width/half-depth (m) — the walkable surface size """
+
     # Walk (WALK variant): capped forward-velocity reward
     walk_target_speed: float = 1.4
     """ Forward speed (m/s) the velocity reward caps at; exceeding it is penalized. ~1.4 = normal human walk """
@@ -150,7 +162,9 @@ class EnvConfig:
     steps_grace_time: float = 0.5
     """ Seconds after reset before gap-termination applies (lets the run-start pose settle onto the course) """
     steps_require_support: bool = True
-    """ Anti-leap: require at least one foot grounded on a stone at all times (forbids flight-phase leaping off) """
+    """ Anti-leap: forbid a SUSTAINED flight phase (leaping off the stones) """
+    steps_max_flight_time: float = 0.2
+    """ Max seconds the walker may have NO foot on a stone before terminating (allows a normal swing, forbids a leap) """
     steps_curriculum_threshold: float = 5.0
     """ Mean targets-reached (EMA) above which the curriculum widens difficulty """
     steps_curriculum_step: float = 0.05
@@ -242,6 +256,25 @@ class EnvConfigSprinterTorquePD(EnvConfigSprinterTorque):
 
 
 @dataclass
+class EnvConfigSprinterTorquePD_RL(EnvConfigSprinterTorquePD):
+    """Sprinter PD RL: 75-dim PD action space for RL training (muscle→torque distillation Phase B).
+
+    Exposes (q_des[25], kp[25], kd[25]) to the TD3 trainer. Rewards sprinting + optional impedance
+    regularization (lambda_impedance, populated in Task 2).
+    """
+    env_variant: DerivedEnv = DerivedEnv.SPRINT_PD_RL
+    reward_lambdas: dict = field(default_factory=lambda: {
+        "lambda_vel": 1.0,
+        "lambda_mid_lane": -0.05,
+        "lambda_spring": -0.02,
+        "lambda_damper": -0.02,
+        "lambda_limit": -0.02,
+        "lambda_muscle_passive": -0.02,
+        "lambda_impedance": 0.0,  # Task 2 will populate this; 0.0 placeholder
+    })
+
+
+@dataclass
 class EnvConfigSprinterUncalibrated(EnvConfig):  # Setup used for publication
     model_path: str = "../msk_models/sprinter/uncalibrated_sprinter_model.osim"
     muscle_function_path: str = "../msk_models/sprinter/sprinter_model_fn.xml"
@@ -311,6 +344,7 @@ EnvConfigUnion = Union[
     Annotated[EnvConfigSprinter, tyro.conf.subcommand(name="sprinter")],
     Annotated[EnvConfigSprinterTorque, tyro.conf.subcommand(name="sprintertorque")],
     Annotated[EnvConfigSprinterTorquePD, tyro.conf.subcommand(name="sprintertorquepd")],
+    Annotated[EnvConfigSprinterTorquePD_RL, tyro.conf.subcommand(name="sprintertorquepdrl")],
     Annotated[EnvConfigSprinterUncalibrated, tyro.conf.subcommand(name="sprinteruncalibrated")],
     Annotated[EnvConfigSprinterExp, tyro.conf.subcommand(name="sprinterexp")],
     Annotated[EnvConfigSconeH0918, tyro.conf.subcommand(name="sconeh0918")],

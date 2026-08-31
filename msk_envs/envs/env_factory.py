@@ -10,6 +10,11 @@ from .env_carioca import CariocaEnv
 from .env_sprint_blocks import BlockStartSprintingEnv
 from .env_locomotion import LocomotionEnv
 from .env_imitate import ImitateEnv
+from .env_steps import StepsEnv
+from .env_walk import WalkEnv
+from .env_walk_steps import WalkStepsEnv
+from .env_stone_course import StoneCourseEnv
+from .env_pd_rl import SprinterPDRLEnv
 
 
 # factory
@@ -40,5 +45,15 @@ class EnvFactory:
             return LocomotionEnv(**kwargs)
         elif env_variant == DerivedEnv.IMITATE:
             return ImitateEnv(**kwargs)
+        elif env_variant == DerivedEnv.STEPS:
+            return StepsEnv(**kwargs)
+        elif env_variant == DerivedEnv.WALK:
+            return WalkEnv(**kwargs)
+        elif env_variant == DerivedEnv.WALK_STEPS:
+            return WalkStepsEnv(**kwargs)
+        elif env_variant == DerivedEnv.STONE_COURSE:
+            return StoneCourseEnv(**kwargs)
+        elif env_variant == DerivedEnv.SPRINT_PD_RL:
+            return SprinterPDRLEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

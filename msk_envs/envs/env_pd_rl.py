@@ -5,14 +5,27 @@ The student learns to sprint using sub-step PD impedance control, optionally reg
 by an impedance reward term (lambda_impedance, populated in Task 2).
 
 Action space (75-dim, range [-1,1]):
-  - raw_qdes[25]:  desired joint positions (radians, decoded with delta clamp)
+  - raw_qdes[25]:  desired-joint-position DELTA (q_des = q_now + QDES_DELTA_CLAMP * raw_qdes)
   - raw_kp[25]:    proportional gains (decoded via softplus * KP_SCALE)
   - raw_kd[25]:    derivative gains (decoded via softplus * KD_SCALE)
 
 Reward: inherits base sprint terms (forward velocity, etc.) + rew_impedance placeholder (0.0).
 
-Decode reuses the dagger_pd convention: q_des clamped to current_q +/- 0.5 rad to prevent
-integrator stall; kp/kd scaled to match the warm-start student checkpoint.
+q_des DELTA REPARAM (RL-T1 warm-start contingency)
+--------------------------------------------------
+The trainer actor (DeterministicPolicy, fasttd3) has a Tanh output head, so every action
+component is bounded to [-1,1]. Interpreting raw_qdes as an ABSOLUTE joint angle (the original
+dagger_pd convention) made joints whose neutral pose exceeds 1 rad UNREACHABLE by a Tanh actor,
+which collapsed the warm-started balancer (verified: clamping absolute q_des to +-1 drops
+notfallen 0.77 -> 0.38). We therefore interpret raw_qdes as a DELTA fraction:
+
+    q_des = q_now + QDES_DELTA_CLAMP * clamp(raw_qdes, -1, 1)
+
+Since the actor's raw_qdes is already in [-1,1], the effective delta lives in +-QDES_DELTA_CLAMP
+(+-0.5 rad) around the current pose — the same integrator-stall guard the old absolute+delta-clamp
+form provided, but now every reachable delta is representable by a Tanh head. kp/kd are unchanged
+(softplus * per-joint scale from the warm-start student checkpoint). The warm-start bridge fits the
+actor to StudentPD in THIS reparam space (see distill/warmstart_bridge.py).
 """
 import os
 import torch
@@ -94,13 +107,15 @@ class SprinterPDRLEnv(SprintingEnv):
         # Store for _get_actions
         self._last_raw_action.copy_(raw_action)
 
-        # Decode: q_des (linear), kp/kd (softplus * scale)
-        q_des_abs, kp, kd = decode(raw_action, self.kp_scale, self.kd_scale)
+        # Decode kp/kd (softplus * scale). decode() also returns q_des from raw[:, :25], but under
+        # the DELTA reparam we IGNORE that absolute value and re-derive q_des as a delta below.
+        _, kp, kd = decode(raw_action, self.kp_scale, self.kd_scale)
 
-        # Clamp q_des to current_q +/- QDES_DELTA_CLAMP (integrator stall defense)
+        # q_des DELTA reparam (RL-T1 contingency): interpret raw_qdes as a delta fraction so a
+        # Tanh-bounded actor can reach any pose. raw in [-1,1] -> delta in +-QDES_DELTA_CLAMP rad.
+        raw_qdes = torch.clamp(raw_action[:, :25], -1.0, 1.0)
         q_now = self.joint_positions.index_select(1, self.qids)
-        delta = torch.clamp(q_des_abs - q_now, -QDES_DELTA_CLAMP, QDES_DELTA_CLAMP)
-        q_des = q_now + delta
+        q_des = q_now + QDES_DELTA_CLAMP * raw_qdes
 
         # Store kp/kd for Task 2 impedance reward
         self._last_kp.copy_(kp)

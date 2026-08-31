@@ -1,0 +1,24 @@
+{
+  "planPath": "docs/superpowers/plans/2026-08-31-rl-pd-muscle-constraint.md",
+  "tasks": [
+    {"id": 13, "subject": "RL-T0: PD-action-space RL env + config", "status": "pending",
+     "description": "**Goal:** Env exposing 75-dim PD action (q_des,kp,kd) to existing TD3 trainer + sprint reward. **Verify:** python -m msk_envs.envs.env_pd_rl. Full steps plan doc Task 0.",
+     "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/envs/env_pd_rl.py","/home/ubuntu/msk_envs/msk_envs/envs/env_config.py","/home/ubuntu/msk_envs/msk_envs/envs/env_factory.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.envs.env_pd_rl", "acceptanceCriteria": ["sprintertorquepdrl resolves num_actions==75","random rollout no stall","reward has sprint terms + rew_impedance placeholder"], "modelTier": "frontier"}},
+    {"id": 14, "subject": "RL-T1: Warm-start bridge (student->actor ckpt)", "status": "pending", "blockedBy": [13],
+     "description": "**Goal:** Bridge pd_student.pt into trainer actor_state_dict so --checkpoint_path warm-starts from the balancer. **Verify:** python -m msk_envs.distill.warmstart_bridge. Full steps plan doc Task 1.",
+     "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/warmstart_bridge.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.warmstart_bridge", "acceptanceCriteria": ["actor_state_dict ckpt loadable td3 n_act=75 n_obs=359","loaded actor reproduces StudentPD <1e-4","warm-start balances in PD-RL env"], "modelTier": "frontier"}},
+    {"id": 15, "subject": "RL-T2: Impedance regularizer reward term", "status": "pending", "blockedBy": [14],
+     "description": "**Goal:** rew_impedance = log-space distance policy (kp,kd) vs teacher impedance, amortized via offline oracle. **Verify:** python -m msk_envs.distill.impedance_cache. Full steps plan doc Task 2.",
+     "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/envs/env_pd_rl.py","/home/ubuntu/msk_envs/msk_envs/distill/impedance_cache.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.impedance_cache", "acceptanceCriteria": ["rew_impedance log-space finite per env","teacher impedance amortized cost documented","lambda>0 smoke active no NaN"], "modelTier": "frontier"}},
+    {"id": 16, "subject": "RL-T3: Launch RL training (long bg run)", "status": "pending", "blockedBy": [15],
+     "description": "**Goal:** Launch TD3 run: PD-RL env, warm-start ckpt, lambda_impedance>0, background, checkpoint often. USER-ORDERED GATE — close only after healthy ~1-2k iters (warm-start balances iter0, reward optimized, checkpoints written), NOT training end. **Verify:** training healthy 1-2k iters. Full steps plan doc Task 3.",
+     "description_metadata": {"files": [], "verifyCommand": "training healthy 1-2k iters (see report)", "acceptanceCriteria": ["RL launches warm-start+regularizer no crash","warm-start balances iter0 fwd reward optimized","checkpoints written launch recorded"], "modelTier": "frontier", "userGate": true, "tags": ["user-gate"], "requireEvidenceTokens": [["warmstart"],["reward"],["checkpoint"]]}},
+    {"id": 17, "subject": "RL-T4: Eval - sprint + compliance (GATE)", "status": "pending", "blockedBy": [16],
+     "description": "**Goal:** evaluate_rl_pd.py — best RL ckpt: sprints (fwd approaching teacher)? compliant (kp/kd near teacher)? USER-ORDERED GATE — real GPU eval of actual ckpt, both metrics, teacher-sanity first; interim/negative valid. **Verify:** python -m msk_envs.distill.evaluate_rl_pd --ckpt <best>. Full steps plan doc Task 4.",
+     "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/evaluate_rl_pd.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.evaluate_rl_pd --ckpt <best>", "acceptanceCriteria": ["teacher-sanity gate first","sprint fwd/not-fallen pd_rl vs teacher 256 envs","compliance log-space vs teacher impedance","verdict+bucket thresholds untouched"], "modelTier": "frontier", "userGate": true, "tags": ["user-gate"], "requireEvidenceTokens": [["teacher"],["pd_rl"],["compliance"]]}},
+    {"id": 18, "subject": "RL-T5: Render RL-PD student + dashboard", "status": "pending", "blockedBy": [17],
+     "description": "**Goal:** Render trained RL-PD student + dashboard card (3rd in progression). **Verify:** ls videos/rl_pd_student.mp4 + Firefox screenshot. Full steps plan doc Task 5.",
+     "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/record_rl_pd.py","/home/ubuntu/bolt_baselines/dashboard.html"], "verifyCommand": "ls -la /home/ubuntu/bolt_baselines/videos/rl_pd_student.mp4", "acceptanceCriteria": ["RL-PD rollout rendered to mp4","dashboard card truthful caption","opens Firefox :1 window capture verified"], "modelTier": "standard"}}
+  ],
+  "lastUpdated": "2026-08-31T00:00:00Z"
+}

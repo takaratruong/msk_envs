@@ -145,10 +145,6 @@ class LoggedSim:
                 idx_world
             )
 
-            if hasattr(self.envs, "get_render_targets"):
-                for pos, radius, active in self.envs.get_render_targets(idx_world):
-                    add_target(frame, pos=pos, radius=radius, active=active)
-
             self.frame_data[i].append(frame)
         return
 

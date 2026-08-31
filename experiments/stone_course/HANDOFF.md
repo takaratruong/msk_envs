@@ -1,0 +1,21 @@
+# Claude handoff
+
+Use the clean worktree at `/home/ubuntu/msk_envs-stone-course` on branch
+`experiment/stone-course`. Its fork remote is
+`https://github.com/takaratruong/msk_envs`.
+
+The original exploratory checkout at `/home/ubuntu/msk_envs` is intentionally
+left untouched because it also contains unrelated distillation, walking, and G1
+changes. The active pre-refactor training run remains there:
+
+- experiment: `stonecourse_walkingheel_2026-08-31_19-41`;
+- checkpoints: `/home/ubuntu/msk_envs/models/stonecourse_walkingheel_2026-08-31_19-41/`;
+- trajectories: `/home/ubuntu/msk_envs/dashboard/trajectories/stonecourse_walkingheel_2026-08-31_19-41/`; and
+- dashboard render: `/home/ubuntu/bolt_baselines/dashboard.html`.
+
+Commit `1fabeb5` is the focused checkpoint of the behavior that launched that
+run. Later commits on this branch are cleanup and documentation. They preserve
+the 344-value observation shape and experiment defaults, so policies retain the
+same input/output contract.
+
+Before changing behavior, read [README.md](README.md) and run the focused tests.

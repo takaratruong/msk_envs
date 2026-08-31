@@ -28,6 +28,10 @@ python -m msk_envs.train.train [sprint|vertical|...] --exp_prefix my_training_ru
 
 *Note that `env-config.*` parameters must be set at the end*
 
+### Experiments
+
+- [Randomized stepping-stone walking](experiments/stone_course/README.md): independent box-slab layouts per simulated world and reset, walking heel contacts, TD3 training, evaluation, and troubleshooting.
+
 ## Trajectory visualization
 We provide visualization tools as well as scripts to generate analytics of trajectories (as PDFs).
 ### Dashboard (web-viewer)

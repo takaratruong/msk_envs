@@ -115,12 +115,16 @@ class EnvConfig:
     # Stone course (STONE_COURSE variant)
     course_stones: int = 24
     """ Number of physical slab instances in every world """
-    course_step_len: tuple = (0.4, 0.7)
-    """ Per-reset random forward gap range (m) between consecutive slabs """
-    course_step_width: float = 0.10
-    """ Per-reset lateral jitter (m) added to alternating L/R slab offsets """
-    course_stone_radius: float = 0.18
-    """ Stone slab half-width/half-depth (m) """
+    course_step_length_range: tuple = (0.4, 0.7)
+    """ Per-reset forward center-to-center spacing range (m) """
+    course_lateral_jitter: float = 0.10
+    """ Per-reset lateral jitter (m) around the alternating foot line """
+    course_slab_size: tuple = (0.36, 0.10, 0.36)
+    """ Full (forward, vertical, lateral) dimensions of every box slab (m) """
+    course_top_height: float = 0.45
+    """ Height of the walkable slab surface above the lower ground plane (m) """
+    course_lookahead: int = 4
+    """ Number of upcoming root-relative slab centers included in observations """
     walk_target_speed: float = 1.4
     """ Forward speed (m/s) at which the course velocity reward is capped """
 

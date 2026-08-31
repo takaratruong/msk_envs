@@ -13,6 +13,14 @@ changes. The active pre-refactor training run remains there:
 - trajectories: `/home/ubuntu/msk_envs/dashboard/trajectories/stonecourse_walkingheel_2026-08-31_19-41/`; and
 - dashboard render: `/home/ubuntu/bolt_baselines/dashboard.html`.
 
+The active run is rendered automatically by
+`/home/ubuntu/bolt_baselines/auto_render_walksteps.sh`. Cron invokes it every
+minute; it skips unchanged trajectories, publishes the newest rollout at
+`videos/stonecourse_walkingheel_latest.mp4`, and updates
+`stonecourse_training_status.json`. The top dashboard card polls that status
+when served over HTTP and reloads the stable video path when opened via
+`file://`.
+
 Commit `1fabeb5` is the focused checkpoint of the behavior that launched that
 run. Later commits on this branch are cleanup and documentation. They preserve
 the 344-value observation shape and experiment defaults, so policies retain the

@@ -13,3 +13,4 @@ class DerivedEnv(Enum):
     VERTICAL = 8
     LOCOMOTION = 9
     IMITATE = 10
+    STONE_COURSE = 11

@@ -114,6 +114,9 @@ def create_pdf_output(
         interval_plots: bool = False
 ):
     """ Create a pdf with all the relevant plots """
+    # A failed eval can terminate before any frames or rewards are recorded.
+    if len(frame_data) == 0 or len(logged_reward_data) == 0:
+        return
     n_frames = len(frame_data)
     times = np.array([frame.time for frame in frame_data])
     frame_ind = np.arange(n_frames)

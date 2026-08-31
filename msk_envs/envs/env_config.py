@@ -112,6 +112,18 @@ class EnvConfig:
     force_std: float = 300.0
     """ Standard deviation of perturbation force magnitude to apply """
 
+    # Stone course (STONE_COURSE variant)
+    course_stones: int = 24
+    """ Number of physical slab instances in every world """
+    course_step_len: tuple = (0.4, 0.7)
+    """ Per-reset random forward gap range (m) between consecutive slabs """
+    course_step_width: float = 0.10
+    """ Per-reset lateral jitter (m) added to alternating L/R slab offsets """
+    course_stone_radius: float = 0.18
+    """ Stone slab half-width/half-depth (m) """
+    walk_target_speed: float = 1.4
+    """ Forward speed (m/s) at which the course velocity reward is capped """
+
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)
     """ Ground rotation quaternion (x,y,z,w) """

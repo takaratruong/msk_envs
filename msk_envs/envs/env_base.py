@@ -217,6 +217,8 @@ class MSKEnv:
         self.ufrc_muscle_passive = bolt.ufrc_muscle_passive(self.d)
         # [num_envs, num_colliders]
         self.collider_forces = bolt.collider_forces(self.d)
+        # [num_envs, num_colliders, 7] (mutable local position + quaternion)
+        self.collider_local_transforms = bolt.geom_local_transforms(self.d)
         # [num_envs, num_colliders, 3]
         self.collider_positions = get_position_from_transform(bolt.get_collider_transforms(self.d))
         # self.collider_self_forces = bolt.collider_self_forces(self.d)

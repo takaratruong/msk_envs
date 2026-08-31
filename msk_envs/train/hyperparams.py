@@ -293,6 +293,22 @@ class LocomotionConfig(BaseArgs):
 
 
 @dataclass
+class StoneCourseConfig(BaseArgs):
+    """Physical stepping stones with a minimal forward-progress objective."""
+    lambda_vel: float = 1e-1
+    lambda_alive: float = 1e-2
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.STONE_COURSE,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
+
+
+@dataclass
 class VerticalConfig(BaseArgs):
     lambda_jump: float = 1e-1
     lambda_limit: float = -3e-4
@@ -339,6 +355,7 @@ Config = Union[
     Annotated[CariocaConfig, tyro.conf.subcommand(name="carioca")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[LocomotionConfig, tyro.conf.subcommand(name="locomotion")],
+    Annotated[StoneCourseConfig, tyro.conf.subcommand(name="stonecourse")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
 ]
 

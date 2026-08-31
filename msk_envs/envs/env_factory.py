@@ -10,6 +10,7 @@ from .env_carioca import CariocaEnv
 from .env_sprint_blocks import BlockStartSprintingEnv
 from .env_locomotion import LocomotionEnv
 from .env_imitate import ImitateEnv
+from .env_stone_course import StoneCourseEnv
 
 
 # factory
@@ -40,5 +41,7 @@ class EnvFactory:
             return LocomotionEnv(**kwargs)
         elif env_variant == DerivedEnv.IMITATE:
             return ImitateEnv(**kwargs)
+        elif env_variant == DerivedEnv.STONE_COURSE:
+            return StoneCourseEnv(**kwargs)
         else:
             raise ValueError(f"Unknown environment type: {env_variant}")

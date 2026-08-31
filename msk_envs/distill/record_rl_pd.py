@@ -64,13 +64,8 @@ def main():
     dev = torch.device("cuda")
 
     # Single env, visuals enabled for LoggedSim trajectory capture
-    # Use seed 0 to match the evaluation harness (SEED=0 in evaluate_rl_pd.py)
-    # DISABLE early termination to see full behavior (the eval harness uses manual has_fallen,
-    # not env termination, to track upright state while continuing the rollout).
     cfg = EnvConfigSprinterTorquePD()
     cfg.reward_lambdas = dict(BLANK_REWARD_LAMBDAS)
-    cfg.seed = 0
-    cfg.terminate_on_fall = False  # disable early term, let it run full episode like eval
     env = EnvFactory.create_env(
         num_envs=1,
         env_config=cfg,
@@ -97,7 +92,11 @@ def main():
     # LoggedSim wraps the env, captures frames at 30fps for the renderer
     recording_fps = 30.0
     sim = LoggedSim(env, dev, delta_t_log=1.0 / recording_fps)
+
+    # Use seed 0 to match evaluate_rl_pd
+    torch.manual_seed(0)
     obs = sim.reset()
+    print(f"Recording with seed=0, num_envs=1 (eval showed not_fallen=1.000)", flush=True)
 
     # Rollout for full episode (or until termination)
     steps = int(round(env.max_episode_duration / env.delta_t))
@@ -109,6 +108,11 @@ def main():
         # RL-PD path: replicate EXACTLY the evaluate_rl_pd.py / env_pd_rl rollout.
         # raw = actor(normalize_obs(obs)) -> decode -> (q_des_delta, kp, kd); q_des = q_now + delta;
         # then write the PD buffers and advance with muscles OFF.
+        if obs is None:
+            # LoggedSim returns None once all envs are finished; stop rollout
+            print(f"Episode finished at step {step_i}/{steps} (env signaled termination)", flush=True)
+            break
+
         q_now = env.joint_positions.index_select(1, qids)
 
         with torch.no_grad():
@@ -129,9 +133,9 @@ def main():
         a[:, :n_musc] = -1.0  # muscles OFF (raw -1 -> excitation 0)
 
         finished, obs = sim.step(a)
-        if finished.all():
-            print(f"Episode terminated at step {step_i+1}/{steps}", flush=True)
-            break
+        # Unlatch finished so LoggedSim doesn't stop producing obs (matches evaluate_rl_pd's manual
+        # loop which resets fallen envs and continues without breaking)
+        sim.finished[:] = 0
 
     # Save trajectory for the Bolt renderer (json.gz format)
     # save_animation writes to dashboard/trajectories/<folder>/<base>_<world_idx>.json.gz

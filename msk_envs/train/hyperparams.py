@@ -172,6 +172,27 @@ class SprintConfig(LaneConfig):
 
 
 @dataclass
+class SprintPDRLConfig(LaneConfig):
+    """ Sprint with the 75-dim PD action space (muscle→torque distillation Phase B).
+
+    Same reward STRUCTURE as SprintConfig (LaneConfig lane terms), PLUS lambda_impedance
+    for the rew_impedance regularizer (SprinterPDRLEnv). env_variant is forced to
+    SPRINT_PD_RL here so it is not clobbered back to SPRINT. Pair with the
+    `env-config:sprintertorquepdrl` subcommand. num_envs MUST stay 4096 to load the
+    warm-start actor checkpoint (noise buffers sized 4096). """
+    lambda_impedance: float = 1e-3  # STARTING point (T2 carry-forward); tuning is across-runs
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.SPRINT_PD_RL,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
+
+
+@dataclass
 class SprintBlockStartConfig(LaneConfig):
     def __post_init__(self):
         super().__post_init__()
@@ -293,6 +314,104 @@ class LocomotionConfig(BaseArgs):
 
 
 @dataclass
+class WalkConfig(LaneConfig):
+    """ Sprint env, but walking: LanesEnv machinery (forward lane + facing
+    termination + run start) with a velocity reward CAPPED at walk speed
+    (velocity_reward_max) instead of sprint's unbounded reward. Same reward
+    STRUCTURE as sprint — only the cap differs. """
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.WALK,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
+
+
+@dataclass
+class WalkStepsConfig(LaneConfig):
+    """ ALLSTEPS stepping targets layered on the WALKING base (WalkEnv): lane +
+    facing termination + run start + capped-velocity walk reward, PLUS foot
+    target-hitting + progress rewards. Same walk reward terms as WalkConfig,
+    plus lambda_target/lambda_progress for the stepping targets. """
+    lambda_target: float = 1e-1
+    lambda_progress: float = 2.0
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.WALK_STEPS,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+            # Root perturbations (ramped, horizontally biased): punish the fragile
+            # explosive push-off that kicks the stance foot out from under it.
+            apply_perturbations=True,
+            perturbation_ramp_steps=30_000,
+        )
+
+
+@dataclass
+class StoneCourseConfig(BaseArgs):
+    """ Physical stepping-stone courses, MINIMAL objective: forward progress +
+    don't fall. No foot-target/gait rewards — raised box slabs physically
+    dictate footwork; the gait must emerge. """
+    lambda_vel: float = 1e-1
+    lambda_alive: float = 1e-2
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_run.yaml",
+            env_variant=DerivedEnv.STONE_COURSE,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
+
+
+@dataclass
+class NaturalWalkConfig(LocomotionConfig):
+    """ Locomotion with environment filters that select for natural gait without
+    touching rewards: push perturbations (ramped, horizontally biased),
+    mid-episode command switches incl. stops/starts, and small terrain bumps. """
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_stand.yaml",
+            apply_perturbations=True,
+            perturbation_ramp_steps=30_000,
+            resample_commands=True,
+            # Terrain bumps work but add ~200 colliders (one-time ~15min warp
+            # kernel recompile + broadphase cost); enable explicitly if needed
+            apply_terrain_noise=False,
+        )
+
+
+@dataclass
+class StepsConfig(BaseArgs):
+    """ ALLSTEPS stepping targets (Xie et al. 2020): reward = target-hitting +
+    progress through the foot-target sequence, with a difficulty curriculum.
+    NOTE: this branch intentionally ADDS reward terms (faithful to the paper);
+    the plan is to ablate them once it walks (see natural-walking-task-design). """
+    lambda_target: float = 1e-1
+    lambda_progress: float = 2.0
+    lambda_alive: float = 1e-2
+    lambda_limit: float = -3e-4
+    lambda_muscle_passive: float = 0.0
+
+    def __post_init__(self):
+        super().__post_init__()
+        self._apply_env_overrides(
+            pose_name="starting_pose_stand.yaml",
+            env_variant=DerivedEnv.STEPS,
+            delta_t=1.0 / 30.0,
+            max_episode_duration=10.0,
+        )
+
+
+@dataclass
 class VerticalConfig(BaseArgs):
     lambda_jump: float = 1e-1
     lambda_limit: float = -3e-4
@@ -329,6 +448,7 @@ class ImitateConfig(BaseArgs):
 
 Config = Union[
     Annotated[SprintConfig, tyro.conf.subcommand(name="sprint")],
+    Annotated[SprintPDRLConfig, tyro.conf.subcommand(name="sprintpdrl")],
     Annotated[SprintBlockStartConfig, tyro.conf.subcommand(name="blockstart")],
     Annotated[BackpedalConfig, tyro.conf.subcommand(name="backpedal")],
     Annotated[SideShuffleConfig, tyro.conf.subcommand(name="sideshuffle")],
@@ -339,6 +459,11 @@ Config = Union[
     Annotated[CariocaConfig, tyro.conf.subcommand(name="carioca")],
     Annotated[VerticalConfig, tyro.conf.subcommand(name="vertical")],
     Annotated[LocomotionConfig, tyro.conf.subcommand(name="locomotion")],
+    Annotated[NaturalWalkConfig, tyro.conf.subcommand(name="walknat")],
+    Annotated[StepsConfig, tyro.conf.subcommand(name="steps")],
+    Annotated[WalkConfig, tyro.conf.subcommand(name="walk")],
+    Annotated[WalkStepsConfig, tyro.conf.subcommand(name="walksteps")],
+    Annotated[StoneCourseConfig, tyro.conf.subcommand(name="stonecourse")],
     Annotated[ImitateConfig, tyro.conf.subcommand(name="imitate")],
 ]
 

@@ -22,9 +22,8 @@ from .env_sprint import SprintingEnv
 from .env_config import EnvConfig
 from msk_envs.distill.dof_utils import joint_dof_indices, build_actuator_perm
 
-# Avoid circular import: dagger_pd imports env_factory, which imports this module
-# Import decode/QDES_DELTA_CLAMP locally in methods that need them
-QDES_DELTA_CLAMP = 0.5  # Copy constant to avoid import
+# Avoid circular import: dagger_pd imports env_factory, which imports this module.
+# decode/QDES_DELTA_CLAMP are imported LOCALLY inside _set_actions (single source of truth).
 
 
 class SprinterPDRLEnv(SprintingEnv):
@@ -88,8 +87,9 @@ class SprinterPDRLEnv(SprintingEnv):
         env.step() calls pre_sim_step -> _set_actions -> launch_sim_step, so the sim step happens
         AFTER this function returns.
         """
-        # Import decode locally to avoid circular import
-        from msk_envs.distill.dagger_pd import decode
+        # Import decode + QDES_DELTA_CLAMP locally to avoid circular import
+        # (single source of truth: dagger_pd)
+        from msk_envs.distill.dagger_pd import decode, QDES_DELTA_CLAMP
 
         # Store for _get_actions
         self._last_raw_action.copy_(raw_action)

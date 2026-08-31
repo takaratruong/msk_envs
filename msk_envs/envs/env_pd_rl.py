@@ -89,6 +89,11 @@ class SprinterPDRLEnv(SprintingEnv):
         self._last_kp = torch.zeros((num_envs, 25), device=device)
         self._last_kd = torch.zeros((num_envs, 25), device=device)
 
+        # Impedance oracle (loaded lazily in _compute_raw_reward_dict). See impedance_cache.py.
+        self._oracle = None
+        self._oracle_loaded = False
+        self._oracle_eps = 1e-3
+
     def _get_actions(self) -> torch.Tensor:
         """Return the 75-dim PD action buffer (defines num_actions == 75)."""
         return self._last_raw_action.detach().clone()
@@ -130,15 +135,59 @@ class SprinterPDRLEnv(SprintingEnv):
         # Force muscles OFF (excitation = 0 → mapped to [0,1] range via base class, so raw = -1)
         self.muscle_excitations.zero_()
 
+    def _load_impedance_oracle(self):
+        """Lazily load the offline impedance oracle (obs359 -> log kp,log kd) once.
+
+        The oracle is built OFFLINE on a teacher rollout of the muscle twin env (see
+        distill/impedance_cache.py) because extract_impedance needs muscles active and is far too
+        slow to run in the RL loop. If the oracle file is missing, WARN once and disable the term
+        (rew_impedance stays 0) so training still runs instead of hard-crashing.
+        """
+        if self._oracle_loaded:
+            return
+        self._oracle_loaded = True
+        from msk_envs.distill.impedance_cache import load_oracle, ORACLE_PATH, ORACLE_EPS
+        self._oracle_eps = ORACLE_EPS
+        if not os.path.exists(ORACLE_PATH):
+            print(
+                f"WARNING [SprinterPDRLEnv]: impedance oracle not found at {ORACLE_PATH}; "
+                f"rew_impedance disabled (0.0). Build it via "
+                f"`python -m msk_envs.distill.impedance_cache --rebuild`.",
+                flush=True,
+            )
+            self._oracle = None
+            return
+        self._oracle, _ = load_oracle(ORACLE_PATH, self.device)
+
     def _compute_raw_reward_dict(self):
-        """Compute sprint rewards + rew_impedance placeholder (0.0 until Task 2)."""
+        """Compute sprint rewards + rew_impedance (log-space distance to teacher impedance).
+
+        rew_impedance = -sum_j (log kp_pol - log kp_tea)^2 - sum_j (log kd_pol - log kd_tea)^2,
+        per env, where kp_pol/kd_pol are the policy's last-applied gains (self._last_kp/_last_kd)
+        and (log kp_tea, log kd_tea) = oracle(obs). Uses the SAME eps as the oracle's targets.
+        """
         # Inherit base sprint terms (rew_vel, rew_mid_lane, spring/damper/limit penalties)
         super()._compute_raw_reward_dict()
 
-        # Add impedance reward placeholder (Task 2 will populate this with the actual loss)
-        self.reward_dict["rew_impedance"] = torch.zeros(
-            self.num_worlds, device=self.device
-        )
+        self._load_impedance_oracle()
+        if self._oracle is None:
+            # Oracle unavailable: leave term at 0 so the RL loop keeps running.
+            self.reward_dict["rew_impedance"] = torch.zeros(
+                self.num_worlds, device=self.device
+            )
+            return
+
+        eps = self._oracle_eps
+        with torch.no_grad():
+            log_kp_tea, log_kd_tea = self._oracle(self._get_obs())  # (n,25) each
+            log_kp_pol = self._last_kp.clamp_min(eps).log()
+            log_kd_pol = self._last_kd.clamp_min(eps).log()
+            rew = (
+                -((log_kp_pol - log_kp_tea) ** 2).sum(dim=1)
+                - ((log_kd_pol - log_kd_tea) ** 2).sum(dim=1)
+            )
+            rew = torch.nan_to_num(rew, nan=0.0, posinf=0.0, neginf=0.0)
+        self.reward_dict["rew_impedance"] = rew.detach()
 
 
 if __name__ == "__main__":

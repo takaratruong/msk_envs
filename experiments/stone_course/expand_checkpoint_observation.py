@@ -44,16 +44,16 @@ def _expand_normalizer_tensor(name: str, value: torch.Tensor) -> torch.Tensor:
     expanded[:, NEW_COURSE_FEATURES:] = value[:, OLD_COURSE_FEATURES:]
 
     # Four target top heights begin around one metre below the pelvis. The
-    # orientation features begin at zero. These priors avoid a startup spike;
-    # a deliberately small count lets all statistics adapt within a few steps.
+    # orientation features begin at zero. These fixed priors avoid a startup
+    # spike while preserving the learned normalization of every legacy input.
     if name == "_mean":
         expanded[:, OLD_COURSE_FEATURES:12] = -1.0
     elif name == "_var":
         expanded[:, OLD_COURSE_FEATURES:12] = 0.04
-        expanded[:, 12:NEW_COURSE_FEATURES] = 1.0
+        expanded[:, 12:NEW_COURSE_FEATURES] = 0.04
     elif name == "_std":
         expanded[:, OLD_COURSE_FEATURES:12] = 0.2
-        expanded[:, 12:NEW_COURSE_FEATURES] = 1.0
+        expanded[:, 12:NEW_COURSE_FEATURES] = 0.2
     else:
         raise ValueError(f"unsupported normalizer tensor: {name}")
     return expanded
@@ -84,7 +84,6 @@ def expand_checkpoint(checkpoint: dict) -> dict:
     normalizer = dict(checkpoint["obs_normalizer_state"])
     for name in ("_mean", "_var", "_std"):
         normalizer[name] = _expand_normalizer_tensor(name, normalizer[name])
-    normalizer["count"] = normalizer["count"].new_tensor(1024)
     migrated["obs_normalizer_state"] = normalizer
     migrated["environment_state"] = {
         "terrain_curriculum": {

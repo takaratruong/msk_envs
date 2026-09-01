@@ -158,9 +158,10 @@ WARMSTART_CHECKPOINT=models/stonecourse_allsteps_forward_warmstart.pt \
   ./experiments/stone_course/train.sh
 ```
 
-The migration retains the old X/Z and body features exactly, initializes the
-new policy/critic columns to zero, and resets terrain curriculum state to the
-flat, straight 0.65–0.80 m stage.
+The migration retains the old X/Z features, body features, and normalization
+statistics exactly; initializes the new policy/critic columns to zero; assigns
+sensible fixed scales to the new terrain inputs; and resets terrain curriculum
+state to the flat, straight 0.65–0.80 m stage.
 
 ## Outputs and evaluation
 

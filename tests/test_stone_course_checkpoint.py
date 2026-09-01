@@ -31,7 +31,7 @@ class StoneCourseCheckpointMigrationTest(unittest.TestCase):
         self.assertTrue(torch.equal(actor[:, 20:], actor_weight[:, 8:]))
         self.assertEqual(critic.shape, (3, 29))
         self.assertTrue(torch.equal(critic[:, 24:], critic_weight[:, 12:]))
-        self.assertEqual(migrated["obs_normalizer_state"]["count"].item(), 1024)
+        self.assertEqual(migrated["obs_normalizer_state"]["count"].item(), 999999)
         self.assertEqual(
             migrated["environment_state"]["terrain_curriculum"]["current_maximum"],
             0.80,

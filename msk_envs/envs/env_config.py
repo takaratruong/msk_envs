@@ -113,10 +113,20 @@ class EnvConfig:
     """ Standard deviation of perturbation force magnitude to apply """
 
     # Stone course (STONE_COURSE variant)
-    course_stones: int = 24
-    """ Number of physical slab instances in every world """
-    course_step_length_range: tuple = (0.4, 0.7)
-    """ Per-reset forward center-to-center spacing range (m) """
+    course_stones: int = 5
+    """ Recycled physical slab instances per world (one spare plus lookahead) """
+    course_step_length_range: tuple = (0.4, 0.85)
+    """ Final curriculum range for forward center-to-center spacing (m) """
+    course_initial_step_length_max: float = 0.55
+    """ Initial upper spacing bound; the lower bound stays fixed """
+    course_curriculum_increment: float = 0.05
+    """ Increase applied to the upper spacing bound after curriculum promotion """
+    course_curriculum_success_threshold: float = 0.60
+    """ Completion rate required to increase the upper spacing bound """
+    course_curriculum_window: int = 1024
+    """ Completed episodes used for each curriculum decision """
+    course_curriculum_min_progress: float = 12.0
+    """ Forward distance required at the time limit for a competent episode (m) """
     course_lateral_jitter: float = 0.10
     """ Per-reset lateral jitter (m) around the alternating foot line """
     course_slab_size: tuple = (0.36, 0.10, 0.36)
@@ -125,6 +135,12 @@ class EnvConfig:
     """ Height of the walkable slab surface above the lower ground plane (m) """
     course_lookahead: int = 4
     """ Number of upcoming root-relative slab centers included in observations """
+    course_require_interior_landing: bool = True
+    """ Reject touchdowns whose complete foot-contact footprint crosses a slab edge """
+    course_landing_check_delay: float = 0.25
+    """ Seconds after reset before interior-touchdown validation begins """
+    course_recycle_distance_behind: float = 0.15
+    """ Minimum distance behind the pelvis before an inactive slab is moved ahead (m) """
     walk_target_speed: float = 1.4
     """ Forward speed (m/s) at which the course velocity reward is capped """
 

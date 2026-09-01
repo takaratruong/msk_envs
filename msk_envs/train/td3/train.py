@@ -198,6 +198,11 @@ def train(
     def evaluate(model_path: str):
         policy_eval = load_policy(model_path).to(device=device)
 
+        # Evaluation owns a separate environment, so explicitly give it the
+        # training task's current curriculum before sampling its new layouts.
+        if hasattr(envs, "get_task_state") and hasattr(eval_envs, "load_task_state"):
+            eval_envs.load_task_state(envs.get_task_state())
+
         # Build logged sim wrapper
         sim = LoggedSim(eval_envs, device=device)
         eval_obs = sim.reset()
@@ -383,6 +388,12 @@ def train(
         if "global_step" in torch_checkpoint:
             global_step = torch_checkpoint["global_step"]
 
+        environment_state = torch_checkpoint.get("environment_state")
+        if environment_state is not None and hasattr(envs, "load_task_state"):
+            envs.load_task_state(environment_state)
+            if hasattr(eval_envs, "load_task_state"):
+                eval_envs.load_task_state(environment_state)
+
         # Load optimizer and scheduler states if available
         if "actor_optimizer_state_dict" in torch_checkpoint:
             actor_optimizer.load_state_dict(torch_checkpoint["actor_optimizer_state_dict"])
@@ -520,6 +531,9 @@ def train(
                     q_scheduler=q_scheduler,
                     scaler=scaler,
                     include_optim_state=td3_config.save_optimizer_state,
+                    environment_state=(
+                        envs.get_task_state() if hasattr(envs, "get_task_state") else None
+                    ),
                 )
 
             if global_step % td3_config.eval_freq == 0 and latest_model_path is not None:

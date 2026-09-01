@@ -20,6 +20,7 @@ def save_params(
         q_scheduler=None,
         scaler=None,
         include_optim_state: bool = False,
+        environment_state=None,
 ):
     """Save model parameters and training configuration to disk."""
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -35,6 +36,8 @@ def save_params(
         "args": vars(args),
         "global_step": global_step,
     }
+    if environment_state is not None:
+        save_dict["environment_state"] = environment_state
     if include_optim_state:
         if actor_optimizer is not None:
             save_dict["actor_optimizer_state_dict"] = actor_optimizer.state_dict()

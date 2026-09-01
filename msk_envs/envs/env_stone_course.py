@@ -28,8 +28,8 @@ class StoneCourseSpec:
     passed_margin: float = 0.10
 
     def __post_init__(self) -> None:
-        if self.num_stones < 1:
-            raise ValueError("course_stones must be at least 1")
+        if self.num_stones < self.lookahead + 1:
+            raise ValueError("course_stones must provide one spare slab beyond course_lookahead")
         self._validate_range("course_step_length_range", self.step_length_range)
         self._validate_range("launch_step_length_range", self.launch_step_length_range)
         if self.lateral_jitter < 0.0:
@@ -66,12 +66,11 @@ class StoneCourseSpec:
         return self.top_height - self.half_extents[UP_IDX]
 
     def default_positions(self, device: torch.device | str = "cpu") -> torch.Tensor:
-        """Deterministic layout used while Bolt constructs the shared geometry."""
+        """Deterministic layout used while Bolt constructs shared geometry."""
         midpoint = sum(self.step_length_range) * 0.5
         step_lengths = torch.full((1, self.num_stones), midpoint, device=device)
         launch_count = min(2, self.num_stones)
-        launch_midpoint = sum(self.launch_step_length_range) * 0.5
-        step_lengths[:, :launch_count] = launch_midpoint
+        step_lengths[:, :launch_count] = sum(self.launch_step_length_range) * 0.5
         lateral_jitter = torch.zeros_like(step_lengths)
         return self._positions_from_steps(step_lengths, lateral_jitter).squeeze(0)
 
@@ -80,12 +79,16 @@ class StoneCourseSpec:
         num_courses: int,
         device: torch.device | str,
         generator: torch.Generator | None = None,
+        step_length_max: float | None = None,
     ) -> torch.Tensor:
-        """Sample one independent layout per course/world."""
+        """Sample one independent five-slab buffer per course/world."""
         if num_courses < 0:
             raise ValueError("num_courses must be non-negative")
 
-        lo, hi = self.step_length_range
+        lo, final_hi = self.step_length_range
+        hi = final_hi if step_length_max is None else step_length_max
+        if hi < lo or hi > final_hi:
+            raise ValueError("step_length_max must stay inside course_step_length_range")
         step_lengths = torch.rand(
             (num_courses, self.num_stones), device=device, generator=generator
         ) * (hi - lo) + lo
@@ -127,8 +130,14 @@ class StoneCourseSpec:
         lookahead_offsets: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """Flatten the next N root-relative (forward, lateral) slab centers."""
+        order = stone_positions[:, :, FWD_IDX].argsort(dim=1)
+        ordered = torch.gather(
+            stone_positions,
+            1,
+            order.unsqueeze(-1).expand(-1, -1, 3),
+        )
         root_xz = root_positions[:, [FWD_IDX, SIDE_IDX]]
-        passed = stone_positions[:, :, FWD_IDX] < (
+        passed = ordered[:, :, FWD_IDX] < (
             root_positions[:, FWD_IDX, None] - self.passed_margin
         )
         next_stone = passed.sum(dim=1)
@@ -137,29 +146,135 @@ class StoneCourseSpec:
             offsets = torch.arange(self.lookahead, device=stone_positions.device)
         indices = (next_stone[:, None] + offsets[None, :]).clamp_max(self.num_stones - 1)
         targets = torch.gather(
-            stone_positions,
+            ordered,
             1,
             indices.unsqueeze(-1).expand(-1, -1, 3),
         )
         return (targets[:, :, [FWD_IDX, SIDE_IDX]] - root_xz[:, None, :]).flatten(1)
 
 
+@dataclass
+class SpacingCurriculum:
+    """Monotonically expand only the upper spacing bound with competence."""
+
+    minimum: float
+    maximum: float
+    current_maximum: float
+    increment: float
+    success_threshold: float
+    window: int
+    episodes: int = 0
+    successes: int = 0
+    last_completion_rate: float = 0.0
+
+    def __post_init__(self) -> None:
+        if not self.minimum <= self.current_maximum <= self.maximum:
+            raise ValueError(
+                "course_initial_step_length_max must lie inside course_step_length_range"
+            )
+        if self.increment <= 0.0:
+            raise ValueError("course_curriculum_increment must be positive")
+        if not 0.0 <= self.success_threshold <= 1.0:
+            raise ValueError("course_curriculum_success_threshold must be in [0, 1]")
+        if self.window < 1:
+            raise ValueError("course_curriculum_window must be at least 1")
+
+    @classmethod
+    def from_env_config(
+        cls,
+        config: EnvConfig,
+        course: StoneCourseSpec,
+    ) -> "SpacingCurriculum":
+        return cls(
+            minimum=course.step_length_range[0],
+            maximum=course.step_length_range[1],
+            current_maximum=config.course_initial_step_length_max,
+            increment=config.course_curriculum_increment,
+            success_threshold=config.course_curriculum_success_threshold,
+            window=config.course_curriculum_window,
+        )
+
+    def observe(self, successful_episodes: torch.Tensor) -> bool:
+        """Record completed episodes and promote once the window is competent."""
+        count = successful_episodes.numel()
+        if count == 0:
+            return False
+        self.episodes += count
+        self.successes += int(successful_episodes.bool().sum().item())
+        if self.episodes < self.window:
+            return False
+
+        self.last_completion_rate = self.successes / self.episodes
+        promoted = (
+            self.last_completion_rate >= self.success_threshold
+            and self.current_maximum < self.maximum
+        )
+        if promoted:
+            self.current_maximum = min(
+                self.maximum,
+                self.current_maximum + self.increment,
+            )
+        self.episodes = 0
+        self.successes = 0
+        return promoted
+
+    def state_dict(self) -> dict:
+        """Return the small, device-independent state needed for a resume."""
+        return {
+            "current_maximum": self.current_maximum,
+            "episodes": self.episodes,
+            "successes": self.successes,
+            "last_completion_rate": self.last_completion_rate,
+        }
+
+    def load_state_dict(self, state: dict) -> None:
+        """Restore progress while retaining bounds from the current config."""
+        current_maximum = float(state["current_maximum"])
+        if not self.minimum <= current_maximum <= self.maximum:
+            raise ValueError("checkpoint curriculum maximum is outside the configured range")
+
+        episodes = int(state.get("episodes", 0))
+        successes = int(state.get("successes", 0))
+        completion_rate = float(state.get("last_completion_rate", 0.0))
+        if episodes < 0 or successes < 0 or successes > episodes:
+            raise ValueError("checkpoint curriculum episode counts are invalid")
+        if not 0.0 <= completion_rate <= 1.0:
+            raise ValueError("checkpoint curriculum completion rate must be in [0, 1]")
+
+        self.current_maximum = current_maximum
+        self.episodes = episodes
+        self.successes = successes
+        self.last_completion_rate = completion_rate
+
+
 class StoneCourseEnv(LanesEnv):
-    """Raised box slabs with a new independent layout in every world/reset.
+    """Endless randomized slab terrain backed by five recycled box colliders.
 
-    Bolt keeps one shared set of collider IDs, but collider transforms live in
-    the per-world data tensor. Updating only a world's transform rows gives it
-    its own course while preserving batched broadphase and collision isolation.
+    Every world owns independent transforms for the same five collider IDs.
+    Once a slab is safely behind the pelvis, that world's slab is moved beyond
+    its furthest slab and receives a new random gap. The policy always observes
+    the four closest upcoming slabs.
 
-    The task intentionally has no foot-target or gait-shaping reward. It rewards
-    capped forward velocity and staying upright. Falling is a terminal failure;
-    contacting the final slab is a successful truncation.
+    The reward remains capped forward velocity plus staying upright. Falling,
+    turning away, or catching a slab only by its edge is a terminal failure.
+    The ordinary time limit is a neutral truncation; there is no final slab.
     """
 
     def __init__(self, num_envs, env_config, device, requires_visuals, cuda_graph):
         self.course = StoneCourseSpec.from_env_config(env_config)
-        default_positions = self.course.default_positions()
+        self.spacing_curriculum = SpacingCurriculum.from_env_config(env_config, self.course)
+        self.require_interior_landing = env_config.course_require_interior_landing
+        self.landing_check_delay = env_config.course_landing_check_delay
+        self.recycle_distance_behind = env_config.course_recycle_distance_behind
+        self.curriculum_min_progress = env_config.course_curriculum_min_progress
+        if self.landing_check_delay < 0.0:
+            raise ValueError("course_landing_check_delay must be non-negative")
+        if self.recycle_distance_behind < 0.0:
+            raise ValueError("course_recycle_distance_behind must be non-negative")
+        if self.curriculum_min_progress < 0.0:
+            raise ValueError("course_curriculum_min_progress must be non-negative")
 
+        default_positions = self.course.default_positions()
         super().__init__(
             num_envs=num_envs,
             env_config=env_config,
@@ -176,30 +291,53 @@ class StoneCourseEnv(LanesEnv):
             device=device,
             dtype=torch.long,
         )
+        foot_entries = [
+            (name, collider_id)
+            for name, collider_id in self.collider_id_lookup.items()
+            if name.startswith(("left_foot_", "right_foot_"))
+        ]
+        if not foot_entries:
+            raise ValueError("StoneCourse requires named left_foot_/right_foot_ colliders")
         self.foot_collider_ids = torch.tensor(
-            [
-                collider_id
-                for name, collider_id in self.collider_id_lookup.items()
-                if name.startswith(("left_foot_", "right_foot_"))
-            ],
+            [collider_id for _, collider_id in foot_entries],
             device=device,
             dtype=torch.long,
         )
-        if self.foot_collider_ids.numel() == 0:
-            raise ValueError("StoneCourse requires named left_foot_/right_foot_ colliders")
-
+        self.foot_side_masks = (
+            torch.tensor([name.startswith("left_foot_") for name, _ in foot_entries], device=device),
+            torch.tensor([name.startswith("right_foot_") for name, _ in foot_entries], device=device),
+        )
         self.foot_collider_radii = self.collider_sizes[self.foot_collider_ids, 0]
         self.slab_half_extents_xz = torch.tensor(
             [self.course.half_extents[FWD_IDX], self.course.half_extents[SIDE_IDX]],
             device=device,
             dtype=self.foot_collider_radii.dtype,
         )
+        self.interior_half_extents_xz = (
+            self.slab_half_extents_xz - self.foot_collider_radii.unsqueeze(1)
+        )
+        if (self.interior_half_extents_xz <= 0.0).any():
+            raise ValueError("course_slab_size must exceed every foot contact diameter")
+
         self.lookahead_offsets = torch.arange(self.course.lookahead, device=device)
         self.stone_positions = default_positions.to(device).unsqueeze(0).repeat(num_envs, 1, 1)
+        self.next_lateral_sign = torch.full(
+            (num_envs,),
+            -1.0 if self.course.num_stones % 2 else 1.0,
+            device=device,
+        )
+        self.previous_foot_contact = torch.zeros(
+            (num_envs, 2), device=device, dtype=torch.bool
+        )
+        self._episode_started = torch.zeros(num_envs, device=device, dtype=torch.bool)
+        self._episode_start_x = torch.zeros(num_envs, device=device)
         self._last_success = torch.zeros(num_envs, device=device, dtype=torch.bool)
+        self._last_edge_violation = torch.zeros(num_envs, device=device, dtype=torch.bool)
+        self.episode_slabs_recycled = torch.zeros(num_envs, device=device, dtype=torch.long)
         self.last_progress_x = 0.0
+        self.last_mean_slabs_recycled = 0.0
 
-    # ---- course geometry and per-world randomization -------------------------------
+    # ---- course geometry and per-world recycling ---------------------------------
 
     def _add_colliders(self, env_config: EnvConfig) -> None:
         half_extents = self.course.half_extents
@@ -227,14 +365,71 @@ class StoneCourseEnv(LanesEnv):
             world_ids[:, None], self.stone_ids[None, :], :3
         ] = positions
 
+    def _record_finished_episodes(self, world_ids: torch.Tensor) -> None:
+        finished = world_ids[self._episode_started[world_ids]]
+        if finished.numel() > 0:
+            self.spacing_curriculum.observe(self._last_success[finished])
+
     def _randomize_stones(self, reset_mask: torch.Tensor) -> None:
-        """Sample and install a fresh physical course for each resetting world."""
+        """Install a new independent five-slab buffer in resetting worlds."""
         world_ids = torch.where(reset_mask.flatten().bool())[0]
         if world_ids.numel() == 0:
             return
-        positions = self.course.sample_positions(world_ids.numel(), self.device)
+        self._record_finished_episodes(world_ids)
+        positions = self.course.sample_positions(
+            world_ids.numel(),
+            self.device,
+            step_length_max=self.spacing_curriculum.current_maximum,
+        )
         self._set_course_positions(world_ids, positions)
+        self.next_lateral_sign[world_ids] = -1.0 if self.course.num_stones % 2 else 1.0
+        self.previous_foot_contact[world_ids] = False
         self._last_success[world_ids] = False
+        self._last_edge_violation[world_ids] = False
+        self.episode_slabs_recycled[world_ids] = 0
+        self._episode_started[world_ids] = True
+
+    def _recycle_passed_stones(self) -> None:
+        """Move safely passed slabs ahead, independently in every world."""
+        safely_behind = self.stone_positions[:, :, FWD_IDX] < (
+            self.root_pos[:, FWD_IDX, None] - self.recycle_distance_behind
+        )
+        inactive = self.collider_forces[:, self.stone_ids] <= 0.0
+        eligible = safely_behind & inactive
+        world_ids = torch.where(eligible.any(dim=1))[0]
+
+        # At normal locomotion speeds no world can pass two 0.4 m-spaced slabs
+        # in one 1/30-second policy step, so one move per world is sufficient.
+        # Keeping this branch-free avoids repeated CPU/GPU synchronizations.
+        masked_x = torch.where(
+            eligible[world_ids],
+            self.stone_positions[world_ids, :, FWD_IDX],
+            torch.full_like(self.stone_positions[world_ids, :, FWD_IDX], torch.inf),
+        )
+        recycled_local_ids = masked_x.argmin(dim=1)
+        furthest_x = self.stone_positions[world_ids, :, FWD_IDX].max(dim=1).values
+        lo = self.spacing_curriculum.minimum
+        hi = self.spacing_curriculum.current_maximum
+        gaps = torch.rand(world_ids.numel(), device=self.device) * (hi - lo) + lo
+        lateral_jitter = (
+            torch.rand(world_ids.numel(), device=self.device) * 2.0 - 1.0
+        ) * self.course.lateral_jitter
+        new_positions = torch.stack(
+            (
+                furthest_x + gaps,
+                torch.full_like(gaps, self.course.center_height),
+                self.next_lateral_sign[world_ids]
+                * self.course.alternating_lateral_offset
+                + lateral_jitter,
+            ),
+            dim=1,
+        )
+
+        collider_ids = self.stone_ids[recycled_local_ids]
+        self.stone_positions[world_ids, recycled_local_ids] = new_positions
+        self.collider_local_transforms[world_ids, collider_ids, :3] = new_positions
+        self.next_lateral_sign[world_ids] *= -1.0
+        self.episode_slabs_recycled[world_ids] += 1
 
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         self._randomize_stones(reset_mask)
@@ -243,6 +438,10 @@ class StoneCourseEnv(LanesEnv):
         pelvis_height = self.qpos_id_lookup["pelvis_ty"]
         self.joint_positions[reset_mask, pelvis_height] += self.course.top_height
         self.launch_sim_reset()
+        self._episode_start_x[reset_mask] = self.root_pos[reset_mask, FWD_IDX]
+
+    def _pre_step(self) -> None:
+        self._recycle_passed_stones()
 
     # ---- observation, objective, and episode boundaries ---------------------------
 
@@ -272,41 +471,75 @@ class StoneCourseEnv(LanesEnv):
             "rew_alive": torch.ones(self.num_worlds, device=self.device),
         }
 
-    def _get_terminated(self) -> torch.Tensor:
-        fallen = self.root_pos[:, UP_IDX] < (self.course.top_height + MIN_ROOT_HEIGHT)
-        not_facing = ~self._is_body_facing_direction(self.root_id)
-        return (fallen | not_facing).float().detach()
-
-    def _reached_last_stone(self) -> torch.Tensor:
-        """Return worlds with an active foot contact on the final physical slab."""
-        final_slab_active = self.collider_forces[:, self.stone_ids[-1]] > 0.0
+    def _interior_foot_support(self) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return per-side physical contact and whole-foot interior support."""
         foot_active = self.collider_forces[:, self.foot_collider_ids] > 0.0
-
+        stone_active = self.collider_forces[:, self.stone_ids] > 0.0
         foot_xz = self.collider_positions[:, self.foot_collider_ids][
             :, :, [FWD_IDX, SIDE_IDX]
         ]
-        final_slab_xz = self.stone_positions[:, -1, [FWD_IDX, SIDE_IDX]].unsqueeze(1)
-        reach = self.slab_half_extents_xz + self.foot_collider_radii.unsqueeze(1)
-        foot_over_final_slab = (
-            (foot_xz - final_slab_xz).abs() <= reach.unsqueeze(0)
-        ).all(dim=2)
-        return (
-            final_slab_active & (foot_active & foot_over_final_slab).any(dim=1)
-        ).detach()
+        stone_xz = self.stone_positions[:, :, [FWD_IDX, SIDE_IDX]]
+        collider_inside = (
+            (foot_xz[:, :, None, :] - stone_xz[:, None, :, :]).abs()
+            <= self.interior_half_extents_xz[None, :, None, :]
+        ).all(dim=3)
+
+        contact_by_side = []
+        interior_by_side = []
+        for mask in self.foot_side_masks:
+            side_active = foot_active[:, mask]
+            side_inside = collider_inside[:, mask]
+            whole_foot_inside = side_inside.all(dim=1)
+            active_collider_inside = (side_inside & side_active[:, :, None]).any(dim=1)
+            valid_slab = whole_foot_inside & active_collider_inside & stone_active
+            contact_by_side.append(side_active.any(dim=1))
+            interior_by_side.append(valid_slab.any(dim=1))
+        return torch.stack(contact_by_side, dim=1), torch.stack(interior_by_side, dim=1)
+
+    def _invalid_edge_touchdown(self) -> torch.Tensor:
+        contact_by_side, interior_by_side = self._interior_foot_support()
+        touchdown = contact_by_side & ~self.previous_foot_contact
+        after_launch = self.time >= self.landing_check_delay
+        invalid = (touchdown & ~interior_by_side).any(dim=1) & after_launch
+        self.previous_foot_contact.copy_(contact_by_side)
+        self._last_edge_violation.copy_(invalid)
+        if not self.require_interior_landing:
+            return torch.zeros_like(invalid)
+        return invalid
+
+    def _get_terminated(self) -> torch.Tensor:
+        fallen = self.root_pos[:, UP_IDX] < (self.course.top_height + MIN_ROOT_HEIGHT)
+        not_facing = ~self._is_body_facing_direction(self.root_id)
+        invalid_edge_landing = self._invalid_edge_touchdown()
+        return (fallen | not_facing | invalid_edge_landing).float().detach()
 
     def _get_truncated(self) -> torch.Tensor:
         timed_out = super()._get_truncated().bool()
-        reached_final_slab = self._reached_last_stone()
-        self._last_success.copy_(reached_final_slab)
-        return (timed_out | reached_final_slab).float().detach()
+        progress = self.root_pos[:, FWD_IDX] - self._episode_start_x
+        competent = timed_out & (progress >= self.curriculum_min_progress)
+        self._last_success.copy_(competent)
+        return timed_out.float().detach()
 
     # ---- metrics -------------------------------------------------------------------
 
     def update_metrics(self) -> None:
-        self.last_progress_x = self.root_pos[:, FWD_IDX].mean().item()
+        progress = self.root_pos[:, FWD_IDX] - self._episode_start_x
+        self.last_progress_x = progress.mean().item()
+        self.last_mean_slabs_recycled = self.episode_slabs_recycled.float().mean().item()
 
     def additional_metrics(self) -> dict:
         return {
             "mean_forward_progress": self.last_progress_x,
-            "successful_completion_rate": self._last_success.float().mean().item(),
+            "mean_slabs_recycled": self.last_mean_slabs_recycled,
+            "curriculum_step_length_max": self.spacing_curriculum.current_maximum,
+            "curriculum_completion_rate": self.spacing_curriculum.last_completion_rate,
         }
+
+    def get_task_state(self) -> dict:
+        """State shared with evaluation and persisted in TD3 checkpoints."""
+        return {"spacing_curriculum": self.spacing_curriculum.state_dict()}
+
+    def load_task_state(self, state: dict) -> None:
+        curriculum_state = state.get("spacing_curriculum") if state else None
+        if curriculum_state is not None:
+            self.spacing_curriculum.load_state_dict(curriculum_state)

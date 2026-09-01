@@ -22,8 +22,9 @@ when served over HTTP and reloads the stable video path when opened via
 `file://`.
 
 Commit `1fabeb5` is the focused checkpoint of the behavior that launched that
-run. Later commits on this branch are cleanup and documentation. They preserve
-the 344-value observation shape and experiment defaults, so policies retain the
-same input/output contract.
+run. The latest branch preserves the 344-value policy observation but replaces
+the finite 24-slab course with five recycled per-world slabs, rejects
+edge-pivot touchdowns, removes final-slab termination, and adds a
+success-driven spacing curriculum. The active run above predates those changes.
 
 Before changing behavior, read [README.md](README.md) and run the focused tests.

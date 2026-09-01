@@ -304,7 +304,7 @@ class StoneCourseConfig(BaseArgs):
             pose_name="starting_pose_run.yaml",
             env_variant=DerivedEnv.STONE_COURSE,
             delta_t=1.0 / 30.0,
-            max_episode_duration=10.0,
+            max_episode_duration=12.0,
         )
 
 

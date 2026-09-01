@@ -115,12 +115,32 @@ class EnvConfig:
     # Stone course (STONE_COURSE variant)
     course_stones: int = 5
     """ Recycled physical slab instances per world (one spare plus lookahead) """
-    course_step_length_range: tuple = (0.4, 0.85)
-    """ Final curriculum range for forward center-to-center spacing (m) """
-    course_initial_step_length_max: float = 0.55
-    """ Initial upper spacing bound; the lower bound stays fixed """
-    course_curriculum_increment: float = 0.05
-    """ Increase applied to the upper spacing bound after curriculum promotion """
+    course_step_length_range: tuple = (0.65, 1.50)
+    """ Final curriculum range for 3D center-to-center step distance (m) """
+    course_initial_step_length_max: float = 0.80
+    """ Initial upper distance bound; the lower bound stays fixed """
+    course_curriculum_increment: float = 0.14
+    """ Increase applied to the upper distance bound after curriculum promotion """
+    course_elevation_angle_max_degrees: float = 50.0
+    """ Final absolute elevation angle between successive slab tops """
+    course_initial_elevation_angle_max_degrees: float = 0.0
+    """ Initial absolute elevation angle (flat pretraining stage) """
+    course_curriculum_elevation_increment_degrees: float = 10.0
+    """ Elevation-angle expansion applied at each curriculum promotion """
+    course_yaw_angle_max_degrees: float = 20.0
+    """ Final absolute forward-biased turn angle between steps """
+    course_initial_yaw_angle_max_degrees: float = 0.0
+    """ Initial absolute turn angle (straight pretraining stage) """
+    course_curriculum_yaw_increment_degrees: float = 4.0
+    """ Turn-angle expansion applied at each curriculum promotion """
+    course_surface_tilt_max_degrees: float = 20.0
+    """ Final absolute roll and pitch of individual slab surfaces """
+    course_initial_surface_tilt_max_degrees: float = 0.0
+    """ Initial absolute surface tilt (flat pretraining stage) """
+    course_curriculum_surface_tilt_increment_degrees: float = 4.0
+    """ Surface-tilt expansion applied at each curriculum promotion """
+    course_top_height_range: tuple = (0.20, 1.05)
+    """ Absolute bounds for recycled slab top surfaces (m) """
     course_curriculum_success_threshold: float = 0.60
     """ Completion rate required to increase the upper spacing bound """
     course_curriculum_window: int = 1024
@@ -141,8 +161,8 @@ class EnvConfig:
     """ Seconds after reset before interior-touchdown validation begins """
     course_recycle_distance_behind: float = 0.15
     """ Minimum distance behind the pelvis before an inactive slab is moved ahead (m) """
-    walk_target_speed: float = 1.4
-    """ Forward speed (m/s) at which the course velocity reward is capped """
+    walk_target_speed: float = 1.35
+    """ Forward walking speed (m/s) at which the course velocity reward is capped """
 
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)

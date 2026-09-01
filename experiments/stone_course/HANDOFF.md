@@ -21,10 +21,22 @@ minute; it skips unchanged trajectories, publishes the newest rollout at
 when served over HTTP and reloads the stable video path when opened via
 `file://`.
 
-Commit `1fabeb5` is the focused checkpoint of the behavior that launched that
-run. The latest branch preserves the 344-value policy observation but replaces
-the finite 24-slab course with five recycled per-world slabs, rejects
-edge-pivot touchdowns, removes final-slab termination, and adds a
-success-driven spacing curriculum. The active run above predates those changes.
+The endless-course retrain is active in tmux session
+`stonecourse_recycled_interior` on physical GPU 5:
+
+- experiment: `stonecourse_recycled_interior_2026-09-01_00-13`;
+- worktree: `/home/ubuntu/msk_envs-stone-course`;
+- log: `models/stonecourse_recycled_interior_launch.log`; and
+- warm start: finite-course checkpoint 26000 from the run above.
+
+Attach with `tmux attach -t stonecourse_recycled_interior`. The renderer scans
+both worktrees and will switch the dashboard to this experiment when its first
+evaluation trajectory appears at iteration 27000.
+
+Commit `1fabeb5` is the focused checkpoint of the behavior that launched the
+old finite run. Commit `d8f15b8` preserves the 344-value policy observation but
+replaces the finite 24-slab course with five recycled per-world slabs, rejects
+edge-pivot touchdowns, removes final-slab termination, and adds a success-driven
+spacing curriculum with checkpoint/evaluation synchronization.
 
 Before changing behavior, read [README.md](README.md) and run the focused tests.

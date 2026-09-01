@@ -30,8 +30,10 @@ The endless-course retrain is active in tmux session
 - warm start: finite-course checkpoint 26000 from the run above.
 
 Attach with `tmux attach -t stonecourse_recycled_interior`. The renderer scans
-both worktrees and will switch the dashboard to this experiment when its first
-evaluation trajectory appears at iteration 27000.
+both worktrees and now prefers this experiment. Its iteration-27000 evaluation
+survived the full 12-second horizon, traveled 16.35 m, and recycled all five
+collider IDs; that rollout is published on the dashboard. The corresponding
+checkpoint is in the experiment's `models/` directory.
 
 Commit `1fabeb5` is the focused checkpoint of the behavior that launched the
 old finite run. Commit `d8f15b8` preserves the 344-value policy observation but

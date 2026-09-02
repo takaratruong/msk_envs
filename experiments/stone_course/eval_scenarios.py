@@ -23,6 +23,7 @@ import json
 import math
 import os
 import sys
+import zlib
 from pathlib import Path
 
 import torch
@@ -38,12 +39,21 @@ from msk_envs.utils.logged_sim import LoggedSim
 import tyro
 
 
-# (forward gap m, elevation rad) per fixed scenario
+# (forward gap m, elevation rad) per fixed scenario. Slopes are chosen so the
+# climb/descent spans most of a 12 s rollout inside the absolute
+# course_top_height_range corridor rather than saturating within a few slabs.
 SCENARIO_GAPS = {
     "flat": (0.80, 0.0),
-    "ascent": (0.90, math.radians(12.0)),
-    "descent": (0.90, math.radians(-6.0)),
+    "ascent": (0.90, math.radians(4.0)),
+    "descent": (0.90, math.radians(-4.0)),
     "rolling": (0.90, math.radians(18.0)),
+}
+
+# Launch-pad height override per scenario: ascent starts at the corridor floor
+# so the full corridor is available to climb; descent starts near the ceiling.
+SCENARIO_TOP_HEIGHT = {
+    "ascent": 0.25,
+    "descent": 1.00,
 }
 
 
@@ -52,7 +62,7 @@ def scenario_positions(spec, kind: str, num_stones: int, device) -> torch.Tensor
     forward_gap, elevation = SCENARIO_GAPS[kind]
     min_top, max_top = spec.top_height_range
     positions = torch.zeros((num_stones, 3))
-    top = spec.top_height
+    top = SCENARIO_TOP_HEIGHT.get(kind, spec.top_height)
     x = 0.0
     for index in range(num_stones):
         sign = 1.0 if index % 2 == 0 else -1.0
@@ -64,9 +74,6 @@ def scenario_positions(spec, kind: str, num_stones: int, device) -> torch.Tensor
             if kind == "rolling":
                 # two up, two down waves, climbing first
                 angle = elevation if ((index - 2) // 2) % 2 == 0 else -elevation
-            if kind == "descent":
-                # steepen with every slab until the floor
-                angle = elevation * (1.0 + 0.5 * (index - 2))
             top = float(min(max(top + forward_gap * math.tan(angle), min_top), max_top))
         positions[index, FWD_IDX] = x
         positions[index, UP_IDX] = top - spec.half_extents[UP_IDX]
@@ -79,6 +86,18 @@ class ScenarioStoneCourseEnv(StoneCourseEnv):
 
     scenario_kind: str | None = None
     scenario_generator: torch.Generator | None = None
+
+    def _upon_reset_post_sim(self, reset_mask):
+        # The base class raises the pelvis by the default launch-pad height;
+        # scenarios that launch at a different height must match it, or the
+        # model spawns inside/above the first slab.
+        launch_top = SCENARIO_TOP_HEIGHT.get(self.scenario_kind)
+        if launch_top is not None:
+            pelvis_height = self.qpos_id_lookup["pelvis_ty"]
+            self.joint_positions[reset_mask, pelvis_height] += (
+                launch_top - self.course.top_height
+            )
+        super()._upon_reset_post_sim(reset_mask)
 
     def _sample_reset_layouts(self, world_ids):
         if self.scenario_kind is None:  # seeded random scenario
@@ -213,6 +232,13 @@ def main() -> int:
 
     summary = {}
     for name, seed in scenarios:
+        # Starting-pose noise draws from the global RNG; seed it per scenario
+        # so every checkpoint faces identical start conditions, regardless of
+        # how much RNG earlier scenarios consumed. zlib.crc32 is stable across
+        # processes, unlike hash() on strings.
+        pose_seed = seed if seed is not None else zlib.crc32(name.encode())
+        torch.manual_seed(pose_seed)
+        torch.cuda.manual_seed_all(pose_seed)
         if seed is None:
             env.scenario_kind = name
             env.scenario_generator = None

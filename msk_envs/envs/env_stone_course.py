@@ -923,6 +923,15 @@ class StoneCourseEnv(LanesEnv):
         self._episode_start_x[reset_mask] = self.root_pos[reset_mask, FWD_IDX]
         self._episode_start_time[reset_mask] = self.time[reset_mask]
 
+    def reset(self):
+        # An external reset must always be a real reset: without clearing the
+        # timeout flags, a world whose previous episode ended in a healthy
+        # timeout would be "continued" here, leaving a stale simulation clock
+        # (observed as one-frame evaluation trajectories mid-training).
+        self._last_timed_out.fill_(False)
+        self._last_terminated.fill_(False)
+        return super().reset()
+
     def _perform_reset(self, resets: torch.Tensor) -> None:
         """Let most timed-out walkers continue on their course uninterrupted.
 

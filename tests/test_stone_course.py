@@ -480,6 +480,32 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         self.assertEqual(env.terrain_curriculum.episodes, 2)
         self.assertEqual(env.terrain_curriculum.successes, 2)
 
+    def test_external_reset_never_continues_a_timed_out_world(self):
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.num_worlds = 2
+        env.continuation_probability = 1.0
+        # The previous rollout ended in a healthy timeout for both worlds.
+        env._last_timed_out = torch.tensor([True, True])
+        env._last_terminated = torch.tensor([False, False])
+
+        performed = {}
+        import unittest.mock as mock
+        base = StoneCourseEnv.__bases__[0]
+        with mock.patch.object(
+            base, "_perform_reset",
+            lambda _self, resets: performed.setdefault(
+                "mask", resets.squeeze(-1).bool().clone()
+            ),
+        ), mock.patch.object(
+            base, "reset",
+            lambda _self: _self._perform_reset(torch.ones((2, 1))),
+        ):
+            env.reset()
+
+        # Every world must be genuinely reset, none continued.
+        self.assertEqual(performed["mask"].tolist(), [True, True])
+
 
 if __name__ == "__main__":
     unittest.main()

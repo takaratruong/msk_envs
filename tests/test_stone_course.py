@@ -86,6 +86,71 @@ class StoneCourseSpecTest(unittest.TestCase):
         radial_distances = torch.linalg.vector_norm(deltas[:, 2:], dim=2)
         self.assertTrue(((radial_distances >= 0.65) & (radial_distances <= 0.80)).all())
 
+    def test_per_course_stride_minimum_raises_the_sampling_floor(self):
+        spec = make_spec()
+        generator = torch.Generator().manual_seed(13)
+        minimums = torch.tensor([0.65, 1.10, 1.10])
+        positions = spec.sample_positions(
+            3,
+            "cpu",
+            generator,
+            step_length_max=1.20,
+            step_length_min=minimums,
+        )
+
+        deltas = torch.diff(
+            positions,
+            dim=1,
+            prepend=torch.tensor([[[0.0, spec.center_height, 0.0]]] * 3),
+        )
+        radial_distances = torch.linalg.vector_norm(deltas[:, 2:], dim=2)
+        self.assertTrue((radial_distances[1:] >= 1.10 - 1e-6).all())
+        self.assertTrue((radial_distances <= 1.20 + 1e-6).all())
+
+        recycled = spec.sample_next_position(
+            positions[:, -1],
+            torch.tensor([1.0, -1.0, 1.0]),
+            1.20,
+            0.0,
+            0.0,
+            generator,
+            step_length_min=minimums,
+        )
+        recycled_distances = torch.linalg.vector_norm(
+            recycled - positions[:, -1], dim=1
+        )
+        self.assertTrue((recycled_distances[1:] >= 1.10 - 1e-6).all())
+        self.assertTrue((recycled_distances <= 1.20 + 1e-6).all())
+
+    def test_stride_minimum_clamps_to_the_current_curriculum_maximum(self):
+        spec = make_spec()
+        generator = torch.Generator().manual_seed(17)
+        minimums = torch.tensor([1.10, 1.10])
+        positions = spec.sample_positions(
+            2,
+            "cpu",
+            generator,
+            step_length_max=0.80,
+            step_length_min=minimums,
+        )
+        deltas = torch.diff(
+            positions,
+            dim=1,
+            prepend=torch.tensor([[[0.0, spec.center_height, 0.0]]] * 2),
+        )
+        radial_distances = torch.linalg.vector_norm(deltas[:, 2:], dim=2)
+        self.assertTrue(
+            torch.allclose(radial_distances, torch.full_like(radial_distances, 0.80))
+        )
+        with self.assertRaisesRegex(ValueError, "step_length_min"):
+            spec.sample_positions(
+                2,
+                "cpu",
+                generator,
+                step_length_max=0.80,
+                step_length_min=torch.tensor([0.10, 0.10]),
+            )
+
     def test_samples_bounded_3d_targets_and_surface_tilts(self):
         spec = make_spec()
         generator = torch.Generator().manual_seed(11)
@@ -188,6 +253,19 @@ class TerrainCurriculumTest(unittest.TestCase):
 
 
 class StoneCourseEnvironmentTest(unittest.TestCase):
+    def test_step_length_minimums_split_stride_and_base_worlds(self):
+        minimums = StoneCourseEnv.build_step_length_minimums(
+            10, 0.7, 1.10, 0.65, "cpu"
+        )
+        self.assertEqual(minimums.shape, (10,))
+        self.assertTrue((minimums[:7] == 1.10).all())
+        self.assertTrue((minimums[7:] == 0.65).all())
+
+        disabled = StoneCourseEnv.build_step_length_minimums(
+            10, 0.7, 0.0, 0.65, "cpu"
+        )
+        self.assertTrue((disabled == 0.65).all())
+
     def make_recycling_env(self) -> StoneCourseEnv:
         env = object.__new__(StoneCourseEnv)
         env.course = make_spec()
@@ -223,6 +301,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.collider_forces = torch.zeros((2, 5))
         env.next_lateral_sign = torch.full((2,), -1.0)
         env.episode_slabs_recycled = torch.zeros(2, dtype=torch.long)
+        env.step_length_minimums = torch.full((2,), 0.65)
         return env
 
     def test_recycles_only_passed_inactive_slab_in_affected_world(self):

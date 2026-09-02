@@ -149,6 +149,12 @@ class EnvConfig:
     """ Forward distance required at the time limit for a competent episode (m) """
     course_lateral_jitter: float = 0.10
     """ Per-reset lateral jitter (m) around the alternating foot line """
+    course_alternating_lateral_offset: float = 0.12
+    """ Alternating left/right centerline offset (m) of successive slabs """
+    course_stride_step_length_min: float = 0.0
+    """ Raised minimum step distance (m) for stride worlds; 0 keeps the base minimum everywhere """
+    course_stride_world_fraction: float = 0.7
+    """ Fraction of worlds that use the raised stride minimum when it is enabled """
     course_slab_size: tuple = (0.36, 0.10, 0.36)
     """ Full (forward, vertical, lateral) dimensions of every box slab (m) """
     course_top_height: float = 0.45

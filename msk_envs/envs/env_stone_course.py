@@ -58,6 +58,8 @@ class StoneCourseSpec:
             raise ValueError("course_surface_tilt_max_degrees must be in [0, 90)")
         if self.lookahead < 1:
             raise ValueError("course_lookahead must be at least 1")
+        if self.alternating_lateral_offset < 0.0:
+            raise ValueError("course_alternating_lateral_offset must be non-negative")
         if not 2 <= self.fixed_flat_stones <= self.num_stones:
             raise ValueError("fixed_flat_stones must include the launch pair")
         if not 0.0 < self.minimum_forward_step < self.step_length_range[0]:
@@ -67,6 +69,23 @@ class StoneCourseSpec:
     def _validate_range(name: str, values: tuple[float, float]) -> None:
         if len(values) != 2 or values[0] <= 0.0 or values[0] > values[1]:
             raise ValueError(f"{name} must be a positive (min, max) pair")
+
+    def _per_course_minimums(
+        self,
+        step_length_min: torch.Tensor | None,
+        count: int,
+        maximum: float,
+        device: torch.device | str,
+    ) -> torch.Tensor:
+        """Per-course lower distance bounds, clamped inside [base min, current max]."""
+        lo, final_hi = self.step_length_range
+        if step_length_min is None:
+            return torch.full((count,), lo, device=device)
+        if step_length_min.shape != (count,):
+            raise ValueError(f"step_length_min must have shape ({count},)")
+        if (step_length_min < lo - 1e-6).any() or (step_length_min > final_hi + 1e-6).any():
+            raise ValueError("step_length_min must stay inside course_step_length_range")
+        return step_length_min.to(device).clamp(lo, maximum)
 
     @classmethod
     def from_env_config(cls, config: EnvConfig) -> "StoneCourseSpec":
@@ -81,6 +100,7 @@ class StoneCourseSpec:
             yaw_angle_max_degrees=config.course_yaw_angle_max_degrees,
             surface_tilt_max_degrees=config.course_surface_tilt_max_degrees,
             lookahead=config.course_lookahead,
+            alternating_lateral_offset=config.course_alternating_lateral_offset,
         )
 
     @property
@@ -132,6 +152,7 @@ class StoneCourseSpec:
         step_length_max: float | None = None,
         elevation_angle_max_degrees: float = 0.0,
         yaw_angle_max_degrees: float = 0.0,
+        step_length_min: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """Sample one independent five-slab buffer per course/world."""
         if num_courses < 0:
@@ -141,6 +162,7 @@ class StoneCourseSpec:
         hi = final_hi if step_length_max is None else step_length_max
         if hi < lo or hi > final_hi:
             raise ValueError("step_length_max must stay inside course_step_length_range")
+        lows = self._per_course_minimums(step_length_min, num_courses, hi, device)
         if not 0.0 <= elevation_angle_max_degrees <= self.elevation_angle_max_degrees:
             raise ValueError(
                 "elevation_angle_max_degrees must stay inside the configured maximum"
@@ -171,8 +193,8 @@ class StoneCourseSpec:
             else:
                 distance = (
                     torch.rand(num_courses, device=device, generator=generator)
-                    * (hi - lo)
-                    + lo
+                    * (hi - lows)
+                    + lows
                 )
                 angle_limit = (
                     0.0
@@ -202,12 +224,16 @@ class StoneCourseSpec:
         elevation_angle_max_degrees: float,
         yaw_angle_max_degrees: float,
         generator: torch.Generator | None = None,
+        step_length_min: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """Sample one bounded spherical-coordinate successor per predecessor."""
         count = predecessors.shape[0]
         lo, final_hi = self.step_length_range
         if not lo <= step_length_max <= final_hi:
             raise ValueError("step_length_max must stay inside course_step_length_range")
+        lows = self._per_course_minimums(
+            step_length_min, count, step_length_max, predecessors.device
+        )
         if not 0.0 <= elevation_angle_max_degrees <= self.elevation_angle_max_degrees:
             raise ValueError(
                 "elevation_angle_max_degrees must stay inside the configured maximum"
@@ -216,8 +242,8 @@ class StoneCourseSpec:
             raise ValueError("yaw_angle_max_degrees must stay inside the configured maximum")
         distance = (
             torch.rand(count, device=predecessors.device, generator=generator)
-            * (step_length_max - lo)
-            + lo
+            * (step_length_max - lows)
+            + lows
         )
         lateral_jitter = (
             torch.rand(count, device=predecessors.device, generator=generator) * 2.0
@@ -614,12 +640,24 @@ class StoneCourseEnv(LanesEnv):
         self.landing_check_delay = env_config.course_landing_check_delay
         self.recycle_distance_behind = env_config.course_recycle_distance_behind
         self.curriculum_min_progress = env_config.course_curriculum_min_progress
+        self.stride_step_length_min = env_config.course_stride_step_length_min
+        self.stride_world_fraction = env_config.course_stride_world_fraction
         if self.landing_check_delay < 0.0:
             raise ValueError("course_landing_check_delay must be non-negative")
         if self.recycle_distance_behind < 0.0:
             raise ValueError("course_recycle_distance_behind must be non-negative")
         if self.curriculum_min_progress < 0.0:
             raise ValueError("course_curriculum_min_progress must be non-negative")
+        if not 0.0 <= self.stride_world_fraction <= 1.0:
+            raise ValueError("course_stride_world_fraction must be in [0, 1]")
+        if self.stride_step_length_min > 0.0 and not (
+            self.course.step_length_range[0]
+            <= self.stride_step_length_min
+            <= self.course.step_length_range[1]
+        ):
+            raise ValueError(
+                "course_stride_step_length_min must lie inside course_step_length_range"
+            )
 
         default_positions = self.course.default_positions()
         super().__init__(
@@ -686,6 +724,13 @@ class StoneCourseEnv(LanesEnv):
         self.previous_foot_contact = torch.zeros(
             (num_envs, 2), device=device, dtype=torch.bool
         )
+        self.step_length_minimums = self.build_step_length_minimums(
+            num_envs,
+            self.stride_world_fraction,
+            self.stride_step_length_min,
+            self.course.step_length_range[0],
+            device,
+        )
         self._episode_started = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._episode_start_x = torch.zeros(num_envs, device=device)
         self._last_success = torch.zeros(num_envs, device=device, dtype=torch.bool)
@@ -695,6 +740,32 @@ class StoneCourseEnv(LanesEnv):
         self.last_mean_slabs_recycled = 0.0
 
     # ---- course geometry and per-world recycling ---------------------------------
+
+    @staticmethod
+    def build_step_length_minimums(
+        num_envs: int,
+        stride_world_fraction: float,
+        stride_step_length_min: float,
+        base_minimum: float,
+        device: torch.device | str,
+    ) -> torch.Tensor:
+        """Fixed per-world lower distance bounds for the stride/base world split.
+
+        Stride worlds draw distances from a raised floor so long steps stay
+        common; the remaining worlds keep the base floor and rehearse easy
+        spacing. The assignment is deterministic: the first
+        round(fraction * num_envs) worlds are stride worlds.
+        """
+        if stride_step_length_min <= 0.0:
+            return torch.full((num_envs,), base_minimum, device=device)
+        stride_worlds = torch.arange(num_envs, device=device) < round(
+            num_envs * stride_world_fraction
+        )
+        return torch.where(
+            stride_worlds,
+            torch.full((num_envs,), stride_step_length_min, device=device),
+            torch.full((num_envs,), base_minimum, device=device),
+        )
 
     def _add_colliders(self, env_config: EnvConfig) -> None:
         half_extents = self.course.half_extents
@@ -758,6 +829,7 @@ class StoneCourseEnv(LanesEnv):
             yaw_angle_max_degrees=(
                 self.terrain_curriculum.current_yaw_maximum_degrees
             ),
+            step_length_min=self.step_length_minimums[world_ids],
         )
         surface_tilts = self.course.sample_surface_tilts(
             world_ids.numel() * self.course.num_stones,
@@ -801,6 +873,7 @@ class StoneCourseEnv(LanesEnv):
             self.terrain_curriculum.current_maximum,
             self.terrain_curriculum.current_elevation_maximum_degrees,
             self.terrain_curriculum.current_yaw_maximum_degrees,
+            step_length_min=self.step_length_minimums[world_ids],
         )
         new_surface_tilts = self.course.sample_surface_tilts(
             world_ids.numel(),

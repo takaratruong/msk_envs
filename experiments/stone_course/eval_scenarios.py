@@ -183,16 +183,29 @@ def run_scenario(env, policy, device) -> tuple[LoggedSim, dict]:
     obs = sim.reset()
     start_x = float(env.root_pos[0, FWD_IDX].item())
     peak_x = start_x
+    outcome = "time limit"
     for _ in range(sim.max_env_steps):
         with torch.no_grad():
             actions = policy(obs)
+        was_finished = bool(sim.finished[0])
         finished, obs = sim.step(actions)
+        if not was_finished and bool(sim.finished[0]) and not bool(
+            env._last_timed_out[0]
+        ):
+            # Distinguish the edge-landing rule from a physical fall: the rule
+            # fires at the exact touchdown frame while the body is still up.
+            outcome = (
+                "edge-landing termination"
+                if bool(env._last_edge_violation[0])
+                else "fall"
+            )
         if not bool(sim.finished[0]):
             peak_x = max(peak_x, float(env.root_pos[0, FWD_IDX].item()))
         if finished:
             break
     steps = int(sim.get_episode_length_mean().item())
     stats = {
+        "outcome": outcome,
         "duration_s": round(steps * env.delta_t, 2),
         "distance_m": round(peak_x - start_x, 2),
         "mean_reward": round(float(sim.get_rewards_mean().item()), 3),

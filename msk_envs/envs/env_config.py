@@ -163,6 +163,8 @@ class EnvConfig:
     """ Number of upcoming root-relative slab centers included in observations """
     course_require_interior_landing: bool = True
     """ Reject touchdowns whose complete foot-contact footprint crosses a slab edge """
+    course_landing_margin_inactive: float = 0.0
+    """ Extra interior tolerance (m) for unloaded contact spheres at touchdown; loaded spheres stay strict """
     course_landing_check_delay: float = 0.25
     """ Seconds after reset before interior-touchdown validation begins """
     course_recycle_distance_behind: float = 0.15

@@ -637,7 +637,10 @@ class StoneCourseEnv(LanesEnv):
             env_config, self.course
         )
         self.require_interior_landing = env_config.course_require_interior_landing
+        self.landing_margin_inactive = env_config.course_landing_margin_inactive
         self.landing_check_delay = env_config.course_landing_check_delay
+        if self.landing_margin_inactive < 0.0:
+            raise ValueError("course_landing_margin_inactive must be non-negative")
         self.recycle_distance_behind = env_config.course_recycle_distance_behind
         self.curriculum_min_progress = env_config.course_curriculum_min_progress
         self.stride_step_length_min = env_config.course_stride_step_length_min
@@ -1018,18 +1021,31 @@ class StoneCourseEnv(LanesEnv):
         local_positions = rotate_vec(
             quat_conjugate(stone_rotations), relative_positions
         )
+        local_xz = local_positions[:, :, :, [FWD_IDX, SIDE_IDX]].abs()
         collider_inside = (
-            local_positions[:, :, :, [FWD_IDX, SIDE_IDX]].abs()
+            local_xz <= self.interior_half_extents_xz[None, :, None, :]
+        ).all(dim=3)
+        # An unloaded sphere may overhang the edge by a small margin; a loaded
+        # sphere on the edge is the actual pivot-cheat and stays strict.
+        collider_inside_relaxed = (
+            local_xz
             <= self.interior_half_extents_xz[None, :, None, :]
+            + self.landing_margin_inactive
         ).all(dim=3)
 
         contact_by_side = []
         interior_by_side = []
         for mask in self.foot_side_masks:
             side_active = foot_active[:, mask]
-            side_inside = collider_inside[:, mask]
+            side_inside = torch.where(
+                side_active[:, :, None],
+                collider_inside[:, mask],
+                collider_inside_relaxed[:, mask],
+            )
             whole_foot_inside = side_inside.all(dim=1)
-            active_collider_inside = (side_inside & side_active[:, :, None]).any(dim=1)
+            active_collider_inside = (
+                collider_inside[:, mask] & side_active[:, :, None]
+            ).any(dim=1)
             valid_slab = whole_foot_inside & active_collider_inside & stone_active
             contact_by_side.append(side_active.any(dim=1))
             interior_by_side.append(valid_slab.any(dim=1))

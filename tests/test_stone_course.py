@@ -341,6 +341,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.course = make_spec()
         env.device = torch.device("cpu")
         env.require_interior_landing = True
+        env.landing_margin_inactive = 0.0
         env.landing_check_delay = 0.25
         env.stone_ids = torch.tensor([3, 4, 5, 6, 7])
         env.foot_collider_ids = torch.tensor([0, 1, 2])
@@ -385,6 +386,23 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
 
         invalid = env._invalid_edge_touchdown()
 
+        self.assertEqual(invalid.tolist(), [False, True, False])
+
+    def test_inactive_sphere_margin_forgives_small_overhang(self):
+        # World 1's violating toe sphere is inactive and only 0.03 m past the
+        # shrunk interior bound; the margin forgives it. A loaded sphere in
+        # the same position would remain a strict violation.
+        env = self.make_contact_env()
+        env.landing_margin_inactive = 0.05
+
+        invalid = env._invalid_edge_touchdown()
+
+        self.assertEqual(invalid.tolist(), [False, False, False])
+
+        strict = self.make_contact_env()
+        strict.landing_margin_inactive = 0.05
+        strict.collider_forces[1, 1] = 100.0  # load the overhanging toe
+        invalid = strict._invalid_edge_touchdown()
         self.assertEqual(invalid.tolist(), [False, True, False])
 
     def test_interior_footprint_is_measured_in_a_tilted_slabs_local_frame(self):

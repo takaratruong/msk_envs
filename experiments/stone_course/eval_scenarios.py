@@ -19,6 +19,7 @@ Usage (from the repository root, in the Bolt conda environment):
 """
 
 import argparse
+import dataclasses
 import json
 import math
 import os
@@ -39,21 +40,30 @@ from msk_envs.utils.logged_sim import LoggedSim
 import tyro
 
 
-# (forward gap m, elevation rad) per fixed scenario. Slopes are chosen so the
-# climb/descent spans most of a 12 s rollout inside the absolute
-# course_top_height_range corridor rather than saturating within a few slabs.
+# (forward gap m, elevation rad) per fixed scenario.
 SCENARIO_GAPS = {
     "flat": (0.80, 0.0),
-    "ascent": (0.90, math.radians(4.0)),
-    "descent": (0.90, math.radians(-4.0)),
+    "ascent": (0.90, math.radians(20.0)),
+    "descent": (0.90, math.radians(-20.0)),
     "rolling": (0.90, math.radians(18.0)),
 }
 
-# Launch-pad height override per scenario: ascent starts at the corridor floor
-# so the full corridor is available to climb; descent starts near the ceiling.
+# Launch-pad height override per scenario: ascent starts at the corridor
+# floor so the full corridor is available to climb. Descent starts only
+# mildly above the training ceiling (1.05 m): the pelvis-height observation
+# is absolute, and spawning far outside its training range (tested at 2.95 m)
+# makes the policy fall immediately from observation shock rather than any
+# stepping failure. The ascent reaches those heights gradually and copes.
 SCENARIO_TOP_HEIGHT = {
     "ascent": 0.25,
-    "descent": 1.00,
+    "descent": 1.60,
+}
+
+# Height corridor override per scenario. A persistent 20 degree slope needs
+# more vertical room than the training corridor (0.20-1.05 m).
+SCENARIO_TOP_RANGE = {
+    "ascent": (0.20, 3.00),
+    "descent": (0.15, 1.65),
 }
 
 
@@ -230,8 +240,17 @@ def main() -> int:
     if state:
         env.load_task_state(state)
 
+    base_spec = env.course
     summary = {}
     for name, seed in scenarios:
+        # Slope scenarios need more vertical room than the training corridor.
+        env.course = (
+            dataclasses.replace(
+                base_spec, top_height_range=SCENARIO_TOP_RANGE[name]
+            )
+            if name in SCENARIO_TOP_RANGE
+            else base_spec
+        )
         # Starting-pose noise draws from the global RNG; seed it per scenario
         # so every checkpoint faces identical start conditions, regardless of
         # how much RNG earlier scenarios consumed. zlib.crc32 is stable across

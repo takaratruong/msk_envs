@@ -297,6 +297,7 @@ class StoneCourseConfig(BaseArgs):
     """Physical stepping stones with a minimal forward-progress objective."""
     lambda_vel: float = 1e-1
     lambda_alive: float = 1e-2
+    lambda_act: float = -1e-4
 
     def __post_init__(self):
         super().__post_init__()

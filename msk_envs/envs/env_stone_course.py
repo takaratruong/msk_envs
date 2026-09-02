@@ -6,7 +6,7 @@ import warp as wp
 
 from msk_envs.utils.global_params import FWD_IDX, MIN_ROOT_HEIGHT, SIDE_IDX, UP_IDX, build_axis
 from msk_envs.utils.quat import quat_conjugate, quat_mul, rotate_vec
-from msk_envs.utils.reward_lib import velocity_reward_max
+from msk_envs.utils.reward_lib import activation_square_penalty, velocity_reward_max
 from .env_config import EnvConfig
 from .env_lanes import LanesEnv
 
@@ -642,6 +642,9 @@ class StoneCourseEnv(LanesEnv):
         self.curriculum_min_progress = env_config.course_curriculum_min_progress
         self.stride_step_length_min = env_config.course_stride_step_length_min
         self.stride_world_fraction = env_config.course_stride_world_fraction
+        self.continuation_probability = env_config.course_continuation_probability
+        if not 0.0 <= self.continuation_probability <= 1.0:
+            raise ValueError("course_continuation_probability must be in [0, 1]")
         if self.landing_check_delay < 0.0:
             raise ValueError("course_landing_check_delay must be non-negative")
         if self.recycle_distance_behind < 0.0:
@@ -733,6 +736,9 @@ class StoneCourseEnv(LanesEnv):
         )
         self._episode_started = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._episode_start_x = torch.zeros(num_envs, device=device)
+        self._episode_start_time = torch.zeros(num_envs, device=device)
+        self._last_terminated = torch.zeros(num_envs, device=device, dtype=torch.bool)
+        self._last_timed_out = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_success = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_edge_violation = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self.episode_slabs_recycled = torch.zeros(num_envs, device=device, dtype=torch.long)
@@ -813,12 +819,10 @@ class StoneCourseEnv(LanesEnv):
         if finished.numel() > 0:
             self.terrain_curriculum.observe(self._last_success[finished])
 
-    def _randomize_stones(self, reset_mask: torch.Tensor) -> None:
-        """Install a new independent five-slab buffer in resetting worlds."""
-        world_ids = torch.where(reset_mask.flatten().bool())[0]
-        if world_ids.numel() == 0:
-            return
-        self._record_finished_episodes(world_ids)
+    def _sample_reset_layouts(
+        self, world_ids: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Layouts and tilts for resetting worlds; the scenario seam."""
         positions = self.course.sample_positions(
             world_ids.numel(),
             self.device,
@@ -837,6 +841,34 @@ class StoneCourseEnv(LanesEnv):
             self.terrain_curriculum.current_surface_tilt_maximum_degrees,
         ).reshape(world_ids.numel(), self.course.num_stones, 2)
         surface_tilts[:, : self.course.fixed_flat_stones] = 0.0
+        return positions, surface_tilts
+
+    def _sample_recycled_slabs(
+        self, world_ids: torch.Tensor, predecessors: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Successor slabs for recycling worlds; the scenario seam."""
+        positions = self.course.sample_next_position(
+            predecessors,
+            self.next_lateral_sign[world_ids],
+            self.terrain_curriculum.current_maximum,
+            self.terrain_curriculum.current_elevation_maximum_degrees,
+            self.terrain_curriculum.current_yaw_maximum_degrees,
+            step_length_min=self.step_length_minimums[world_ids],
+        )
+        surface_tilts = self.course.sample_surface_tilts(
+            world_ids.numel(),
+            self.device,
+            self.terrain_curriculum.current_surface_tilt_maximum_degrees,
+        )
+        return positions, surface_tilts
+
+    def _randomize_stones(self, reset_mask: torch.Tensor) -> None:
+        """Install a new independent slab buffer in resetting worlds."""
+        world_ids = torch.where(reset_mask.flatten().bool())[0]
+        if world_ids.numel() == 0:
+            return
+        self._record_finished_episodes(world_ids)
+        positions, surface_tilts = self._sample_reset_layouts(world_ids)
         self._set_course_layout(world_ids, positions, surface_tilts)
         self.next_lateral_sign[world_ids] = -1.0 if self.course.num_stones % 2 else 1.0
         self.previous_foot_contact[world_ids] = False
@@ -867,18 +899,8 @@ class StoneCourseEnv(LanesEnv):
             world_ids, :, FWD_IDX
         ].argmax(dim=1)
         predecessors = self.stone_positions[world_ids, furthest_local_ids]
-        new_positions = self.course.sample_next_position(
-            predecessors,
-            self.next_lateral_sign[world_ids],
-            self.terrain_curriculum.current_maximum,
-            self.terrain_curriculum.current_elevation_maximum_degrees,
-            self.terrain_curriculum.current_yaw_maximum_degrees,
-            step_length_min=self.step_length_minimums[world_ids],
-        )
-        new_surface_tilts = self.course.sample_surface_tilts(
-            world_ids.numel(),
-            self.device,
-            self.terrain_curriculum.current_surface_tilt_maximum_degrees,
+        new_positions, new_surface_tilts = self._sample_recycled_slabs(
+            world_ids, predecessors
         )
         new_rotations = self.course.surface_tilts_to_quaternions(new_surface_tilts)
 
@@ -899,6 +921,40 @@ class StoneCourseEnv(LanesEnv):
         self.joint_positions[reset_mask, pelvis_height] += self.course.top_height
         self.launch_sim_reset()
         self._episode_start_x[reset_mask] = self.root_pos[reset_mask, FWD_IDX]
+        self._episode_start_time[reset_mask] = self.time[reset_mask]
+
+    def _perform_reset(self, resets: torch.Tensor) -> None:
+        """Let most timed-out walkers continue on their course uninterrupted.
+
+        A continued world starts a new episode for RL bookkeeping (its
+        truncation still bootstraps normally) but keeps its physical state,
+        terrain, and contacts, so training data reflects steady-state walking
+        rather than repeated launches. Failures always reset, and a small
+        share of timeouts also reset to keep launch competence rehearsed.
+        """
+        reset_mask = resets.squeeze(-1).bool()
+        if self.continuation_probability > 0.0:
+            continued = (
+                reset_mask
+                & self._last_timed_out
+                & ~self._last_terminated
+                & (
+                    torch.rand(self.num_worlds, device=self.device)
+                    < self.continuation_probability
+                )
+            )
+            if continued.any():
+                self._continue_episodes(continued)
+                reset_mask = reset_mask & ~continued
+        super()._perform_reset(reset_mask.float().unsqueeze(-1))
+
+    def _continue_episodes(self, continued: torch.Tensor) -> None:
+        world_ids = torch.where(continued)[0]
+        self._record_finished_episodes(world_ids)
+        self._episode_start_x[world_ids] = self.root_pos[world_ids, FWD_IDX]
+        self._episode_start_time[world_ids] = self.time[world_ids]
+        self.episode_slabs_recycled[world_ids] = 0
+        self._last_success[world_ids] = False
 
     def _pre_step(self) -> None:
         self._recycle_passed_stones()
@@ -932,6 +988,12 @@ class StoneCourseEnv(LanesEnv):
             "rew_vel": forward_velocity.detach(),
             "rew_alive": torch.ones(self.num_worlds, device=self.device),
         }
+        # Configs saved before the effort term have no lambda_act; skip the
+        # term for them so their checkpoints still evaluate.
+        if "lambda_act" in self.reward_lambdas:
+            self.reward_dict["rew_act"] = activation_square_penalty(
+                self.muscle_activations
+            ).detach()
 
     def _interior_foot_support(self) -> tuple[torch.Tensor, torch.Tensor]:
         """Return per-side physical contact and whole-foot interior support."""
@@ -983,13 +1045,19 @@ class StoneCourseEnv(LanesEnv):
         fallen = (self.root_pos[:, UP_IDX] - foot_bottom) < MIN_ROOT_HEIGHT
         not_facing = ~self._is_body_facing_direction(self.root_id)
         invalid_edge_landing = self._invalid_edge_touchdown()
-        return (fallen | not_facing | invalid_edge_landing).float().detach()
+        terminated = fallen | not_facing | invalid_edge_landing
+        self._last_terminated.copy_(terminated)
+        return terminated.float().detach()
 
     def _get_truncated(self) -> torch.Tensor:
-        timed_out = super()._get_truncated().bool()
+        # Continued worlds keep their simulation clock, so the time limit is
+        # measured from each world's own episode start.
+        elapsed = self.time - self._episode_start_time
+        timed_out = elapsed >= self.max_episode_duration
         progress = self.root_pos[:, FWD_IDX] - self._episode_start_x
         competent = timed_out & (progress >= self.curriculum_min_progress)
         self._last_success.copy_(competent)
+        self._last_timed_out.copy_(timed_out)
         return timed_out.float().detach()
 
     # ---- metrics -------------------------------------------------------------------

@@ -167,6 +167,8 @@ class EnvConfig:
     """ Seconds after reset before interior-touchdown validation begins """
     course_recycle_distance_behind: float = 0.15
     """ Minimum distance behind the pelvis before an inactive slab is moved ahead (m) """
+    course_continuation_probability: float = 0.0
+    """ Probability that a timed-out episode keeps walking instead of resetting """
     walk_target_speed: float = 1.35
     """ Forward walking speed (m/s) at which the course velocity reward is capped """
 

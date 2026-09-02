@@ -66,7 +66,18 @@ so the course still presents natural left/right footholds.
 
 After a window of 1,024 episodes, all four difficulty bounds expand when at
 least 60% survived the full 12 seconds and traveled at least 12 m. Difficulty
-never decreases. This first phase is forward locomotion with moderate turning;
+never decreases.
+
+With `course_stride_step_length_min` set, a fixed fraction of worlds
+(`course_stride_world_fraction`) sample step distance from that raised floor
+(clamped to the current curriculum maximum) so long steps stay common, while
+the remaining worlds keep the base floor and rehearse easy spacing.
+
+With `course_continuation_probability` set, that share of healthy timed-out
+walkers keeps going on the same course instead of teleporting back to the
+launch pose: the episode ends for RL bookkeeping (normal bootstrapped
+truncation, curriculum still observes it) but the physical state carries over,
+so training data reflects steady-state walking. Falls always reset. This first phase is forward locomotion with moderate turning;
 sideways, backwards, and fully omnidirectional target generation are deliberately
 left for a later phase. TD3 checkpoints retain curriculum state, and evaluation
 environments copy it from training before each rendered rollout.
@@ -162,6 +173,25 @@ The migration retains the old X/Z features, body features, and normalization
 statistics exactly; initializes the new policy/critic columns to zero; assigns
 sensible fixed scales to the new terrain inputs; and resets terrain curriculum
 state to the flat, straight 0.65–0.80 m stage.
+
+## Fixed evaluation scenarios
+
+`eval_scenarios.py` rolls a checkpoint through deterministic courses so
+checkpoints and runs compare on identical terrain: `flat` (even 0.80 m spacing
+on one level), `ascent` (continuous 12° climb), `descent` (steepening drop),
+`rolling` (two-up/two-down waves), plus seeded random courses at the
+checkpoint's stored difficulty.
+
+```bash
+python experiments/stone_course/eval_scenarios.py \
+    models/<run>/<checkpoint>.pt --out-tag <run>_<iteration>
+```
+
+Trajectories land in `dashboard/trajectories/<out-tag>/scenario_<name>_0.json.gz`
+with a `scenarios_summary.json` of per-scenario duration, distance, and reward.
+Pass the same `--env-config.*` overrides used in training after the known
+arguments when the environment geometry differs from the defaults (for example
+`--env-config.course-stones 7`).
 
 ## Outputs and evaluation
 

@@ -405,7 +405,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
 
         self.assertTrue(interior_by_side[0, 0])
 
-    def test_time_limit_is_neutral_and_curriculum_success_requires_progress(self):
+    def make_truncation_env(self) -> StoneCourseEnv:
         env = object.__new__(StoneCourseEnv)
         env.time = torch.tensor([12.0, 12.0, 1.0])
         env.max_episode_duration = 12.0
@@ -415,13 +415,70 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
             [2.0, 1.4, 0.0],
         ])
         env._episode_start_x = torch.zeros(3)
+        env._episode_start_time = torch.zeros(3)
         env.curriculum_min_progress = 12.0
         env._last_success = torch.zeros(3, dtype=torch.bool)
+        env._last_timed_out = torch.zeros(3, dtype=torch.bool)
+        return env
+
+    def test_time_limit_is_neutral_and_curriculum_success_requires_progress(self):
+        env = self.make_truncation_env()
 
         truncated = env._get_truncated()
 
         self.assertEqual(truncated.tolist(), [1.0, 1.0, 0.0])
         self.assertEqual(env._last_success.tolist(), [True, False, False])
+        self.assertEqual(env._last_timed_out.tolist(), [True, True, False])
+
+    def test_truncation_is_relative_to_each_worlds_episode_start(self):
+        env = self.make_truncation_env()
+        # World 0 continued at t=6 s, so at t=12 s only 6 s have elapsed.
+        env._episode_start_time = torch.tensor([6.0, 0.0, 0.0])
+
+        truncated = env._get_truncated()
+
+        self.assertEqual(truncated.tolist(), [0.0, 1.0, 0.0])
+
+    def test_continued_worlds_keep_walking_and_failed_worlds_reset(self):
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.num_worlds = 4
+        env.continuation_probability = 1.0
+        env.root_pos = torch.tensor([
+            [13.0, 1.4, 0.0],
+            [14.0, 1.4, 0.0],
+            [3.0, 1.4, 0.0],
+            [5.0, 1.4, 0.0],
+        ])
+        env.time = torch.full((4,), 12.0)
+        env._episode_start_x = torch.zeros(4)
+        env._episode_start_time = torch.zeros(4)
+        env._episode_started = torch.ones(4, dtype=torch.bool)
+        env._last_timed_out = torch.tensor([True, True, False, False])
+        env._last_terminated = torch.tensor([False, False, True, False])
+        env._last_success = torch.tensor([True, True, False, False])
+        env.episode_slabs_recycled = torch.full((4,), 9, dtype=torch.long)
+        env.terrain_curriculum = make_curriculum()
+
+        performed = {}
+        env_reset = lambda _self, resets: performed.setdefault(
+            "mask", resets.squeeze(-1).bool().clone()
+        )
+        import unittest.mock as mock
+        with mock.patch.object(
+            StoneCourseEnv.__bases__[0], "_perform_reset", env_reset
+        ):
+            # Worlds 0/1 timed out healthy, world 2 fell, world 3 keeps going.
+            env._perform_reset(torch.tensor([[1.0], [1.0], [1.0], [0.0]]))
+
+        self.assertEqual(performed["mask"].tolist(), [False, False, True, False])
+        self.assertEqual(env._episode_start_x[:2].tolist(), [13.0, 14.0])
+        self.assertEqual(env._episode_start_time[:2].tolist(), [12.0, 12.0])
+        self.assertEqual(env.episode_slabs_recycled[:2].tolist(), [0, 0])
+        self.assertEqual(env._last_success[:2].tolist(), [False, False])
+        # Both continued episodes were still recorded for the curriculum.
+        self.assertEqual(env.terrain_curriculum.episodes, 2)
+        self.assertEqual(env.terrain_curriculum.successes, 2)
 
 
 if __name__ == "__main__":

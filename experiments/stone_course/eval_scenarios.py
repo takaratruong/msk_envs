@@ -152,22 +152,22 @@ class ScenarioStoneCourseEnv(StoneCourseEnv):
 def run_scenario(env, policy, device) -> tuple[LoggedSim, dict]:
     sim = LoggedSim(env, device=device)
     obs = sim.reset()
+    start_x = float(env.root_pos[0, FWD_IDX].item())
+    peak_x = start_x
     for _ in range(sim.max_env_steps):
         with torch.no_grad():
             actions = policy(obs)
         finished, obs = sim.step(actions)
+        if not bool(sim.finished[0]):
+            peak_x = max(peak_x, float(env.root_pos[0, FWD_IDX].item()))
         if finished:
             break
-    duration = float(env.time[0].item() - env._episode_start_time[0].item())
-    # LoggedSim finishes when every world resets once; read progress metrics
-    # from the recorded frames instead of the already-reset live state.
-    frames = sim.frame_data[0]
-    distance = float(frames[-1]["cam_pos"][0] - frames[0]["cam_pos"][0]) if frames else 0.0
+    steps = int(sim.get_episode_length_mean().item())
     stats = {
-        "duration_s": round(len(frames) * sim.delta_t_log, 2),
-        "distance_m": round(distance, 2),
+        "duration_s": round(steps * env.delta_t, 2),
+        "distance_m": round(peak_x - start_x, 2),
         "mean_reward": round(float(sim.get_rewards_mean().item()), 3),
-        "episode_length": int(sim.get_episode_length_mean().item()),
+        "episode_length": steps,
     }
     return sim, stats
 
@@ -199,17 +199,23 @@ def main() -> int:
         (f"random-{seed}", seed) for seed in args.random_seeds
     ]
 
+    # One environment reused for every scenario: building it is expensive
+    # (Bolt model construction and, on first use, Warp kernel compilation).
+    # cuda_graph=True matches the trainer's eval env, so the Warp kernel
+    # cache from training runs is reused instead of recompiling from scratch.
+    env = ScenarioStoneCourseEnv(
+        num_envs=1, env_config=cfg, device=args.device,
+        requires_visuals=True, cuda_graph=True,
+    )
+    state = checkpoint.get("environment_state")
+    if state:
+        env.load_task_state(state)
+
     summary = {}
     for name, seed in scenarios:
-        env = ScenarioStoneCourseEnv(
-            num_envs=1, env_config=cfg, device=args.device,
-            requires_visuals=True, cuda_graph=False,
-        )
-        state = checkpoint.get("environment_state")
-        if state:
-            env.load_task_state(state)
         if seed is None:
             env.scenario_kind = name
+            env.scenario_generator = None
         else:
             env.scenario_kind = None
             env.scenario_generator = torch.Generator(device=args.device)
@@ -217,7 +223,7 @@ def main() -> int:
         sim, stats = run_scenario(env, policy, args.device)
         sim.save_animation(str(out_dir), f"scenario_{name}", use_gzip=True)
         summary[name] = stats
-        print(f"{name}: {stats}")
+        print(f"{name}: {stats}", flush=True)
 
     summary_path = out_dir / "scenarios_summary.json"
     summary_path.write_text(json.dumps({

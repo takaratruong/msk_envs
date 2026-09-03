@@ -68,6 +68,15 @@ After a window of 1,024 episodes, all four difficulty bounds expand when at
 least 60% survived the full 12 seconds and traveled at least 12 m. Difficulty
 never decreases.
 
+With `course_curriculum_command_fraction` set (requires speed commands), the
+fixed 12 m bar is replaced by a command-relative one: an episode is competent
+when it covers at least that fraction of its own commanded distance
+(command × elapsed time). A zero command therefore asks for no progress, so
+surviving to the time limit already counts. With
+`course_command_zero_probability` set, that share of resampled commands is
+exactly zero, making standing in place a rehearsed task rather than a
+measure-zero corner of the uniform command range.
+
 With `course_stride_step_length_min` set, a fixed fraction of worlds
 (`course_stride_world_fraction`) sample step distance from that raised floor
 (clamped to the current curriculum maximum) so long steps stay common, while

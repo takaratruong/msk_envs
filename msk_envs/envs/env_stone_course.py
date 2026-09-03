@@ -650,14 +650,33 @@ class StoneCourseEnv(LanesEnv):
         self.continuation_probability = env_config.course_continuation_probability
         self.upright_pelvis_range = tuple(env_config.course_upright_pelvis_range)
         self.command_speed_range = tuple(env_config.course_command_speed_range)
+        self.command_zero_probability = env_config.course_command_zero_probability
+        self.curriculum_command_fraction = (
+            env_config.course_curriculum_command_fraction
+        )
         if self.upright_pelvis_range != (0.0, 0.0) and not (
             0.0 <= self.upright_pelvis_range[0] < self.upright_pelvis_range[1]
         ):
             raise ValueError("course_upright_pelvis_range must be an increasing pair")
         if self.command_speed_range != (0.0, 0.0) and not (
-            0.0 < self.command_speed_range[0] <= self.command_speed_range[1]
+            0.0 <= self.command_speed_range[0] <= self.command_speed_range[1]
+            and self.command_speed_range[1] > 0.0
         ):
-            raise ValueError("course_command_speed_range must be a positive pair")
+            raise ValueError(
+                "course_command_speed_range must be non-negative with a positive maximum"
+            )
+        if not 0.0 <= self.command_zero_probability <= 1.0:
+            raise ValueError("course_command_zero_probability must be in [0, 1]")
+        if self.command_zero_probability > 0.0 and self.command_speed_range == (0.0, 0.0):
+            raise ValueError(
+                "course_command_zero_probability requires course_command_speed_range"
+            )
+        if self.curriculum_command_fraction < 0.0:
+            raise ValueError("course_curriculum_command_fraction must be non-negative")
+        if self.curriculum_command_fraction > 0.0 and self.command_speed_range == (0.0, 0.0):
+            raise ValueError(
+                "course_curriculum_command_fraction requires course_command_speed_range"
+            )
         if not 0.0 <= self.continuation_probability <= 1.0:
             raise ValueError("course_continuation_probability must be in [0, 1]")
         if self.landing_check_delay < 0.0:
@@ -900,9 +919,18 @@ class StoneCourseEnv(LanesEnv):
         low, high = self.command_speed_range
         if (low, high) == (0.0, 0.0):
             return
-        self.command_speeds[world_ids] = (
+        speeds = (
             torch.rand(world_ids.numel(), device=self.device) * (high - low) + low
         )
+        if self.command_zero_probability > 0.0:
+            # A point mass at zero makes standing still a rehearsed task rather
+            # than a measure-zero corner of the uniform range.
+            standing = (
+                torch.rand(world_ids.numel(), device=self.device)
+                < self.command_zero_probability
+            )
+            speeds = torch.where(standing, torch.zeros_like(speeds), speeds)
+        self.command_speeds[world_ids] = speeds
 
     def _recycle_passed_stones(self) -> None:
         """Move safely passed slabs ahead, independently in every world."""
@@ -1136,7 +1164,16 @@ class StoneCourseEnv(LanesEnv):
         elapsed = self.time - self._episode_start_time
         timed_out = elapsed >= self.max_episode_duration
         progress = self.root_pos[:, FWD_IDX] - self._episode_start_x
-        competent = timed_out & (progress >= self.curriculum_min_progress)
+        if self.curriculum_command_fraction > 0.0:
+            # Success is judged against each episode's own command: cover the
+            # required share of the commanded distance. A zero command asks
+            # for no progress, so surviving to the time limit already counts.
+            required = (
+                self.curriculum_command_fraction * self.command_speeds * elapsed
+            )
+        else:
+            required = self.curriculum_min_progress
+        competent = timed_out & (progress >= required)
         self._last_success.copy_(competent)
         self._last_timed_out.copy_(timed_out)
         return timed_out.float().detach()

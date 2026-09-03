@@ -435,6 +435,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env._episode_start_x = torch.zeros(3)
         env._episode_start_time = torch.zeros(3)
         env.curriculum_min_progress = 12.0
+        env.curriculum_command_fraction = 0.0
         env._last_success = torch.zeros(3, dtype=torch.bool)
         env._last_timed_out = torch.zeros(3, dtype=torch.bool)
         return env
@@ -456,6 +457,30 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         truncated = env._get_truncated()
 
         self.assertEqual(truncated.tolist(), [0.0, 1.0, 0.0])
+
+    def test_curriculum_success_is_relative_to_each_worlds_command(self):
+        env = self.make_truncation_env()
+        env.curriculum_command_fraction = 0.7
+        # World 0: commanded 1.35 m/s, needs 0.7*1.35*12 = 11.34 m; made 13 m.
+        # World 1: commanded 1.35 m/s, needs 11.34 m; made only 5 m.
+        # World 2: not timed out yet, never a success.
+        env.command_speeds = torch.tensor([1.35, 1.35, 1.35])
+
+        truncated = env._get_truncated()
+
+        self.assertEqual(truncated.tolist(), [1.0, 1.0, 0.0])
+        self.assertEqual(env._last_success.tolist(), [True, False, False])
+
+    def test_zero_command_success_is_surviving_to_the_time_limit(self):
+        env = self.make_truncation_env()
+        env.curriculum_command_fraction = 0.7
+        env.command_speeds = torch.zeros(3)
+        # No world moved anywhere.
+        env.root_pos = torch.zeros((3, 3))
+
+        env._get_truncated()
+
+        self.assertEqual(env._last_success.tolist(), [True, True, False])
 
     def test_continued_worlds_keep_walking_and_failed_worlds_reset(self):
         env = object.__new__(StoneCourseEnv)
@@ -527,6 +552,22 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         self.assertEqual(alive[0].item(), 1.0)
         self.assertAlmostEqual(alive[1].item(), 0.5, places=5)
         self.assertEqual(alive[2].item(), 0.0)
+
+    def test_command_sampler_places_a_point_mass_at_zero(self):
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.command_speed_range = (0.0, 2.5)
+        env.command_zero_probability = 0.2
+        env.command_speeds = torch.full((4096,), -1.0)
+
+        torch.manual_seed(0)
+        env._resample_command_speeds(torch.arange(4096))
+
+        zero_fraction = (env.command_speeds == 0.0).float().mean().item()
+        self.assertGreater(zero_fraction, 0.15)
+        self.assertLess(zero_fraction, 0.25)
+        nonzero = env.command_speeds[env.command_speeds > 0.0]
+        self.assertLessEqual(nonzero.max().item(), 2.5)
 
     def test_command_speed_caps_velocity_reward_per_world(self):
         env = object.__new__(StoneCourseEnv)

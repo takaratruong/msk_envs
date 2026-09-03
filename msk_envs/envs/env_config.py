@@ -177,6 +177,10 @@ class EnvConfig:
     """ Pelvis-above-foot band (m) scaling the alive bonus from 0 to 1; (0, 0) keeps a constant bonus """
     course_command_speed_range: tuple = (0.0, 0.0)
     """ Per-episode commanded speed range (m/s) capping the velocity reward and appended to observations; (0, 0) disables """
+    course_command_zero_probability: float = 0.0
+    """ Probability that a resampled command is exactly zero so standing in place is rehearsed """
+    course_curriculum_command_fraction: float = 0.0
+    """ Fraction of the commanded distance (command x elapsed) required for curriculum success; 0 keeps the absolute course_curriculum_min_progress """
 
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)

@@ -298,6 +298,8 @@ class StoneCourseConfig(BaseArgs):
     lambda_vel: float = 1e-1
     lambda_alive: float = 1e-2
     lambda_act: float = -1e-4
+    lambda_metabolic: float = 0.0
+    """ Weight on the mean Umberger metabolic rate (W per muscle); negative to penalize """
 
     def __post_init__(self):
         super().__post_init__()

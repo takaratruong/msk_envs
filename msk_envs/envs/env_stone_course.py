@@ -6,6 +6,8 @@ import warp as wp
 
 from msk_envs.utils.global_params import FWD_IDX, MIN_ROOT_HEIGHT, SIDE_IDX, UP_IDX, build_axis
 from msk_envs.utils.quat import quat_conjugate, quat_mul, rotate_vec
+from bolt._src.smooth_muscle_metabolic import compute_muscle_metabolics
+
 from msk_envs.utils.reward_lib import activation_square_penalty, velocity_reward_max
 from .env_config import EnvConfig
 from .env_lanes import LanesEnv
@@ -1052,6 +1054,13 @@ class StoneCourseEnv(LanesEnv):
         if "lambda_act" in self.reward_lambdas:
             self.reward_dict["rew_act"] = activation_square_penalty(
                 self.muscle_activations
+            ).detach()
+        if self.reward_lambdas.get("lambda_metabolic", 0.0) != 0.0:
+            # Umberger metabolic energy rate (W). Bolt provides the kernel but
+            # does not run it in the ordinary forward pass.
+            compute_muscle_metabolics(self.m, self.d)
+            self.reward_dict["rew_metabolic"] = (
+                self.muscle_powers.sum(dim=1) / max(self.num_muscles, 1)
             ).detach()
 
     def _interior_foot_support(self) -> tuple[torch.Tensor, torch.Tensor]:

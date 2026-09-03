@@ -646,6 +646,16 @@ class StoneCourseEnv(LanesEnv):
         self.stride_step_length_min = env_config.course_stride_step_length_min
         self.stride_world_fraction = env_config.course_stride_world_fraction
         self.continuation_probability = env_config.course_continuation_probability
+        self.upright_pelvis_range = tuple(env_config.course_upright_pelvis_range)
+        self.command_speed_range = tuple(env_config.course_command_speed_range)
+        if self.upright_pelvis_range != (0.0, 0.0) and not (
+            0.0 <= self.upright_pelvis_range[0] < self.upright_pelvis_range[1]
+        ):
+            raise ValueError("course_upright_pelvis_range must be an increasing pair")
+        if self.command_speed_range != (0.0, 0.0) and not (
+            0.0 < self.command_speed_range[0] <= self.command_speed_range[1]
+        ):
+            raise ValueError("course_command_speed_range must be a positive pair")
         if not 0.0 <= self.continuation_probability <= 1.0:
             raise ValueError("course_continuation_probability must be in [0, 1]")
         if self.landing_check_delay < 0.0:
@@ -740,6 +750,9 @@ class StoneCourseEnv(LanesEnv):
         self._episode_started = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._episode_start_x = torch.zeros(num_envs, device=device)
         self._episode_start_time = torch.zeros(num_envs, device=device)
+        self.command_speeds = torch.full(
+            (num_envs,), self.target_speed, device=device
+        )
         self._last_terminated = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_timed_out = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_success = torch.zeros(num_envs, device=device, dtype=torch.bool)
@@ -879,6 +892,15 @@ class StoneCourseEnv(LanesEnv):
         self._last_edge_violation[world_ids] = False
         self.episode_slabs_recycled[world_ids] = 0
         self._episode_started[world_ids] = True
+        self._resample_command_speeds(world_ids)
+
+    def _resample_command_speeds(self, world_ids: torch.Tensor) -> None:
+        low, high = self.command_speed_range
+        if (low, high) == (0.0, 0.0):
+            return
+        self.command_speeds[world_ids] = (
+            torch.rand(world_ids.numel(), device=self.device) * (high - low) + low
+        )
 
     def _recycle_passed_stones(self) -> None:
         """Move safely passed slabs ahead, independently in every world."""
@@ -967,6 +989,7 @@ class StoneCourseEnv(LanesEnv):
         self._episode_start_time[world_ids] = self.time[world_ids]
         self.episode_slabs_recycled[world_ids] = 0
         self._last_success[world_ids] = False
+        self._resample_command_speeds(world_ids)
 
     def _pre_step(self) -> None:
         self._recycle_passed_stones()
@@ -981,24 +1004,48 @@ class StoneCourseEnv(LanesEnv):
             self.root_pos,
             self.lookahead_offsets,
         )
-        return torch.cat((course_obs, super()._get_obs()), dim=1).detach().clone()
+        parts = [course_obs, super()._get_obs()]
+        if self.command_speed_range != (0.0, 0.0):
+            parts.append(self.command_speeds.unsqueeze(1))
+        return torch.cat(parts, dim=1).detach().clone()
 
     def _compute_raw_reward_dict(self) -> None:
-        forward_velocity = torch.nan_to_num(
-            velocity_reward_max(
+        if self.command_speed_range != (0.0, 0.0):
+            # Same tent shape as velocity_reward_max, with a per-world cap at
+            # each episode's commanded speed.
+            raw_velocity = self.body_velocities[:, self.root_id, FWD_IDX + 3]
+            forward_velocity = torch.where(
+                raw_velocity > self.command_speeds,
+                2.0 * self.command_speeds - raw_velocity,
+                raw_velocity,
+            )
+        else:
+            forward_velocity = velocity_reward_max(
                 self.body_velocities,
                 self.root_id,
                 FWD_IDX,
                 linear=True,
                 target_speed=self.target_speed,
-            ),
-            nan=0.0,
-            posinf=0.0,
-            neginf=0.0,
+            )
+        forward_velocity = torch.nan_to_num(
+            forward_velocity, nan=0.0, posinf=0.0, neginf=0.0
         )
+
+        alive = torch.ones(self.num_worlds, device=self.device)
+        if self.upright_pelvis_range != (0.0, 0.0):
+            # Scale the alive bonus by pelvis height above the lowest foot so
+            # crouching earns less without dictating any particular pose.
+            low, high = self.upright_pelvis_range
+            foot_bottom = (
+                self.collider_positions[:, self.foot_collider_ids, UP_IDX]
+                - self.foot_collider_radii[None, :]
+            ).min(dim=1).values
+            clearance = self.root_pos[:, UP_IDX] - foot_bottom
+            alive = ((clearance - low) / (high - low)).clamp(0.0, 1.0)
+
         self.reward_dict = {
             "rew_vel": forward_velocity.detach(),
-            "rew_alive": torch.ones(self.num_worlds, device=self.device),
+            "rew_alive": alive.detach(),
         }
         # Configs saved before the effort term have no lambda_act; skip the
         # term for them so their checkpoints still evaluate.

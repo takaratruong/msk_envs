@@ -462,6 +462,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.device = torch.device("cpu")
         env.num_worlds = 4
         env.continuation_probability = 1.0
+        env.command_speed_range = (0.0, 0.0)
         env.root_pos = torch.tensor([
             [13.0, 1.4, 0.0],
             [14.0, 1.4, 0.0],
@@ -497,6 +498,55 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         # Both continued episodes were still recorded for the curriculum.
         self.assertEqual(env.terrain_curriculum.episodes, 2)
         self.assertEqual(env.terrain_curriculum.successes, 2)
+
+    def test_uprightness_scales_the_alive_bonus(self):
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.num_worlds = 3
+        env.command_speed_range = (0.0, 0.0)
+        env.upright_pelvis_range = (0.6, 1.0)
+        env.target_speed = 1.35
+        env.root_id = 0
+        env.reward_lambdas = {"lambda_vel": 0.1, "lambda_alive": 0.01}
+        env.body_velocities = torch.zeros((3, 1, 6))
+        env.body_velocities[:, 0, 3] = 1.0
+        env.foot_collider_ids = torch.tensor([0, 1])
+        env.foot_collider_radii = torch.full((2,), 0.02)
+        env.collider_positions = torch.zeros((3, 2, 3))
+        env.collider_positions[:, :, 1] = 0.42
+        # Pelvis heights: fully upright, mid-band, fully crouched.
+        env.root_pos = torch.tensor([
+            [0.0, 1.5, 0.0],
+            [0.0, 1.2, 0.0],
+            [0.0, 0.9, 0.0],
+        ])
+
+        env._compute_raw_reward_dict()
+
+        alive = env.reward_dict["rew_alive"]
+        self.assertEqual(alive[0].item(), 1.0)
+        self.assertAlmostEqual(alive[1].item(), 0.5, places=5)
+        self.assertEqual(alive[2].item(), 0.0)
+
+    def test_command_speed_caps_velocity_reward_per_world(self):
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.num_worlds = 2
+        env.command_speed_range = (0.9, 1.8)
+        env.upright_pelvis_range = (0.0, 0.0)
+        env.root_id = 0
+        env.reward_lambdas = {"lambda_vel": 0.1, "lambda_alive": 0.01}
+        env.command_speeds = torch.tensor([1.0, 1.6])
+        env.body_velocities = torch.zeros((2, 1, 6))
+        env.body_velocities[:, 0, 3] = 1.3  # both run at 1.3 m/s
+
+        env._compute_raw_reward_dict()
+
+        vel = env.reward_dict["rew_vel"]
+        # World 0 commanded 1.0: overspeed by 0.3 -> 1.0 - 0.3 = 0.7.
+        self.assertAlmostEqual(vel[0].item(), 0.7, places=5)
+        # World 1 commanded 1.6: below command -> raw velocity.
+        self.assertAlmostEqual(vel[1].item(), 1.3, places=5)
 
     def test_external_reset_never_continues_a_timed_out_world(self):
         env = object.__new__(StoneCourseEnv)

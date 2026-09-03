@@ -173,6 +173,10 @@ class EnvConfig:
     """ Probability that a timed-out episode keeps walking instead of resetting """
     walk_target_speed: float = 1.35
     """ Forward walking speed (m/s) at which the course velocity reward is capped """
+    course_upright_pelvis_range: tuple = (0.0, 0.0)
+    """ Pelvis-above-foot band (m) scaling the alive bonus from 0 to 1; (0, 0) keeps a constant bonus """
+    course_command_speed_range: tuple = (0.0, 0.0)
+    """ Per-episode commanded speed range (m/s) capping the velocity reward and appended to observations; (0, 0) disables """
 
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)

@@ -51,15 +51,16 @@ Default course geometry:
 | Final elevation range | ±50° within the absolute height bounds |
 | Final slab roll/pitch | independently uniform in ±20° |
 | Promotion increments | +0.14 m distance, +10° elevation, +4° turn/tilt |
-| Launch-pair center spacing | uniform in 0.32–0.38 m |
+| Launch-pair placement | side by side at x = 0.07 m, under the start pose |
 | Alternating lateral centerline | ±0.12 m |
 | Regular lateral jitter | uniform in ±0.10 m |
 | Observation lookahead | 4 surfaces (20 values) |
 | Target walking speed | 1.35 m/s |
 | Maximum episode duration | 12 s |
 
-The first pair is intentionally easier so the run-start pose begins supported;
-the first three reset slabs are flat and straight. Later slabs are generated in
+The launch pair sits directly beneath the starting feet so a fresh reset
+begins standing on the slabs rather than falling onto the course; the first
+three reset slabs are flat and straight. Later slabs are generated in
 spherical coordinates relative to their predecessor: radial distance,
 forward-biased yaw, and elevation. The alternating lateral offset is retained
 so the course still presents natural left/right footholds.

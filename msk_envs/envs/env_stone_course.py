@@ -28,8 +28,9 @@ class StoneCourseSpec:
     surface_tilt_max_degrees: float
     lookahead: int
 
-    # The first pair is deliberately easy so the initial pose is supported.
-    launch_step_length_range: tuple[float, float] = (0.32, 0.38)
+    # The launch pair sits side by side beneath the starting pose so a fresh
+    # reset begins standing on the slabs instead of falling onto the course.
+    launch_forward_offset: float = 0.07
     alternating_lateral_offset: float = 0.12
     launch_jitter_scale: float = 0.2
     passed_margin: float = 0.10
@@ -40,7 +41,8 @@ class StoneCourseSpec:
         if self.num_stones < self.lookahead + 1:
             raise ValueError("course_stones must provide one spare slab beyond course_lookahead")
         self._validate_range("course_step_length_range", self.step_length_range)
-        self._validate_range("launch_step_length_range", self.launch_step_length_range)
+        if self.launch_forward_offset < 0.0:
+            raise ValueError("launch_forward_offset must be non-negative")
         self._validate_range("course_top_height_range", self.top_height_range)
         if self.lateral_jitter < 0.0:
             raise ValueError("course_lateral_jitter must be non-negative")
@@ -125,13 +127,7 @@ class StoneCourseSpec:
                 (1,), sign * self.alternating_lateral_offset, device=device
             )
             if index < 2:
-                predecessor = self._launch_position(
-                    predecessor,
-                    torch.full(
-                        (1,), sum(self.launch_step_length_range) * 0.5, device=device
-                    ),
-                    lateral_center,
-                )
+                predecessor = self._launch_position(predecessor, lateral_center)
             else:
                 predecessor = self._position_from_parameters(
                     predecessor,
@@ -183,15 +179,7 @@ class StoneCourseSpec:
             ) * self.lateral_jitter * jitter_scale
 
             if index < 2:
-                launch_lo, launch_hi = self.launch_step_length_range
-                forward_gap = (
-                    torch.rand(num_courses, device=device, generator=generator)
-                    * (launch_hi - launch_lo)
-                    + launch_lo
-                )
-                predecessor = self._launch_position(
-                    predecessor, forward_gap, lateral_center
-                )
+                predecessor = self._launch_position(predecessor, lateral_center)
             else:
                 distance = (
                     torch.rand(num_courses, device=device, generator=generator)
@@ -265,11 +253,10 @@ class StoneCourseSpec:
     def _launch_position(
         self,
         predecessors: torch.Tensor,
-        forward_gaps: torch.Tensor,
         lateral_centers: torch.Tensor,
     ) -> torch.Tensor:
         result = predecessors.clone()
-        result[:, FWD_IDX] += forward_gaps
+        result[:, FWD_IDX] = self.launch_forward_offset
         result[:, UP_IDX] = self.center_height
         result[:, SIDE_IDX] = lateral_centers
         return result

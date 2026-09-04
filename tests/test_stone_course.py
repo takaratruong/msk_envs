@@ -77,12 +77,19 @@ class StoneCourseSpecTest(unittest.TestCase):
             torch.full((3, 5), spec.center_height),
         ))
 
+        # The launch pair sits side by side beneath the starting pose.
+        self.assertTrue(torch.allclose(
+            positions[:, :2, 0],
+            torch.full((3, 2), spec.launch_forward_offset),
+        ))
+        self.assertTrue((positions[:, 0, 2] > 0.0).all())
+        self.assertTrue((positions[:, 1, 2] < 0.0).all())
+
         deltas = torch.diff(
             positions,
             dim=1,
             prepend=torch.tensor([[[0.0, spec.center_height, 0.0]]] * 3),
         )
-        self.assertTrue(((deltas[:, :2, 0] >= 0.32) & (deltas[:, :2, 0] <= 0.38)).all())
         radial_distances = torch.linalg.vector_norm(deltas[:, 2:], dim=2)
         self.assertTrue(((radial_distances >= 0.65) & (radial_distances <= 0.80)).all())
 
@@ -165,7 +172,8 @@ class StoneCourseSpecTest(unittest.TestCase):
         top_heights = positions[:, :, 1] + spec.half_extents[1]
         self.assertTrue((top_heights >= 0.20 - 1e-6).all())
         self.assertTrue((top_heights <= 1.05 + 1e-6).all())
-        self.assertTrue((torch.diff(positions[:, :, 0], dim=1) > 0.0).all())
+        # The launch pair shares one x; every later step advances forward.
+        self.assertTrue((torch.diff(positions[:, 1:, 0], dim=1) > 0.0).all())
 
         tilts = spec.sample_surface_tilts(1024, "cpu", 20.0, generator)
         self.assertLessEqual(tilts.abs().max().item(), torch.deg2rad(torch.tensor(20.0)).item())

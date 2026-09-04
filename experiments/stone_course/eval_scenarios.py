@@ -77,7 +77,7 @@ def scenario_positions(spec, kind: str, num_stones: int, device) -> torch.Tensor
     for index in range(num_stones):
         sign = 1.0 if index % 2 == 0 else -1.0
         if index < 2:
-            x += sum(spec.launch_step_length_range) * 0.5
+            x = spec.launch_forward_offset
         else:
             x += forward_gap
             angle = elevation

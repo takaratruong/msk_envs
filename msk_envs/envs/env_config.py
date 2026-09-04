@@ -181,6 +181,12 @@ class EnvConfig:
     """ Probability that a resampled command is exactly zero so standing in place is rehearsed """
     course_curriculum_command_fraction: float = 0.0
     """ Fraction of the commanded distance (command x elapsed) required for curriculum success; 0 keeps the absolute course_curriculum_min_progress """
+    course_terminate_below_supports: bool = True
+    """ Terminate when both feet drop below the lowest slab top minus course_below_support_margin """
+    course_below_support_margin: float = 0.15
+    """ Distance (m) both feet may dip below the lowest nearby slab top before termination """
+    course_terminate_on_ground_contact: bool = True
+    """ Terminate when any foot touches the lower ground plane beneath the course """
 
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)

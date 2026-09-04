@@ -9,6 +9,8 @@ from msk_envs.envs.env_stone_course import (
 )
 from msk_envs.utils.quat import rotate_vec
 
+UP_IDX_TEST = 1
+
 
 def make_spec(**overrides) -> StoneCourseSpec:
     values = {
@@ -412,6 +414,41 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         strict.collider_forces[1, 1] = 100.0  # load the overhanging toe
         invalid = strict._invalid_edge_touchdown()
         self.assertEqual(invalid.tolist(), [False, True, False])
+
+    def make_below_support_env(self) -> StoneCourseEnv:
+        env = object.__new__(StoneCourseEnv)
+        env.course = make_spec()
+        env.foot_collider_ids = torch.tensor([0, 1, 2])
+        env.foot_collider_radii = torch.full((3,), 0.02)
+        env.foot_side_masks = (
+            torch.tensor([True, True, False]),
+            torch.tensor([False, False, True]),
+        )
+        env.below_support_margin = 0.15
+        # One slab at top height 0.45 near the origin, the rest far ahead at
+        # a lower level (top 0.25) so nearest-slab attribution matters.
+        env.stone_positions = torch.tensor(
+            [[[0.0, 0.40, 0.0]] + [[5.0, 0.20, 0.0]] * 4]
+        ).repeat(3, 1, 1)
+        env.collider_positions = torch.zeros((3, 3, 3))
+
+        # World 0: all spheres of both feet at the near slab's top. Supported.
+        env.collider_positions[0, :, UP_IDX_TEST] = 0.47
+        # World 1: both feet 0.2 m below the near slab top. Fallen.
+        env.collider_positions[1, :, UP_IDX_TEST] = 0.27
+        # World 2: left foot dropped but the right foot stands on the distant
+        # lower slab; stepping down a descent must not terminate.
+        env.collider_positions[2, 0, UP_IDX_TEST] = 0.10
+        env.collider_positions[2, 1, UP_IDX_TEST] = 0.10
+        env.collider_positions[2, 2] = torch.tensor([5.0, 0.27, 0.0])
+        return env
+
+    def test_both_feet_below_their_nearest_supports_is_a_fall(self):
+        env = self.make_below_support_env()
+
+        below = env._feet_below_supports()
+
+        self.assertEqual(below.tolist(), [False, True, False])
 
     def test_interior_footprint_is_measured_in_a_tilted_slabs_local_frame(self):
         env = self.make_contact_env()

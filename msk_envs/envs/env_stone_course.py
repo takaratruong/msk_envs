@@ -641,6 +641,13 @@ class StoneCourseEnv(LanesEnv):
         self.curriculum_command_fraction = (
             env_config.course_curriculum_command_fraction
         )
+        self.terminate_below_supports = env_config.course_terminate_below_supports
+        self.below_support_margin = env_config.course_below_support_margin
+        self.terminate_on_ground_contact = (
+            env_config.course_terminate_on_ground_contact
+        )
+        if self.below_support_margin < 0.0:
+            raise ValueError("course_below_support_margin must be non-negative")
         if self.upright_pelvis_range != (0.0, 0.0) and not (
             0.0 <= self.upright_pelvis_range[0] < self.upright_pelvis_range[1]
         ):
@@ -701,6 +708,7 @@ class StoneCourseEnv(LanesEnv):
             device=device,
             dtype=torch.long,
         )
+        self.ground_collider_id = self.collider_id_lookup["ground_collider"]
         foot_entries = [
             (name, collider_id)
             for name, collider_id in self.collider_id_lookup.items()
@@ -958,7 +966,32 @@ class StoneCourseEnv(LanesEnv):
     def _upon_reset_pre_sim(self, reset_mask: torch.Tensor) -> None:
         self._randomize_stones(reset_mask)
 
+    def _snap_launch_slabs_under_feet(self, reset_mask: torch.Tensor) -> None:
+        """Center each launch slab beneath its actual reset foot.
+
+        Pose noise and left/right swaps move each foot by up to ~0.15 m, and
+        the two feet do not stay mutually aligned, so no fixed slab position
+        covers every reset (observed as heels hanging off the back edge).
+        The feet stay where the pose sampler put them; the supports follow.
+        """
+        world_ids = torch.where(reset_mask)[0]
+        if world_ids.numel() == 0:
+            return
+        feet = self.collider_positions[world_ids][:, self.foot_collider_ids]
+        left_mask, right_mask = self.foot_side_masks
+        # stone_0 carries the positive-z (right) foot, stone_1 the left.
+        for slab_index, side_mask in ((0, right_mask), (1, left_mask)):
+            side_xz = feet[:, side_mask][:, :, [FWD_IDX, SIDE_IDX]]
+            center_xz = (side_xz.amin(dim=1) + side_xz.amax(dim=1)) * 0.5
+            collider_id = self.stone_ids[slab_index]
+            for axis, column in ((FWD_IDX, 0), (SIDE_IDX, 1)):
+                self.stone_positions[world_ids, slab_index, axis] = center_xz[:, column]
+                self.collider_local_transforms[
+                    world_ids, collider_id, axis
+                ] = center_xz[:, column]
+
     def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
+        self._snap_launch_slabs_under_feet(reset_mask)
         pelvis_height = self.qpos_id_lookup["pelvis_ty"]
         self.joint_positions[reset_mask, pelvis_height] += self.course.top_height
         self.launch_sim_reset()
@@ -1133,6 +1166,39 @@ class StoneCourseEnv(LanesEnv):
             return torch.zeros_like(invalid)
         return invalid
 
+    def _feet_below_supports(self) -> torch.Tensor:
+        """Both feet entirely below their nearest slab tops means a fall.
+
+        Each contact sphere is compared against the top of the slab whose
+        footprint is horizontally nearest to it, so stepping down a descent
+        (one foot on a lower slab) never trips the rule; only a body that
+        has dropped into a gap has every sphere of both feet below level.
+        """
+        foot_positions = self.collider_positions[:, self.foot_collider_ids]
+        foot_bottoms = (
+            foot_positions[:, :, UP_IDX] - self.foot_collider_radii[None, :]
+        )
+        outside_x = (
+            foot_positions[:, :, None, FWD_IDX]
+            - self.stone_positions[:, None, :, FWD_IDX]
+        ).abs() - self.course.half_extents[FWD_IDX]
+        outside_z = (
+            foot_positions[:, :, None, SIDE_IDX]
+            - self.stone_positions[:, None, :, SIDE_IDX]
+        ).abs() - self.course.half_extents[SIDE_IDX]
+        footprint_distances = (
+            outside_x.clamp(min=0.0).square() + outside_z.clamp(min=0.0).square()
+        )
+        nearest = footprint_distances.argmin(dim=2)
+        slab_tops = (
+            self.stone_positions[:, :, UP_IDX] + self.course.half_extents[UP_IDX]
+        )
+        nearest_tops = torch.gather(slab_tops, 1, nearest)
+        below = foot_bottoms < nearest_tops - self.below_support_margin
+        left_below = below[:, self.foot_side_masks[0]].all(dim=1)
+        right_below = below[:, self.foot_side_masks[1]].all(dim=1)
+        return left_below & right_below
+
     def _get_terminated(self) -> torch.Tensor:
         foot_bottom = (
             self.collider_positions[:, self.foot_collider_ids, UP_IDX]
@@ -1142,6 +1208,14 @@ class StoneCourseEnv(LanesEnv):
         not_facing = ~self._is_body_facing_direction(self.root_id)
         invalid_edge_landing = self._invalid_edge_touchdown()
         terminated = fallen | not_facing | invalid_edge_landing
+        if self.terminate_below_supports:
+            terminated = terminated | self._feet_below_supports()
+        if self.terminate_on_ground_contact:
+            # The slabs are the only walkable surface; any body contact with
+            # the ground plane beneath the course is a failed episode.
+            terminated = terminated | (
+                self.collider_forces[:, self.ground_collider_id] > 0.0
+            )
         self._last_terminated.copy_(terminated)
         return terminated.float().detach()
 

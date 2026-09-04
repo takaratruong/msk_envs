@@ -450,6 +450,27 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
 
         self.assertEqual(below.tolist(), [False, True, False])
 
+    def test_zero_command_episodes_do_not_feed_the_terrain_curriculum(self):
+        env = object.__new__(StoneCourseEnv)
+        env.terrain_curriculum = make_curriculum(window=2)
+        env.command_speed_range = (0.0, 2.5)
+        env._episode_started = torch.tensor([True, True, True])
+        # Worlds 0 and 1 stood still successfully; world 2 walked and failed.
+        env.command_speeds = torch.tensor([0.0, 0.0, 1.2])
+        env._last_success = torch.tensor([True, True, False])
+
+        env._record_finished_episodes(torch.tensor([0, 1, 2]))
+
+        # Only the walking episode counts: one episode, zero successes.
+        self.assertEqual(env.terrain_curriculum.episodes, 1)
+        self.assertEqual(env.terrain_curriculum.successes, 0)
+
+        # With commands disabled every episode still counts as before.
+        env.command_speed_range = (0.0, 0.0)
+        env._record_finished_episodes(torch.tensor([0, 1, 2]))
+        self.assertEqual(env.terrain_curriculum.episodes, 0)  # window of 2 rolled over
+        self.assertEqual(env.terrain_curriculum.last_completion_rate, 0.5)
+
     def test_interior_footprint_is_measured_in_a_tilted_slabs_local_frame(self):
         env = self.make_contact_env()
         env.stone_positions[0, 1:, 0] = 10.0

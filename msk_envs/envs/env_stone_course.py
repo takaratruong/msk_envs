@@ -848,6 +848,11 @@ class StoneCourseEnv(LanesEnv):
 
     def _record_finished_episodes(self, world_ids: torch.Tensor) -> None:
         finished = world_ids[self._episode_started[world_ids]]
+        if self.command_speed_range != (0.0, 0.0):
+            # A zero-command episode succeeds by standing on the launch pair;
+            # its outcome says nothing about the sampled terrain, so it must
+            # neither advance nor hold back the terrain curriculum.
+            finished = finished[self.command_speeds[finished] > 0.0]
         if finished.numel() > 0:
             self.terrain_curriculum.observe(self._last_success[finished])
 

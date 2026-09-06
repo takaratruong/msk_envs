@@ -690,6 +690,9 @@ class StoneCourseEnv(LanesEnv):
             env_config.course_curriculum_command_fraction
         )
         self.stone_gated_reward = env_config.course_stone_gated_reward
+        self.curriculum_require_stone_support = (
+            env_config.course_curriculum_require_stone_support
+        )
         self.terminate_below_supports = env_config.course_terminate_below_supports
         self.below_support_margin = env_config.course_below_support_margin
         self.terminate_on_ground_contact = (
@@ -808,6 +811,12 @@ class StoneCourseEnv(LanesEnv):
         # Support gate for the stone-gated reward: true while the most recent
         # support was a slab. Ground contact clears it; slab contact sets it.
         self.stone_supported = torch.ones(num_envs, device=device, dtype=torch.bool)
+        # Per-episode latch: any ground-plane contact disqualifies the episode
+        # from counting as a curriculum success (crossing must happen on the
+        # stones), independent of the transient reward gate above.
+        self._episode_touched_ground = torch.zeros(
+            num_envs, device=device, dtype=torch.bool
+        )
         self.step_length_minimums = self.build_step_length_minimums(
             num_envs,
             self.stride_world_fraction,
@@ -964,6 +973,7 @@ class StoneCourseEnv(LanesEnv):
         self.next_lateral_sign[world_ids] = -1.0 if self.course.num_stones % 2 else 1.0
         self.previous_foot_contact[world_ids] = False
         self.stone_supported[world_ids] = True
+        self._episode_touched_ground[world_ids] = False
         self._last_success[world_ids] = False
         self._last_edge_violation[world_ids] = False
         self.episode_slabs_recycled[world_ids] = 0
@@ -1101,6 +1111,7 @@ class StoneCourseEnv(LanesEnv):
         self._episode_start_time[world_ids] = self.time[world_ids]
         self.episode_slabs_recycled[world_ids] = 0
         self._last_success[world_ids] = False
+        self._episode_touched_ground[world_ids] = False
         self._resample_command_speeds(world_ids)
 
     def _pre_step(self) -> None:
@@ -1143,13 +1154,15 @@ class StoneCourseEnv(LanesEnv):
             forward_velocity, nan=0.0, posinf=0.0, neginf=0.0
         )
 
+        if self.stone_gated_reward or self.curriculum_require_stone_support:
+            on_ground = self.collider_forces[:, self.ground_collider_id] > 0.0
+            self._episode_touched_ground |= on_ground
         if self.stone_gated_reward:
             # Forward meters only pay while the walker's most recent support
             # was a slab. Ground contact is survivable (exploration keeps its
             # safety net) but earns nothing until the feet regain a slab, so
             # ground-jogging is never the optimal policy.
             on_stones = (self.collider_forces[:, self.stone_ids] > 0.0).any(dim=1)
-            on_ground = self.collider_forces[:, self.ground_collider_id] > 0.0
             self.stone_supported = (self.stone_supported | on_stones) & ~on_ground
             forward_velocity = forward_velocity * self.stone_supported
 
@@ -1309,6 +1322,11 @@ class StoneCourseEnv(LanesEnv):
         else:
             required = self.curriculum_min_progress
         competent = timed_out & (progress >= required)
+        if self.curriculum_require_stone_support:
+            # Crossing must happen on the stones: an episode that ever touched
+            # the ground plane cannot be curriculum evidence of competence,
+            # even if it survived and covered the distance.
+            competent = competent & ~self._episode_touched_ground
         self._last_success.copy_(competent)
         self._last_timed_out.copy_(timed_out)
         return timed_out.float().detach()

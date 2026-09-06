@@ -483,6 +483,28 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
 
         self.assertEqual(below.tolist(), [False, True, False])
 
+    def test_ground_contact_disqualifies_curriculum_success(self):
+        env = object.__new__(StoneCourseEnv)
+        env.time = torch.tensor([12.0, 12.0, 12.0])
+        env._episode_start_time = torch.zeros(3)
+        env.max_episode_duration = 12.0
+        env.curriculum_command_fraction = 0.0
+        env.curriculum_min_progress = 12.0
+        env.curriculum_require_stone_support = True
+        env.root_pos = torch.tensor([
+            [15.0, 1.4, 0.0],   # far enough, never touched ground -> success
+            [15.0, 1.4, 0.0],   # far enough but touched ground -> disqualified
+            [5.0, 1.4, 0.0],    # too short anyway
+        ])
+        env._episode_start_x = torch.zeros(3)
+        env._episode_touched_ground = torch.tensor([False, True, False])
+        env._last_success = torch.zeros(3, dtype=torch.bool)
+        env._last_timed_out = torch.zeros(3, dtype=torch.bool)
+
+        env._get_truncated()
+
+        self.assertEqual(env._last_success.tolist(), [True, False, False])
+
     def test_stone_gate_pays_slab_support_and_zeroes_ground_contact(self):
         env = object.__new__(StoneCourseEnv)
         env.device = torch.device("cpu")
@@ -560,6 +582,8 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env._episode_start_time = torch.zeros(3)
         env.curriculum_min_progress = 12.0
         env.curriculum_command_fraction = 0.0
+        env.curriculum_require_stone_support = False
+        env._episode_touched_ground = torch.zeros(3, dtype=torch.bool)
         env._last_success = torch.zeros(3, dtype=torch.bool)
         env._last_timed_out = torch.zeros(3, dtype=torch.bool)
         return env
@@ -626,6 +650,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env._last_terminated = torch.tensor([False, False, True, False])
         env._last_success = torch.tensor([True, True, False, False])
         env.episode_slabs_recycled = torch.full((4,), 9, dtype=torch.long)
+        env._episode_touched_ground = torch.zeros(4, dtype=torch.bool)
         env.terrain_curriculum = make_curriculum()
 
         performed = {}
@@ -654,6 +679,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.num_worlds = 3
         env.command_speed_range = (0.0, 0.0)
         env.stone_gated_reward = False
+        env.curriculum_require_stone_support = False
         env.upright_pelvis_range = (0.6, 1.0)
         env.target_speed = 1.35
         env.root_id = 0
@@ -700,6 +726,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.num_worlds = 2
         env.command_speed_range = (0.9, 1.8)
         env.stone_gated_reward = False
+        env.curriculum_require_stone_support = False
         env.upright_pelvis_range = (0.0, 0.0)
         env.root_id = 0
         env.reward_lambdas = {"lambda_vel": 0.1, "lambda_alive": 0.01}

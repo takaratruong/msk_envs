@@ -254,3 +254,59 @@ than later runs.
   contact material.
 - `tests/test_stone_course.py` and `tests/test_walking_heel_contacts.py`:
   focused regression coverage.
+
+## The working from-scratch recipe (riser, 2026-09-06)
+
+First recipe to learn genuine stone-walking from scratch. Checkpointed while
+training at `models/stonecourse_riser_keeper_17000.pt` (run
+`stonecourse_riser_2026-09-06_20-37`, passive checkpoint
+`20260906T232145Z-manual-ee292037`). By iteration 12000 (~3.5 h) it walked a
+full 12 s / 15.6 m eval at full platform height with zero ground-plane frames.
+
+The three mechanisms, in the order they mattered:
+
+1. **Rising platform** (`course_initial_height_scale 0.1`,
+   `course_curriculum_height_scale_increment 0.15`): slabs start 4.5 cm off
+   the ground so missing one is a harmless step down; each competent window
+   raises the whole platform before any terrain bound expands. "Missing =
+   falling" emerges from gravity, never from a termination rule.
+2. **Stone-gated reward** (`course_stone_gated_reward`): velocity/alive pay
+   only while the last support was a slab; ground contact is survivable but
+   earns nothing until the feet regain a slab. Kills the ground-jogging
+   optimum that consumed standwalk and late heritage.
+3. **Reachable first rung** (`course_step_length_range 0.40 1.50`,
+   `course_initial_step_length_max 0.70`): the curriculum floor matches the
+   gap band the original walkingheel run learned on.
+
+Full launch command (from scratch, no warm start):
+
+    python -m msk_envs.train.train stonecourse --disable-wandb \
+      --exp-prefix stonecourse_riser --algo td3 --gpu-id 0 \
+      --td3-config.num-envs 1024 --lambda-act=0.0 env-config:sprinter \
+      --env-config.course-step-length-range 0.40 1.50 \
+      --env-config.course-initial-step-length-max 0.70 \
+      --env-config.course-stone-gated-reward \
+      --env-config.course-initial-height-scale 0.1 \
+      --env-config.course-curriculum-height-scale-increment 0.15 \
+      --env-config.no-course-require-interior-landing \
+      --env-config.no-course-terminate-below-supports \
+      --env-config.no-course-terminate-on-ground-contact \
+      --env-config.course-stones 8 \
+      --env-config.course-recycle-distance-behind 2.0 \
+      --env-config.course-landing-margin-inactive 0.02 \
+      --env-config.course-lateral-jitter 0.10 \
+      --env-config.course-alternating-lateral-offset 0.12 \
+      --env-config.course-continuation-probability 0.95
+
+Defaults deliberately NOT used by this recipe: run pose comes from the
+`stonecourse` preset (`starting_pose_run.yaml`); no metabolic term, no
+speed conditioning, no standing episodes, no stride floor; the three strict
+terminations are off because the rising platform replaces them. Knee
+hyperextension early in training is expected free scaffolding (soft +10
+degree limit, no lambda_limit) and washes out as the gait matures;
+`lambda_limit -3e-4` is the ready lever if final-gait polish needs it.
+
+Negative results worth not repeating: seven from-scratch runs with strict
+terminations all stalled at ~0.5 m; the edge-landing rule from scratch
+(edgeland) stalled at ~1.4 m; 20% zero-velocity episodes flooded the buffer
+and polluted curriculum evidence.

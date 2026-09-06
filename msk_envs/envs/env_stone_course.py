@@ -641,6 +641,7 @@ class StoneCourseEnv(LanesEnv):
         self.curriculum_command_fraction = (
             env_config.course_curriculum_command_fraction
         )
+        self.stone_gated_reward = env_config.course_stone_gated_reward
         self.terminate_below_supports = env_config.course_terminate_below_supports
         self.below_support_margin = env_config.course_below_support_margin
         self.terminate_on_ground_contact = (
@@ -756,6 +757,9 @@ class StoneCourseEnv(LanesEnv):
         self.previous_foot_contact = torch.zeros(
             (num_envs, 2), device=device, dtype=torch.bool
         )
+        # Support gate for the stone-gated reward: true while the most recent
+        # support was a slab. Ground contact clears it; slab contact sets it.
+        self.stone_supported = torch.ones(num_envs, device=device, dtype=torch.bool)
         self.step_length_minimums = self.build_step_length_minimums(
             num_envs,
             self.stride_world_fraction,
@@ -909,6 +913,7 @@ class StoneCourseEnv(LanesEnv):
         self._set_course_layout(world_ids, positions, surface_tilts)
         self.next_lateral_sign[world_ids] = -1.0 if self.course.num_stones % 2 else 1.0
         self.previous_foot_contact[world_ids] = False
+        self.stone_supported[world_ids] = True
         self._last_success[world_ids] = False
         self._last_edge_violation[world_ids] = False
         self.episode_slabs_recycled[world_ids] = 0
@@ -1086,7 +1091,19 @@ class StoneCourseEnv(LanesEnv):
             forward_velocity, nan=0.0, posinf=0.0, neginf=0.0
         )
 
+        if self.stone_gated_reward:
+            # Forward meters only pay while the walker's most recent support
+            # was a slab. Ground contact is survivable (exploration keeps its
+            # safety net) but earns nothing until the feet regain a slab, so
+            # ground-jogging is never the optimal policy.
+            on_stones = (self.collider_forces[:, self.stone_ids] > 0.0).any(dim=1)
+            on_ground = self.collider_forces[:, self.ground_collider_id] > 0.0
+            self.stone_supported = (self.stone_supported | on_stones) & ~on_ground
+            forward_velocity = forward_velocity * self.stone_supported
+
         alive = torch.ones(self.num_worlds, device=self.device)
+        if self.stone_gated_reward:
+            alive = alive * self.stone_supported
         if self.upright_pelvis_range != (0.0, 0.0):
             # Scale the alive bonus by pelvis height above the lowest foot so
             # crouching earns less without dictating any particular pose.

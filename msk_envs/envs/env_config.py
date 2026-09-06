@@ -181,6 +181,8 @@ class EnvConfig:
     """ Probability that a resampled command is exactly zero so standing in place is rehearsed """
     course_curriculum_command_fraction: float = 0.0
     """ Fraction of the commanded distance (command x elapsed) required for curriculum success; 0 keeps the absolute course_curriculum_min_progress """
+    course_stone_gated_reward: bool = False
+    """ Pay velocity/alive rewards only while the last support was a slab; any ground contact zeroes them until the feet regain a slab """
     course_terminate_below_supports: bool = True
     """ Terminate when both feet drop below the lowest slab top minus course_below_support_margin """
     course_below_support_margin: float = 0.15

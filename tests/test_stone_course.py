@@ -450,6 +450,31 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
 
         self.assertEqual(below.tolist(), [False, True, False])
 
+    def test_stone_gate_pays_slab_support_and_zeroes_ground_contact(self):
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.stone_ids = torch.tensor([1, 2])
+        env.ground_collider_id = 0
+        env.stone_supported = torch.tensor([True, True, False])
+        env.collider_forces = torch.zeros((3, 3))
+        env.collider_forces[0, 1] = 50.0   # world 0: on a slab
+        env.collider_forces[1, 0] = 50.0   # world 1: touches ground
+        # world 2: airborne, previously unsupported -> gate stays closed
+
+        on_stones = (env.collider_forces[:, env.stone_ids] > 0.0).any(dim=1)
+        on_ground = env.collider_forces[:, env.ground_collider_id] > 0.0
+        env.stone_supported = (env.stone_supported | on_stones) & ~on_ground
+
+        self.assertEqual(env.stone_supported.tolist(), [True, False, False])
+
+        # World 1 regains a slab next step: the gate reopens.
+        env.collider_forces[1, 0] = 0.0
+        env.collider_forces[1, 2] = 50.0
+        on_stones = (env.collider_forces[:, env.stone_ids] > 0.0).any(dim=1)
+        on_ground = env.collider_forces[:, env.ground_collider_id] > 0.0
+        env.stone_supported = (env.stone_supported | on_stones) & ~on_ground
+        self.assertEqual(env.stone_supported.tolist(), [True, True, False])
+
     def test_zero_command_episodes_do_not_feed_the_terrain_curriculum(self):
         env = object.__new__(StoneCourseEnv)
         env.terrain_curriculum = make_curriculum(window=2)
@@ -595,6 +620,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.device = torch.device("cpu")
         env.num_worlds = 3
         env.command_speed_range = (0.0, 0.0)
+        env.stone_gated_reward = False
         env.upright_pelvis_range = (0.6, 1.0)
         env.target_speed = 1.35
         env.root_id = 0
@@ -640,6 +666,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.device = torch.device("cpu")
         env.num_worlds = 2
         env.command_speed_range = (0.9, 1.8)
+        env.stone_gated_reward = False
         env.upright_pelvis_range = (0.0, 0.0)
         env.root_id = 0
         env.reward_lambdas = {"lambda_vel": 0.1, "lambda_alive": 0.01}

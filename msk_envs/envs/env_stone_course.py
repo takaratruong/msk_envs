@@ -151,6 +151,7 @@ class StoneCourseSpec:
         elevation_angle_max_degrees: float = 0.0,
         yaw_angle_max_degrees: float = 0.0,
         step_length_min: torch.Tensor | None = None,
+        height_scale: float = 1.0,
     ) -> torch.Tensor:
         """Sample one independent five-slab buffer per course/world."""
         if num_courses < 0:
@@ -168,9 +169,13 @@ class StoneCourseSpec:
         if not 0.0 <= yaw_angle_max_degrees <= self.yaw_angle_max_degrees:
             raise ValueError("yaw_angle_max_degrees must stay inside the configured maximum")
 
+        if not 0.0 < height_scale <= 1.0:
+            raise ValueError("height_scale must be in (0, 1]")
+
         positions = torch.zeros((num_courses, self.num_stones, 3), device=device)
         predecessor = torch.zeros((num_courses, 3), device=device)
-        predecessor[:, UP_IDX] = self.center_height
+        scaled_center = self.top_height * height_scale - self.half_extents[UP_IDX]
+        predecessor[:, UP_IDX] = scaled_center
         for index in range(self.num_stones):
             sign = 1.0 if index % 2 == 0 else -1.0
             jitter_scale = self.launch_jitter_scale if index < 2 else 1.0
@@ -179,7 +184,9 @@ class StoneCourseSpec:
             ) * self.lateral_jitter * jitter_scale
 
             if index < 2:
-                predecessor = self._launch_position(predecessor, lateral_center)
+                predecessor = self._launch_position(
+                    predecessor, lateral_center, scaled_center
+                )
             else:
                 distance = (
                     torch.rand(num_courses, device=device, generator=generator)
@@ -202,6 +209,7 @@ class StoneCourseSpec:
                     yaw_angle_max_degrees=(
                         0.0 if index < self.fixed_flat_stones else yaw_angle_max_degrees
                     ),
+                    height_scale=height_scale,
                 )
             positions[:, index] = predecessor
         return positions
@@ -215,6 +223,7 @@ class StoneCourseSpec:
         yaw_angle_max_degrees: float,
         generator: torch.Generator | None = None,
         step_length_min: torch.Tensor | None = None,
+        height_scale: float = 1.0,
     ) -> torch.Tensor:
         """Sample one bounded spherical-coordinate successor per predecessor."""
         count = predecessors.shape[0]
@@ -248,16 +257,18 @@ class StoneCourseSpec:
             lateral_jitter,
             elevation_angle_max_degrees=elevation_angle_max_degrees,
             yaw_angle_max_degrees=yaw_angle_max_degrees,
+            height_scale=height_scale,
         )
 
     def _launch_position(
         self,
         predecessors: torch.Tensor,
         lateral_centers: torch.Tensor,
+        center_height: float | None = None,
     ) -> torch.Tensor:
         result = predecessors.clone()
         result[:, FWD_IDX] = self.launch_forward_offset
-        result[:, UP_IDX] = self.center_height
+        result[:, UP_IDX] = self.center_height if center_height is None else center_height
         result[:, SIDE_IDX] = lateral_centers
         return result
 
@@ -271,11 +282,17 @@ class StoneCourseSpec:
         lateral_jitter: torch.Tensor,
         elevation_angle_max_degrees: float,
         yaw_angle_max_degrees: float,
+        height_scale: float = 1.0,
     ) -> torch.Tensor:
         """Convert bounded spherical parameters plus alternating stance to XYZ."""
         predecessor_top = predecessors[:, UP_IDX] + self.half_extents[UP_IDX]
 
         min_top, max_top = self.top_height_range
+        # A lowered course scales its whole height corridor: the floor must
+        # not push slabs above the scaled launch height, and the ceiling
+        # shrinks so relative drops stay proportionate.
+        min_top = min_top * height_scale
+        max_top = max_top * height_scale
         height_angle_min = torch.asin(torch.clamp(
             (min_top - predecessor_top) / distances, -1.0, 1.0
         ))
@@ -436,6 +453,8 @@ class TerrainCurriculum:
     surface_tilt_increment_degrees: float
     success_threshold: float
     window: int
+    current_height_scale: float = 1.0
+    height_scale_increment: float = 0.0
     episodes: int = 0
     successes: int = 0
     last_completion_rate: float = 0.0
@@ -475,6 +494,12 @@ class TerrainCurriculum:
             raise ValueError("course_curriculum_success_threshold must be in [0, 1]")
         if self.window < 1:
             raise ValueError("course_curriculum_window must be at least 1")
+        if not 0.0 < self.current_height_scale <= 1.0:
+            raise ValueError("course_initial_height_scale must be in (0, 1]")
+        if self.height_scale_increment < 0.0:
+            raise ValueError(
+                "course_curriculum_height_scale_increment must be non-negative"
+            )
 
     @classmethod
     def from_env_config(
@@ -506,6 +531,8 @@ class TerrainCurriculum:
             ),
             success_threshold=config.course_curriculum_success_threshold,
             window=config.course_curriculum_window,
+            current_height_scale=config.course_initial_height_scale,
+            height_scale_increment=config.course_curriculum_height_scale_increment,
         )
 
     def observe(self, successful_episodes: torch.Tensor) -> bool:
@@ -522,7 +549,8 @@ class TerrainCurriculum:
         promoted = (
             self.last_completion_rate >= self.success_threshold
             and (
-                self.current_maximum < self.maximum
+                (self.height_scale_increment > 0.0 and self.current_height_scale < 1.0)
+                or self.current_maximum < self.maximum
                 or self.current_elevation_maximum_degrees
                 < self.elevation_maximum_degrees
                 or self.current_yaw_maximum_degrees < self.yaw_maximum_degrees
@@ -530,6 +558,20 @@ class TerrainCurriculum:
                 < self.surface_tilt_maximum_degrees
             )
         )
+        if (
+            promoted
+            and self.height_scale_increment > 0.0
+            and self.current_height_scale < 1.0
+        ):
+            # Stakes before difficulty: a competent window first raises the
+            # whole platform toward full height. Terrain only expands after
+            # missing a slab has become a real fall.
+            self.current_height_scale = min(
+                1.0, self.current_height_scale + self.height_scale_increment
+            )
+            self.episodes = 0
+            self.successes = 0
+            return True
         if promoted:
             self.current_maximum = min(
                 self.maximum,
@@ -564,6 +606,7 @@ class TerrainCurriculum:
             "current_surface_tilt_maximum_degrees": (
                 self.current_surface_tilt_maximum_degrees
             ),
+            "current_height_scale": self.current_height_scale,
             "episodes": self.episodes,
             "successes": self.successes,
             "last_completion_rate": self.last_completion_rate,
@@ -590,6 +633,10 @@ class TerrainCurriculum:
                 "checkpoint curriculum surface tilt is outside the configured range"
             )
 
+        current_height_scale = float(state.get("current_height_scale", 1.0))
+        if not 0.0 < current_height_scale <= 1.0:
+            raise ValueError("checkpoint curriculum height scale is outside (0, 1]")
+
         episodes = int(state.get("episodes", 0))
         successes = int(state.get("successes", 0))
         completion_rate = float(state.get("last_completion_rate", 0.0))
@@ -602,6 +649,7 @@ class TerrainCurriculum:
         self.current_elevation_maximum_degrees = current_elevation
         self.current_yaw_maximum_degrees = current_yaw
         self.current_surface_tilt_maximum_degrees = current_surface_tilt
+        self.current_height_scale = current_height_scale
         self.episodes = episodes
         self.successes = successes
         self.last_completion_rate = completion_rate
@@ -875,6 +923,7 @@ class StoneCourseEnv(LanesEnv):
                 self.terrain_curriculum.current_yaw_maximum_degrees
             ),
             step_length_min=self.step_length_minimums[world_ids],
+            height_scale=self.terrain_curriculum.current_height_scale,
         )
         surface_tilts = self.course.sample_surface_tilts(
             world_ids.numel() * self.course.num_stones,
@@ -895,6 +944,7 @@ class StoneCourseEnv(LanesEnv):
             self.terrain_curriculum.current_elevation_maximum_degrees,
             self.terrain_curriculum.current_yaw_maximum_degrees,
             step_length_min=self.step_length_minimums[world_ids],
+            height_scale=self.terrain_curriculum.current_height_scale,
         )
         surface_tilts = self.course.sample_surface_tilts(
             world_ids.numel(),
@@ -1003,7 +1053,9 @@ class StoneCourseEnv(LanesEnv):
     def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
         self._snap_launch_slabs_under_feet(reset_mask)
         pelvis_height = self.qpos_id_lookup["pelvis_ty"]
-        self.joint_positions[reset_mask, pelvis_height] += self.course.top_height
+        self.joint_positions[reset_mask, pelvis_height] += (
+            self.course.top_height * self.terrain_curriculum.current_height_scale
+        )
         self.launch_sim_reset()
         self._episode_start_x[reset_mask] = self.root_pos[reset_mask, FWD_IDX]
         self._episode_start_time[reset_mask] = self.time[reset_mask]
@@ -1282,6 +1334,7 @@ class StoneCourseEnv(LanesEnv):
             "curriculum_surface_tilt_max_degrees": (
                 self.terrain_curriculum.current_surface_tilt_maximum_degrees
             ),
+            "curriculum_height_scale": self.terrain_curriculum.current_height_scale,
             "curriculum_completion_rate": self.terrain_curriculum.last_completion_rate,
         }
 

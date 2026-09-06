@@ -183,6 +183,10 @@ class EnvConfig:
     """ Fraction of the commanded distance (command x elapsed) required for curriculum success; 0 keeps the absolute course_curriculum_min_progress """
     course_stone_gated_reward: bool = False
     """ Pay velocity/alive rewards only while the last support was a slab; any ground contact zeroes them until the feet regain a slab """
+    course_initial_height_scale: float = 1.0
+    """ Starting fraction of course_top_height for the whole platform; 1.0 keeps slabs at full height from the first episode """
+    course_curriculum_height_scale_increment: float = 0.0
+    """ Height-scale added per curriculum promotion until 1.0; 0 disables the height dimension """
     course_terminate_below_supports: bool = True
     """ Terminate when both feet drop below the lowest slab top minus course_below_support_margin """
     course_below_support_margin: float = 0.15

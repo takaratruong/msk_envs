@@ -211,6 +211,39 @@ class StoneCourseSpecTest(unittest.TestCase):
 
 
 class TerrainCurriculumTest(unittest.TestCase):
+    def test_height_scale_rises_before_terrain_difficulty_expands(self):
+        curriculum = make_curriculum(
+            current_height_scale=0.2, height_scale_increment=0.4
+        )
+
+        # First competent window: platform rises, terrain bounds hold.
+        promoted = curriculum.observe(torch.tensor([True] * 4 + [False]))
+        self.assertTrue(promoted)
+        self.assertAlmostEqual(curriculum.current_height_scale, 0.6)
+        self.assertAlmostEqual(curriculum.current_maximum, 0.80)
+
+        promoted = curriculum.observe(torch.tensor([True] * 4 + [False]))
+        self.assertTrue(promoted)
+        self.assertAlmostEqual(curriculum.current_height_scale, 1.0)
+        self.assertAlmostEqual(curriculum.current_maximum, 0.80)
+
+        # Full height reached: the next window expands terrain as before.
+        promoted = curriculum.observe(torch.tensor([True] * 4 + [False]))
+        self.assertTrue(promoted)
+        self.assertAlmostEqual(curriculum.current_maximum, 0.94)
+
+    def test_sampler_scales_the_whole_platform_height(self):
+        spec = make_spec()
+        generator = torch.Generator().manual_seed(5)
+        positions = spec.sample_positions(
+            4, "cpu", generator, step_length_max=0.80, height_scale=0.2
+        )
+        tops = positions[:, :, 1] + spec.half_extents[1]
+        self.assertTrue(torch.allclose(
+            tops[:, :2], torch.full((4, 2), 0.45 * 0.2)
+        ))
+        self.assertTrue((tops <= 1.05 * 0.2 + 1e-6).all())
+
     def test_promotes_all_bounds_after_a_competent_window(self):
         curriculum = make_curriculum()
 

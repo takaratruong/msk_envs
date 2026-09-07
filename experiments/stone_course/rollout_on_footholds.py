@@ -22,6 +22,7 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -54,10 +55,70 @@ def foothold_positions(stage: dict, seed: int, device) -> torch.Tensor:
     return positions.to(device)
 
 
+def custom_course_positions(
+    seed: int,
+    device,
+    num_stones: int = 16,
+    gap_range: tuple[float, float] = (0.9, 1.4),
+    delta_range: tuple[float, float] = (0.3, 0.7),
+    top_range: tuple[float, float] = (0.2, 2.0),
+    repeat_probability: float = 0.35,
+    lateral_offset: float = 0.12,
+    lateral_jitter: float = 0.10,
+) -> torch.Tensor:
+    """Unconstrained step-variation course, generated slabs-first.
+
+    spec.sample_positions clamps tops to the training corridor
+    (top_height_range ceiling 1.05 m) and couples height change to
+    elevation angle x gap. This generator ignores the corridor: every
+    step climbs or drops by a draw from delta_range, alternating
+    direction but repeating the previous direction with
+    repeat_probability so multi-step ascents reach the top of top_range.
+    A step that would leave top_range reverses instead of clamping, so
+    the per-step change is never silently shrunk.
+
+    Stones 0 and 1 are the standard launch pair (the reset snap centers
+    them under the feet); the variation starts at stone 2.
+    """
+    spec = curriculum_spec()
+    half_up = spec.half_extents[UP_IDX]
+    rng = np.random.default_rng(seed)
+    positions = torch.zeros((num_stones, 3))
+    # Launch pair: same placement the env's default/sampled layouts use.
+    for index in (0, 1):
+        positions[index, FWD_IDX] = spec.launch_forward_offset
+        positions[index, UP_IDX] = spec.center_height
+        positions[index, SIDE_IDX] = (
+            (1.0 if index % 2 == 0 else -1.0) * spec.alternating_lateral_offset
+        )
+    x = spec.launch_forward_offset
+    top = spec.top_height
+    sign = 1.0  # first move climbs
+    for index in range(2, num_stones):
+        x += rng.uniform(*gap_range)
+        if rng.random() >= repeat_probability:
+            sign = -sign
+        delta = rng.uniform(*delta_range)
+        if not top_range[0] <= top + sign * delta <= top_range[1]:
+            sign = -sign  # reverse rather than clamp: keep the full swing
+        top = float(np.clip(top + sign * delta, *top_range))
+        lateral_sign = 1.0 if index % 2 == 0 else -1.0
+        positions[index, FWD_IDX] = x
+        positions[index, UP_IDX] = top - half_up
+        positions[index, SIDE_IDX] = (
+            lateral_sign * lateral_offset + rng.uniform(-lateral_jitter, lateral_jitter)
+        )
+    return positions.to(device)
+
+
 class FootholdStoneCourseEnv(StoneCourseEnv):
     """StoneCourseEnv whose reset layout is a fixed foothold course."""
 
     course_positions: torch.Tensor | None = None  # (num_stones, 3), env axes
+    # Continuation slabs clamp their top height to this corridor; None means
+    # the training corridor. Custom courses set it to their own top span so
+    # a slab past the course end does not snap down to the training ceiling.
+    continuation_top_range: tuple[float, float] | None = None
 
     def _sample_reset_layouts(self, world_ids):
         positions = self.course_positions.unsqueeze(0).repeat(
@@ -71,7 +132,9 @@ class FootholdStoneCourseEnv(StoneCourseEnv):
     def _sample_recycled_slabs(self, world_ids, predecessors):
         # Deterministic continuation past the fixed course: same top height,
         # walking-stride gap, alternating lateral offset, flat tops.
-        min_top, max_top = self.course.top_height_range
+        min_top, max_top = (
+            self.continuation_top_range or self.course.top_height_range
+        )
         half_up = self.course.half_extents[UP_IDX]
         positions = predecessors.clone()
         positions[:, FWD_IDX] += CONTINUATION_GAP
@@ -134,13 +197,40 @@ def main() -> int:
     parser.add_argument("--elevation-deg", type=float, default=None)
     parser.add_argument("--yaw-deg", type=float, default=None)
     parser.add_argument("--height-scale", type=float, default=1.0)
+    parser.add_argument("--custom-course", action="store_true",
+                        help="generate the course with "
+                             "custom_course_positions instead of the "
+                             "curriculum sampler: unconstrained per-step "
+                             "top-height swings (see --step-delta/--top-span)")
+    parser.add_argument("--course-stones", type=int, default=16,
+                        help="custom-course length (also sets the env's "
+                             "stone count in that mode)")
+    parser.add_argument("--gap", type=float, nargs=2, default=[0.9, 1.4],
+                        metavar=("MIN", "MAX"))
+    parser.add_argument("--step-delta", type=float, nargs=2, default=[0.3, 0.7],
+                        metavar=("MIN", "MAX"),
+                        help="per-step top-height climb/drop magnitude (m)")
+    parser.add_argument("--top-span", type=float, nargs=2, default=[0.2, 2.0],
+                        metavar=("MIN", "MAX"),
+                        help="absolute corridor for slab tops (m)")
+    parser.add_argument("--repeat-probability", type=float, default=0.35,
+                        help="chance a step keeps climbing/dropping in the "
+                             "same direction as the previous one")
     parser.add_argument("--tag", default=None,
                         help="filename prefix for saved trajectories "
                              "(default: 'foothold' for the mid stage, "
                              "'foothold_<stagename>' otherwise)")
     args, remaining = parser.parse_known_args()
 
-    if args.step_length_max is not None:
+    if args.custom_course:
+        stage_name = (f"extreme_d{args.step_delta[0]:g}-{args.step_delta[1]:g}"
+                      f"_top{args.top_span[0]:g}-{args.top_span[1]:g}"
+                      f"_gap{args.gap[0]:g}-{args.gap[1]:g}")
+        stage = dict(custom_course=True, num_stones=args.course_stones,
+                     gap_range=args.gap, delta_range=args.step_delta,
+                     top_range=args.top_span,
+                     repeat_probability=args.repeat_probability)
+    elif args.step_length_max is not None:
         stage_name = (f"custom_sl{args.step_length_max:g}"
                       f"_el{args.elevation_deg:g}_yaw{args.yaw_deg:g}")
         stage = dict(step_length_max=args.step_length_max,
@@ -151,15 +241,19 @@ def main() -> int:
         stage_name, stage = STAGES[args.stage_index][0], STAGES[args.stage_index][1]
     tag = args.tag or ("foothold" if args.stage_index == 2
                        and args.step_length_max is None
+                       and not args.custom_course
                        else f"foothold_{stage_name}")
 
     # Match the stonecourse_symaug4 training environment (see
     # models/stonecourse_symaug4_launch.log), except interior-landing
     # termination is off so an imperfect landing does not end the video.
+    # A custom course sets its own stone count; everything else stays
+    # training-matched so out-of-corridor slab tops are the ONLY novelty.
+    course_stones = args.course_stones if args.custom_course else 14
     train_args = tyro.cli(StoneCourseConfig, args=[
         "--disable-wandb", "env-config:sprinter",
         "--env-config.model-path", "../msk_models/sprinter/sprinter_model_sym.osim",
-        "--env-config.course-stones", "14",
+        "--env-config.course-stones", str(course_stones),
         "--env-config.course-step-length-range", "0.40", "1.50",
         "--env-config.course-lateral-jitter", "0.10",
         "--env-config.course-alternating-lateral-offset", "0.12",
@@ -185,9 +279,20 @@ def main() -> int:
         requires_visuals=True, cuda_graph=True,
     )
 
+    if args.custom_course:
+        env.continuation_top_range = tuple(args.top_span)
+
     results = {}
     for seed in args.seeds:
-        env.course_positions = foothold_positions(stage, seed, args.device)
+        if args.custom_course:
+            env.course_positions = custom_course_positions(
+                seed, args.device, num_stones=args.course_stones,
+                gap_range=tuple(args.gap), delta_range=tuple(args.step_delta),
+                top_range=tuple(args.top_span),
+                repeat_probability=args.repeat_probability,
+            )
+        else:
+            env.course_positions = foothold_positions(stage, seed, args.device)
         # Starting-pose noise draws from the global RNG; seed it per rollout.
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)

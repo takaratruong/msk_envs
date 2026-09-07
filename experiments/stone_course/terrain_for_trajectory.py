@@ -76,6 +76,10 @@ def main() -> int:
     parser.add_argument("--margin", type=float, default=3.0,
                         help="terrain apron beyond the contacts (m)")
     parser.add_argument("--rbf-length", type=float, default=0.35)
+    parser.add_argument("--amp", type=float, default=0.30,
+                        help="base fBm relief amplitude (m); raise to "
+                             "0.6-0.8 so the terrain between contacts looks "
+                             "as dramatic as a large-step course")
     parser.add_argument("--passes", type=int, default=12,
                         help="RBF correction iterations; steep courses "
                              "(elevation beyond ~20 deg) need 30+ to pull "
@@ -91,7 +95,7 @@ def main() -> int:
 
     gx, gy, Z = fit_terrain(
         all_tops, cell=args.cell, margin=args.margin, seed=args.seed,
-        L=args.rbf_length, passes=args.passes,
+        amp=args.amp, L=args.rbf_length, passes=args.passes,
     )
     ix = np.clip(np.rint((all_tops[:, 0] - gx[0]) / args.cell).astype(int), 0, len(gx) - 1)
     iy = np.clip(np.rint((all_tops[:, 1] - gy[0]) / args.cell).astype(int), 0, len(gy) - 1)

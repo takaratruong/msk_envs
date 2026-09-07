@@ -75,6 +75,13 @@ def main() -> int:
     parser.add_argument("--cell", type=float, default=0.05)
     parser.add_argument("--margin", type=float, default=3.0,
                         help="terrain apron beyond the contacts (m)")
+    parser.add_argument("--rbf-length", type=float, default=0.35)
+    parser.add_argument("--passes", type=int, default=12,
+                        help="RBF correction iterations; steep courses "
+                             "(elevation beyond ~20 deg) need 30+ to pull "
+                             "the residual under 1 cm")
+    parser.add_argument("--title", default=None,
+                        help="override the hero-image title")
     parser.add_argument("--out-npz", type=Path, required=True)
     parser.add_argument("--out-image", type=Path, required=True)
     args = parser.parse_args()
@@ -83,7 +90,8 @@ def main() -> int:
     print(f"course slabs: {len(course)}, total slab positions: {len(all_tops)}")
 
     gx, gy, Z = fit_terrain(
-        all_tops, cell=args.cell, margin=args.margin, seed=args.seed
+        all_tops, cell=args.cell, margin=args.margin, seed=args.seed,
+        L=args.rbf_length, passes=args.passes,
     )
     ix = np.clip(np.rint((all_tops[:, 0] - gx[0]) / args.cell).astype(int), 0, len(gx) - 1)
     iy = np.clip(np.rint((all_tops[:, 1] - gy[0]) / args.cell).astype(int), 0, len(gy) - 1)
@@ -115,9 +123,11 @@ def main() -> int:
     ax.view_init(elev=28, azim=-49)
     ax.set_axis_off()
     ax.set_title(
-        "Mid-stage curriculum as natural terrain - red: the 14 sampled "
-        "footholds, gray: continuation contacts; the rollout video walks "
-        "this exact surface",
+        args.title or (
+            "Mid-stage curriculum as natural terrain - red: the 14 sampled "
+            "footholds, gray: continuation contacts; the rollout video walks "
+            "this exact surface"
+        ),
         color="#e6e6e6", fontsize=13,
     )
     args.out_image.parent.mkdir(parents=True, exist_ok=True)

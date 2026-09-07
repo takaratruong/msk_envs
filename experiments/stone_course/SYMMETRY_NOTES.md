@@ -29,3 +29,19 @@ under mirroring (e.g. canonicalize the initialization by side, or solve one
 side and mirror the solution). Until then, mirrored transitions are exact
 for all leg mechanics and approximate (~3%) for arm-muscle fiber state —
 acceptable as data augmentation, insufficient for exact-equivalence claims.
+
+## Observation: one-foot hopping basin (2026-09-07)
+
+riser3sym (control, no augmentation) converged early onto single-leg
+hopping: its iter-16000 full-episode eval spent 73% of frames on the right
+foot only, 1% left, 0% double support. Verified NOT a model artifact: the
+symmetrization touched leg anatomy by at most 0.015% (vas_int) and made the
+legs exactly equal. Hopping is simply a valid basin of the minimal
+vel+alive objective - one leg to coordinate, no weight transfer.
+
+symaug (identical recipe + mirrored replay) shows near-balanced contacts
+at iter 3000 (34% L / 40% R): mirrored data prevents one-sided strategies
+from consolidating, since every right-leg experience trains the left too.
+Expectation: terrain difficulty (long gaps, steep elevation) should
+eventually price hopping out for the control as well; either way the A/B
+now doubles as a gait-symmetry experiment with a pathological baseline.

@@ -96,6 +96,34 @@ class MirrorSpec:
         )
 
 
+def obs_block_slices(env) -> dict[str, slice]:
+    """Column ranges of each observation block, for diagnostics."""
+    lookahead = env.course.lookahead
+    n_muscles = env.muscle_activations.shape[1]
+    n_actuators = env.actuator_activations.shape[1]
+    n_qpos = env.joint_positions.shape[1]
+    n_qvel = env.joint_velocities.shape[1]
+    blocks = {}
+    offset = 0
+    blocks["course"] = slice(offset, offset + 5 * lookahead); offset += 5 * lookahead
+    blocks["muscle_act"] = slice(offset, offset + n_muscles); offset += n_muscles
+    blocks["fiber_len"] = slice(offset, offset + n_muscles); offset += n_muscles
+    blocks["actuator"] = slice(offset, offset + n_actuators); offset += n_actuators
+    blocks["qpos"] = slice(offset, offset + n_qpos - 1); offset += n_qpos - 1
+    blocks["qvel"] = slice(offset, offset + n_qvel); offset += n_qvel
+    if env.command_speed_range != (0.0, 0.0):
+        blocks["command"] = slice(offset, offset + 1)
+    return blocks
+
+
+def report_block_errors(spec, env, obs: torch.Tensor, label: str) -> None:
+    flipped = spec.flip_obs(obs[1:2])
+    for name, sl in obs_block_slices(env).items():
+        err = (flipped[0, sl] - obs[0, sl]).abs()
+        print(f"  {label} {name:11s} max_err={err.max().item():.3e} "
+              f"argmax_col={sl.start + int(err.argmax())}")
+
+
 def build_mirror_spec(env) -> MirrorSpec:
     """Derive the mirror permutation for env's exact observation layout.
 
@@ -217,6 +245,9 @@ def main() -> int:
         "--env-config.no-apply-swap-lr",
         "--env-config.course-lateral-jitter", "0.10",
         "--env-config.course-alternating-lateral-offset", "0.12",
+        # Recycling samples new random slabs per world independently, which
+        # would silently break the mirror mid-rollout. Push it out of reach.
+        "--env-config.course-recycle-distance-behind", "1000.0",
     ] + remaining)
 
     policy = load_policy(args.checkpoint).to(args.device)
@@ -229,15 +260,23 @@ def main() -> int:
 
     # World 1 becomes the exact mirror of world 0: layout and body state.
     mirror_world_layout(env, 0, 1)
+    muscle_perm = spec.act_perm[:env.num_muscles].to(env.device)
     env.joint_positions[1] = flip_qpos(env.joint_positions[0:1], env)[0]
     env.joint_velocities[1] = flip_qvel(env.joint_velocities[0:1], env)[0]
-    env.muscle_activations[1] = env.muscle_activations[0, spec.act_perm[:env.num_muscles].cpu()]
+    env.muscle_activations[1] = env.muscle_activations[0, muscle_perm]
     env.actuator_activations[1] = env.actuator_activations[0]
+    # Re-derive all pose-dependent state (fiber lengths, collider positions)
+    # from the mirrored qpos before reading any observation. launch_sim_reset
+    # only touches worlds flagged in reset_tensor, so flag them explicitly.
+    env.reset_tensor.fill_(1.0)
     env.launch_sim_reset()
+    env.reset_tensor.fill_(0.0)
 
     obs = env._get_obs()
     obs_err0 = (spec.flip_obs(obs[1:2]) - obs[0:1]).abs().max().item()
     print(f"initial mirrored-obs error: {obs_err0:.2e}")
+    if obs_err0 > 1e-3:
+        report_block_errors(spec, env, obs, "t=0")
 
     worst_obs = worst_pos = 0.0
     for step in range(args.steps):
@@ -262,6 +301,8 @@ def main() -> int:
         if step % 15 == 14:
             print(f"step {step + 1:3d}: root divergence {pos_err:.2e}, "
                   f"obs divergence {obs_err:.2e}")
+            if obs_err > 0.5:
+                report_block_errors(spec, env, obs_now, f"t={step + 1}")
 
     print(f"\nover {args.steps} steps ({args.steps / 30.0:.1f} s):")
     print(f"  max mirrored root divergence: {worst_pos:.3e} m")

@@ -7,27 +7,44 @@ untouched - the walker stepped on invisible slabs - but because the surface
 passes through every slab top (max residual < 1 mm), each footfall lands on
 the rendered terrain.
 
-The slab boxes are simply skipped, not re-simulated: warp's OpenGL renderer
-supports only one color per mesh instance, so the terrain is a single
-earth-green with smooth shading. Backface culling is disabled so the ribbon
-is visible from every camera elevation.
+The slab boxes are simply skipped, not re-simulated. warp's OpenGL renderer
+supports only one color per mesh instance, so a single terrain mesh reads as
+a flat green sheet with no depth cues. Instead the triangles are split into
+elevation bands (by mean vertex height) and each band is rendered as its own
+mesh with a hypsometric tint (valley green -> grass -> tan -> ochre ->
+grey-brown), alternate bands slightly darkened. The band boundaries act as
+contour lines, making ridges/valleys and relative height readable. Backface
+culling is disabled so the ribbon is visible from every camera elevation.
 
 Usage:
     DISPLAY=:99 CUDA_VISIBLE_DEVICES=2 python \
         render_trajectory_natural_terrain.py <traj.json[.gz]> <out_frame_dir> \
-        <terrain.npz>
+        <terrain.npz> [--max-frames N] [--bands N] [--faceted-terrain]
 """
+import argparse
 import gzip
 import json
 import os
-import sys
 
 import numpy as np
 import warp as wp
 import warp.render
 from PIL import Image
 
-traj_path, out_dir, terrain_path = sys.argv[1], sys.argv[2], sys.argv[3]
+ap = argparse.ArgumentParser()
+ap.add_argument("traj_path")
+ap.add_argument("out_dir")
+ap.add_argument("terrain_path")
+ap.add_argument("--max-frames", type=int, default=0,
+                help="render only the first N frames (0 = all)")
+ap.add_argument("--bands", type=int, default=12,
+                help="number of hypsometric elevation bands")
+ap.add_argument("--faceted-terrain", action="store_true",
+                help="flat-shade the terrain bands (default: smooth; faceted "
+                     "was compared and reads as broken streaky ribbons on "
+                     "this low-poly grid)")
+args = ap.parse_args()
+traj_path, out_dir, terrain_path = args.traj_path, args.out_dir, args.terrain_path
 os.makedirs(out_dir, exist_ok=True)
 
 opener = gzip.open if traj_path.endswith(".gz") else open
@@ -47,8 +64,55 @@ v = (iy * nx + ix).ravel()
 tris = np.stack(
     [v, v + nx, v + 1, v + 1, v + nx, v + nx + 1], -1
 ).reshape(-1, 3).astype(np.int32)
-terrain_indices = tris.reshape(-1)
 print(f"terrain mesh: {len(terrain_points)} vertices, {len(tris)} triangles", flush=True)
+
+# --- Elevation banding: split triangles into height bands, one mesh each ---
+# Hypsometric control points, dark valley-green -> grass -> tan -> ochre ->
+# grey-brown summit.
+_PALETTE = np.array([
+    (0.25, 0.42, 0.22),
+    (0.45, 0.58, 0.30),
+    (0.72, 0.66, 0.40),
+    (0.62, 0.48, 0.30),
+    (0.55, 0.50, 0.45),
+], dtype=np.float64)
+
+
+def band_color(k, t):
+    """t in [0, 1]: normalized elevation of the band's midpoint."""
+    x = t * (len(_PALETTE) - 1)
+    i = min(int(x), len(_PALETTE) - 2)
+    c = _PALETTE[i] + (x - i) * (_PALETTE[i + 1] - _PALETTE[i])
+    if k % 2 == 1:  # darken alternate bands so boundaries read as contours
+        c = c * 0.88
+    return tuple(c)
+
+
+n_bands = max(args.bands, 1)
+tri_h = terrain_points[tris, 1].mean(axis=1)  # mean vertex height (Y is up)
+# Quantile edges spread the contour lines evenly over the surface actually
+# seen (linear edges bunch most of a flat course into one or two bands), but
+# the COLOR still follows true elevation so valleys stay green and only real
+# summits go ochre/grey.
+edges = np.quantile(tri_h, np.linspace(0.0, 1.0, n_bands + 1))
+edges[-1] += 1e-6
+tri_band = np.clip(np.digitize(tri_h, edges) - 1, 0, n_bands - 1)
+h_lo, h_span = tri_h.min(), max(tri_h.max() - tri_h.min(), 1e-6)
+terrain_bands = []  # (name, verts, flat indices, color)
+for k in range(n_bands):
+    band_tris = tris[tri_band == k]
+    if len(band_tris) == 0:
+        continue
+    used, local = np.unique(band_tris, return_inverse=True)
+    t_mid = (0.5 * (edges[k] + edges[k + 1]) - h_lo) / h_span
+    terrain_bands.append((
+        f"terrain_band_{k:02d}",
+        terrain_points[used],
+        local.astype(np.int32).reshape(-1),
+        band_color(k, float(np.clip(t_mid, 0.0, 1.0))),
+    ))
+print(f"split into {len(terrain_bands)} elevation bands "
+      f"(z {edges[0]:.2f}..{edges[-1]:.2f} m)", flush=True)
 
 W, H = 1000, 800
 renderer = warp.render.OpenGLRenderer(
@@ -87,6 +151,9 @@ def act_color(a):
     return (0.15 + 0.85 * a, 0.15, 0.7 - 0.55 * a)  # blue->red with activation
 
 
+if args.max_frames > 0:
+    frames = frames[:args.max_frames]
+
 saved = 0
 for fi, fr in enumerate(frames):
     cam = fr.get("cam_pos", [3, 1.2, 3])
@@ -99,12 +166,14 @@ for fi, fr in enumerate(frames):
 
     # The natural terrain replaces both the ground plane and the slab boxes.
     # Static geometry: registering it on the first frame is enough, the
-    # instance persists across frames.
+    # instances persist across frames. One mesh per elevation band because
+    # render_mesh takes a single flat color per instance.
     if fi == 0:
-        renderer.render_mesh(
-            "terrain", terrain_points, terrain_indices,
-            colors=(0.42, 0.54, 0.32), smooth_shading=True,
-        )
+        for name, verts, idx, col in terrain_bands:
+            renderer.render_mesh(
+                name, verts, idx,
+                colors=col, smooth_shading=not args.faceted_terrain,
+            )
 
     for vi, vis in enumerate(fr.get("visuals", [])):
         mesh = load_bone_mesh(vis.get("mesh_file"))

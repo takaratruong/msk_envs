@@ -61,3 +61,17 @@ aesthetic is wanted without the limit-bracing exploit, the honest levers are
 late-phase effort costs (lambda_limit on limit forces, or the metabolic
 term), not geometry caps. Keeper checkpoint of the good-looking gait:
 models/stonecourse_kneecap_keeper.pt.
+
+## Observation: staged lane leads per-checkpoint (2026-09-07, user)
+
+Visual note from watching the live cards: stonecourse_staged shows the best
+gait quality for its checkpoint of any lane so far, including clear PUSH-OFF
+behavior with the back foot (active ankle propulsion at toe-off) - the first
+lane where that has been visible. Quantitatively consistent: staged reached
+the 1.12 m / ±30° terrain rung in ~25k iterations vs riser6's ~62k under the
+same final rules (landing termination + annealed margin), 2.5x faster via the
+stage-sequenced schedule (free learning -> placement -> terrain).
+
+Recipe of the lane: symmetric model, mirrored replay augmentation, stone-gated
+reward, stones-only passing, rising platform, staged landing rule
+(course_defer_landing_to_full_height), annealed margin 0.06 -> 0.01/promotion.

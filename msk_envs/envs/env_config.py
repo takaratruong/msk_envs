@@ -185,6 +185,8 @@ class EnvConfig:
     """ Pay velocity/alive rewards only while the last support was a slab; any ground contact zeroes them until the feet regain a slab """
     course_curriculum_require_stone_support: bool = False
     """ Curriculum success additionally requires zero ground-plane contact for the whole episode: the course must be crossed on the stones """
+    course_curriculum_require_interior_landings: bool = False
+    """ Curriculum success additionally requires every touchdown to land whole-foot interior on a slab: edge landings don't terminate, but the episode cannot promote the curriculum """
     course_initial_height_scale: float = 1.0
     """ Starting fraction of course_top_height for the whole platform; 1.0 keeps slabs at full height from the first episode """
     course_curriculum_height_scale_increment: float = 0.0

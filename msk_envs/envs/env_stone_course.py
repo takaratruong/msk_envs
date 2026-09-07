@@ -693,6 +693,9 @@ class StoneCourseEnv(LanesEnv):
         self.curriculum_require_stone_support = (
             env_config.course_curriculum_require_stone_support
         )
+        self.curriculum_require_interior_landings = (
+            env_config.course_curriculum_require_interior_landings
+        )
         self.terminate_below_supports = env_config.course_terminate_below_supports
         self.below_support_margin = env_config.course_below_support_margin
         self.terminate_on_ground_contact = (
@@ -815,6 +818,13 @@ class StoneCourseEnv(LanesEnv):
         # from counting as a curriculum success (crossing must happen on the
         # stones), independent of the transient reward gate above.
         self._episode_touched_ground = torch.zeros(
+            num_envs, device=device, dtype=torch.bool
+        )
+        # Per-episode latch: any touchdown that is not whole-foot interior on
+        # a slab disqualifies the episode as curriculum evidence. Landing
+        # quality is never rewarded or terminal; it is only what "passing"
+        # means, so the curriculum shapes centered, heel-supported footfalls.
+        self._episode_edge_landed = torch.zeros(
             num_envs, device=device, dtype=torch.bool
         )
         self.step_length_minimums = self.build_step_length_minimums(
@@ -974,6 +984,7 @@ class StoneCourseEnv(LanesEnv):
         self.previous_foot_contact[world_ids] = False
         self.stone_supported[world_ids] = True
         self._episode_touched_ground[world_ids] = False
+        self._episode_edge_landed[world_ids] = False
         self._last_success[world_ids] = False
         self._last_edge_violation[world_ids] = False
         self.episode_slabs_recycled[world_ids] = 0
@@ -1112,6 +1123,7 @@ class StoneCourseEnv(LanesEnv):
         self.episode_slabs_recycled[world_ids] = 0
         self._last_success[world_ids] = False
         self._episode_touched_ground[world_ids] = False
+        self._episode_edge_landed[world_ids] = False
         self._resample_command_speeds(world_ids)
 
     def _pre_step(self) -> None:
@@ -1245,10 +1257,16 @@ class StoneCourseEnv(LanesEnv):
     def _invalid_edge_touchdown(self) -> torch.Tensor:
         contact_by_side, interior_by_side = self._interior_foot_support()
         touchdown = contact_by_side & ~self.previous_foot_contact
-        after_launch = self.time >= self.landing_check_delay
+        # Grace is measured from each episode's own start so continued worlds
+        # do not get a permanent exemption and fresh resets always get one.
+        after_launch = (
+            self.time - self._episode_start_time
+        ) >= self.landing_check_delay
         invalid = (touchdown & ~interior_by_side).any(dim=1) & after_launch
         self.previous_foot_contact.copy_(contact_by_side)
         self._last_edge_violation.copy_(invalid)
+        if self.curriculum_require_interior_landings:
+            self._episode_edge_landed |= invalid
         if not self.require_interior_landing:
             return torch.zeros_like(invalid)
         return invalid
@@ -1327,6 +1345,11 @@ class StoneCourseEnv(LanesEnv):
             # the ground plane cannot be curriculum evidence of competence,
             # even if it survived and covered the distance.
             competent = competent & ~self._episode_touched_ground
+        if self.curriculum_require_interior_landings:
+            # Passing also means landing properly: every touchdown whole-foot
+            # interior on a slab. Edge landings are survivable and unpunished,
+            # they just are not competence.
+            competent = competent & ~self._episode_edge_landed
         self._last_success.copy_(competent)
         self._last_timed_out.copy_(timed_out)
         return timed_out.float().detach()

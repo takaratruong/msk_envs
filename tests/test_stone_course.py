@@ -410,6 +410,9 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.previous_foot_contact = torch.zeros((3, 2), dtype=torch.bool)
         env._last_edge_violation = torch.zeros(3, dtype=torch.bool)
         env.time = torch.ones(3)
+        env._episode_start_time = torch.zeros(3)
+        env.curriculum_require_interior_landings = False
+        env._episode_edge_landed = torch.zeros(3, dtype=torch.bool)
 
         # World 0: both the active heel and inactive toe project inside.
         env.collider_positions[0, 0] = torch.tensor([1.0, 0.50, 0.0])
@@ -491,6 +494,8 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.curriculum_command_fraction = 0.0
         env.curriculum_min_progress = 12.0
         env.curriculum_require_stone_support = True
+        env.curriculum_require_interior_landings = False
+        env._episode_edge_landed = torch.zeros(3, dtype=torch.bool)
         env.root_pos = torch.tensor([
             [15.0, 1.4, 0.0],   # far enough, never touched ground -> success
             [15.0, 1.4, 0.0],   # far enough but touched ground -> disqualified
@@ -583,7 +588,9 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.curriculum_min_progress = 12.0
         env.curriculum_command_fraction = 0.0
         env.curriculum_require_stone_support = False
+        env.curriculum_require_interior_landings = False
         env._episode_touched_ground = torch.zeros(3, dtype=torch.bool)
+        env._episode_edge_landed = torch.zeros(3, dtype=torch.bool)
         env._last_success = torch.zeros(3, dtype=torch.bool)
         env._last_timed_out = torch.zeros(3, dtype=torch.bool)
         return env
@@ -651,6 +658,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env._last_success = torch.tensor([True, True, False, False])
         env.episode_slabs_recycled = torch.full((4,), 9, dtype=torch.long)
         env._episode_touched_ground = torch.zeros(4, dtype=torch.bool)
+        env._episode_edge_landed = torch.zeros(4, dtype=torch.bool)
         env.terrain_curriculum = make_curriculum()
 
         performed = {}
@@ -820,3 +828,40 @@ class SymmetricAugmentationTest(unittest.TestCase):
                 rewards=rewards, terminated=terminated, truncations=truncations,
                 info=info, mirror_spec=spec,
             )
+
+
+class InteriorLandingCriterionTest(unittest.TestCase):
+    def test_edge_landing_disqualifies_curriculum_success(self):
+        env = object.__new__(StoneCourseEnv)
+        env.time = torch.tensor([12.0, 12.0])
+        env._episode_start_time = torch.zeros(2)
+        env.max_episode_duration = 12.0
+        env.curriculum_command_fraction = 0.0
+        env.curriculum_min_progress = 12.0
+        env.curriculum_require_stone_support = False
+        env.curriculum_require_interior_landings = True
+        env.root_pos = torch.tensor([[15.0, 1.4, 0.0], [15.0, 1.4, 0.0]])
+        env._episode_start_x = torch.zeros(2)
+        env._episode_touched_ground = torch.zeros(2, dtype=torch.bool)
+        env._episode_edge_landed = torch.tensor([False, True])
+        env._last_success = torch.zeros(2, dtype=torch.bool)
+        env._last_timed_out = torch.zeros(2, dtype=torch.bool)
+
+        env._get_truncated()
+
+        self.assertEqual(env._last_success.tolist(), [True, False])
+
+    def test_edge_touchdowns_latch_without_terminating(self):
+        env_source = None
+        # Reuse the contact fixture from StoneCourseEnvironmentTest.
+        fixture = StoneCourseEnvironmentTest()
+        env = fixture.make_contact_env()
+        env.require_interior_landing = False       # never terminal
+        env.curriculum_require_interior_landings = True
+
+        invalid = env._invalid_edge_touchdown()
+
+        # World 1's edge touchdown latched as disqualifying but returned
+        # no termination signal.
+        self.assertEqual(invalid.tolist(), [False, False, False])
+        self.assertEqual(env._episode_edge_landed.tolist(), [False, True, False])

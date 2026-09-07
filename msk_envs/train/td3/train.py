@@ -188,6 +188,11 @@ def train(
         device=device,
     )
 
+    mirror_spec = None
+    if td3_config.symmetric_augmentation:
+        from msk_envs.utils.symmetry import build_stone_course_mirror_spec
+        mirror_spec = build_stone_course_mirror_spec(envs)
+
     @contextmanager
     def _maybe_amp():
         with autocast(device_type=amp_device_type, dtype=amp_dtype, enabled=td3_config.amp):
@@ -439,6 +444,7 @@ def train(
             collect_experience(
                 rb=rb, obs=obs, actions=actions, next_obs=next_obs, rewards=rewards,
                 terminated=terminated, truncations=truncations, info=info,
+                mirror_spec=mirror_spec,
             )
 
             if td3_config.reward_normalization:

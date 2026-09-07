@@ -9,6 +9,9 @@ class TD3Config:
     num_envs: int = 4096
     """number of parallel environments"""
 
+    symmetric_augmentation: bool = False
+    """store the L/R-mirrored copy of every transition in the replay buffer (StoneCourse only; requires the symmetric model for exact validity)"""
+
     num_learning_iterations: int = 150000
     """total timesteps of the experiments"""
 

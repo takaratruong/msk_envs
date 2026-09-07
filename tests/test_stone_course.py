@@ -771,3 +771,52 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SymmetricAugmentationTest(unittest.TestCase):
+    def test_mirrored_transition_is_stored_alongside_the_original(self):
+        from msk_envs.train.nets.buffer import SimpleReplayBuffer, collect_experience
+        from msk_envs.utils.symmetry import MirrorSpec
+
+        n_env, n_obs, n_act = 2, 4, 3
+        rb = SimpleReplayBuffer(
+            n_env=n_env, buffer_size=8, n_obs=n_obs, n_act=n_act,
+            n_steps=1, gamma=0.99, device=torch.device("cpu"),
+        )
+        # Mirror: swap obs cols 0/1, negate col 3; swap action cols 0/1.
+        spec = MirrorSpec(
+            obs_perm=torch.tensor([1, 0, 2, 3]),
+            obs_signs=torch.tensor([1.0, 1.0, 1.0, -1.0]),
+            act_perm=torch.tensor([1, 0, 2]),
+            act_signs=torch.ones(3),
+        )
+        obs = torch.arange(n_env * n_obs, dtype=torch.float).reshape(n_env, n_obs)
+        actions = torch.arange(n_env * n_act, dtype=torch.float).reshape(n_env, n_act)
+        next_obs = obs + 100.0
+        rewards = torch.tensor([1.0, 2.0])
+        terminated = torch.zeros(n_env)
+        truncations = torch.zeros(n_env)
+        info = {"final_observation": next_obs}
+
+        collect_experience(
+            rb=rb, obs=obs, actions=actions, next_obs=next_obs,
+            rewards=rewards, terminated=terminated, truncations=truncations,
+            info=info, mirror_spec=spec,
+        )
+
+        self.assertEqual(rb.ptr, 2)
+        self.assertTrue(torch.equal(rb.observations[:, 0], obs))
+        self.assertTrue(torch.equal(rb.observations[:, 1], spec.flip_obs(obs)))
+        self.assertTrue(torch.equal(rb.actions[:, 1], spec.flip_action(actions)))
+        self.assertTrue(torch.equal(rb.rewards[:, 0], rb.rewards[:, 1]))
+
+        with self.assertRaisesRegex(ValueError, "n_steps"):
+            rb_multi = SimpleReplayBuffer(
+                n_env=n_env, buffer_size=8, n_obs=n_obs, n_act=n_act,
+                n_steps=3, gamma=0.99, device=torch.device("cpu"),
+            )
+            collect_experience(
+                rb=rb_multi, obs=obs, actions=actions, next_obs=next_obs,
+                rewards=rewards, terminated=terminated, truncations=truncations,
+                info=info, mirror_spec=spec,
+            )

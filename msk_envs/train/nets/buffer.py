@@ -223,19 +223,22 @@ def collect_experience(
         terminated: torch.Tensor,
         truncations: torch.Tensor,
         info: dict,
+        mirror_spec=None,
 ):
     dones = (terminated + truncations).bool()
 
     # Compute 'true' next_obs for saving
     true_next_obs = torch.where(dones[:, None] > 0, info["final_observation"], next_obs)
 
+    actions = torch.as_tensor(actions, device=rb.device, dtype=torch.float)
+    rewards = torch.as_tensor(rewards, device=rb.device, dtype=torch.float)
     transition = TensorDict(
         {
             "observations": obs,
-            "actions": torch.as_tensor(actions, device=rb.device, dtype=torch.float),
+            "actions": actions,
             "next": {
                 "observations": true_next_obs,
-                "rewards": torch.as_tensor(rewards, device=rb.device, dtype=torch.float),
+                "rewards": rewards,
                 "truncations": truncations.long(),
                 "dones": dones.long(),
             },
@@ -244,6 +247,30 @@ def collect_experience(
         device=rb.device,
     )
     rb.extend(transition)
+
+    if mirror_spec is not None:
+        # Symmetric augmentation: the L/R-mirrored transition is equally
+        # valid experience (reward and dynamics are mirror-invariant), so
+        # store it as if it had been collected. Doubles data per env step.
+        # Interleaving mirrored rows breaks temporal adjacency along the
+        # buffer's time axis, so this is only valid with 1-step sampling.
+        if rb.n_steps != 1:
+            raise ValueError("symmetric augmentation requires n_steps == 1")
+        mirrored = TensorDict(
+            {
+                "observations": mirror_spec.flip_obs(obs),
+                "actions": mirror_spec.flip_action(actions),
+                "next": {
+                    "observations": mirror_spec.flip_obs(true_next_obs),
+                    "rewards": rewards,
+                    "truncations": truncations.long(),
+                    "dones": dones.long(),
+                },
+            },
+            batch_size=(rb.n_env,),
+            device=rb.device,
+        )
+        rb.extend(mirrored)
     return
 
 

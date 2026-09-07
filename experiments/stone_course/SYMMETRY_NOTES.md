@@ -45,3 +45,19 @@ from consolidating, since every right-leg experience trains the left too.
 Expectation: terrain difficulty (long gaps, steep elevation) should
 eventually price hopping out for the control as well; either way the A/B
 now doubles as a gait-symmetry experiment with a pathological baseline.
+
+## Finding: knee-cap experiment (2026-09-07, stonecourse_kneecap)
+
+Capping the knee coordinate at 0.0 rad (no hyperextension) did NOT inhibit
+learning: the capped lane matched its uncapped counterpart's pace (48-54%
+completion, full platform height by ~13k iterations) and produced visually
+excellent straight-knee walking.
+
+However the mechanism is the same exploit relocated: the policy braces
+against the hard stop at exactly straight and uses the leg as a passive
+fulcrum, just as the uncapped model braces at +10 degrees. Design decision:
+keep hyperextension allowed (standard sym model). If the straight-knee
+aesthetic is wanted without the limit-bracing exploit, the honest levers are
+late-phase effort costs (lambda_limit on limit forces, or the metabolic
+term), not geometry caps. Keeper checkpoint of the good-looking gait:
+models/stonecourse_kneecap_keeper.pt.

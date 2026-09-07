@@ -386,6 +386,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.require_interior_landing = True
         env.landing_margin_inactive = 0.0
         env.landing_check_delay = 0.25
+        env.terrain_curriculum = make_curriculum()
         env.stone_ids = torch.tensor([3, 4, 5, 6, 7])
         env.foot_collider_ids = torch.tensor([0, 1, 2])
         env.foot_side_masks = (
@@ -865,3 +866,39 @@ class InteriorLandingCriterionTest(unittest.TestCase):
         # no termination signal.
         self.assertEqual(invalid.tolist(), [False, False, False])
         self.assertEqual(env._episode_edge_landed.tolist(), [False, True, False])
+
+
+class LandingMarginAnnealTest(unittest.TestCase):
+    def test_margin_shrinks_per_promotion_and_gates_promotability(self):
+        curriculum = make_curriculum(
+            current_maximum=1.50,
+            current_elevation_maximum_degrees=50.0,
+            current_yaw_maximum_degrees=20.0,
+            current_surface_tilt_maximum_degrees=20.0,
+            current_landing_margin=0.06,
+            landing_margin_decrement=0.03,
+        )
+        # All terrain bounds are maxed; only the margin keeps promotions alive.
+        promoted = curriculum.observe(torch.tensor([True] * 4 + [False]))
+        self.assertTrue(promoted)
+        self.assertAlmostEqual(curriculum.current_landing_margin, 0.03)
+
+        promoted = curriculum.observe(torch.tensor([True] * 4 + [False]))
+        self.assertTrue(promoted)
+        self.assertAlmostEqual(curriculum.current_landing_margin, 0.0)
+
+        # Margin exhausted and terrain maxed: no more promotions.
+        promoted = curriculum.observe(torch.tensor([True] * 4 + [False]))
+        self.assertFalse(promoted)
+
+    def test_annealed_margin_widens_the_interior_test(self):
+        fixture = StoneCourseEnvironmentTest()
+        env = fixture.make_contact_env()
+        # World 1's toe is 0.03 m past the strict bound: strict test flags it.
+        strict = env._invalid_edge_touchdown()
+        self.assertEqual(strict.tolist(), [False, True, False])
+
+        env2 = fixture.make_contact_env()
+        env2.terrain_curriculum.current_landing_margin = 0.05
+        lenient = env2._invalid_edge_touchdown()
+        self.assertEqual(lenient.tolist(), [False, False, False])

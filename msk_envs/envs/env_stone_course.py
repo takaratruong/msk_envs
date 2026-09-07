@@ -455,6 +455,8 @@ class TerrainCurriculum:
     window: int
     current_height_scale: float = 1.0
     height_scale_increment: float = 0.0
+    current_landing_margin: float = 0.0
+    landing_margin_decrement: float = 0.0
     episodes: int = 0
     successes: int = 0
     last_completion_rate: float = 0.0
@@ -500,6 +502,12 @@ class TerrainCurriculum:
             raise ValueError(
                 "course_curriculum_height_scale_increment must be non-negative"
             )
+        if self.current_landing_margin < 0.0:
+            raise ValueError("course_initial_landing_margin must be non-negative")
+        if self.landing_margin_decrement < 0.0:
+            raise ValueError(
+                "course_curriculum_landing_margin_decrement must be non-negative"
+            )
 
     @classmethod
     def from_env_config(
@@ -533,6 +541,10 @@ class TerrainCurriculum:
             window=config.course_curriculum_window,
             current_height_scale=config.course_initial_height_scale,
             height_scale_increment=config.course_curriculum_height_scale_increment,
+            current_landing_margin=config.course_initial_landing_margin,
+            landing_margin_decrement=(
+                config.course_curriculum_landing_margin_decrement
+            ),
         )
 
     def observe(self, successful_episodes: torch.Tensor) -> bool:
@@ -550,6 +562,10 @@ class TerrainCurriculum:
             self.last_completion_rate >= self.success_threshold
             and (
                 (self.height_scale_increment > 0.0 and self.current_height_scale < 1.0)
+                or (
+                    self.landing_margin_decrement > 0.0
+                    and self.current_landing_margin > 0.0
+                )
                 or self.current_maximum < self.maximum
                 or self.current_elevation_maximum_degrees
                 < self.elevation_maximum_degrees
@@ -558,6 +574,13 @@ class TerrainCurriculum:
                 < self.surface_tilt_maximum_degrees
             )
         )
+        if promoted and self.landing_margin_decrement > 0.0:
+            # Placement tightens with every promotion, alongside whatever
+            # else the rung changes: each competent window must land cleaner
+            # than the last, ending at the strict interior test.
+            self.current_landing_margin = max(
+                0.0, self.current_landing_margin - self.landing_margin_decrement
+            )
         if (
             promoted
             and self.height_scale_increment > 0.0
@@ -607,6 +630,7 @@ class TerrainCurriculum:
                 self.current_surface_tilt_maximum_degrees
             ),
             "current_height_scale": self.current_height_scale,
+            "current_landing_margin": self.current_landing_margin,
             "episodes": self.episodes,
             "successes": self.successes,
             "last_completion_rate": self.last_completion_rate,
@@ -636,6 +660,9 @@ class TerrainCurriculum:
         current_height_scale = float(state.get("current_height_scale", 1.0))
         if not 0.0 < current_height_scale <= 1.0:
             raise ValueError("checkpoint curriculum height scale is outside (0, 1]")
+        current_landing_margin = float(state.get("current_landing_margin", 0.0))
+        if current_landing_margin < 0.0:
+            raise ValueError("checkpoint curriculum landing margin is negative")
 
         episodes = int(state.get("episodes", 0))
         successes = int(state.get("successes", 0))
@@ -650,6 +677,7 @@ class TerrainCurriculum:
         self.current_yaw_maximum_degrees = current_yaw
         self.current_surface_tilt_maximum_degrees = current_surface_tilt
         self.current_height_scale = current_height_scale
+        self.current_landing_margin = current_landing_margin
         self.episodes = episodes
         self.successes = successes
         self.last_completion_rate = completion_rate
@@ -1225,14 +1253,19 @@ class StoneCourseEnv(LanesEnv):
             quat_conjugate(stone_rotations), relative_positions
         )
         local_xz = local_positions[:, :, :, [FWD_IDX, SIDE_IDX]].abs()
+        # The curriculum's annealed margin widens what counts as interior:
+        # early rungs accept "on the slab", later rungs demand centered
+        # placement, ending strict when the margin reaches zero.
+        annealed = self.terrain_curriculum.current_landing_margin
         collider_inside = (
-            local_xz <= self.interior_half_extents_xz[None, :, None, :]
+            local_xz <= self.interior_half_extents_xz[None, :, None, :] + annealed
         ).all(dim=3)
         # An unloaded sphere may overhang the edge by a small margin; a loaded
         # sphere on the edge is the actual pivot-cheat and stays strict.
         collider_inside_relaxed = (
             local_xz
             <= self.interior_half_extents_xz[None, :, None, :]
+            + annealed
             + self.landing_margin_inactive
         ).all(dim=3)
 
@@ -1376,6 +1409,7 @@ class StoneCourseEnv(LanesEnv):
                 self.terrain_curriculum.current_surface_tilt_maximum_degrees
             ),
             "curriculum_height_scale": self.terrain_curriculum.current_height_scale,
+            "curriculum_landing_margin": self.terrain_curriculum.current_landing_margin,
             "curriculum_completion_rate": self.terrain_curriculum.last_completion_rate,
         }
 

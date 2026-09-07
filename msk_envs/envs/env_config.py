@@ -187,6 +187,10 @@ class EnvConfig:
     """ Curriculum success additionally requires zero ground-plane contact for the whole episode: the course must be crossed on the stones """
     course_curriculum_require_interior_landings: bool = False
     """ Curriculum success additionally requires every touchdown to land whole-foot interior on a slab: edge landings don't terminate, but the episode cannot promote the curriculum """
+    course_initial_landing_margin: float = 0.0
+    """ Starting extra tolerance (m) added to the interior-landing passing test; each promotion shrinks it by the decrement until 0 (strict) """
+    course_curriculum_landing_margin_decrement: float = 0.0
+    """ Landing-margin tolerance removed per curriculum promotion; 0 disables annealing """
     course_initial_height_scale: float = 1.0
     """ Starting fraction of course_top_height for the whole platform; 1.0 keeps slabs at full height from the first episode """
     course_curriculum_height_scale_increment: float = 0.0

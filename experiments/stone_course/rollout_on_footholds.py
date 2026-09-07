@@ -40,14 +40,13 @@ from experiments.stone_course.terrain_from_curriculum import (
     sample_footholds,
 )
 
-MID_STAGE = STAGES[2][1]  # gaps to 1.10 m, elevation +-20 deg, yaw +-8 deg
 CONTINUATION_GAP = 0.90  # walking-stride forward gap for recycled slabs
 
 
-def foothold_positions(seed: int, device) -> torch.Tensor:
+def foothold_positions(stage: dict, seed: int, device) -> torch.Tensor:
     """Slab centers (env axes) whose tops are the visualization footholds."""
     spec = curriculum_spec()
-    fh = sample_footholds(spec, MID_STAGE, seed=seed)  # (N,3): x, lateral, top
+    fh = sample_footholds(spec, stage, seed=seed)  # (N,3): x, lateral, top
     positions = torch.zeros((fh.shape[0], 3))
     positions[:, FWD_IDX] = torch.from_numpy(fh[:, 0])
     positions[:, UP_IDX] = torch.from_numpy(fh[:, 2]) - spec.half_extents[1]
@@ -127,7 +126,32 @@ def main() -> int:
                              "first rollout lasts under --min-duration")
     parser.add_argument("--min-duration", type=float, default=3.0)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--stage-index", type=int, default=2,
+                        help="terrain_from_curriculum.STAGES index (default: "
+                             "2, the mid stage); ignored if stage params are "
+                             "given explicitly")
+    parser.add_argument("--step-length-max", type=float, default=None)
+    parser.add_argument("--elevation-deg", type=float, default=None)
+    parser.add_argument("--yaw-deg", type=float, default=None)
+    parser.add_argument("--height-scale", type=float, default=1.0)
+    parser.add_argument("--tag", default=None,
+                        help="filename prefix for saved trajectories "
+                             "(default: 'foothold' for the mid stage, "
+                             "'foothold_<stagename>' otherwise)")
     args, remaining = parser.parse_known_args()
+
+    if args.step_length_max is not None:
+        stage_name = (f"custom_sl{args.step_length_max:g}"
+                      f"_el{args.elevation_deg:g}_yaw{args.yaw_deg:g}")
+        stage = dict(step_length_max=args.step_length_max,
+                     elevation_deg=args.elevation_deg or 0.0,
+                     yaw_deg=args.yaw_deg or 0.0,
+                     height_scale=args.height_scale)
+    else:
+        stage_name, stage = STAGES[args.stage_index][0], STAGES[args.stage_index][1]
+    tag = args.tag or ("foothold" if args.stage_index == 2
+                       and args.step_length_max is None
+                       else f"foothold_{stage_name}")
 
     # Match the stonecourse_symaug4 training environment (see
     # models/stonecourse_symaug4_launch.log), except interior-landing
@@ -163,12 +187,12 @@ def main() -> int:
 
     results = {}
     for seed in args.seeds:
-        env.course_positions = foothold_positions(seed, args.device)
+        env.course_positions = foothold_positions(stage, seed, args.device)
         # Starting-pose noise draws from the global RNG; seed it per rollout.
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         sim, stats = run_rollout(env, policy, args.device)
-        sim.save_animation(str(out_dir), f"foothold_seed{seed}", use_gzip=True)
+        sim.save_animation(str(out_dir), f"{tag}_seed{seed}", use_gzip=True)
         results[seed] = stats
         print(f"seed {seed}: {stats}", flush=True)
         if stats["duration_s"] >= args.min_duration:
@@ -177,14 +201,15 @@ def main() -> int:
     kept = max(results, key=lambda s: results[s]["duration_s"])
     summary = {
         "checkpoint": str(args.checkpoint),
-        "stage": "stage2_mid",
+        "stage": stage_name,
+        "stage_params": stage,
         "kept_seed": kept,
-        "kept_trajectory": str(out_dir / f"foothold_seed{kept}_0.json.gz"),
+        "kept_trajectory": str(out_dir / f"{tag}_seed{kept}_0.json.gz"),
         "rollouts": {str(s): results[s] for s in results},
     }
-    (out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
+    (out_dir / f"summary_{tag}.json").write_text(json.dumps(summary, indent=2))
     print(f"kept seed {kept}: {results[kept]}")
-    print(f"Summary: {out_dir / 'summary.json'}")
+    print(f"Summary: {out_dir / f'summary_{tag}.json'}")
     return 0
 
 

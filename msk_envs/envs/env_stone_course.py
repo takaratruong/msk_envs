@@ -457,6 +457,7 @@ class TerrainCurriculum:
     height_scale_increment: float = 0.0
     current_landing_margin: float = 0.0
     landing_margin_decrement: float = 0.0
+    staged_landing: bool = False
     episodes: int = 0
     successes: int = 0
     last_completion_rate: float = 0.0
@@ -545,6 +546,7 @@ class TerrainCurriculum:
             landing_margin_decrement=(
                 config.course_curriculum_landing_margin_decrement
             ),
+            staged_landing=config.course_defer_landing_to_full_height,
         )
 
     def observe(self, successful_episodes: torch.Tensor) -> bool:
@@ -574,27 +576,40 @@ class TerrainCurriculum:
                 < self.surface_tilt_maximum_degrees
             )
         )
-        if promoted and self.landing_margin_decrement > 0.0:
-            # Placement tightens with every promotion, alongside whatever
-            # else the rung changes: each competent window must land cleaner
-            # than the last, ending at the strict interior test.
-            self.current_landing_margin = max(
-                0.0, self.current_landing_margin - self.landing_margin_decrement
-            )
         if (
             promoted
             and self.height_scale_increment > 0.0
             and self.current_height_scale < 1.0
         ):
-            # Stakes before difficulty: a competent window first raises the
-            # whole platform toward full height. Terrain only expands after
-            # missing a slab has become a real fall.
+            # Stage A - stakes before everything: a competent window raises
+            # the whole platform toward full height. With staged_landing the
+            # landing rule is dormant here, so the policy learns freely.
             self.current_height_scale = min(
                 1.0, self.current_height_scale + self.height_scale_increment
             )
             self.episodes = 0
             self.successes = 0
             return True
+        if (
+            promoted
+            and self.staged_landing
+            and self.landing_margin_decrement > 0.0
+            and self.current_landing_margin > 0.0
+        ):
+            # Stage B - placement: each competent window under the (now
+            # active) landing termination tightens the margin. Terrain holds
+            # until the standard is strict.
+            self.current_landing_margin = max(
+                0.0, self.current_landing_margin - self.landing_margin_decrement
+            )
+            self.episodes = 0
+            self.successes = 0
+            return True
+        if promoted and not self.staged_landing and self.landing_margin_decrement > 0.0:
+            # Blanket mode (legacy): margin tightens alongside terrain rungs.
+            self.current_landing_margin = max(
+                0.0, self.current_landing_margin - self.landing_margin_decrement
+            )
         if promoted:
             self.current_maximum = min(
                 self.maximum,
@@ -617,6 +632,13 @@ class TerrainCurriculum:
         self.episodes = 0
         self.successes = 0
         return promoted
+
+    @property
+    def landing_rule_active(self) -> bool:
+        """Whether the landing termination applies at the current stage."""
+        if not self.staged_landing:
+            return True
+        return self.current_height_scale >= 1.0
 
     def state_dict(self) -> dict:
         """Return the small, device-independent state needed for a resume."""
@@ -1301,6 +1323,10 @@ class StoneCourseEnv(LanesEnv):
         if self.curriculum_require_interior_landings:
             self._episode_edge_landed |= invalid
         if not self.require_interior_landing:
+            return torch.zeros_like(invalid)
+        if not self.terrain_curriculum.landing_rule_active:
+            # Staged landing, stage A: the rule is dormant while the platform
+            # is still rising; the policy learns whatever works first.
             return torch.zeros_like(invalid)
         return invalid
 

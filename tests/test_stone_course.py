@@ -902,3 +902,58 @@ class LandingMarginAnnealTest(unittest.TestCase):
         env2.terrain_curriculum.current_landing_margin = 0.05
         lenient = env2._invalid_edge_touchdown()
         self.assertEqual(lenient.tolist(), [False, False, False])
+
+
+class StagedLandingTest(unittest.TestCase):
+    def _staged(self):
+        return make_curriculum(
+            current_height_scale=0.7, height_scale_increment=0.15,
+            current_landing_margin=0.02, landing_margin_decrement=0.01,
+            staged_landing=True,
+        )
+
+    def test_landing_rule_dormant_until_full_height(self):
+        c = self._staged()
+        self.assertFalse(c.landing_rule_active)
+
+        # Competent windows first finish the height ladder (stage A)...
+        c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertAlmostEqual(c.current_height_scale, 0.85)
+        self.assertAlmostEqual(c.current_landing_margin, 0.02)  # untouched
+        self.assertFalse(c.landing_rule_active)
+
+        c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertAlmostEqual(c.current_height_scale, 1.0)
+        self.assertTrue(c.landing_rule_active)  # stage B begins
+
+        # ...then anneal the margin while terrain holds (stage B)...
+        dist_before = c.current_maximum
+        c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertAlmostEqual(c.current_landing_margin, 0.01)
+        self.assertEqual(c.current_maximum, dist_before)
+
+        c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertAlmostEqual(c.current_landing_margin, 0.0)
+        self.assertEqual(c.current_maximum, dist_before)
+
+        # ...and only then expand terrain (stage C).
+        c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertGreater(c.current_maximum, dist_before)
+
+    def test_env_suppresses_termination_while_rule_dormant(self):
+        fixture = StoneCourseEnvironmentTest()
+        env = fixture.make_contact_env()
+        env.terrain_curriculum = self._staged()
+        env.terrain_curriculum.current_landing_margin = 0.0
+        env.require_interior_landing = True
+        # Height below 1.0: dormant, world 1's edge touchdown is forgiven.
+        invalid = env._invalid_edge_touchdown()
+        self.assertEqual(invalid.tolist(), [False, False, False])
+
+        env2 = fixture.make_contact_env()
+        env2.terrain_curriculum = self._staged()
+        env2.terrain_curriculum.current_landing_margin = 0.0
+        env2.terrain_curriculum.current_height_scale = 1.0
+        env2.require_interior_landing = True
+        invalid = env2._invalid_edge_touchdown()
+        self.assertEqual(invalid.tolist(), [False, True, False])

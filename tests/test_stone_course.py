@@ -660,6 +660,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env.episode_slabs_recycled = torch.full((4,), 9, dtype=torch.long)
         env._episode_touched_ground = torch.zeros(4, dtype=torch.bool)
         env._episode_edge_landed = torch.zeros(4, dtype=torch.bool)
+        env.heading_commands_enabled = False
         env.terrain_curriculum = make_curriculum()
 
         performed = {}
@@ -1012,3 +1013,55 @@ class GroundHeightGateTest(unittest.TestCase):
         # Gate disabled (0.0): never fatal via the gate.
         off = self._env(height_scale=1.0, gate=0.0)
         self.assertEqual(off._get_terminated().tolist(), [0.0, 0.0])
+
+
+class HeadingCommandTest(unittest.TestCase):
+    def test_heading_expands_with_terrain_and_round_trips(self):
+        c = make_curriculum(
+            heading_maximum_degrees=180.0,
+            current_heading_maximum_degrees=0.0,
+            heading_increment_degrees=30.0,
+        )
+        c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertAlmostEqual(c.current_heading_maximum_degrees, 30.0)
+
+        target = make_curriculum(
+            heading_maximum_degrees=180.0,
+            current_heading_maximum_degrees=0.0,
+            heading_increment_degrees=30.0,
+        )
+        target.load_state_dict(c.state_dict())
+        self.assertAlmostEqual(target.current_heading_maximum_degrees, 30.0)
+
+    def test_heading_keeps_maxed_terrain_promotable(self):
+        c = make_curriculum(
+            current_maximum=1.50,
+            current_elevation_maximum_degrees=50.0,
+            current_yaw_maximum_degrees=20.0,
+            current_surface_tilt_maximum_degrees=20.0,
+            heading_maximum_degrees=180.0,
+            current_heading_maximum_degrees=150.0,
+            heading_increment_degrees=30.0,
+        )
+        promoted = c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertTrue(promoted)
+        self.assertAlmostEqual(c.current_heading_maximum_degrees, 180.0)
+        promoted = c.observe(torch.tensor([True] * 4 + [False]))
+        self.assertFalse(promoted)
+
+    def test_facing_check_is_relative_to_commanded_heading(self):
+        import math
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.heading_commands_enabled = True
+        env.fwd_axis = torch.tensor([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+        env.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(45.0)))
+        # Two worlds, both bodies facing -X (yawed 180 about up).
+        s, cθ = math.sin(math.pi / 2), math.cos(math.pi / 2)
+        env.body_rotations = torch.tensor([[0.0, s, 0.0, cθ]]).repeat(2, 1).unsqueeze(1)
+        # World 0 commanded backward (pi): facing matches. World 1 forward: fails.
+        env.command_headings = torch.tensor([math.pi, 0.0])
+
+        facing = env._is_body_facing_direction(0)
+
+        self.assertEqual(facing.tolist(), [True, False])

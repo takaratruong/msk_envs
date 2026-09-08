@@ -203,6 +203,12 @@ class EnvConfig:
     """ Distance (m) both feet may dip below the lowest nearby slab top before termination """
     course_terminate_on_ground_contact: bool = True
     """ Terminate when any foot touches the lower ground plane beneath the course """
+    course_heading_max_degrees: float = 0.0
+    """ Final half-range of the commanded body heading relative to the course direction; 180 allows full omnidirectional (backward) commands, 0 disables heading commands entirely """
+    course_initial_heading_max_degrees: float = 0.0
+    """ Starting half-range of the heading command curriculum """
+    course_curriculum_heading_increment_degrees: float = 0.0
+    """ Heading half-range added per curriculum promotion (after height/margin stages when staged) """
     course_ground_forbidden_above_height_scale: float = 0.0
     """ Once the curriculum's platform height scale reaches this value, ground contact terminates the episode even if course_terminate_on_ground_contact is off; 0 disables the gate """
 

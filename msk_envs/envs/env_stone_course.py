@@ -458,6 +458,9 @@ class TerrainCurriculum:
     current_landing_margin: float = 0.0
     landing_margin_decrement: float = 0.0
     staged_landing: bool = False
+    heading_maximum_degrees: float = 0.0
+    current_heading_maximum_degrees: float = 0.0
+    heading_increment_degrees: float = 0.0
     episodes: int = 0
     successes: int = 0
     last_completion_rate: float = 0.0
@@ -509,6 +512,14 @@ class TerrainCurriculum:
             raise ValueError(
                 "course_curriculum_landing_margin_decrement must be non-negative"
             )
+        if not 0.0 <= self.current_heading_maximum_degrees <= self.heading_maximum_degrees <= 180.0:
+            raise ValueError(
+                "heading maxima must satisfy 0 <= initial <= final <= 180"
+            )
+        if self.heading_increment_degrees < 0.0:
+            raise ValueError(
+                "course_curriculum_heading_increment_degrees must be non-negative"
+            )
 
     @classmethod
     def from_env_config(
@@ -547,6 +558,13 @@ class TerrainCurriculum:
                 config.course_curriculum_landing_margin_decrement
             ),
             staged_landing=config.course_defer_landing_to_full_height,
+            heading_maximum_degrees=config.course_heading_max_degrees,
+            current_heading_maximum_degrees=(
+                config.course_initial_heading_max_degrees
+            ),
+            heading_increment_degrees=(
+                config.course_curriculum_heading_increment_degrees
+            ),
         )
 
     def observe(self, successful_episodes: torch.Tensor) -> bool:
@@ -574,6 +592,11 @@ class TerrainCurriculum:
                 or self.current_yaw_maximum_degrees < self.yaw_maximum_degrees
                 or self.current_surface_tilt_maximum_degrees
                 < self.surface_tilt_maximum_degrees
+                or (
+                    self.heading_increment_degrees > 0.0
+                    and self.current_heading_maximum_degrees
+                    < self.heading_maximum_degrees
+                )
             )
         )
         if (
@@ -629,6 +652,12 @@ class TerrainCurriculum:
                 self.current_surface_tilt_maximum_degrees
                 + self.surface_tilt_increment_degrees,
             )
+            if self.heading_increment_degrees > 0.0:
+                self.current_heading_maximum_degrees = min(
+                    self.heading_maximum_degrees,
+                    self.current_heading_maximum_degrees
+                    + self.heading_increment_degrees,
+                )
         self.episodes = 0
         self.successes = 0
         return promoted
@@ -653,6 +682,7 @@ class TerrainCurriculum:
             ),
             "current_height_scale": self.current_height_scale,
             "current_landing_margin": self.current_landing_margin,
+            "current_heading_maximum_degrees": self.current_heading_maximum_degrees,
             "episodes": self.episodes,
             "successes": self.successes,
             "last_completion_rate": self.last_completion_rate,
@@ -685,6 +715,11 @@ class TerrainCurriculum:
         current_landing_margin = float(state.get("current_landing_margin", 0.0))
         if current_landing_margin < 0.0:
             raise ValueError("checkpoint curriculum landing margin is negative")
+        current_heading = float(state.get("current_heading_maximum_degrees", 0.0))
+        if not 0.0 <= current_heading <= max(self.heading_maximum_degrees, 0.0):
+            raise ValueError(
+                "checkpoint curriculum heading is outside the configured range"
+            )
 
         episodes = int(state.get("episodes", 0))
         successes = int(state.get("successes", 0))
@@ -700,6 +735,7 @@ class TerrainCurriculum:
         self.current_surface_tilt_maximum_degrees = current_surface_tilt
         self.current_height_scale = current_height_scale
         self.current_landing_margin = current_landing_margin
+        self.current_heading_maximum_degrees = current_heading
         self.episodes = episodes
         self.successes = successes
         self.last_completion_rate = completion_rate
@@ -754,6 +790,7 @@ class StoneCourseEnv(LanesEnv):
         self.ground_forbidden_above_height_scale = (
             env_config.course_ground_forbidden_above_height_scale
         )
+        self.heading_commands_enabled = env_config.course_heading_max_degrees > 0.0
         if self.ground_forbidden_above_height_scale < 0.0:
             raise ValueError(
                 "course_ground_forbidden_above_height_scale must be non-negative"
@@ -897,6 +934,11 @@ class StoneCourseEnv(LanesEnv):
         self.command_speeds = torch.full(
             (num_envs,), self.target_speed, device=device
         )
+        # Commanded body heading relative to the course direction (radians).
+        # 0 = face forward along the course; pi = walk it backward. The course
+        # itself always advances along +X; only the body orientation is
+        # commanded, so progress, recycling, and rewards stay unchanged.
+        self.command_headings = torch.zeros(num_envs, device=device)
         self._last_terminated = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_timed_out = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_success = torch.zeros(num_envs, device=device, dtype=torch.bool)
@@ -1047,6 +1089,18 @@ class StoneCourseEnv(LanesEnv):
         self.episode_slabs_recycled[world_ids] = 0
         self._episode_started[world_ids] = True
         self._resample_command_speeds(world_ids)
+        self._resample_command_headings(world_ids)
+
+    def _resample_command_headings(self, world_ids: torch.Tensor) -> None:
+        if not self.heading_commands_enabled:
+            return
+        limit = torch.deg2rad(torch.tensor(
+            self.terrain_curriculum.current_heading_maximum_degrees,
+            device=self.device,
+        ))
+        self.command_headings[world_ids] = (
+            torch.rand(world_ids.numel(), device=self.device) * 2.0 - 1.0
+        ) * limit
 
     def _resample_command_speeds(self, world_ids: torch.Tensor) -> None:
         low, high = self.command_speed_range
@@ -1128,8 +1182,32 @@ class StoneCourseEnv(LanesEnv):
                     world_ids, collider_id, axis
                 ] = center_xz[:, column]
 
+    def _apply_command_heading_to_pose(self, reset_mask: torch.Tensor) -> None:
+        """Yaw each resetting root to its commanded heading about the up axis."""
+        if not self.heading_commands_enabled:
+            return
+        world_ids = torch.where(reset_mask)[0]
+        if world_ids.numel() == 0:
+            return
+        half = self.command_headings[world_ids] * 0.5
+        zeros = torch.zeros_like(half)
+        yaw_quat = torch.stack(
+            (zeros, torch.sin(half), zeros, torch.cos(half)), dim=1
+        )  # rotation about +Y (up), xyzw
+        quat_ids = [
+            self.qpos_id_lookup["pelvis_tilt"],
+            self.qpos_id_lookup["pelvis_list"],
+            self.qpos_id_lookup["pelvis_rotation"],
+            self.qpos_id_lookup["pelvis_quat_w"],
+        ]
+        root_quat = self.joint_positions[world_ids][:, quat_ids]
+        rotated = quat_mul(yaw_quat, root_quat)
+        for column, qpos_id in enumerate(quat_ids):
+            self.joint_positions[world_ids, qpos_id] = rotated[:, column]
+
     def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
         self._snap_launch_slabs_under_feet(reset_mask)
+        self._apply_command_heading_to_pose(reset_mask)
         pelvis_height = self.qpos_id_lookup["pelvis_ty"]
         self.joint_positions[reset_mask, pelvis_height] += (
             self.course.top_height * self.terrain_curriculum.current_height_scale
@@ -1182,6 +1260,9 @@ class StoneCourseEnv(LanesEnv):
         self._episode_touched_ground[world_ids] = False
         self._episode_edge_landed[world_ids] = False
         self._resample_command_speeds(world_ids)
+        # Continued walkers keep their body state but may receive a new
+        # heading command: mid-course direction changes are turning practice.
+        self._resample_command_headings(world_ids)
 
     def _pre_step(self) -> None:
         self._recycle_passed_stones()
@@ -1199,6 +1280,12 @@ class StoneCourseEnv(LanesEnv):
         parts = [course_obs, super()._get_obs()]
         if self.command_speed_range != (0.0, 0.0):
             parts.append(self.command_speeds.unsqueeze(1))
+        if self.heading_commands_enabled:
+            # (cos, sin) of the commanded heading: continuous at +/-180 deg.
+            parts.append(torch.stack(
+                (torch.cos(self.command_headings), torch.sin(self.command_headings)),
+                dim=1,
+            ))
         return torch.cat(parts, dim=1).detach().clone()
 
     def _compute_raw_reward_dict(self) -> None:
@@ -1337,6 +1424,25 @@ class StoneCourseEnv(LanesEnv):
             return torch.zeros_like(invalid)
         return invalid
 
+    def _is_body_facing_direction(self, body_id):
+        """Facing is judged against each world's commanded heading.
+
+        With heading commands disabled this reduces exactly to the base
+        check (commanded heading 0 = course forward).
+        """
+        if not self.heading_commands_enabled:
+            return super()._is_body_facing_direction(body_id)
+        body_rot = self.body_rotations[:, body_id]
+        body_fwd = rotate_vec(body_rot, self.fwd_axis)
+        body_fwd = body_fwd[:, [FWD_IDX, SIDE_IDX]]
+        body_fwd = body_fwd / torch.norm(body_fwd, dim=1, keepdim=True)
+        commanded = torch.stack(
+            (torch.cos(self.command_headings), -torch.sin(self.command_headings)),
+            dim=1,
+        )
+        dot = torch.sum(body_fwd * commanded, dim=1)
+        return (dot >= self.cos_angle_threshold).detach()
+
     def _feet_below_supports(self) -> torch.Tensor:
         """Both feet entirely below their nearest slab tops means a fall.
 
@@ -1451,6 +1557,9 @@ class StoneCourseEnv(LanesEnv):
             ),
             "curriculum_height_scale": self.terrain_curriculum.current_height_scale,
             "curriculum_landing_margin": self.terrain_curriculum.current_landing_margin,
+            "curriculum_heading_max_degrees": (
+                self.terrain_curriculum.current_heading_maximum_degrees
+            ),
             "curriculum_completion_rate": self.terrain_curriculum.last_completion_rate,
         }
 

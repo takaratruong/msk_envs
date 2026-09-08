@@ -957,3 +957,58 @@ class StagedLandingTest(unittest.TestCase):
         env2.require_interior_landing = True
         invalid = env2._invalid_edge_touchdown()
         self.assertEqual(invalid.tolist(), [False, True, False])
+
+
+class GroundHeightGateTest(unittest.TestCase):
+    def _env(self, height_scale, gate):
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.terrain_curriculum = make_curriculum(
+            current_height_scale=height_scale, height_scale_increment=0.15,
+        )
+        env.require_interior_landing = False
+        env.curriculum_require_interior_landings = False
+        env.terminate_below_supports = False
+        env.terminate_on_ground_contact = False
+        env.ground_forbidden_above_height_scale = gate
+        env.ground_collider_id = 0
+        env.root_id = 0
+        env.foot_collider_ids = torch.tensor([1, 2])
+        env.foot_collider_radii = torch.full((2,), 0.02)
+        env.collider_positions = torch.zeros((2, 3, 3))
+        env.collider_positions[:, 1:, 1] = 0.47
+        env.root_pos = torch.tensor([[0.0, 1.4, 0.0], [0.0, 1.4, 0.0]])
+        env.collider_forces = torch.zeros((2, 3))
+        env.collider_forces[1, 0] = 50.0     # world 1 touches ground
+        env._last_terminated = torch.zeros(2, dtype=torch.bool)
+        env.previous_foot_contact = torch.zeros((2, 2), dtype=torch.bool)
+        env._last_edge_violation = torch.zeros(2, dtype=torch.bool)
+        env.time = torch.ones(2)
+        env._episode_start_time = torch.zeros(2)
+        env.landing_check_delay = 0.25
+        env._is_body_facing_direction = lambda root_id: torch.ones(2, dtype=torch.bool)
+        env.stone_ids = torch.tensor([0])
+        env.stone_positions = torch.zeros((2, 1, 3))
+        env.stone_positions[:, 0, 1] = 0.40
+        env.stone_rotations = torch.tensor([0.0, 0.0, 0.0, 1.0]).view(1, 1, 4).repeat(2, 1, 1)
+        env.interior_half_extents_xz = torch.tensor([[0.16, 0.16], [0.16, 0.16]])
+        env.landing_margin_inactive = 0.02
+        env.foot_side_masks = (
+            torch.tensor([True, False]),
+            torch.tensor([False, True]),
+        )
+        env.course = make_spec()
+        return env
+
+    def test_ground_contact_fatal_only_once_platform_is_high(self):
+        # Below the gate: ground contact survivable.
+        low = self._env(height_scale=0.55, gate=0.7)
+        self.assertEqual(low._get_terminated().tolist(), [0.0, 0.0])
+
+        # At/above the gate: the same contact terminates.
+        high = self._env(height_scale=0.7, gate=0.7)
+        self.assertEqual(high._get_terminated().tolist(), [0.0, 1.0])
+
+        # Gate disabled (0.0): never fatal via the gate.
+        off = self._env(height_scale=1.0, gate=0.0)
+        self.assertEqual(off._get_terminated().tolist(), [0.0, 0.0])

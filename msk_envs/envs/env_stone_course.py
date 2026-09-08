@@ -751,6 +751,13 @@ class StoneCourseEnv(LanesEnv):
         self.terminate_on_ground_contact = (
             env_config.course_terminate_on_ground_contact
         )
+        self.ground_forbidden_above_height_scale = (
+            env_config.course_ground_forbidden_above_height_scale
+        )
+        if self.ground_forbidden_above_height_scale < 0.0:
+            raise ValueError(
+                "course_ground_forbidden_above_height_scale must be non-negative"
+            )
         if self.below_support_margin < 0.0:
             raise ValueError("course_below_support_margin must be non-negative")
         if self.upright_pelvis_range != (0.0, 0.0) and not (
@@ -1374,9 +1381,17 @@ class StoneCourseEnv(LanesEnv):
         terminated = fallen | not_facing | invalid_edge_landing
         if self.terminate_below_supports:
             terminated = terminated | self._feet_below_supports()
-        if self.terminate_on_ground_contact:
+        ground_forbidden = self.terminate_on_ground_contact or (
+            self.ground_forbidden_above_height_scale > 0.0
+            and self.terrain_curriculum.current_height_scale
+            >= self.ground_forbidden_above_height_scale
+        )
+        if ground_forbidden:
             # The slabs are the only walkable surface; any body contact with
-            # the ground plane beneath the course is a failed episode.
+            # the ground plane beneath the course is a failed episode. With
+            # the height gate, the ground stays a survivable (but unpaid)
+            # safety net while the platform is low and becomes lava once the
+            # course is genuinely elevated.
             terminated = terminated | (
                 self.collider_forces[:, self.ground_collider_id] > 0.0
             )

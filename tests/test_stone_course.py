@@ -1065,3 +1065,19 @@ class HeadingCommandTest(unittest.TestCase):
         facing = env._is_body_facing_direction(0)
 
         self.assertEqual(facing.tolist(), [True, False])
+
+
+class MirrorHeadingTest(unittest.TestCase):
+    def test_mirror_spec_flips_heading_sin(self):
+        from msk_envs.utils.symmetry import MirrorSpec
+        # 4-dim toy obs: [x, speed, cos, sin] with heading appended last.
+        spec = MirrorSpec(
+            obs_perm=torch.arange(4),
+            obs_signs=torch.tensor([1.0, 1.0, 1.0, -1.0]),
+            act_perm=torch.arange(2),
+            act_signs=torch.ones(2),
+        )
+        obs = torch.tensor([[0.5, 1.2, 0.8, 0.6]])
+        flipped = spec.flip_obs(obs)
+        self.assertAlmostEqual(flipped[0, 2].item(), 0.8)   # cos invariant
+        self.assertAlmostEqual(flipped[0, 3].item(), -0.6)  # sin negates

@@ -94,10 +94,12 @@ def build_stone_course_mirror_spec(env) -> MirrorSpec:
     n_qpos = env.joint_positions.shape[1]
     n_qvel = env.joint_velocities.shape[1]
     has_command = env.command_speed_range != (0.0, 0.0)
+    has_heading = getattr(env, "heading_commands_enabled", False)
 
     course_n = 5 * lookahead
     total = course_n + 2 * n_muscles + n_actuators + (n_qpos - 1) + n_qvel
     total += 1 if has_command else 0
+    total += 2 if has_heading else 0
 
     perm = torch.arange(total)
     signs = torch.ones(total)
@@ -140,6 +142,11 @@ def build_stone_course_mirror_spec(env) -> MirrorSpec:
 
     if has_command:
         offset += 1                              # command speed is invariant
+    if has_heading:
+        # Heading command (cos, sin): under a z-mirror the commanded heading
+        # negates, so cos is invariant and sin flips sign.
+        signs[offset + 1] = -1.0
+        offset += 2
 
     obs_width = env._get_obs().shape[1]
     if offset != obs_width:

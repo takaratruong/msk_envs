@@ -791,6 +791,8 @@ class StoneCourseEnv(LanesEnv):
             env_config.course_ground_forbidden_above_height_scale
         )
         self.heading_commands_enabled = env_config.course_heading_max_degrees > 0.0
+        self.heading_fixed = env_config.course_heading_fixed
+        self.heading_fixed_degrees = env_config.course_heading_max_degrees
         if self.ground_forbidden_above_height_scale < 0.0:
             raise ValueError(
                 "course_ground_forbidden_above_height_scale must be non-negative"
@@ -1093,6 +1095,20 @@ class StoneCourseEnv(LanesEnv):
 
     def _resample_command_headings(self, world_ids: torch.Tensor) -> None:
         if not self.heading_commands_enabled:
+            return
+        if self.heading_fixed:
+            # Single-task mode: every episode commands exactly the configured
+            # heading, random sign (e.g. 90 -> pure left or right sidestep;
+            # 180 -> both signs are the same backward walk).
+            magnitude = torch.deg2rad(torch.tensor(
+                self.heading_fixed_degrees, device=self.device
+            ))
+            signs = torch.where(
+                torch.rand(world_ids.numel(), device=self.device) < 0.5,
+                torch.tensor(-1.0, device=self.device),
+                torch.tensor(1.0, device=self.device),
+            )
+            self.command_headings[world_ids] = signs * magnitude
             return
         limit = torch.deg2rad(torch.tensor(
             self.terrain_curriculum.current_heading_maximum_degrees,

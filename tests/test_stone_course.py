@@ -1081,3 +1081,23 @@ class MirrorHeadingTest(unittest.TestCase):
         flipped = spec.flip_obs(obs)
         self.assertAlmostEqual(flipped[0, 2].item(), 0.8)   # cos invariant
         self.assertAlmostEqual(flipped[0, 3].item(), -0.6)  # sin negates
+
+
+class FixedHeadingTest(unittest.TestCase):
+    def test_fixed_mode_commands_exact_heading_with_random_sign(self):
+        import math
+        env = object.__new__(StoneCourseEnv)
+        env.device = torch.device("cpu")
+        env.heading_commands_enabled = True
+        env.heading_fixed = True
+        env.heading_fixed_degrees = 90.0
+        env.terrain_curriculum = make_curriculum()
+        env.command_headings = torch.zeros(64)
+
+        torch.manual_seed(3)
+        env._resample_command_headings(torch.arange(64))
+
+        mags = env.command_headings.abs()
+        self.assertTrue(torch.allclose(mags, torch.full((64,), math.pi / 2)))
+        signs = torch.sign(env.command_headings)
+        self.assertTrue((signs == 1).any() and (signs == -1).any())

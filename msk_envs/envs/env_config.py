@@ -205,6 +205,8 @@ class EnvConfig:
     """ Terminate when any foot touches the lower ground plane beneath the course """
     course_heading_max_degrees: float = 0.0
     """ Final half-range of the commanded body heading relative to the course direction; 180 allows full omnidirectional (backward) commands, 0 disables heading commands entirely """
+    course_heading_fixed: bool = False
+    """ Single-task mode: every episode commands exactly +/-course_heading_max_degrees (random sign) instead of a uniform range; the heading curriculum is bypassed """
     course_initial_heading_max_degrees: float = 0.0
     """ Starting half-range of the heading command curriculum """
     course_curriculum_heading_increment_degrees: float = 0.0

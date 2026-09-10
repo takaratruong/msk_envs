@@ -78,18 +78,46 @@ class StoneCourseSpec:
         self,
         step_length_min: torch.Tensor | None,
         count: int,
-        maximum: float,
+        maximum: float | torch.Tensor,
         device: torch.device | str,
     ) -> torch.Tensor:
         """Per-course lower distance bounds, clamped inside [base min, current max]."""
         lo, final_hi = self.step_length_range
         if step_length_min is None:
-            return torch.full((count,), lo, device=device)
-        if step_length_min.shape != (count,):
-            raise ValueError(f"step_length_min must have shape ({count},)")
-        if (step_length_min < lo - 1e-6).any() or (step_length_min > final_hi + 1e-6).any():
-            raise ValueError("step_length_min must stay inside course_step_length_range")
-        return step_length_min.to(device).clamp(lo, maximum)
+            minimums = torch.full((count,), lo, device=device)
+        else:
+            if step_length_min.shape != (count,):
+                raise ValueError(f"step_length_min must have shape ({count},)")
+            if (step_length_min < lo - 1e-6).any() or (step_length_min > final_hi + 1e-6).any():
+                raise ValueError("step_length_min must stay inside course_step_length_range")
+            minimums = step_length_min.to(device).clamp(min=lo)
+        maximum = torch.as_tensor(maximum, device=device, dtype=minimums.dtype)
+        return torch.minimum(minimums, maximum)
+
+    def _validated_maximums(
+        self,
+        step_length_max: float | torch.Tensor | None,
+        count: int,
+        device: torch.device | str,
+    ) -> float | torch.Tensor:
+        """Scalar or per-course upper distance bounds inside the configured range."""
+        lo, final_hi = self.step_length_range
+        if step_length_max is None:
+            return final_hi
+        if isinstance(step_length_max, torch.Tensor):
+            if step_length_max.shape != (count,):
+                raise ValueError(f"step_length_max must have shape ({count},)")
+            if (
+                (step_length_max < lo - 1e-6).any()
+                or (step_length_max > final_hi + 1e-6).any()
+            ):
+                raise ValueError(
+                    "step_length_max must stay inside course_step_length_range"
+                )
+            return step_length_max.to(device).clamp(lo, final_hi)
+        if step_length_max < lo or step_length_max > final_hi:
+            raise ValueError("step_length_max must stay inside course_step_length_range")
+        return step_length_max
 
     @classmethod
     def from_env_config(cls, config: EnvConfig) -> "StoneCourseSpec":
@@ -147,7 +175,7 @@ class StoneCourseSpec:
         num_courses: int,
         device: torch.device | str,
         generator: torch.Generator | None = None,
-        step_length_max: float | None = None,
+        step_length_max: float | torch.Tensor | None = None,
         elevation_angle_max_degrees: float = 0.0,
         yaw_angle_max_degrees: float = 0.0,
         step_length_min: torch.Tensor | None = None,
@@ -157,10 +185,7 @@ class StoneCourseSpec:
         if num_courses < 0:
             raise ValueError("num_courses must be non-negative")
 
-        lo, final_hi = self.step_length_range
-        hi = final_hi if step_length_max is None else step_length_max
-        if hi < lo or hi > final_hi:
-            raise ValueError("step_length_max must stay inside course_step_length_range")
+        hi = self._validated_maximums(step_length_max, num_courses, device)
         lows = self._per_course_minimums(step_length_min, num_courses, hi, device)
         if not 0.0 <= elevation_angle_max_degrees <= self.elevation_angle_max_degrees:
             raise ValueError(
@@ -218,7 +243,7 @@ class StoneCourseSpec:
         self,
         predecessors: torch.Tensor,
         lateral_signs: torch.Tensor,
-        step_length_max: float,
+        step_length_max: float | torch.Tensor,
         elevation_angle_max_degrees: float,
         yaw_angle_max_degrees: float,
         generator: torch.Generator | None = None,
@@ -227,9 +252,9 @@ class StoneCourseSpec:
     ) -> torch.Tensor:
         """Sample one bounded spherical-coordinate successor per predecessor."""
         count = predecessors.shape[0]
-        lo, final_hi = self.step_length_range
-        if not lo <= step_length_max <= final_hi:
-            raise ValueError("step_length_max must stay inside course_step_length_range")
+        step_length_max = self._validated_maximums(
+            step_length_max, count, predecessors.device
+        )
         lows = self._per_course_minimums(
             step_length_min, count, step_length_max, predecessors.device
         )
@@ -793,6 +818,16 @@ class StoneCourseEnv(LanesEnv):
         self.heading_commands_enabled = env_config.course_heading_max_degrees > 0.0
         self.heading_fixed = env_config.course_heading_fixed
         self.heading_fixed_degrees = env_config.course_heading_max_degrees
+        self.heading_gap_scale = env_config.course_heading_gap_scale
+        self.heading_max_change_degrees = (
+            env_config.course_heading_max_change_degrees
+        )
+        if not 0.0 < self.heading_gap_scale <= 1.0:
+            raise ValueError("course_heading_gap_scale must be in (0, 1]")
+        if self.heading_max_change_degrees < 0.0:
+            raise ValueError(
+                "course_heading_max_change_degrees must be non-negative"
+            )
         if self.ground_forbidden_above_height_scale < 0.0:
             raise ValueError(
                 "course_ground_forbidden_above_height_scale must be non-negative"
@@ -1028,6 +1063,25 @@ class StoneCourseEnv(LanesEnv):
         if finished.numel() > 0:
             self.terrain_curriculum.observe(self._last_success[finished])
 
+    def _heading_scaled_maximums(
+        self, world_ids: torch.Tensor
+    ) -> float | torch.Tensor:
+        """Per-world gap ceilings scaled to the commanded heading.
+
+        A sideways stride cannot span what a forward stride can (the sidestep
+        experiment put the walkable lateral band at roughly half the forward
+        one), so the step-distance ceiling shrinks toward heading_gap_scale as
+        |sin(heading)| approaches 1. Forward and backward headings keep the
+        full band; the floor of the configured range is never crossed.
+        """
+        base = self.terrain_curriculum.current_maximum
+        if not self.heading_commands_enabled or self.heading_gap_scale >= 1.0:
+            return base
+        scale = 1.0 - (1.0 - self.heading_gap_scale) * torch.abs(
+            torch.sin(self.command_headings[world_ids])
+        )
+        return (base * scale).clamp(min=self.course.step_length_range[0])
+
     def _sample_reset_layouts(
         self, world_ids: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -1035,7 +1089,7 @@ class StoneCourseEnv(LanesEnv):
         positions = self.course.sample_positions(
             world_ids.numel(),
             self.device,
-            step_length_max=self.terrain_curriculum.current_maximum,
+            step_length_max=self._heading_scaled_maximums(world_ids),
             elevation_angle_max_degrees=(
                 self.terrain_curriculum.current_elevation_maximum_degrees
             ),
@@ -1060,7 +1114,7 @@ class StoneCourseEnv(LanesEnv):
         positions = self.course.sample_next_position(
             predecessors,
             self.next_lateral_sign[world_ids],
-            self.terrain_curriculum.current_maximum,
+            self._heading_scaled_maximums(world_ids),
             self.terrain_curriculum.current_elevation_maximum_degrees,
             self.terrain_curriculum.current_yaw_maximum_degrees,
             step_length_min=self.step_length_minimums[world_ids],
@@ -1079,6 +1133,9 @@ class StoneCourseEnv(LanesEnv):
         if world_ids.numel() == 0:
             return
         self._record_finished_episodes(world_ids)
+        # Commands first: the course geometry (gap band) follows the heading.
+        self._resample_command_speeds(world_ids)
+        self._resample_command_headings(world_ids)
         positions, surface_tilts = self._sample_reset_layouts(world_ids)
         self._set_course_layout(world_ids, positions, surface_tilts)
         self.next_lateral_sign[world_ids] = -1.0 if self.course.num_stones % 2 else 1.0
@@ -1090,10 +1147,10 @@ class StoneCourseEnv(LanesEnv):
         self._last_edge_violation[world_ids] = False
         self.episode_slabs_recycled[world_ids] = 0
         self._episode_started[world_ids] = True
-        self._resample_command_speeds(world_ids)
-        self._resample_command_headings(world_ids)
 
-    def _resample_command_headings(self, world_ids: torch.Tensor) -> None:
+    def _resample_command_headings(
+        self, world_ids: torch.Tensor, continued: bool = False
+    ) -> None:
         if not self.heading_commands_enabled:
             return
         if self.heading_fixed:
@@ -1114,9 +1171,20 @@ class StoneCourseEnv(LanesEnv):
             self.terrain_curriculum.current_heading_maximum_degrees,
             device=self.device,
         ))
-        self.command_headings[world_ids] = (
+        fresh = (
             torch.rand(world_ids.numel(), device=self.device) * 2.0 - 1.0
         ) * limit
+        if continued and self.heading_max_change_degrees > 0.0:
+            # A continued walker keeps its physical course, whose gap band
+            # was laid for the previous heading. Bound the drift so heading
+            # and geometry change together gradually: recycled slabs ahead
+            # adopt the new heading's band while the near course stays sane.
+            max_change = torch.deg2rad(torch.tensor(
+                self.heading_max_change_degrees, device=self.device
+            ))
+            previous = self.command_headings[world_ids]
+            fresh = previous + (fresh - previous).clamp(-max_change, max_change)
+        self.command_headings[world_ids] = fresh
 
     def _resample_command_speeds(self, world_ids: torch.Tensor) -> None:
         low, high = self.command_speed_range
@@ -1278,7 +1346,7 @@ class StoneCourseEnv(LanesEnv):
         self._resample_command_speeds(world_ids)
         # Continued walkers keep their body state but may receive a new
         # heading command: mid-course direction changes are turning practice.
-        self._resample_command_headings(world_ids)
+        self._resample_command_headings(world_ids, continued=True)
 
     def _pre_step(self) -> None:
         self._recycle_passed_stones()

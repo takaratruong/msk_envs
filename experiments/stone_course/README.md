@@ -310,3 +310,14 @@ Negative results worth not repeating: seven from-scratch runs with strict
 terminations all stalled at ~0.5 m; the edge-landing rule from scratch
 (edgeland) stalled at ~1.4 m; 20% zero-velocity episodes flooded the buffer
 and polluted curriculum evidence.
+
+### Scale the course to the gap band (sidestep lesson, 2026-09-09)
+
+`course_stones 8` + `course_recycle_distance_behind 2.0` assume ~0.7-0.85 m
+gaps (course span ~6 m). With short gaps the whole course can be shorter
+than the recycle distance and no slab ever recycles forward: the walker
+outruns the course in ~2 s and completion pins at 0%. The first sidestep
+lane (0.25-0.60 m gaps, span ~1.5 m) starved exactly this way for 20k
+iterations. Rule: keep `recycle_distance_behind` well under the minimum
+course span and size `course_stones` so ~6+ slabs stay ahead (the relaunch
+used 12 stones / 0.5 m and completion moved within 8k iterations).

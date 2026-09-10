@@ -213,6 +213,10 @@ class EnvConfig:
     """ Heading half-range added per curriculum promotion (after height/margin stages when staged) """
     course_ground_forbidden_above_height_scale: float = 0.0
     """ Once the curriculum's platform height scale reaches this value, ground contact terminates the episode even if course_terminate_on_ground_contact is off; 0 disables the gate """
+    course_heading_gap_scale: float = 1.0
+    """ Gap-distance multiplier at a fully sideways (+/-90 deg) heading, interpolated by |sin(heading)|: each episode's step-distance band is scaled to what its commanded heading can physically span (sideways strides are shorter than forward ones); 1.0 disables """
+    course_heading_max_change_degrees: float = 0.0
+    """ Bound on how far the heading command may move per continued episode, so heading transitions are gradual and the recycled course geometry keeps pace; 0 keeps unrestricted resampling """
 
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)

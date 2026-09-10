@@ -822,11 +822,21 @@ class StoneCourseEnv(LanesEnv):
         self.heading_max_change_degrees = (
             env_config.course_heading_max_change_degrees
         )
+        self.heading_switch_fraction = env_config.course_heading_switch_fraction
+        self.heading_switch_grace = env_config.course_heading_switch_grace
         if not 0.0 < self.heading_gap_scale <= 1.0:
             raise ValueError("course_heading_gap_scale must be in (0, 1]")
         if self.heading_max_change_degrees < 0.0:
             raise ValueError(
                 "course_heading_max_change_degrees must be non-negative"
+            )
+        if not 0.0 <= self.heading_switch_fraction < 1.0:
+            raise ValueError("course_heading_switch_fraction must be in [0, 1)")
+        if self.heading_switch_grace < 0.0:
+            raise ValueError("course_heading_switch_grace must be non-negative")
+        if self.heading_switch_fraction > 0.0 and not self.heading_commands_enabled:
+            raise ValueError(
+                "course_heading_switch_fraction requires course_heading_max_degrees > 0"
             )
         if self.ground_forbidden_above_height_scale < 0.0:
             raise ValueError(
@@ -976,6 +986,14 @@ class StoneCourseEnv(LanesEnv):
         # itself always advances along +X; only the body orientation is
         # commanded, so progress, recycling, and rewards stay unchanged.
         self.command_headings = torch.zeros(num_envs, device=device)
+        # Transition training: the heading each episode will switch TO at the
+        # switch time, and when the last switch (or reset) happened so the
+        # facing termination can grant a turning grace window.
+        self._pending_headings = torch.zeros(num_envs, device=device)
+        self._heading_switched = torch.zeros(
+            num_envs, device=device, dtype=torch.bool
+        )
+        self._last_heading_change_time = torch.zeros(num_envs, device=device)
         self._last_terminated = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_timed_out = torch.zeros(num_envs, device=device, dtype=torch.bool)
         self._last_success = torch.zeros(num_envs, device=device, dtype=torch.bool)
@@ -1152,6 +1170,33 @@ class StoneCourseEnv(LanesEnv):
         self, world_ids: torch.Tensor, continued: bool = False
     ) -> None:
         if not self.heading_commands_enabled:
+            return
+        self._last_heading_change_time[world_ids] = self.time[world_ids]
+        if self.heading_switch_fraction > 0.0:
+            # Transition training: half the episodes start forward and will
+            # switch to sideways mid-episode, half start sideways and will
+            # switch to forward. Both gaits and the turn between them are
+            # rehearsed in every episode, in both orders.
+            magnitude = torch.deg2rad(torch.tensor(
+                self.heading_fixed_degrees, device=self.device
+            ))
+            signs = torch.where(
+                torch.rand(world_ids.numel(), device=self.device) < 0.5,
+                torch.tensor(-1.0, device=self.device),
+                torch.tensor(1.0, device=self.device),
+            )
+            sideways = signs * magnitude
+            forward = torch.zeros_like(sideways)
+            start_sideways = (
+                torch.rand(world_ids.numel(), device=self.device) < 0.5
+            )
+            self.command_headings[world_ids] = torch.where(
+                start_sideways, sideways, forward
+            )
+            self._pending_headings[world_ids] = torch.where(
+                start_sideways, forward, sideways
+            )
+            self._heading_switched[world_ids] = False
             return
         if self.heading_fixed:
             # Single-task mode: every episode commands exactly the configured
@@ -1347,9 +1392,105 @@ class StoneCourseEnv(LanesEnv):
         # Continued walkers keep their body state but may receive a new
         # heading command: mid-course direction changes are turning practice.
         self._resample_command_headings(world_ids, continued=True)
+        if self.heading_switch_fraction > 0.0:
+            # The fresh start-heading may differ from the course underfoot;
+            # re-lay the slabs ahead for its gap band.
+            self._relay_course_ahead(world_ids)
 
     def _pre_step(self) -> None:
+        self._switch_pending_headings()
         self._recycle_passed_stones()
+
+    def _switch_pending_headings(self) -> None:
+        """Flip due episodes to their other gait and re-lay the course ahead."""
+        if self.heading_switch_fraction <= 0.0:
+            return
+        elapsed = self.time - self._episode_start_time
+        due = (
+            ~self._heading_switched
+            & self._episode_started
+            & (elapsed >= self.heading_switch_fraction * self.max_episode_duration)
+        )
+        world_ids = torch.where(due)[0]
+        if world_ids.numel() == 0:
+            return
+        self.command_headings[world_ids] = self._pending_headings[world_ids]
+        self._heading_switched[world_ids] = True
+        self._last_heading_change_time[world_ids] = self.time[world_ids]
+        self._relay_course_ahead(world_ids)
+
+    def _relay_course_ahead(self, world_ids: torch.Tensor) -> None:
+        """Re-lay unclaimed slabs ahead for the current heading's gap band.
+
+        The nearest slab ahead is kept (it is almost always the in-flight
+        landing target), as is anything contacted or behind; everything
+        beyond is re-chained from the nearest-ahead anchor at the new
+        heading's step-distance band, so a walker that just turned sideways
+        finds sideways-spannable gaps instead of the old forward ones.
+        """
+        count = world_ids.numel()
+        if count == 0:
+            return
+        x = self.stone_positions[world_ids, :, FWD_IDX]
+        ahead = x > (
+            self.root_pos[world_ids, FWD_IDX, None] + self.course.passed_margin
+        )
+        nearest_ahead_x = torch.where(
+            ahead, x, torch.full_like(x, torch.inf)
+        ).min(dim=1).values
+        inactive = self.collider_forces[world_ids][:, self.stone_ids] <= 0.0
+        remaining = ahead & inactive & (x > nearest_ahead_x[:, None] + 1e-6)
+        kept_x = torch.where(remaining, torch.full_like(x, -torch.inf), x)
+        anchor_ids = kept_x.argmax(dim=1)
+        arange = torch.arange(count, device=self.device)
+        predecessors = self.stone_positions[world_ids, anchor_ids]
+        signs = self.next_lateral_sign[world_ids].clone()
+        maxima = self._heading_scaled_maximums(world_ids)
+        for _ in range(self.course.num_stones):
+            has = remaining.any(dim=1)
+            if not has.any():
+                break
+            active = torch.where(has)[0]
+            active_worlds = world_ids[active]
+            slab_x = torch.where(
+                remaining[active],
+                self.stone_positions[active_worlds, :, FWD_IDX],
+                torch.full(
+                    (active.numel(), self.course.num_stones),
+                    torch.inf,
+                    device=self.device,
+                ),
+            )
+            local = slab_x.argmin(dim=1)
+            new_positions = self.course.sample_next_position(
+                predecessors[active],
+                signs[active],
+                maxima[active] if isinstance(maxima, torch.Tensor) else maxima,
+                self.terrain_curriculum.current_elevation_maximum_degrees,
+                self.terrain_curriculum.current_yaw_maximum_degrees,
+                step_length_min=self.step_length_minimums[active_worlds],
+                height_scale=self.terrain_curriculum.current_height_scale,
+            )
+            new_tilts = self.course.sample_surface_tilts(
+                active.numel(),
+                self.device,
+                self.terrain_curriculum.current_surface_tilt_maximum_degrees,
+            )
+            new_rotations = self.course.surface_tilts_to_quaternions(new_tilts)
+            collider_ids = self.stone_ids[local]
+            self.stone_positions[active_worlds, local] = new_positions
+            self.stone_surface_tilts[active_worlds, local] = new_tilts
+            self.stone_rotations[active_worlds, local] = new_rotations
+            self.collider_local_transforms[active_worlds, collider_ids, :3] = (
+                new_positions
+            )
+            self.collider_local_transforms[active_worlds, collider_ids, 3:7] = (
+                new_rotations
+            )
+            predecessors[active] = new_positions
+            signs[active] *= -1.0
+            remaining[active, local] = False
+        self.next_lateral_sign[world_ids] = signs
 
     # ---- observation, objective, and episode boundaries ---------------------------
 
@@ -1525,7 +1666,15 @@ class StoneCourseEnv(LanesEnv):
             dim=1,
         )
         dot = torch.sum(body_fwd * commanded, dim=1)
-        return (dot >= self.cos_angle_threshold).detach()
+        facing = dot >= self.cos_angle_threshold
+        if self.heading_switch_fraction > 0.0 and self.heading_switch_grace > 0.0:
+            # A freshly switched command points up to 90 deg away from the
+            # body; suspend the facing termination while the turn happens.
+            turning = (
+                self.time - self._last_heading_change_time
+            ) < self.heading_switch_grace
+            facing = facing | turning
+        return facing.detach()
 
     def _feet_below_supports(self) -> torch.Tensor:
         """Both feet entirely below their nearest slab tops means a fall.

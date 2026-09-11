@@ -300,6 +300,8 @@ class StoneCourseConfig(BaseArgs):
     lambda_act: float = -1e-4
     lambda_metabolic: float = 0.0
     """ Weight on the mean Umberger metabolic rate (W per muscle); negative to penalize """
+    lambda_limit: float = 0.0
+    """ Weight on the joint-limit torque penalty (negative to penalize); the knee-hyperextension lever """
 
     def __post_init__(self):
         super().__post_init__()

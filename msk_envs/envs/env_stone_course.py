@@ -8,7 +8,11 @@ from msk_envs.utils.global_params import FWD_IDX, MIN_ROOT_HEIGHT, SIDE_IDX, UP_
 from msk_envs.utils.quat import quat_conjugate, quat_mul, rotate_vec
 from bolt._src.smooth_muscle_metabolic import compute_muscle_metabolics
 
-from msk_envs.utils.reward_lib import activation_square_penalty, velocity_reward_max
+from msk_envs.utils.reward_lib import (
+    activation_square_penalty,
+    joint_penalty,
+    velocity_reward_max,
+)
 from .env_config import EnvConfig
 from .env_lanes import LanesEnv
 
@@ -824,6 +828,20 @@ class StoneCourseEnv(LanesEnv):
         )
         self.heading_switch_fraction = env_config.course_heading_switch_fraction
         self.heading_switch_grace = env_config.course_heading_switch_grace
+        self.heading_switch_backward_probability = (
+            env_config.course_heading_switch_backward_probability
+        )
+        if not 0.0 <= self.heading_switch_backward_probability <= 1.0:
+            raise ValueError(
+                "course_heading_switch_backward_probability must be in [0, 1]"
+            )
+        if self.heading_switch_backward_probability > 0.0 and (
+            self.heading_switch_fraction <= 0.0 or self.heading_fixed_degrees != 90.0
+        ):
+            raise ValueError(
+                "backward transition sampling requires course_heading_switch_fraction "
+                "> 0 and course_heading_max_degrees = 90"
+            )
         if not 0.0 < self.heading_gap_scale <= 1.0:
             raise ValueError("course_heading_gap_scale must be in (0, 1]")
         if self.heading_max_change_degrees < 0.0:
@@ -1173,10 +1191,9 @@ class StoneCourseEnv(LanesEnv):
             return
         self._last_heading_change_time[world_ids] = self.time[world_ids]
         if self.heading_switch_fraction > 0.0:
-            # Transition training: half the episodes start forward and will
-            # switch to sideways mid-episode, half start sideways and will
-            # switch to forward. Both gaits and the turn between them are
-            # rehearsed in every episode, in both orders.
+            # Each fresh episode rehearses a longitudinal/sideways pair in
+            # either order. Backward sampling extends the longitudinal family
+            # while the default preserves the original forward/side sampler.
             magnitude = torch.deg2rad(torch.tensor(
                 self.heading_fixed_degrees, device=self.device
             ))
@@ -1186,15 +1203,34 @@ class StoneCourseEnv(LanesEnv):
                 torch.tensor(1.0, device=self.device),
             )
             sideways = signs * magnitude
-            forward = torch.zeros_like(sideways)
+            longitudinal = torch.zeros_like(sideways)
             start_sideways = (
                 torch.rand(world_ids.numel(), device=self.device) < 0.5
             )
-            self.command_headings[world_ids] = torch.where(
-                start_sideways, sideways, forward
-            )
+            if self.heading_switch_backward_probability > 0.0:
+                backward = (
+                    torch.rand(world_ids.numel(), device=self.device)
+                    < self.heading_switch_backward_probability
+                )
+                longitudinal = torch.where(
+                    backward, signs * torch.pi, longitudinal
+                )
+                if continued:
+                    # Keep the gait already being executed at the timeout.
+                    # Resampling it could introduce an unintended 180-degree
+                    # forward/backward or left/right turn at the boundary.
+                    current = self.command_headings[world_ids]
+                    start_sideways = torch.sin(current).abs() > 0.5
+                else:
+                    self.command_headings[world_ids] = torch.where(
+                        start_sideways, sideways, longitudinal
+                    )
+            else:
+                self.command_headings[world_ids] = torch.where(
+                    start_sideways, sideways, longitudinal
+                )
             self._pending_headings[world_ids] = torch.where(
-                start_sideways, forward, sideways
+                start_sideways, longitudinal, sideways
             )
             self._heading_switched[world_ids] = False
             return
@@ -1335,12 +1371,15 @@ class StoneCourseEnv(LanesEnv):
             self.joint_positions[world_ids, qpos_id] = rotated[:, column]
 
     def _upon_reset_post_sim(self, reset_mask: torch.Tensor) -> None:
-        self._snap_launch_slabs_under_feet(reset_mask)
         self._apply_command_heading_to_pose(reset_mask)
         pelvis_height = self.qpos_id_lookup["pelvis_ty"]
         self.joint_positions[reset_mask, pelvis_height] += (
             self.course.top_height * self.terrain_curriculum.current_height_scale
         )
+        # Foot locations must reflect the commanded yaw before supports are
+        # placed. Snapping first leaves side/backward starts off their slabs.
+        self.fk()
+        self._snap_launch_slabs_under_feet(reset_mask)
         self.launch_sim_reset()
         self._episode_start_x[reset_mask] = self.root_pos[reset_mask, FWD_IDX]
         self._episode_start_time[reset_mask] = self.time[reset_mask]
@@ -1570,6 +1609,13 @@ class StoneCourseEnv(LanesEnv):
         if "lambda_act" in self.reward_lambdas:
             self.reward_dict["rew_act"] = activation_square_penalty(
                 self.muscle_activations
+            ).detach()
+        if self.reward_lambdas.get("lambda_limit", 0.0) != 0.0:
+            # Joint-limit torque penalty: knee hyperextension rides the soft
+            # +10 deg CoordinateLimitForce for free, so a straight-but-not-
+            # locked knee never out-scores the backward-bent one on its own.
+            self.reward_dict["rew_limit"] = joint_penalty(
+                self.ufrc_limit, squared=False
             ).detach()
         if self.reward_lambdas.get("lambda_metabolic", 0.0) != 0.0:
             # Umberger metabolic energy rate (W). Bolt provides the kernel but

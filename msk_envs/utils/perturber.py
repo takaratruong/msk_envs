@@ -1,5 +1,7 @@
 import torch
 
+from msk_envs.utils.global_params import UP_IDX
+
 
 class Perturber:
     def __init__(
@@ -11,6 +13,8 @@ class Perturber:
             force_std: float,
             delta_t: float,
             enabled: bool,
+            vertical_scale: float = 1.0,
+            ramp_steps: int = 0,
     ):
         self.num_envs = num_envs
         self.device = device
@@ -30,10 +34,20 @@ class Perturber:
 
         # Standard deviation of force to apply
         self.force_std = force_std
+        # Scale on the vertical component of push directions (biases pushes horizontal)
+        self.vertical_scale = vertical_scale
+        # Curriculum: env steps over which force magnitude ramps from 0 to force_std
+        self.ramp_steps = ramp_steps
+        self.step_count = 0
 
         # Duration between calls
         self.delta_t = delta_t
         return
+
+    def _current_force_std(self) -> float:
+        if self.ramp_steps <= 0:
+            return self.force_std
+        return self.force_std * min(1.0, self.step_count / self.ramp_steps)
 
     def sample_range(self, range_tuple: tuple) -> torch.Tensor:
         return torch.rand(self.num_envs, device=self.device) * (range_tuple[1] - range_tuple[0]) + range_tuple[0]
@@ -64,8 +78,11 @@ class Perturber:
 
             # Sample a new random external force for these worlds
             num_perturb = torch.sum(worlds_start).item()
-            force_magnitudes = torch.randn(num_perturb, device=self.device) * self.force_std
+            force_magnitudes = torch.randn(num_perturb, device=self.device) * self._current_force_std()
             force_directions = torch.randn((num_perturb, 3), device=self.device)
+            # Bias pushes toward horizontal (vertical pushes mostly load/unload the
+            # legs; horizontal ones — especially lateral — challenge balance)
+            force_directions[:, UP_IDX] *= self.vertical_scale
             force_directions = force_directions / torch.norm(force_directions, dim=1, keepdim=True)
             external_forces = force_directions * force_magnitudes.unsqueeze(1)
             body_user_forces[worlds_start, root_id, 3:6] = external_forces
@@ -76,4 +93,5 @@ class Perturber:
 
         # Increment timers
         self.timer += self.delta_t
+        self.step_count += 1
         return

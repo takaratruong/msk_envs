@@ -4,50 +4,148 @@
     {
       "id": 7,
       "subject": "Task 0: Sub-step PD actuator kernel (Bolt)",
-      "status": "pending",
-      "description": "**Goal:** PD force mode in Bolt: pd_q_des/pd_kp/pd_kd buffers + use_pd/qpos_adr/qvel_adr metadata + per-substep kernel tau=clamp(kp(q_des-q)-kd*qd, ±optimal_force), launched alongside untouched constant-torque kernel. **Verify:** cd /home/ubuntu/bolt && python test_pd_actuator.py. Full steps in plan doc Task 0.",
-      "description_metadata": {"files": ["/home/ubuntu/bolt/bolt/_src/types.py","/home/ubuntu/bolt/bolt/_src/smooth_actuator.py","/home/ubuntu/bolt/bolt/model_loader.py","/home/ubuntu/bolt/bolt/bindings.py","/home/ubuntu/bolt/test_pd_actuator.py"], "verifyCommand": "cd /home/ubuntu/bolt && python test_pd_actuator.py", "acceptanceCriteria": ["PD mode joint converges to q_des and holds","use_pd=false constant-torque unchanged","torque clamped kp/kd<0 treated as 0"], "modelTier": "frontier"}
+      "status": "completed",
+      "description": "**Goal:** PD force mode in Bolt: pd_q_des/pd_kp/pd_kd buffers + use_pd/qpos_adr/qvel_adr metadata + per-substep kernel tau=clamp(kp(q_des-q)-kd*qd, \u00b1optimal_force), launched alongside untouched constant-torque kernel. **Verify:** cd /home/ubuntu/bolt && python test_pd_actuator.py. Full steps in plan doc Task 0.",
+      "description_metadata": {
+        "files": [
+          "/home/ubuntu/bolt/bolt/_src/types.py",
+          "/home/ubuntu/bolt/bolt/_src/smooth_actuator.py",
+          "/home/ubuntu/bolt/bolt/model_loader.py",
+          "/home/ubuntu/bolt/bolt/bindings.py",
+          "/home/ubuntu/bolt/test_pd_actuator.py"
+        ],
+        "verifyCommand": "cd /home/ubuntu/bolt && python test_pd_actuator.py",
+        "acceptanceCriteria": [
+          "PD mode joint converges to q_des and holds",
+          "use_pd=false constant-torque unchanged",
+          "torque clamped kp/kd<0 treated as 0"
+        ],
+        "modelTier": "frontier"
+      }
     },
     {
       "id": 8,
       "subject": "Task 1: PD env config + action plumbing",
-      "status": "pending",
-      "blockedBy": [7],
+      "status": "completed",
+      "blockedBy": [
+        7
+      ],
       "description": "**Goal:** EnvConfigSprinterTorquePD (use_pd_actuators=True, subcommand sprintertorquepd) + distill/pd_control.py apply_pd writing (q_des,kp,kd)x25 into pd buffers via act_perm, muscles OFF. **Verify:** python -m msk_envs.distill.pd_control. Full steps in plan doc Task 1.",
-      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/envs/env_config.py","/home/ubuntu/msk_envs/msk_envs/distill/pd_control.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.pd_control", "acceptanceCriteria": ["env-config:sprintertorquepd resolves with PD actuators","apply_pd writes permuted buffers + steps","basic gains keep notfallen>0.5"], "modelTier": "standard"}
+      "description_metadata": {
+        "files": [
+          "/home/ubuntu/msk_envs/msk_envs/envs/env_config.py",
+          "/home/ubuntu/msk_envs/msk_envs/distill/pd_control.py"
+        ],
+        "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.pd_control",
+        "acceptanceCriteria": [
+          "env-config:sprintertorquepd resolves with PD actuators",
+          "apply_pd writes permuted buffers + steps",
+          "basic gains keep notfallen>0.5"
+        ],
+        "modelTier": "standard"
+      }
     },
     {
       "id": 9,
       "subject": "Task 2: Teacher impedance extraction",
-      "status": "pending",
-      "blockedBy": [8],
+      "status": "completed",
+      "blockedBy": [
+        8
+      ],
       "description": "**Goal:** distill/impedance.py extract_impedance(env,teacher)->(q_des,kp,kd) (n_envs,25) via finite-diff of ufrc_muscle at perturbed state; kp,kd>=0; q_des=q+tau/kp. **Verify:** python -m msk_envs.distill.impedance. HIGHEST-UNCERTAINTY: recompute ufrc_muscle at perturbed state w/o corrupting rollout; BLOCKED if infeasible. Full steps in plan doc Task 2.",
-      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/impedance.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.impedance", "acceptanceCriteria": ["returns finite (q_des,kp,kd) (n_envs,25) kp/kd>=0","finite-diff stiffness sign correct per-joint distribution reported","epsilon sensitivity <20%"], "modelTier": "frontier"}
+      "description_metadata": {
+        "files": [
+          "/home/ubuntu/msk_envs/msk_envs/distill/impedance.py"
+        ],
+        "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.impedance",
+        "acceptanceCriteria": [
+          "returns finite (q_des,kp,kd) (n_envs,25) kp/kd>=0",
+          "finite-diff stiffness sign correct per-joint distribution reported",
+          "epsilon sensitivity <20%"
+        ],
+        "modelTier": "frontier"
+      }
     },
     {
       "id": 10,
       "subject": "Task 3: DAgger distill (q_des,kp,kd)",
-      "status": "pending",
-      "blockedBy": [9],
+      "status": "completed",
+      "blockedBy": [
+        9
+      ],
       "description": "**Goal:** distill/dagger_pd.py DAgger loop, student obs(359)->(q_des,kp,kd) R75, labels from extract_impedance, student rollout drives PD env via apply_pd. Saves pd_student.pt+metrics. **Verify:** python -m msk_envs.distill.dagger_pd --rounds 8. Full steps in plan doc Task 3.",
-      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/dagger_pd.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.dagger_pd --rounds 8", "acceptanceCriteria": ["8 rounds buffer grows final val_mse<0.6x round0","student rollout via PD env + muscles-off + act_perm","saves pd_student.pt + metrics.json"], "modelTier": "frontier"}
+      "description_metadata": {
+        "files": [
+          "/home/ubuntu/msk_envs/msk_envs/distill/dagger_pd.py"
+        ],
+        "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.dagger_pd --rounds 8",
+        "acceptanceCriteria": [
+          "8 rounds buffer grows final val_mse<0.6x round0",
+          "student rollout via PD env + muscles-off + act_perm",
+          "saves pd_student.pt + metrics.json"
+        ],
+        "modelTier": "frontier"
+      }
     },
     {
       "id": 11,
-      "subject": "Task 4: Eval — torque match + sprint (GATE)",
-      "status": "pending",
-      "blockedBy": [10],
-      "description": "**Goal:** distill/evaluate_pd.py — applied tau_PD vs teacher tau_muscle per-joint correlation along matched rollouts + sprint (fwd,not-fallen) vs teacher; verdict. USER-ORDERED GATE — non-skippable; close only after real GPU run captures per-joint torque-match table + sprint numbers, teacher-sprints sanity gate first. **Verify:** python -m msk_envs.distill.evaluate_pd. Full steps in plan doc Task 4.",
-      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/evaluate_pd.py"], "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.evaluate_pd", "acceptanceCriteria": ["teacher-sprints sanity gate passes first","per-joint tau_PD vs tau_muscle corr + RMS ratio over 256 envs","sprint fwd/not-fallen teacher vs pd_student","verdict line printed thresholds untouched"], "modelTier": "frontier", "userGate": true, "tags": ["user-gate"], "requireEvidenceTokens": [["teacher"],["pd_student"],["torque_match"]]}
+      "subject": "Task 4: Eval \u2014 torque match + sprint (GATE)",
+      "status": "completed",
+      "blockedBy": [
+        10
+      ],
+      "description": "**Goal:** distill/evaluate_pd.py \u2014 applied tau_PD vs teacher tau_muscle per-joint correlation along matched rollouts + sprint (fwd,not-fallen) vs teacher; verdict. USER-ORDERED GATE \u2014 non-skippable; close only after real GPU run captures per-joint torque-match table + sprint numbers, teacher-sprints sanity gate first. **Verify:** python -m msk_envs.distill.evaluate_pd. Full steps in plan doc Task 4.",
+      "description_metadata": {
+        "files": [
+          "/home/ubuntu/msk_envs/msk_envs/distill/evaluate_pd.py"
+        ],
+        "verifyCommand": "cd /home/ubuntu/msk_envs && python -m msk_envs.distill.evaluate_pd",
+        "acceptanceCriteria": [
+          "teacher-sprints sanity gate passes first",
+          "per-joint tau_PD vs tau_muscle corr + RMS ratio over 256 envs",
+          "sprint fwd/not-fallen teacher vs pd_student",
+          "verdict line printed thresholds untouched"
+        ],
+        "modelTier": "frontier",
+        "userGate": true,
+        "tags": [
+          "user-gate"
+        ],
+        "requireEvidenceTokens": [
+          [
+            "teacher"
+          ],
+          [
+            "pd_student"
+          ],
+          [
+            "torque_match"
+          ]
+        ]
+      }
     },
     {
       "id": 12,
       "subject": "Task 5: Render PD student + dashboard",
-      "status": "pending",
-      "blockedBy": [11],
+      "status": "completed",
+      "blockedBy": [
+        11
+      ],
       "description": "**Goal:** Render distilled PD student rollout to pd_student.mp4 + dashboard card next to Phase A torque student, truthful caption. **Verify:** ls pd_student.mp4 non-empty + Firefox window screenshot shows card. Full steps in plan doc Task 5.",
-      "description_metadata": {"files": ["/home/ubuntu/msk_envs/msk_envs/distill/record_pd.py","/home/ubuntu/bolt_baselines/dashboard.html"], "verifyCommand": "ls -la /home/ubuntu/bolt_baselines/videos/pd_student.mp4", "acceptanceCriteria": ["PD student rollout rendered to mp4","dashboard card added truthful caption","opens in Firefox on :1 window capture verified"], "modelTier": "standard"}
+      "description_metadata": {
+        "files": [
+          "/home/ubuntu/msk_envs/msk_envs/distill/record_pd.py",
+          "/home/ubuntu/bolt_baselines/dashboard.html"
+        ],
+        "verifyCommand": "ls -la /home/ubuntu/bolt_baselines/videos/pd_student.mp4",
+        "acceptanceCriteria": [
+          "PD student rollout rendered to mp4",
+          "dashboard card added truthful caption",
+          "opens in Firefox on :1 window capture verified"
+        ],
+        "modelTier": "standard"
+      }
     }
   ],
-  "lastUpdated": "2026-08-29T00:00:00Z"
+  "lastUpdated": "2026-08-30T10:45:00Z"
 }

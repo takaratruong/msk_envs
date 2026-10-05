@@ -1,0 +1,10 @@
+# Standing pose for the G1-retargeted muscle model (short legs; foot 0.60m below pelvis).
+pelvis_tx: {q: 0.0, v: 0.0}
+pelvis_ty: {q: 0.65, v: 0.0}
+pelvis_tilt: {q: 0.0, v: 0.0}
+hip_flexion_r: {q: 0.10, v: 0.0}
+knee_angle_r: {q: -0.15, v: 0.0}
+ankle_angle_r: {q: 0.0, v: 0.0}
+hip_flexion_l: {q: 0.10, v: 0.0}
+knee_angle_l: {q: -0.15, v: 0.0}
+ankle_angle_l: {q: 0.0, v: 0.0}

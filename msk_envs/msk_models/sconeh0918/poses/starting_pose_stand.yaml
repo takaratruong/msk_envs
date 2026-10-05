@@ -1,0 +1,29 @@
+# Standing pose for the SCONE H0918 planar biped (18 muscles, 9 DoF).
+# Near-upright with slight hip/knee flexion and neutral ankles for a stable start.
+pelvis_tx:
+  q: 0.0
+  v: 0.0
+pelvis_ty:
+  q: 0.92
+  v: 0.0
+pelvis_tilt:
+  q: 0.0
+  v: 0.0
+hip_flexion_r:
+  q: 0.05
+  v: 0.0
+knee_angle_r:
+  q: -0.10
+  v: 0.0
+ankle_angle_r:
+  q: 0.0
+  v: 0.0
+hip_flexion_l:
+  q: 0.05
+  v: 0.0
+knee_angle_l:
+  q: -0.10
+  v: 0.0
+ankle_angle_l:
+  q: 0.0
+  v: 0.0

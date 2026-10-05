@@ -114,6 +114,11 @@ def create_pdf_output(
         interval_plots: bool = False
 ):
     """ Create a pdf with all the relevant plots """
+    # An eval world can terminate on its first step (e.g. gap-termination when a
+    # foot spawns off a stone), logging zero frames/rewards. Skip the PDF for
+    # such empty worlds rather than crashing the whole training run.
+    if len(frame_data) == 0 or len(logged_reward_data) == 0:
+        return
     n_frames = len(frame_data)
     times = np.array([frame.time for frame in frame_data])
     frame_ind = np.arange(n_frames)

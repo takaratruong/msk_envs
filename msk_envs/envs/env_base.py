@@ -218,6 +218,8 @@ class MSKEnv:
         self.ufrc_muscle_passive = bolt.ufrc_muscle_passive(self.d)
         # [num_envs, num_colliders]
         self.collider_forces = bolt.collider_forces(self.d)
+        # [num_envs, num_colliders, 7] (mutable local position + quaternion)
+        self.collider_local_transforms = bolt.geom_local_transforms(self.d)
         # [num_envs, num_colliders, 3]
         self.collider_positions = get_position_from_transform(bolt.get_collider_transforms(self.d))
         # self.collider_self_forces = bolt.collider_self_forces(self.d)
@@ -271,6 +273,8 @@ class MSKEnv:
             force_std=env_config.force_std,
             delta_t=self.delta_t,
             enabled=env_config.apply_perturbations,
+            vertical_scale=env_config.perturbation_vertical_scale,
+            ramp_steps=env_config.perturbation_ramp_steps,
         )
         # Set up random starting pose generator
         self.starting_state_helper = StartingStateHelper(

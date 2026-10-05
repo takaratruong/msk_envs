@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MSK model on terrain — video gallery</title>
+<style>
+ body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 1200px; color: #222; }
+ h1 { font-size: 1.4rem; } h2 { font-size: 1.05rem; margin-top: 2.2rem; border-bottom: 1px solid #ddd; padding-bottom: .3rem; }
+ .meta { color: #666; font-size: .9rem; }
+ .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: .6rem; }
+ figure { margin: 0; }
+ video { width: 100%; border-radius: 8px; background: #000; }
+ figcaption { font-size: .85rem; color: #444; margin-top: .25rem; }
+</style>
+</head>
+<body>
+<h1>Musculoskeletal model on terrain — rendered terrain videos</h1>
+<p class="meta">Natural-terrain heightfield runs (bolt_baselines/videos, served via symlink). Poster frames load instantly; click to play.</p>
+
+<h2>Natural terrain (rendered heightfield)</h2>
+<div class="grid">
+<figure><video controls preload="none" poster="posters/staged_131000_max_terrain_9.jpg" src="bolt_videos/staged_131000_max_terrain_9.mp4"></video><figcaption>staged @131k · max-stage natural terrain · seed 9 · full 12 s, 17.2 m</figcaption></figure>
+<figure><video controls preload="none" poster="posters/staged_131000_max_terrain_89.jpg" src="bolt_videos/staged_131000_max_terrain_89.mp4"></video><figcaption>staged @131k · max-stage natural terrain · seed 89</figcaption></figure>
+<figure><video controls preload="none" poster="posters/final_max_terrain_9.jpg" src="bolt_videos/final_max_terrain_9.mp4"></video><figcaption>final checkpoint · max terrain · seed 9</figcaption></figure>
+<figure><video controls preload="none" poster="posters/final_max_terrain_29.jpg" src="bolt_videos/final_max_terrain_29.mp4"></video><figcaption>final checkpoint · max terrain · seed 29</figcaption></figure>
+<figure><video controls preload="none" poster="posters/foothold_rollout_mid_natural.jpg" src="bolt_videos/foothold_rollout_mid_natural.mp4"></video><figcaption>foothold rollout · mid natural terrain</figcaption></figure>
+<figure><video controls preload="none" poster="posters/foothold_rollout_hard_terrain.jpg" src="bolt_videos/foothold_rollout_hard_terrain.mp4"></video><figcaption>foothold rollout · hard terrain</figcaption></figure>
+<figure><video controls preload="none" poster="posters/foothold_rollout_extreme_terrain.jpg" src="bolt_videos/foothold_rollout_extreme_terrain.mp4"></video><figcaption>foothold rollout · extreme terrain</figcaption></figure>
+</div>
+
+<h2>Terrain benches (staged @131k)</h2>
+<div class="grid">
+<figure><video controls preload="none" poster="posters/staged_131000_rolling.jpg" src="bolt_videos/staged_131000_rolling.mp4"></video><figcaption>rolling waves</figcaption></figure>
+<figure><video controls preload="none" poster="posters/staged_131000_ascent.jpg" src="bolt_videos/staged_131000_ascent.mp4"></video><figcaption>ascent</figcaption></figure>
+<figure><video controls preload="none" poster="posters/staged_131000_descent.jpg" src="bolt_videos/staged_131000_descent.mp4"></video><figcaption>descent</figcaption></figure>
+<figure><video controls preload="none" poster="posters/staged_131000_random-101.jpg" src="bolt_videos/staged_131000_random-101.mp4"></video><figcaption>random-101</figcaption></figure>
+</div>
+
+<h2>Stepping-stone scenarios (checkerboard stones — for reference)</h2>
+<div class="grid">
+<figure><video controls preload="metadata" src="../runs/scenarios/metabolic_265000/ascent.mp4"></video><figcaption>metabolic_265000 · stone ascent</figcaption></figure>
+<figure><video controls preload="metadata" src="../runs/scenarios/speedcond_259000/rolling.mp4"></video><figcaption>speedcond_259000 · stone rolling</figcaption></figure>
+</div>
+</body>
+</html>

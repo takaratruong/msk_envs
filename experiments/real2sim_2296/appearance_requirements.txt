@@ -1,0 +1,12 @@
+# Keep torch/torchvision matched to the selected CUDA gsplat wheel. The verified
+# local environment uses torch==2.4.1+cu124, torchvision==0.19.1+cu124 and the
+# official gsplat==1.5.3+pt24cu124 wheel; do not silently replace the torch build.
+# gsplat APIs are verified against the official v1.5.3 tag.
+gsplat==1.5.3
+numpy>=1.24,<3
+scipy>=1.10,<2
+Pillow>=10,<12
+# Optional perceptual metric: install lpips==0.1.4 with torchvision matched to
+# the installed torch. Its official AlexNet pretrained weights must be present
+# or downloadable; absence is explicitly recorded and does not falsify PSNR/SSIM.
+# A system ffmpeg with libx264 is required for comparison.mp4.

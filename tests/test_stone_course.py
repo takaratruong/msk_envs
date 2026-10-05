@@ -311,6 +311,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
 
     def make_recycling_env(self) -> StoneCourseEnv:
         env = object.__new__(StoneCourseEnv)
+        env.heading_commands_enabled = False
         env.course = make_spec()
         env.terrain_curriculum = make_curriculum()
         env.device = torch.device("cpu")
@@ -661,6 +662,7 @@ class StoneCourseEnvironmentTest(unittest.TestCase):
         env._episode_touched_ground = torch.zeros(4, dtype=torch.bool)
         env._episode_edge_landed = torch.zeros(4, dtype=torch.bool)
         env.heading_commands_enabled = False
+        env.heading_switch_fraction = 0.0
         env.terrain_curriculum = make_curriculum()
 
         performed = {}
@@ -1054,6 +1056,7 @@ class HeadingCommandTest(unittest.TestCase):
         env = object.__new__(StoneCourseEnv)
         env.device = torch.device("cpu")
         env.heading_commands_enabled = True
+        env.heading_switch_fraction = 0.0
         env.fwd_axis = torch.tensor([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
         env.cos_angle_threshold = torch.cos(torch.deg2rad(torch.tensor(45.0)))
         # Two worlds, both bodies facing -X (yawed 180 about up).
@@ -1091,6 +1094,9 @@ class FixedHeadingTest(unittest.TestCase):
         env.heading_commands_enabled = True
         env.heading_fixed = True
         env.heading_fixed_degrees = 90.0
+        env.heading_switch_fraction = 0.0
+        env.time = torch.zeros(64)
+        env._last_heading_change_time = torch.zeros(64)
         env.terrain_curriculum = make_curriculum()
         env.command_headings = torch.zeros(64)
 

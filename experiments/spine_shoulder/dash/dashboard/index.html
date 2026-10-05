@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="30">
+  <title>Spine + Shoulder Fidelity (parallel lane) · Progress</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b0d12; --panel:#151922; --line:#2a3140; --text:#f4f1e9; --muted:#a5adba; --good:#70d7a7; --bad:#ef9696; }
+    * { box-sizing:border-box } body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,sans-serif }
+    main { width:min(1050px,calc(100% - 32px)); margin:auto; padding:44px 0 70px }
+    header { display:flex; justify-content:space-between; gap:20px; align-items:end }
+    h1 { margin:0; font-size:clamp(34px,6vw,60px) } time,.muted,.copy p { color:var(--muted) }
+    a { color:inherit } .back { color:var(--muted); text-decoration:none }
+    .goal,.status,.media,.contract { border:1px solid var(--line); border-radius:18px; background:var(--panel) }
+    .goal { margin-top:28px; padding:30px } .goal h2 { margin:8px 0 0; font-size:clamp(26px,4vw,42px) }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; margin-top:13px }
+    .status { padding:22px; min-height:170px } .label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:11px }
+    .value { margin-top:25px; font-size:17px; line-height:1.45 } .proof { font:11px ui-monospace,monospace; overflow-wrap:anywhere }
+    .checked { color:var(--good) } .unchecked,.missing { color:var(--bad) }
+    h2.section { margin:45px 0 15px } .media-grid,.contract-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px }
+    .contract { padding:20px; overflow-wrap:anywhere } .contract h3 { margin:9px 0 } .contract.link { display:block; text-decoration:none } .contract.link:hover { border-color:var(--muted) }
+    .media { overflow:hidden } .media.old { opacity:.65 } .visual { min-height:240px; display:grid; place-items:center; background:#050609 }
+    img,video { display:block; width:100%; max-height:500px; object-fit:contain } .copy { padding:17px } .copy h3 { margin:10px 0 5px }
+    .empty { color:var(--muted) } footer { margin-top:42px; color:var(--muted); font-size:12px }
+    @media(max-width:760px) { header { align-items:start; flex-direction:column } .grid,.media-grid,.contract-grid { grid-template-columns:1fr } .status { min-height:0 } }
+  </style>
+</head>
+<body><main>
+  <header><h1>Spine + Shoulder Fidelity (parallel lane)</h1><time datetime="2026-09-10T03:13:00Z">2026-09-10T03:13:00Z</time></header>
+  <section class="goal"><p class="label">Current goal</p><h2>Add a flexible multi-segment lumbar spine and a Seth-style mobile (ellipsoid) scapula to the sprinter, verify it is correct, and test whether it fixes the policies&#x27; strange arm use. SEPARATE dashboard — does not touch the stepping-stone project.</h2></section>
+  <section class="grid">
+    <article class="status"><p class="label">Current activity</p><p class="value">SHOULDER ASYMMETRY BUG FIXED. The mobile (ellipsoid) scapula was moving asymmetrically under symmetric commands (&#x27;bobbing&#x27;, &#x27;left popped off&#x27;). Root cause was mine: converting the welded scapula to an EllipsoidJoint, I mirrored the joint&#x27;s parent-frame TRANSLATION directly, but the ellipsoid bakes a (0,0,semi_z) surface offset along that frame so the translation is NOT mirror-symmetric — the left scapula ended 0.15 m off. Fix: compute the left translation from the mirrored TARGET position, t_l = M@p0 - R0l@semi. Confirmed the source model was already perfectly symmetric, so this was not the prior symmetrization.</p></article>
+    <article class="status"><p class="label">Last reported result</p><p class="value">Neutral pose: left scapula lands exactly at the mirror of the right (mirror residual 0.00000 m). Under a sagittally-symmetric command the residual is 0 at neutral and grows only ~0.011 m at extreme ROM — the benign signature of ellipsoid surface curvature, not a bug. The model LOADS in Bolt again (nq=38 shoulderonly / nq=47 full spine+shoulder); the earlier CableSpan wrap crash was a symptom of the misplaced scapula and is gone. Compare the FIXED media (scapulae move together / mirror-symmetric) against the BROKEN media (scapulae moved oppositely).</p><p class="proof unchecked">unchecked · no receipt</p></article>
+    <article class="status"><p class="label">Next action</p><p class="value">Rebuild-and-relaunch the ablation training (spine-only / shoulder-only / full) on the FIXED model with the proven forward curriculum, then compare curriculum promotion + arm behavior against the welded baseline. (Held pending user go-ahead; shared repo state is being kept clear of the other session.)</p></article>
+  </section>
+  
+  <h2 class="section">Images and videos</h2><section class="media-grid">
+      <article class="media">
+        <div class="visual"><img src="../media/shoulders_fk_contactsheet.png" alt="BEFORE (broken) — L/R scapula trajectories were not mirror images." loading="lazy"></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · candidate</p>
+          <h3>BEFORE (broken) — L/R scapula trajectories were not mirror images.</h3>
+          <p>media/shoulders_fk_contactsheet.png · shoulder-broken-2026-09-09</p>
+        </div>
+      </article>
+
+      <article class="media">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../media/shoulders_fk_back.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · candidate</p>
+          <h3>BEFORE (broken) — identical L/R commands produced ASYMMETRIC motion (right scapula drops while left rises). Kept for before/after comparison.</h3>
+          <p>media/shoulders_fk_back.mp4 · shoulder-broken-2026-09-09</p>
+        </div>
+      </article>
+
+      <article class="media">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../media/shoulders_fk_back_FIXED.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · candidate</p>
+          <h3>FIXED — back view, sagittally-symmetric scapula command. Scapulae now move TOGETHER (mirror-symmetric). Neutral residual 0; ~1 cm only at extreme ROM (benign surface curvature). Model loads in Bolt.</h3>
+          <p>media/shoulders_fk_back_FIXED.mp4 · shoulder-FIXED-2026-09-10</p>
+        </div>
+      </article>
+
+      <article class="media">
+        <div class="visual"><img src="../media/shoulders_fk_FIXED_contactsheet.png" alt="FIXED — four frames of one symmetric sweep: L/R scapulae move in unison." loading="lazy"></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · candidate</p>
+          <h3>FIXED — four frames of one symmetric sweep: L/R scapulae move in unison.</h3>
+          <p>media/shoulders_fk_FIXED_contactsheet.png · shoulder-FIXED-2026-09-10</p>
+        </div>
+      </article></section>
+  <footer>Read-only progress view.</footer>
+</main></body></html>

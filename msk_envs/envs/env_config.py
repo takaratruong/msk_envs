@@ -218,9 +218,11 @@ class EnvConfig:
     course_heading_max_change_degrees: float = 0.0
     """ Bound on how far the heading command may move per continued episode, so heading transitions are gradual and the recycled course geometry keeps pace; 0 keeps unrestricted resampling """
     course_heading_switch_fraction: float = 0.0
-    """ Transition-training mode: episodes start half forward (0 deg) and half sideways (+/-course_heading_max_degrees); at this fraction of the episode the command flips to the other gait and the course ahead is re-laid for the new heading's gap band. 0 disables """
+    """ Transition-training mode: episodes start half longitudinal and half sideways (+/-course_heading_max_degrees); at this fraction of the episode the command flips to the other gait and the course ahead is re-laid for the new heading's gap band. Longitudinal defaults to forward (0 deg). 0 disables """
     course_heading_switch_grace: float = 1.5
     """ Seconds after a mid-episode heading change during which the facing termination is suspended so the body can physically turn """
+    course_heading_switch_backward_probability: float = 0.0
+    """ Probability of using backward (180 deg) instead of forward as the longitudinal endpoint. Requires switching and a 90-degree sideways heading. Positive values preserve the current heading across continued episodes, then choose the other gait for the next switch. 0 retains legacy forward/side behavior """
 
     # Miscellaneous
     ground_rotation: tuple = (0.0, 0.0, 0.0, 1.0)

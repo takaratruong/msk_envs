@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G1 interactive room · Progress</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b0d12; --panel:#151922; --line:#2a3140; --text:#f4f1e9; --muted:#a5adba; --good:#70d7a7; --bad:#ef9696; }
+    * { box-sizing:border-box } body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,sans-serif }
+    main { width:min(1050px,calc(100% - 32px)); margin:auto; padding:44px 0 70px }
+    header { display:flex; justify-content:space-between; gap:20px; align-items:end }
+    h1 { margin:0; font-size:clamp(34px,6vw,60px) } time,.muted,.copy p { color:var(--muted) }
+    a { color:inherit } .back { color:var(--muted); text-decoration:none }
+    .goal,.status,.media,.contract { border:1px solid var(--line); border-radius:18px; background:var(--panel) }
+    .goal { margin-top:28px; padding:30px } .goal h2 { margin:8px 0 0; font-size:clamp(26px,4vw,42px) }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; margin-top:13px }
+    .status { padding:22px; min-height:170px } .label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:11px }
+    .value { margin-top:25px; font-size:17px; line-height:1.45 } .proof { font:11px ui-monospace,monospace; overflow-wrap:anywhere }
+    .checked { color:var(--good) } .unchecked,.missing { color:var(--bad) }
+    h2.section { margin:45px 0 15px } .media-grid,.contract-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px }
+    .contract { padding:20px; overflow-wrap:anywhere } .contract h3 { margin:9px 0 } .contract.link { display:block; text-decoration:none } .contract.link:hover { border-color:var(--muted) }
+    .media { overflow:hidden } .media.old { opacity:.65 } .visual { min-height:240px; display:grid; place-items:center; background:#050609 }
+    img,video { display:block; width:100%; max-height:500px; object-fit:contain } .copy { padding:17px } .copy h3 { margin:10px 0 5px }
+    .empty { color:var(--muted) } footer { margin-top:42px; color:var(--muted); font-size:12px }
+    @media(max-width:760px) { header { align-items:start; flex-direction:column } .grid,.media-grid,.contract-grid { grid-template-columns:1fr } .status { min-height:0 } }
+    .media:has(video[autoplay]) { grid-column: 1 / -1; }
+</style>
+</head>
+<body><main>
+  <header><h1>G1 interactive room</h1><time datetime="2026-09-16T07:05:00Z">2026-09-16T07:05:00Z</time></header>
+  <section class="goal"><p class="label">Current goal</p><h2>A continuous G1 physics game with stable camera control and a first find-soda, grasp, carry and blue-tray placement mission.</h2></section>
+  <section class="grid">
+    <article class="status"><p class="label">Current activity</p><p class="value">Claude bounded real2sim pilot: rebuilt the 3-compartment recycle/compost station from IMG_2296.MOV (19-23 s) as an articulated, video-textured USD + MJCF asset.</p></article>
+    <article class="status"><p class="label">Last reported result</p><p class="value">Claude pilot: hinge articulation verified in MuJoCo (peaks 84.5-86.6 deg, settle &lt;0.7 deg, receipt-bound). Visual quality FAILED user review on 2026-09-16: box-primitive geometry and flat rasterizer output are not comparable to the accepted room&#x27;s photorealism bar. The mechanical pipeline is demonstrated; the appearance/visual-fidelity layer is not.</p><p class="proof unchecked">unchecked · receipt mismatch</p></article>
+    <article class="status"><p class="label">Next action</p><p class="value">If continuing: proper appearance pass (COLMAP cameras + baked textures or splat layer, GPU is available), beveled/inset door geometry, real label capture from sharper frames, RTX-quality rendering for comparison.</p></article>
+  </section>
+  
+  <h2 class="section">Images and videos</h2><section class="media-grid">
+      <article class="media">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_Room_Game_Automatic_Approach.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · current</p>
+          <h3>Automatic approach, drawer opening and return to walking: 74 seconds of recorded physics</h3>
+          <p>dashboard/media/G1_Room_Game_Automatic_Approach.mp4 · continuous-room-bank03-documentary</p>
+        </div>
+      </article>
+
+      <article class="media">
+        <div class="visual"><video controls preload="metadata" playsinline autoplay muted><source src="../dashboard/media/Claude_Pilot_Recycle_Station_Doors.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · current</p>
+          <h3>Claude pilot: doors actuated in MuJoCo physics (mechanical test only)</h3>
+          <p>dashboard/media/Claude_Pilot_Recycle_Station_Doors.mp4 · 20260916T0000Z-claude-pilot</p>
+        </div>
+      </article>
+
+      <article class="media">
+        <div class="visual"><img src="../dashboard/media/Claude_Pilot_Recycle_Station_Comparison.jpg" alt="Claude pilot: real frame vs rebuilt cabinet — articulation passed, visual quality judged FAIL by user review" loading="lazy"></div>
+        <div class="copy">
+          <p class="proof checked">checked · current</p>
+          <h3>Claude pilot: real frame vs rebuilt cabinet — articulation passed, visual quality judged FAIL by user review</h3>
+          <p>dashboard/media/Claude_Pilot_Recycle_Station_Comparison.jpg · 20260916T0000Z-claude-pilot</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><img src="../dashboard/media/G1_Drawer_Naturalness_Comparison.png" alt="Claude pilot: real frame vs rebuilt cabinet — articulation passed, visual quality judged FAIL by user review" loading="lazy"></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · receipt mismatch</p>
+          <h3>Claude pilot: real frame vs rebuilt cabinet — articulation passed, visual quality judged FAIL by user review</h3>
+          <p>dashboard/media/G1_Drawer_Naturalness_Comparison.png · natural_pair12_review_image</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_Drawer_Naturalness_Improved.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>Improved drawer motion: opening, release and return to walking</h3>
+          <p>dashboard/media/G1_Drawer_Naturalness_Improved.mp4 · natural_pair24_review_video</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><img src="../dashboard/media/G1_drawer_naturalness_audit.png" alt="Naturalness review: the current drawer motion needs revision" loading="lazy"></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>Naturalness review: the current drawer motion needs revision</h3>
+          <p>dashboard/media/G1_drawer_naturalness_audit.png · drawer_naturalness_audit01</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_controller_comparison.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>New controller comparison: walking and carrying posture on a floor (no object)</h3>
+          <p>dashboard/media/G1_controller_comparison.mp4 · controller_floor_comparison01</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_AMO_ScaleBFM_fridge_opening.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>New: AMO walks, ScaleBFM opens the fridge, AMO resumes — recorded physics</h3>
+          <p>dashboard/media/G1_AMO_ScaleBFM_fridge_opening.mp4 · amo_scalebfm_fridge_nominal04</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_MotionBricks_fridge_approach.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>New: MotionBricks stance transition under ScaleBFM physics control in the room</h3>
+          <p>dashboard/media/G1_MotionBricks_fridge_approach.mp4 · motionbricks_room_transition01</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_Dex3_fridge_to_table_physics.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>Previous verified task: complete fridge-to-table physics recording</h3>
+          <p>dashboard/media/G1_Dex3_fridge_to_table_physics.mp4 · final_physics_video01</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><img src="../dashboard/media/G1_drawer_naturalness_revision.png" alt="Revised actual motion: improved posture, release still rejected" loading="lazy"></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · receipt mismatch</p>
+          <h3>Revised actual motion: improved posture, release still rejected</h3>
+          <p>dashboard/media/G1_drawer_naturalness_revision.png · natural_pair06_naturalness_review</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_Drawer_Naturalness_Review.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · receipt mismatch</p>
+          <h3>Revised drawer opening: actual physics; naturalness still needs work</h3>
+          <p>dashboard/media/G1_Drawer_Naturalness_Review.mp4 · natural_pair12_review_video</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><img src="../dashboard/media/G1_Drawer_Improved_Posture.png" alt="Revised release posture: the elbow stays bent" loading="lazy"></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>Revised release posture: the elbow stays bent</h3>
+          <p>dashboard/media/G1_Drawer_Improved_Posture.png · natural_pair24_posture_image</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_Two_Drawers_Physics.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>Two drawer openings with joystick travel: continuous recorded physics (62 seconds)</h3>
+          <p>dashboard/media/G1_Two_Drawers_Physics.mp4 · bank_sequence01-documentary</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_Room_Game_Drawer_Skills.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof unchecked">unchecked · receipt mismatch</p>
+          <h3>Two recorded physics episodes: lower-drawer crouch/open/stand, then upper-drawer closing (57 seconds)</h3>
+          <p>dashboard/media/G1_Room_Game_Drawer_Skills.mp4 · room-game-drawer-skills01</p>
+        </div>
+      </article>
+
+      <article class="media old">
+        <div class="visual"><video controls preload="metadata" playsinline><source src="../dashboard/media/G1_Upright_Drawer_Opening.mp4">Video unavailable.</video></div>
+        <div class="copy">
+          <p class="proof checked">checked · superseded</p>
+          <h3>Upright drawer opening and AMO handback — actual recorded physics, one nominal trial</h3>
+          <p>dashboard/media/G1_Upright_Drawer_Opening.mp4 · upright3_pair_documentary01</p>
+        </div>
+      </article></section>
+  <footer>Read-only progress view.</footer>
+</main></body></html>
